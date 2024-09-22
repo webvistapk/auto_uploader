@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/screens/profile/forgot_password_screen.dart';
@@ -25,18 +27,18 @@ class _LoginScreenState extends State<LoginScreen> {
   String _errorMessage = '';
 
   // Method to handle login
-  Future<void> _login() async {
-    String username = "";
-    String password = "";
+  Future<void> _login(usernameText, passwordText) async {
+    String username = usernameText;
+    String password = passwordText;
     if (Utils.devMode) {
-      username = "sana";
-      password = "Sana2372";
+      username = username;
+      password = password;
     } else {
       username = _usernameController.text;
       password = _passwordController.text;
     }
 
-    final Uri url = Uri.parse('${Utils.baseUrl}userprofile/login/');
+    final Uri url = Uri.parse('${Utils.baseUrl}userprofile/users/login/');
 
     try {
       final http.Response response = await http.post(
@@ -104,7 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _login, // Call _login method on button press
+                  onPressed: () {
+                    // debugger();
+                    _login(_usernameController.text.trim(),
+                        _passwordController.text.trim());
+                  }, // Call _login method on button press
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         Colors.blue, // Set login button background to blue

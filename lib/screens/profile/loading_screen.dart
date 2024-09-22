@@ -17,13 +17,20 @@ class LoadingScreen extends StatelessWidget {
     return const Scaffold(
       backgroundColor: Utils.mainBgColor, // Set greyish background color
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AppLogo(width: 80, height: 80),
-            SizedBox(height: 20),
-            TellusLogo(width: 100, height: 50)
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 55,
+              ),
+              AppLogo(width: 80, height: 80),
+              // SizedBox(height: 20),
+              Spacer(),
+              TellusLogo(width: 100, height: 50)
+            ],
+          ),
         ),
       ),
     );

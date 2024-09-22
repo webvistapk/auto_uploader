@@ -14,7 +14,9 @@ class UserProfile {
   final String? city;
   final String? country;
   final String? website;
+  // ignore: non_constant_identifier_names
   final int? followers_count;
+  // ignore: non_constant_identifier_names
   final int? following_count;
   final String? privacy;
   final Roles? roles;
@@ -82,5 +84,4 @@ class UserProfile {
       'roles': roles?.toJson(), // Assuming Roles class also has a toJson method
     };
   }
-
 }

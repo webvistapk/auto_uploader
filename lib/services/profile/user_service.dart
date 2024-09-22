@@ -9,14 +9,13 @@ class UserService {
   static Future<UserProfile> fetchUserProfile(int id) async {
     final String? token = await Utils.getAuthToken(Utils.authToken);
 
-    final response =
-        await http.get(
-          Uri.parse('${Utils.baseUrl}userprofile/users/$id/'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            if (token != null) 'Authorization': 'Bearer $token',
-          },
-        );
+    final response = await http.get(
+      Uri.parse('${Utils.baseUrl}userprofile/users/$id/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
       return UserProfile.fromJson(jsonDecode(response.body));
@@ -34,7 +33,7 @@ class UserService {
       throw Exception('You can only edit your own profile.');
     }
 
-    final url = '${Utils.baseUrl}userprofile/${userProfile.id}/';
+    final url = '${Utils.baseUrl}userprofile/users/${userProfile.id}/';
     final response = await http.put(
       Uri.parse(url),
       headers: {
@@ -69,7 +68,7 @@ class UserService {
     required String phoneNumber,
     required String password,
   }) async {
-    const url = '${Utils.baseUrl}userprofile/register/';
+    const url = '${Utils.baseUrl}userprofile/users/register/';
 
     final response = await http.post(
       Uri.parse(url),
@@ -102,7 +101,7 @@ class UserService {
     int userId = JwtDecoder.decode(token.toString())['user_id'];
 
     final response = await http.put(
-      Uri.parse('${Utils.baseUrl}userprofile/update_password/$userId'),
+      Uri.parse('${Utils.baseUrl}userprofile/users/update_password/$userId'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         if (token != null) 'Authorization': 'Bearer $token',
