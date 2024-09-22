@@ -1,0 +1,356 @@
+import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/screens/profile/edit_profile_screen.dart';
+import 'package:mobile/screens/widgets/full_screen_image.dart';
+import 'package:mobile/common/utils.dart';
+import 'package:mobile/services/profile/user_service.dart';
+
+class ProfileHeader extends StatefulWidget {
+  final UserProfile user;
+  final bool canViewProfile;
+  final bool isFollowing;
+
+  const ProfileHeader({
+    super.key,
+    required this.user,
+    required this.canViewProfile,
+    required this.isFollowing,
+  });
+
+  @override
+  _ProfileHeaderState createState() => _ProfileHeaderState();
+}
+
+class _ProfileHeaderState extends State<ProfileHeader> {
+  bool _followRequestSent = false;
+
+  Future<int?> _getUserIdFromToken() async {
+    String? token = await Utils.getAuthToken(Utils.authToken);
+    if (token != null && token.isNotEmpty) {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      return decodedToken['user_id'] as int?;
+    }
+    return null;
+  }
+
+  void _handleFollow() async {
+    final int? currentUserId = await _getUserIdFromToken();
+    if (currentUserId != null) {
+      try {
+        await UserService.followRequest(currentUserId, widget.user.id);
+        setState(() {
+          _followRequestSent = true;
+        });
+      } catch (e) {
+        // Handle error, e.g., show a snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send follow request')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<int?>(
+      future: _getUserIdFromToken(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (snapshot.hasData) {
+          final int? currentUserId = snapshot.data;
+          final bool isCurrentUser = widget.user.id == currentUserId;
+
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FullScreenImage(
+                              imageUrl: Utils.testImage,
+                              tag: "profile-image",
+                            ),
+                          ),
+                        );
+                      },
+                      child: Hero(
+                        tag: 'profile-image',
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            image: const DecorationImage(
+                              image: NetworkImage(Utils.testImage),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          Text(
+                            '${widget.user.firstName} ${widget.user.lastName}',
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          if (widget.canViewProfile) ...[
+                            Text(
+                              widget.user.position!,
+                              style: const TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.user.description!,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Utils.greyColor,
+                              ),
+                            ),
+                            Text(
+                              [
+                                if (widget.user.address!.isNotEmpty)
+                                  widget.user.address,
+                                if (widget.user.city!.isNotEmpty)
+                                  widget.user.city,
+                                if (widget.user.country!.isNotEmpty)
+                                  widget.user.country,
+                              ].where((part) => part!.isNotEmpty).join(', '),
+                            ),
+                            const SizedBox(height: 8),
+                            GestureDetector(
+                              onTap: () {
+                                Utils.launchUrl(widget.user.website!);
+                              },
+                              child: Text(
+                                widget.user.website!,
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 8),
+                            const Text(
+                              "This profile is private.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Utils.greyColor,
+                              ),
+                            ),
+                            const SizedBox(height: 48),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      '@${widget.user.username}',
+                      style: const TextStyle(color: Utils.greyColor),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (isCurrentUser) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => EditProfileScreen(),
+                                settings: RouteSettings(arguments: widget.user),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Edit Profile',
+                            style: TextStyle(color: Utils.whiteColor),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Share Profile',
+                            style: TextStyle(color: Utils.blackColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  Row(
+                    children: [
+                      if (_followRequestSent)
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Pending',
+                              style: TextStyle(color: Utils.whiteColor),
+                            ),
+                          ),
+                        )
+                      else if (!widget.isFollowing)
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _handleFollow,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Follow',
+                              style: TextStyle(color: Utils.whiteColor),
+                            ),
+                          ),
+                        ),
+                      if (widget.isFollowing)
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Unfollow',
+                              style: TextStyle(color: Utils.whiteColor),
+                            ),
+                          ),
+                        ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Message',
+                            style: TextStyle(color: Utils.blackColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${widget.user.following_count}',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        const Text(
+                          'Following',
+                          style:
+                              TextStyle(fontSize: 12, color: Utils.greyColor),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 24), // Spacing between columns
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${widget.user.followers_count}',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        const Text(
+                          'Followers',
+                          style:
+                              TextStyle(fontSize: 12, color: Utils.greyColor),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 24), // Spacing between columns
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '0',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Posts',
+                          style:
+                              TextStyle(fontSize: 12, color: Utils.greyColor),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        } else {
+          return const Center(
+              child: Text('Unable to retrieve user information.'));
+        }
+      },
+    );
+  }
+}
