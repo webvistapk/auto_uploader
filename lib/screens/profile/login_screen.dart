@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/screens/profile/forgot_password_screen.dart';
-import 'package:mobile/screens/profile/home_screen.dart';
+import 'package:mobile/screens/profile/main_screen.dart';
 import 'package:mobile/screens/profile/register_screen.dart';
 import 'dart:convert';
 
@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Utils.storeAuthToken(Utils.authToken, token);
 
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => MainScreen()),
           (Route<dynamic> route) => false, // Remove all previous routes
         );
       } else {
@@ -73,6 +73,8 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     }
   }
+
+  bool visible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -90,19 +92,31 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                TextField(
+                TextFormField(
                   controller: _usernameController, // Added controller
                   decoration: AppStyles.inputDecoration.copyWith(
                     labelText: 'Username, email, phone number',
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 16),
                   ),
                 ),
                 const SizedBox(height: 10),
-                TextField(
+                TextFormField(
                   controller: _passwordController, // Added controller
+
                   decoration: AppStyles.inputDecoration.copyWith(
-                    labelText: 'Password',
-                  ),
-                  obscureText: true,
+                      labelText: 'Password',
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 20, horizontal: 16),
+                      suffixIcon: GestureDetector(
+                          onTap: () {
+                            visible = !visible;
+                            setState(() {});
+                          },
+                          child: !visible
+                              ? Icon(Icons.visibility_off)
+                              : Icon(Icons.visibility))),
+                  obscureText: !visible ? true : false,
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
