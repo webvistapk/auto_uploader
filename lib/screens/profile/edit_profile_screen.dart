@@ -131,7 +131,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,7 +138,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         onSearch: (query) => SearchStore.updateSearchQuery(query),
       ),
       drawer: const SideBar(),
-      bottomNavigationBar: const BottomBar(),
+      // bottomNavigationBar: BottomBar(
+      //   selectedIndex: 1,
+      // ),
       backgroundColor: Utils.mainBgColor,
       body: ValueListenableBuilder<String?>(
         valueListenable: SearchStore.searchQuery,
@@ -264,7 +265,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       onPressed: () {
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
-                              builder: (context) => const ChangePasswordScreen()),
+                              builder: (context) =>
+                                  const ChangePasswordScreen()),
                           (Route<dynamic> route) =>
                               false, // Remove all previous routes
                         );

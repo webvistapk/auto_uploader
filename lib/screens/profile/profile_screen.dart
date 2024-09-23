@@ -113,7 +113,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ProfileHeader(user: user, canViewProfile: canViewProfile, isFollowing: isFollowing),
+                              ProfileHeader(
+                                  user: user,
+                                  canViewProfile: canViewProfile,
+                                  isFollowing: isFollowing),
                               if (canViewProfile) ...[
                                 const CategoryIcons(images: [
                                   Utils.testImage,
@@ -150,7 +153,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         },
       ),
-      bottomNavigationBar: const BottomBar(),
+      // bottomNavigationBar: BottomBar(
+      //   selectedIndex: 1,
+      // ),
     );
   }
 }

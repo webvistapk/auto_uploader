@@ -68,7 +68,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         onSearch: (query) => SearchStore.updateSearchQuery(query),
       ),
       drawer: const SideBar(),
-      bottomNavigationBar: const BottomBar(),
+      // bottomNavigationBar: BottomBar(
+      //   selectedIndex: 1,
+      // ),
       backgroundColor: Utils.mainBgColor,
       body: ValueListenableBuilder<String?>(
         valueListenable: SearchStore.searchQuery,

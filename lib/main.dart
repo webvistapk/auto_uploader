@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/screens/profile/loading_screen.dart';
+import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 
 void main() {
   runApp(MyApp());

@@ -3,7 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/screens/profile/forgot_password_screen.dart';
-import 'package:mobile/screens/profile/main_screen.dart';
+import 'package:mobile/screens/profile/home_screen.dart';
+import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/register_screen.dart';
 import 'dart:convert';
 
@@ -28,15 +29,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Method to handle login
   Future<void> _login(usernameText, passwordText) async {
+    isLoading = true;
+    setState(() {});
     String username = usernameText;
     String password = passwordText;
-    if (Utils.devMode) {
-      username = username;
-      password = password;
-    } else {
-      username = _usernameController.text;
-      password = _passwordController.text;
-    }
+
+    // if (Utils.devMode) {
+    //   username = username;
+    //   password = password;
+    // } else {
+    //   username = _usernameController.text;
+    //   password = _passwordController.text;
+    // }
 
     final Uri url = Uri.parse('${Utils.baseUrl}userprofile/users/login/');
 
@@ -55,7 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final String token = responseData['access'];
-
+        isLoading = false;
+        setState(() {});
         Utils.storeAuthToken(Utils.authToken, token);
 
         Navigator.of(context).pushAndRemoveUntil(
@@ -75,6 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   bool visible = false;
+  final formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -90,72 +97,116 @@ class _LoginScreenState extends State<LoginScreen> {
           const Spacer(flex: 1),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _usernameController, // Added controller
-                  decoration: AppStyles.inputDecoration.copyWith(
-                    labelText: 'Username, email, phone number',
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 16),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _passwordController, // Added controller
-
-                  decoration: AppStyles.inputDecoration.copyWith(
-                      labelText: 'Password',
+            child: Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return "Please Enter The Email or Username or Phone#";
+                      }
+                      return null;
+                    },
+                    controller: _usernameController, // Added controller
+                    decoration: AppStyles.inputDecoration.copyWith(
+                      labelText: 'Username, email, phone number',
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 20, horizontal: 16),
-                      suffixIcon: GestureDetector(
-                          onTap: () {
-                            visible = !visible;
-                            setState(() {});
-                          },
-                          child: !visible
-                              ? Icon(Icons.visibility_off)
-                              : Icon(Icons.visibility))),
-                  obscureText: !visible ? true : false,
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    // debugger();
-                    _login(_usernameController.text.trim(),
-                        _passwordController.text.trim());
-                  }, // Call _login method on button press
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Colors.blue, // Set login button background to blue
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(50), // Updated border radius
                     ),
                   ),
-                  child: const Text('Log in', style: AppStyles.buttonTextStyle),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                          builder: (context) => const ForgotPasswordScreen()),
-                      (Route<dynamic> route) =>
-                          false, // Remove all previous routes
-                    );
-                  },
-                  child: const Text('Forgot password?'),
-                ),
-                if (_errorMessage.isNotEmpty) // Display error message if any
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Text(
-                      _errorMessage,
-                      style: const TextStyle(color: Colors.red),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return "Please Enter The Password";
+                      }
+                      return null;
+                    },
+                    controller: _passwordController, // Added controller
+
+                    decoration: AppStyles.inputDecoration.copyWith(
+                        labelText: 'Password',
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 20, horizontal: 16),
+                        suffixIcon: GestureDetector(
+                            onTap: () {
+                              visible = !visible;
+                              setState(() {});
+                            },
+                            child: !visible
+                                ? Icon(Icons.visibility_off)
+                                : Icon(Icons.visibility))),
+                    obscureText: !visible ? true : false,
+                  ),
+                  const SizedBox(height: 20),
+                  isLoading
+                      ? Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        )
+                      : ElevatedButton(
+                          onPressed: () {
+                            // debugger();
+                            if (formKey.currentState!.validate()) {
+                              _login(_usernameController.text.trim(),
+                                  _passwordController.text.trim());
+                            }
+                          }, // Call _login method on button press
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors
+                                .blue, // Set login button background to blue
+                            minimumSize: const Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  50), // Updated border radius
+                            ),
+                          ),
+                          child: const Text('Log in',
+                              style: AppStyles.buttonTextStyle),
+                        ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const ForgotPasswordScreen()));
+                        // Navigator.pushNamed(context, Routes.forgotPassword);
+                      },
+                      child: Text(
+                        'Forgot password?',
+                        style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
                     ),
                   ),
-              ],
+                  // TextButton(
+                  //   onPressed: () {
+                  // Navigator.of(context).pushAndRemoveUntil(
+                  //   MaterialPageRoute(
+                  //       builder: (context) => const ForgotPasswordScreen()),
+                  //   (Route<dynamic> route) =>
+                  //       false, // Remove all previous routes
+                  // );
+                  //   },
+                  //   child: const Text('Forgot password?'),
+                  // ),
+                  if (_errorMessage.isNotEmpty) // Display error message if any
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Text(
+                        _errorMessage,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
           const Spacer(flex: 5), // Pushes the below content to the bottom
