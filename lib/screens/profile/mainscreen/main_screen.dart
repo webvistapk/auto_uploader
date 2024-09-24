@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
+import 'package:mobile/screens/profile/request_screen/request_sereen.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 class MainScreen extends StatefulWidget {
@@ -15,7 +16,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     // Center(child: Text("Search", style: TextStyle(fontSize: 24))),
     // Center(child: Text("Add", style: TextStyle(fontSize: 24))),
-    Center(child: Text("Requests", style: TextStyle(fontSize: 24))),
+   RequestScreen(),
     ProfileScreen(),
     Center(child: Text("Settings", style: TextStyle(fontSize: 24))),
   ];
