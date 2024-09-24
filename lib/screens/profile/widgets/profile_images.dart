@@ -3,7 +3,7 @@ import 'package:mobile/screens/widgets/full_screen_image.dart';
 
 class ProfileImages extends StatelessWidget {
   final List<String> images;
-  
+
   const ProfileImages({
     super.key,
     required this.images,
@@ -30,7 +30,8 @@ class ProfileImages extends StatelessWidget {
             height: 500, // Adjust height as needed
             child: TabBarView(
               children: [
-                _buildImageGrid(images), // Replace with your methods to build each tab's content
+                _buildImageGrid(
+                    images), // Replace with your methods to build each tab's content
                 _buildImageGrid(images),
                 _buildImageGrid(images),
                 _buildImageGrid(images),
@@ -60,9 +61,8 @@ class ProfileImages extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => FullScreenImage(
-                  imageUrl: imagesToDisplay[index],
-                  tag: "profile_images_$index"
-                ),
+                    imageUrl: imagesToDisplay[index],
+                    tag: "profile_images_$index"),
               ),
             );
           },
@@ -77,5 +77,4 @@ class ProfileImages extends StatelessWidget {
       },
     );
   }
-
 }

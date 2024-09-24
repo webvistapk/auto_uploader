@@ -28,8 +28,7 @@ class _LogoutScreenState extends State<LogoutScreen> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child:
-            CircularProgressIndicator(),
+        child: CircularProgressIndicator(),
       ),
     );
   }

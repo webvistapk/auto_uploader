@@ -22,7 +22,10 @@ class ForgotPasswordScreen extends StatelessWidget {
                     const SizedBox(
                         height:
                             100), // Adjust this value to match the arrow position
-                    const AppLogo(width: 80, height: 80), // Position the logo higher with smaller size
+                    const AppLogo(
+                        width: 80,
+                        height:
+                            80), // Position the logo higher with smaller size
                     const SizedBox(height: 30),
                     const Text(
                       'Please enter your email and we will send you a password reset link',
@@ -47,7 +50,8 @@ class ForgotPasswordScreen extends StatelessWidget {
                               50), // Updated border radius
                         ),
                       ),
-                      child: const Text('Submit', style: AppStyles.buttonTextStyle),
+                      child: const Text('Submit',
+                          style: AppStyles.buttonTextStyle),
                     ),
                     const SizedBox(height: 10),
                     TextButton(

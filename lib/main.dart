@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: RequestScreen(), // Start with the LoadingScreen
+      home: LoadingScreen(), // Start with the LoadingScreen
     );
   }
 }
