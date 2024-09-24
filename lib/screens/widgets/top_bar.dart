@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/utils.dart';
 
 class TopBar extends StatefulWidget implements PreferredSizeWidget {
@@ -33,7 +34,7 @@ class _TopBarState extends State<TopBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Utils.mainBgColor,
+      backgroundColor: AppColors.mainBgColor,
       elevation: 0,
       automaticallyImplyLeading: false, // Remove the default back button
       title: Row(

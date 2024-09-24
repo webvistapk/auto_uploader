@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/screens/profile/forgot_password_screen.dart';
-import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/register_screen.dart';
 import 'dart:convert';
@@ -42,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     //   password = _passwordController.text;
     // }
 
-    final Uri url = Uri.parse('${Utils.baseUrl}userprofile/users/login/');
+    final Uri url = Uri.parse('${ApiURLs.baseUrl}${ApiURLs.login_endpoint}');
 
     try {
       final http.Response response = await http.post(
@@ -61,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final String token = responseData['access'];
         isLoading = false;
         setState(() {});
-        Utils.storeAuthToken(Utils.authToken, token);
+        AppUtils.storeAuthToken(AppUtils.authToken, token);
 
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => MainScreen()),
@@ -86,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Utils.mainBgColor, // Set greyish background color
+      backgroundColor: AppColors.mainBgColor, // Set greyish background color
       body: Column(
         children: [
           const Spacer(flex: 2), // Adjust the flex values to control spacing
@@ -141,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
                   isLoading
-                      ? Center(
+                      ? const Center(
                           child: CircularProgressIndicator.adaptive(),
                         )
                       : ElevatedButton(

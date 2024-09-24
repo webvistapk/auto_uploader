@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
-import 'package:mobile/store/search/search_store.dart';
+import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
-import 'package:mobile/services/search/search_service.dart';
+import 'package:mobile/controller/services/search/search_service.dart';
 
 class SearchWidget extends StatefulWidget {
   final String query;
@@ -171,8 +171,8 @@ class _SearchWidgetState extends State<SearchWidget>
                     final user = results[index];
                     return ListTile(
                       leading: const CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(Utils.testImage), // Placeholder image
+                        backgroundImage: NetworkImage(
+                            AppUtils.testImage), // Placeholder image
                       ),
                       title: Text(
                         user.username!,

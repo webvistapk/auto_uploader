@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 import '../widgets/app_logo.dart';
@@ -10,7 +11,7 @@ class ForgotPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Utils.mainBgColor, // Set greyish background color
+      backgroundColor: AppColors.mainBgColor, // Set greyish background color
       body: Column(
         children: [
           Expanded(

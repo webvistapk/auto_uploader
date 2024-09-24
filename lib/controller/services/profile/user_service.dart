@@ -2,15 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/utils.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/models/UserProfile/followers.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 
 class UserService {
   static Future<UserProfile> fetchUserProfile(int id) async {
-    final String? token = await Utils.getAuthToken(Utils.authToken);
+    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
 
     final response = await http.get(
-      Uri.parse('${Utils.baseUrl}userprofile/users/$id/'),
+      Uri.parse('${ApiURLs.baseUrl}${ApiURLs.user_endpoint}$id/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         if (token != null) 'Authorization': 'Bearer $token',
@@ -25,7 +26,7 @@ class UserService {
   }
 
   static Future<void> updateUserProfile(UserProfile userProfile) async {
-    final String? token = await Utils.getAuthToken(Utils.authToken);
+    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
     int currentUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     // Ensure the user can only update their own profile
@@ -33,7 +34,7 @@ class UserService {
       throw Exception('You can only edit your own profile.');
     }
 
-    final url = '${Utils.baseUrl}userprofile/users/${userProfile.id}/';
+    final url = '${ApiURLs.baseUrl}${userProfile.id}/';
     final response = await http.put(
       Uri.parse(url),
       headers: {
@@ -68,7 +69,7 @@ class UserService {
     required String phoneNumber,
     required String password,
   }) async {
-    const url = '${Utils.baseUrl}userprofile/users/register/';
+    const url = '${ApiURLs.baseUrl}${ApiURLs.register_endpoint}';
 
     final response = await http.post(
       Uri.parse(url),
@@ -97,11 +98,11 @@ class UserService {
     required String oldPassword,
     required String newPassword,
   }) async {
-    final String? token = await Utils.getAuthToken(Utils.authToken);
+    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
     int userId = JwtDecoder.decode(token.toString())['user_id'];
 
     final response = await http.put(
-      Uri.parse('${Utils.baseUrl}userprofile/users/update_password/$userId'),
+      Uri.parse('${ApiURLs.baseUrl}${ApiURLs.follow_request_endpoint}$userId'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         if (token != null) 'Authorization': 'Bearer $token',
@@ -119,11 +120,11 @@ class UserService {
 
   static Future<FollowRequest> followRequest(
       int followerId, int followingId) async {
-    final String? token = await Utils.getAuthToken(Utils.authToken);
+    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
 
     final response = await http.post(
       Uri.parse(
-          '${Utils.baseUrl}userprofile/users/follow/$followerId/$followingId/'),
+          '${ApiURLs.baseUrl}userprofile/users/follow/$followerId/$followingId/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         if (token != null) 'Authorization': 'Bearer $token',
@@ -139,11 +140,11 @@ class UserService {
 
   static Future<FollowRequest> fetchFollowRequestStatus(
       int followerId, int followingId) async {
-    final String? token = await Utils.getAuthToken(Utils.authToken);
+    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
 
     final response = await http.get(
       Uri.parse(
-          '${Utils.baseUrl}userprofile/users/follow/get/$followerId/$followingId/'),
+          '${ApiURLs.baseUrl}${ApiURLs.follow_request_endpoint}$followerId/$followingId/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         if (token != null) 'Authorization': 'Bearer $token',

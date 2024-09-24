@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/profile/login_screen.dart';
-import 'package:mobile/services/profile/user_service.dart';
+import 'package:mobile/controller/services/profile/user_service.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 import '../widgets/app_logo.dart';
@@ -55,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (token.isNotEmpty) {
         // Store the token locally
-        await Utils.storeAuthToken(Utils.authToken, token);
+        await AppUtils.storeAuthToken(AppUtils.authToken, token);
 
         // Navigate to the home page
         if (context.mounted) {
@@ -79,7 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Utils.mainBgColor,
+      backgroundColor: AppColors.mainBgColor,
       body: Column(
         children: [
           Expanded(

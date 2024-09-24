@@ -14,8 +14,6 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    // Center(child: Text("Search", style: TextStyle(fontSize: 24))),
-    // Center(child: Text("Request", style: TextStyle(fontSize: 24))),
     RequestScreen(),
     ProfileScreen(),
     Center(child: Text("Settings", style: TextStyle(fontSize: 24))),

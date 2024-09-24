@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/models/UserProfile/followers.dart';
-import 'package:mobile/store/search/search_store.dart';
+import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/profile/widgets/category_icons.dart';
 import 'package:mobile/screens/profile/widgets/profile_header.dart';
 import 'package:mobile/screens/profile/widgets/profile_images.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
-import 'package:mobile/screens/widgets/bottom_bar.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:mobile/screens/widgets/top_bar.dart';
-import 'package:mobile/services/profile/user_service.dart';
+import 'package:mobile/controller/services/profile/user_service.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _initializeData() async {
-    String? token = await Utils.getAuthToken(Utils.authToken);
+    String? token = await AppUtils.getAuthToken(AppUtils.authToken);
     _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     final int? passedUserId =
@@ -60,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             await UserService.fetchFollowRequestStatus(
                 _loggedInUserId!, userId);
 
-        return followRequest.status == Utils.follower_accepted;
+        return followRequest.status == AppUtils.follower_accepted;
       } catch (e) {
         return false;
       }
@@ -75,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onSearch: (query) => SearchStore.updateSearchQuery(query),
       ),
       drawer: const SideBar(),
-      backgroundColor: Utils.mainBgColor,
+      backgroundColor: AppColors.mainBgColor,
       body: ValueListenableBuilder<String?>(
         valueListenable: SearchStore.searchQuery,
         builder: (context, searchQuery, child) {
@@ -107,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         final bool isOwner = _loggedInUserId == user.id;
                         final bool canViewProfile = isOwner ||
                             isFollowing ||
-                            user.privacy == Utils.privacy_public;
+                            user.privacy == AppUtils.privacy_public;
 
                         return SingleChildScrollView(
                           child: Column(
@@ -119,20 +119,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   isFollowing: isFollowing),
                               if (canViewProfile) ...[
                                 const CategoryIcons(images: [
-                                  Utils.testImage,
-                                  Utils.testImage,
-                                  Utils.testImage,
-                                  Utils.testImage,
-                                  Utils.testImage,
-                                  Utils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
                                 ]),
                                 const ProfileImages(images: [
-                                  Utils.testImage,
-                                  Utils.testImage,
-                                  Utils.testImage,
-                                  Utils.testImage,
-                                  Utils.testImage,
-                                  Utils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
+                                  AppUtils.testImage,
                                 ]),
                               ] else ...[
                                 const Center(

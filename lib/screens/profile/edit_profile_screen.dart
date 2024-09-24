@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_styles.dart';
+import 'package:mobile/common/utils.dart';
 import 'package:mobile/screens/profile/change_password_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
-import 'package:mobile/store/search/search_store.dart';
-import 'package:mobile/common/utils.dart';
+import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
-import 'package:mobile/screens/widgets/bottom_bar.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:mobile/screens/widgets/top_bar.dart';
-import 'package:mobile/services/profile/user_service.dart';
+import 'package:mobile/controller/services/profile/user_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -141,7 +141,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       // bottomNavigationBar: BottomBar(
       //   selectedIndex: 1,
       // ),
-      backgroundColor: Utils.mainBgColor,
+      backgroundColor: AppColors.mainBgColor,
       body: ValueListenableBuilder<String?>(
         valueListenable: SearchStore.searchQuery,
         builder: (context, searchQuery, child) {
