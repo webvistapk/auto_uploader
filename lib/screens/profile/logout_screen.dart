@@ -10,6 +10,7 @@ class LogoutScreen extends StatefulWidget {
 }
 
 class _LogoutScreenState extends State<LogoutScreen> {
+  
   @override
   void initState() {
     super.initState();
