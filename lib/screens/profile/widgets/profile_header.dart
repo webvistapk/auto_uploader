@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/profile/edit_profile_screen.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 import 'package:mobile/common/utils.dart';
-import 'package:mobile/services/profile/user_service.dart';
+import 'package:mobile/controller/services/profile/user_service.dart';
 
 class ProfileHeader extends StatefulWidget {
   final UserProfile user;
@@ -26,7 +27,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   bool _followRequestSent = false;
 
   Future<int?> _getUserIdFromToken() async {
-    String? token = await Utils.getAuthToken(Utils.authToken);
+    String? token = await AppUtils.getAuthToken(AppUtils.authToken);
     if (token != null && token.isNotEmpty) {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       return decodedToken['user_id'] as int?;
@@ -77,7 +78,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const FullScreenImage(
-                              imageUrl: Utils.testImage,
+                              imageUrl: AppUtils.testImage,
                               tag: "profile-image",
                             ),
                           ),
@@ -91,7 +92,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             image: const DecorationImage(
-                              image: NetworkImage(Utils.testImage),
+                              image: NetworkImage(AppUtils.testImage),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -120,7 +121,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               widget.user.description!,
                               style: const TextStyle(
                                 fontSize: 10,
-                                color: Utils.greyColor,
+                                color: AppColors.greyColor,
                               ),
                             ),
                             Text(
@@ -136,7 +137,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                             const SizedBox(height: 8),
                             GestureDetector(
                               onTap: () {
-                                Utils.launchUrl(widget.user.website!);
+                                AppUtils.launchUrl(widget.user.website!);
                               },
                               child: Text(
                                 widget.user.website!,
@@ -152,7 +153,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               "This profile is private.",
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Utils.greyColor,
+                                color: AppColors.greyColor,
                               ),
                             ),
                             const SizedBox(height: 48),
@@ -167,7 +168,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                   children: [
                     Text(
                       '@${widget.user.username}',
-                      style: const TextStyle(color: Utils.greyColor),
+                      style: const TextStyle(color: AppColors.greyColor),
                     ),
                     const Spacer(),
                   ],
@@ -195,7 +196,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           ),
                           child: const Text(
                             'Edit Profile',
-                            style: TextStyle(color: Utils.whiteColor),
+                            style: TextStyle(color: AppColors.whiteColor),
                           ),
                         ),
                       ),
@@ -211,7 +212,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           ),
                           child: const Text(
                             'Share Profile',
-                            style: TextStyle(color: Utils.blackColor),
+                            style: TextStyle(color: AppColors.blackColor),
                           ),
                         ),
                       ),
@@ -233,7 +234,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                             ),
                             child: const Text(
                               'Pending',
-                              style: TextStyle(color: Utils.whiteColor),
+                              style: TextStyle(color: AppColors.whiteColor),
                             ),
                           ),
                         )
@@ -250,7 +251,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                             ),
                             child: const Text(
                               'Follow',
-                              style: TextStyle(color: Utils.whiteColor),
+                              style: TextStyle(color: AppColors.whiteColor),
                             ),
                           ),
                         ),
@@ -267,7 +268,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                             ),
                             child: const Text(
                               'Unfollow',
-                              style: TextStyle(color: Utils.whiteColor),
+                              style: TextStyle(color: AppColors.whiteColor),
                             ),
                           ),
                         ),
@@ -283,7 +284,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           ),
                           child: const Text(
                             'Message',
-                            style: TextStyle(color: Utils.blackColor),
+                            style: TextStyle(color: AppColors.blackColor),
                           ),
                         ),
                       ),
@@ -304,8 +305,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         ),
                         const Text(
                           'Following',
-                          style:
-                              TextStyle(fontSize: 12, color: Utils.greyColor),
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.greyColor),
                         ),
                       ],
                     ),
@@ -320,8 +321,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         ),
                         const Text(
                           'Followers',
-                          style:
-                              TextStyle(fontSize: 12, color: Utils.greyColor),
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.greyColor),
                         ),
                       ],
                     ),
@@ -336,8 +337,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         ),
                         Text(
                           'Posts',
-                          style:
-                              TextStyle(fontSize: 12, color: Utils.greyColor),
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.greyColor),
                         ),
                       ],
                     ),

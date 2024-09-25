@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static Future<bool> isAuthenticated() async {
-    String? token = await Utils.getAuthToken(Utils.authToken);
+    String? token = await AppUtils.getAuthToken(AppUtils.authToken);
 
     // You can add additional token validation logic here if needed
     return token != null && token.isNotEmpty;
@@ -14,10 +14,10 @@ class AuthService {
   static Future<void> logout() async {
     if (kIsWeb) {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove(Utils.authToken);
+      await prefs.remove(AppUtils.authToken);
     } else {
       const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-      await secureStorage.delete(key: Utils.authToken);
+      await secureStorage.delete(key: AppUtils.authToken);
     }
   }
 }

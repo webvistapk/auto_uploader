@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_styles.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
@@ -70,7 +71,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       // bottomNavigationBar: BottomBar(
       //   selectedIndex: 1,
       // ),
-      backgroundColor: Utils.mainBgColor,
+      backgroundColor: AppColors.mainBgColor,
       body: ValueListenableBuilder<String?>(
         valueListenable: SearchStore.searchQuery,
         builder: (context, searchQuery, child) {

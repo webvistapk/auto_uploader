@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/authentication/auth_service.dart';
+import 'package:mobile/controller/services/authentication/auth_service.dart';
 import 'package:mobile/screens/profile/login_screen.dart';
 
 class LogoutScreen extends StatefulWidget {

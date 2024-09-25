@@ -13,4 +13,8 @@ class AppColors {
   static Color unReadColor = const Color(0xffFFE1C8);
   static String p = "\x1B[31m";
   static String printcolor2 = "\x1B[38;5;2m";
+  static const Color mainBgColor = Color(0xFFF5F5F5);
+  static const Color whiteColor = Color.fromARGB(255, 255, 255, 255);
+  static const Color blackColor = Color.fromARGB(255, 0, 0, 0);
+  static const Color greyColor = Color.fromARGB(255, 84, 84, 84);
 }
