@@ -25,6 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+      var formKey = GlobalKey<FormState>();
 
   String _errorMessage = '';
 
@@ -87,97 +88,168 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 100),
-                    const AppLogo(width: 80, height: 80),
-                    const SizedBox(height: 30),
-                    TextField(
-                      controller: _emailController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Email',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _usernameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Username',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _firstNameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'First Name',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _lastNameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Last Name',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _phoneNumberController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Phone Number',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _passwordController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Password',
-                      ),
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _confirmPasswordController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Confirm Password',
-                      ),
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed:
-                          _register, // Trigger registration on button press
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 100),
+                      const AppLogo(width: 80, height: 80),
+                      const SizedBox(height: 30),
+                      TextFormField(
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Enter your email";
+              
+                          }
+                            if (_emailController.text.contains("@")&& !
+                            _emailController.text.contains(".com")) 
+                            {
+                              return "Email is not Correct";
+                              
+                            }
+                            return null;
+                        },
+                        controller: _emailController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Email',
                         ),
                       ),
-                      child: const Text('Create Account',
-                          style: AppStyles.buttonTextStyle),
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (context) => const LoginScreen()),
-                          (Route<dynamic> route) =>
-                              false, // Remove all previous routes
-                        );
-                      },
-                      child: const Text('Back to Login',
-                          style: TextStyle(color: Colors.blue)),
-                    ),
-                    if (_errorMessage.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(
-                          _errorMessage,
-                          style: const TextStyle(color: Colors.red),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Enter your username";
+                            
+                          }
+                          return null;
+                        },
+                        controller: _usernameController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Username',
                         ),
                       ),
-                  ],
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Enter your first name";
+                            
+                          }
+                          return null;
+                        },
+                        controller: _firstNameController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'First Name',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Enter your last name";
+                            
+                          }
+                          return null;
+                          
+                        },
+                        controller: _lastNameController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Last Name',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Enter your phone number";
+                            
+                          }
+                        },
+                        controller: _phoneNumberController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Phone Number',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Enter your password";
+                          }
+
+                          if (_passwordController.text.length<8) {
+                            return "Password should must be 8 characters or above";
+                            
+                          }
+                          return null;
+                        },
+                        controller: _passwordController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Password',
+                        ),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Enter your confirm password';
+                            
+                          }else if (_passwordController.text!=
+                          _confirmPasswordController.text ) {
+                            return "Password did not match";
+                              
+                            }
+                            return null;
+                        },
+                        controller: _confirmPasswordController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Confirm Password',
+                        ),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed:
+                            (){
+                              if (formKey.currentState!.validate()) {
+                                _register();
+                                
+                              }
+                            }, // Trigger registration on button press
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                        ),
+                        child: const Text('Create Account',
+                            style: AppStyles.buttonTextStyle),
+                      ),
+                      const SizedBox(height: 10),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) => const LoginScreen()),
+                            (Route<dynamic> route) =>
+                                false, // Remove all previous routes
+                          );
+                        },
+                        child: const Text('Back to Login',
+                            style: TextStyle(color: Colors.blue)),
+                      ),
+                      if (_errorMessage.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Text(
+                            _errorMessage,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

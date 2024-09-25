@@ -178,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Text(
                         'Forgot password?',
-                        style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
                               color: Colors.black,
                               fontWeight: FontWeight.w700,
                             ),
