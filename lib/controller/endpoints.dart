@@ -1,7 +1,13 @@
 class ApiURLs {
-  static const String baseUrl = "http://147.79.117.253:8001/";
-  static const String login_endpoint = "admin/";
-  static const String follow_request_endpoint = "userprofile/users/follow/get/";
+  static const String baseUrl = "http://147.79.117.253:8001/api/";
+  static const String login_endpoint = "userprofile/users/login/";
   static const String register_endpoint = "userprofile/users/register/";
+  static const String follow_request_endpoint = "userprofile/users/follow/get/";
   static const String user_endpoint = "userprofile/users/";
+  static const String check_email_verified =
+      "userprofile/users/check_email_verified/";
+  static const String renew_email_verified =
+      "userprofile/users/renew_email_verified/";
+  static const String update_email_verified =
+      "userprofile/users/update_email_verified/";
 }

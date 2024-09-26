@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
@@ -17,10 +18,14 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
+    Center(
+        child:
+            Text("Waiting for Seaching ...", style: TextStyle(fontSize: 24))),
+    Center(
+        child:
+            Text("Waiting for Add Post ...", style: TextStyle(fontSize: 24))),
     RequestScreen(),
     ProfileScreen(),
-    OtpScreen(),
-    Center(child: Text("Settings", style: TextStyle(fontSize: 24))),
   ];
 
   @override
@@ -42,37 +47,37 @@ class _MainScreenState extends State<MainScreen> {
               items: [
                 /// Home
                 SalomonBottomBarItem(
-                  icon: Icon(Icons.home),
+                  icon: Icon(CupertinoIcons.home),
                   title: Text(""),
                   selectedColor: Colors.teal,
                 ),
 
                 /// Search
-                // SalomonBottomBarItem(
-                //   icon: Icon(Icons.search),
-                //   title: Text("Search"),
-                //   selectedColor: Colors.teal,
-                // ),
+                SalomonBottomBarItem(
+                  icon: Icon(CupertinoIcons.search),
+                  title: Text(""),
+                  selectedColor: Colors.teal,
+                ),
 
                 /// Add
 
                 /// Notifications
                 SalomonBottomBarItem(
-                  icon: Icon(Icons.notifications),
+                  icon: Icon(CupertinoIcons.add_circled),
                   title: Text(""),
                   selectedColor: Colors.teal,
                 ),
 
                 /// Profile
                 SalomonBottomBarItem(
-                  icon: Icon(Icons.person),
+                  icon: Icon(CupertinoIcons.bell),
                   title: Text(""),
                   selectedColor: Colors.teal,
                 ),
 
                 SalomonBottomBarItem(
                   icon: const Icon(
-                    Icons.settings,
+                    CupertinoIcons.person_alt_circle,
                   ),
                   title: Text(""),
                   selectedColor: Colors.teal,

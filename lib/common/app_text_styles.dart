@@ -11,7 +11,7 @@ class AppTextStyles {
     double? letterSpacing,
   }) {
     return GoogleFonts.poppins(
-      fontSize: fontSize ?? 11.sp,
+      fontSize: fontSize ?? 14,
       color: color ?? AppColors.black,
       fontWeight: fontWeight ?? FontWeight.normal,
       letterSpacing: letterSpacing ?? 0,
@@ -25,9 +25,9 @@ class AppTextStyles {
     double? letterSpacing,
   }) {
     return GoogleFonts.poppins(
-      fontSize: fontSize ?? 12.sp,
+      fontSize: fontSize ?? 15,
       color: color ?? AppColors.black,
-      fontWeight: fontWeight ?? FontWeight.w600,
+      fontWeight: fontWeight ?? FontWeight.w700,
       letterSpacing: letterSpacing ?? 0,
     );
   }
@@ -39,7 +39,7 @@ class AppTextStyles {
     double? letterSpacing,
   }) {
     return GoogleFonts.poppins(
-      fontSize: fontSize ?? 12.sp,
+      fontSize: fontSize ?? 18,
       color: color ?? AppColors.black,
       fontWeight: fontWeight ?? FontWeight.bold,
       letterSpacing: letterSpacing ?? 0,
@@ -53,7 +53,7 @@ class AppTextStyles {
     double? letterSpacing,
   }) {
     return GoogleFonts.poppins(
-      fontSize: fontSize ?? 12.sp,
+      fontSize: fontSize ?? 17,
       color: color ?? AppColors.black,
       fontWeight: fontWeight ?? FontWeight.w500,
       letterSpacing: letterSpacing ?? 0,
