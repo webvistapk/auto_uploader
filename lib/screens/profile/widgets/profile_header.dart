@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/app_colors.dart';
@@ -27,7 +29,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   bool _followRequestSent = false;
 
   Future<int?> _getUserIdFromToken() async {
+   //debugger();
     String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+   // debugger();
     if (token != null && token.isNotEmpty) {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       return decodedToken['user_id'] as int?;

@@ -46,6 +46,7 @@ dependencies:
   url_launcher: ^6.0.9
   jwt_decoder: ^2.0.1
   win32: ^5.5.4
+  provider: ^6.1.2
 
 
 dev_dependencies:

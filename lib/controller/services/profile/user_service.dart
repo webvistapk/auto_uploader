@@ -11,7 +11,7 @@ class UserService {
     final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
 
     final response = await http.get(
-      Uri.parse('${ApiURLs.baseUrl}${ApiURLs.user_endpoint}$id/'),
+      Uri.parse('${ApiURLs.baseUrl}${ApiURLs.user_endpoint}$id'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         if (token != null) 'Authorization': 'Bearer $token',
