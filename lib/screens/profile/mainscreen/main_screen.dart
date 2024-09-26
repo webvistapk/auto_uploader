@@ -5,6 +5,8 @@ import 'package:mobile/screens/profile/request_screen/request_sereen.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 class MainScreen extends StatefulWidget {
+  final accessToken;
+  const MainScreen({super.key, required this.accessToken});
   @override
   _MainScreenState createState() => _MainScreenState();
 }
