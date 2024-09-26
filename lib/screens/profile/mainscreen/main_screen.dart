@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/screens/profile/request_screen/request_sereen.dart';
@@ -16,6 +17,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     RequestScreen(),
     ProfileScreen(),
+    OtpScreen(),
     Center(child: Text("Settings", style: TextStyle(fontSize: 24))),
   ];
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/profile/loading_screen.dart';
 
 void main() {
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: LoadingScreen(), // Start with the LoadingScreen
+      home: OtpScreen(), // Start with the LoadingScreen
     );
   }
 }
