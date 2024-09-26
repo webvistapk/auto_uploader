@@ -44,12 +44,9 @@ dependencies:
   animated_bottom_navigation_bar: ^1.3.3
   google_fonts: ^4.0.4
   sizer: ^3.0.0
-<<<<<<< HEAD
   pinput: ^5.0.0
-=======
   flutter_sliding_toast: ^1.4.2
   provider: ^6.1.2
->>>>>>> df7d1b4963f2123cca0ca4b2a49fc3607022bcf7
 
 dev_dependencies:
   flutter_test:

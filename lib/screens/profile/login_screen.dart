@@ -28,13 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
   // Variable to store error message
   String _errorMessage = '';
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    context.read<AuthProvider>();
-  }
-
   // Method to handle login
   // Future<void> _login(usernameText, passwordText) async {
   //   isLoading = true;
@@ -72,7 +65,9 @@ class _LoginScreenState extends State<LoginScreen> {
   //       AppUtils.storeAuthToken(AppUtils.authToken, token);
 
   //       Navigator.of(context).pushAndRemoveUntil(
-  //         MaterialPageRoute(builder: (context) => MainScreen()),
+  //         MaterialPageRoute(builder: (context) => MainScreen(
+  //           accessToken: ,
+  //         )),
   //         (Route<dynamic> route) => false, // Remove all previous routes
   //       );
   //     } else {
@@ -89,15 +84,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool visible = false;
   final formKey = GlobalKey<FormState>();
-  bool isLoading = false;
+  // bool isLoading = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<AuthProvider>();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Builder(builder: (context) {
-      var pro = context.watch<AuthProvider>();
-      return Scaffold(
-        backgroundColor: AppColors.mainBgColor, // Set greyish background color
-        body: Column(
+    return Scaffold(
+      backgroundColor: AppColors.mainBgColor, // Set greyish background color
+      body: Builder(builder: (context) {
+        var pro = context.watch<AuthProvider>();
+        return Column(
           children: [
             const Spacer(flex: 2), // Adjust the flex values to control spacing
             const AppLogo(
@@ -112,7 +113,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     TextFormField(
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: (value) {
                         if (value!.isEmpty) {
                           return "Please Enter The Email or Username or Phone#";
@@ -128,7 +128,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: (value) {
                         if (value!.isEmpty) {
                           return "Please Enter The Password";
@@ -260,8 +259,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ],
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 }
