@@ -4,6 +4,7 @@ import 'package:mobile/models/UserProfile/followers.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/widgets/category_icons.dart';
 import 'package:mobile/screens/profile/widgets/profile_header.dart';
 import 'package:mobile/screens/profile/widgets/profile_images.dart';
@@ -35,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _initializeData() async {
-    String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    String? token = await AppUtils.getAuthToken(Prefrences.authToken);
     _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     final int? passedUserId =

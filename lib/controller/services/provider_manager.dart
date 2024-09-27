@@ -132,7 +132,7 @@ class ProviderManager {
     return false;
   }
 
-  Future<String> renewEmailVerified(String email) async {
+  static Future<String> renewEmailVerified(String email) async {
     try {
       final response = await http.get(
           Uri.parse(ApiURLs.baseUrl + ApiURLs.renew_email_verified + email));
@@ -146,21 +146,20 @@ class ProviderManager {
     }
   }
 
-  Future<String> updateEmailVerified(
-      String email, String verificationCode) async {
+  static updateEmailVerified(String email, String verificationCode) async {
     try {
       final response = await http.patch(
-        Uri.parse(
-            '{{baseurl}}/api/userprofile/users/update_email_verified/$email'),
+        Uri.parse(ApiURLs.baseUrl + ApiURLs.update_email_verified + email),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email_verification_code': verificationCode}),
       );
       var data;
       if (response.statusCode == 200) {
         data = jsonDecode(response.body);
+        return data;
       }
 
-      return data['status'] + '\n' + data['message'];
+      return null;
     } catch (e) {
       return e.toString();
     }

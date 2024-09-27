@@ -15,10 +15,14 @@ class LoadingScreen extends StatelessWidget {
     Future.delayed(Duration(seconds: 4), () async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final data = prefs.get(Prefrences.authToken);
+      final email = prefs.get(Prefrences.userEmail);
       if (data != null) {
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (_) => MainScreen(accessToken: data)),
+            MaterialPageRoute(
+                builder: (_) => MainScreen(
+                      email: email ?? "",
+                    )),
             (route) => false);
       } else {
         Navigator.pushReplacement(
