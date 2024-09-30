@@ -1,20 +1,20 @@
 import 'userprofile.dart'; 
 
-class FollowRequest {
-  final UserProfile follower;
-  final UserProfile following;
-  final String status;
-  final DateTime createdAt;
+class FetchResponseModel {
+  final UserProfile? follower;
+  final UserProfile? following;
+  final String? status;
+  final DateTime? createdAt;
 
-  FollowRequest({
-    required this.follower,
-    required this.following,
-    required this.status,
-    required this.createdAt,
+  FetchResponseModel({
+    this.follower,
+    this.following,
+    this.status,
+    this.createdAt,
   });
 
-  factory FollowRequest.fromJson(Map<String, dynamic> json) {
-    return FollowRequest(
+  factory FetchResponseModel.fromJson(Map<String, dynamic> json) {
+    return FetchResponseModel(
       follower: UserProfile.fromJson(json['follower']),
       following: UserProfile.fromJson(json['following']),
       status: json['status'],
@@ -24,10 +24,10 @@ class FollowRequest {
 
   Map<String, dynamic> toJson() {
     return {
-      'follower': follower.toJson(),
-      'following': following.toJson(),
+      'follower': follower!.toJson(),
+      'following': following!.toJson(),
       'status': status,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt!.toIso8601String(),
     };
   }
 }

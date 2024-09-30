@@ -68,12 +68,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController.text = user.lastName ?? '';
     _phoneNumberController.text = user.phoneNumber ?? '';
     _descriptionController.text = user.description ?? '';
-    _positionController.text = user.position ?? '';
-    _organizationController.text = user.organization ?? '';
+    //_positionController.text = user.position ?? '';
+    //_organizationController.text = user.organization ?? '';
     _addressController.text = user.address ?? '';
     _cityController.text = user.city ?? '';
     _countryController.text = user.country ?? '';
-    _websiteController.text = user.website ?? '';
+    //_websiteController.text = user.website ?? '';
   }
 
   @override
@@ -84,12 +84,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController.dispose();
     _phoneNumberController.dispose();
     _descriptionController.dispose();
-    _positionController.dispose();
-    _organizationController.dispose();
+    //_positionController.dispose();
+    //_organizationController.dispose();
     _addressController.dispose();
     _cityController.dispose();
     _countryController.dispose();
-    _websiteController.dispose();
+    //_websiteController.dispose();
     super.dispose();
   }
 
@@ -107,12 +107,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       lastName: _lastNameController.text,
       phoneNumber: _phoneNumberController.text,
       description: _descriptionController.text,
-      position: _positionController.text,
-      organization: _organizationController.text,
+      // position: _positionController.text,
+      //organization: _organizationController.text,
       address: _addressController.text,
       city: _cityController.text,
       country: _countryController.text,
-      website: _websiteController.text,
+      //website: _websiteController.text,
     );
 
     try {
@@ -205,20 +205,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       maxLines: 3,
                     ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _positionController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Position',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _organizationController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Organization',
-                      ),
-                    ),
+
                     const SizedBox(height: 10),
                     TextField(
                       controller: _addressController,
@@ -240,13 +227,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         labelText: 'Country',
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _websiteController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Website',
-                      ),
-                    ),
+
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: _saveProfile,

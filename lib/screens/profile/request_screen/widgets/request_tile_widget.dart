@@ -7,8 +7,9 @@ import 'package:provider/provider.dart';
 class RequestListTile extends StatefulWidget {
   String fullName;
   String followerId;
+  String followingId;
   String status;
-   RequestListTile({super.key,required this.fullName,required this.followerId,required this.status});
+   RequestListTile({super.key,required this.fullName,required this.followerId,required this.followingId,required this.status});
 
   @override
   State<RequestListTile> createState() => _RequestListTileState();
@@ -27,7 +28,7 @@ class _RequestListTileState extends State<RequestListTile> {
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14.0),
-          color: Colors.white,
+          //color: Colors.white,
           /*boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.2),
@@ -92,7 +93,7 @@ class _RequestListTileState extends State<RequestListTile> {
                           GestureDetector(
                             onTap: () {
                               // Accept logic
-                              Provider.of<follower_request_provider>(context,listen: false).acceptRequest(context, widget.followerId);
+                              //Provider.of<follower_request_provider>(context,listen: false).acceptRequest(context, widget.followerId,widget.followingId);
                             },
                             child: Container(
                               padding: const EdgeInsets.all(5),

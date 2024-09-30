@@ -118,27 +118,27 @@ class UserService {
     }
   }
 
-  static Future<FollowRequest> followRequest(
+  static Future<FetchResponseModel> followRequest(
       int followerId, int followingId) async {
     final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
-
     final response = await http.post(
       Uri.parse(
-          '${ApiURLs.baseUrl}userprofile/users/follow/$followerId/$followingId/'),
+          "${ApiURLs.baseUrl}${ApiURLs.follow_request_endpoint}$followingId/$followerId/"),
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        if (token != null) 'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
       },
     );
 
     if (response.statusCode == 200) {
-      return FollowRequest.fromJson(jsonDecode(response.body));
+      final data=response.body;
+      return FetchResponseModel.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to load follow request status');
+      throw Exception('Failed to Send follow request status ${response.statusCode}');
     }
   }
 
-  static Future<FollowRequest> fetchFollowRequestStatus(
+  static Future<FetchResponseModel> fetchFollowRequestStatus(
       int followerId, int followingId) async {
     final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
 
@@ -152,7 +152,7 @@ class UserService {
     );
 
     if (response.statusCode == 200) {
-      return FollowRequest.fromJson(jsonDecode(response.body));
+      return FetchResponseModel.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load follow request status');
     }
