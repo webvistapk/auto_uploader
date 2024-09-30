@@ -1,10 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/provider_manager.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -20,15 +24,33 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         await Prefrences.SetAuthToken(accessToken);
         await Prefrences.SetUserEmail(email);
+        log("Access Token: $accessToken");
+        int userID = JwtDecoder.decode(accessToken)['user_id'];
+        UserPreferences userPrefs = UserPreferences();
+        UserProfile? userProfile;
+        userPrefs.getCurrentUser().then((value) {
+          if (value != null) {
+            userProfile = value;
+          } else {
+            Future<UserProfile> currentUser =
+                ProviderManager.fetchUserProfile(userID);
+            currentUser.then((value) async {
+              await userPrefs.saveCurrentUser(value);
+              userProfile = value;
+              notifyListeners();
+            });
+          }
+        });
+        // debugger();
 
         ///
         Navigator.pushAndRemoveUntil(
             context,
             CupertinoDialogRoute(
-                builder: (_) => MainScreen(
-                      email: email,
-                      // accessToken: accessToken,
-                    ),
+                builder: (_) =>
+                    MainScreen(email: email, userProfile: userProfile!
+                        // accessToken: accessToken,
+                        ),
                 context: context),
             (route) => false);
       } else {
@@ -115,11 +137,18 @@ class AuthProvider extends ChangeNotifier {
           notifyListeners();
           final message = result['status'] + '\n' + result['message'];
           ToastNotifier.showSuccessToast(context, message);
+          UserProfile? userProfile;
+          UserPreferences userPreferences = UserPreferences();
+          userPreferences.getCurrentUser().then((value) {
+            userProfile = value;
+            notifyListeners();
+          });
           Navigator.pushAndRemoveUntil(
               context,
               CupertinoDialogRoute(
                   builder: (_) => MainScreen(
                         email: email,
+                        userProfile: userProfile!,
                       ),
                   context: context),
               (route) => false);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/edit_profile_screen.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 import 'package:mobile/common/utils.dart';
@@ -27,7 +28,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   bool _followRequestSent = false;
 
   Future<int?> _getUserIdFromToken() async {
-    String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    String? token = await AppUtils.getAuthToken(Prefrences.authToken);
     if (token != null && token.isNotEmpty) {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       return decodedToken['user_id'] as int?;
@@ -112,7 +113,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           ),
                           if (widget.canViewProfile) ...[
                             Text(
-                              widget.user.position!,
+                              widget.user.position ?? "",
                               style: const TextStyle(
                                   fontSize: 10, fontWeight: FontWeight.bold),
                             ),
@@ -140,7 +141,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                                 AppUtils.launchUrl(widget.user.website!);
                               },
                               child: Text(
-                                widget.user.website!,
+                                widget.user.website ?? "",
                                 style: const TextStyle(
                                   color: Colors.blue,
                                   decoration: TextDecoration.underline,

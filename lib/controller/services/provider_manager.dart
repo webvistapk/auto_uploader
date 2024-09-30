@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 
 class ProviderManager {
   static Future login(context, String email, String password) async {
@@ -162,6 +165,24 @@ class ProviderManager {
       return null;
     } catch (e) {
       return e.toString();
+    }
+  }
+
+  static Future<UserProfile> fetchUserProfile(int id) async {
+    final String? token = await AppUtils.getAuthToken(Prefrences.authToken);
+
+    final response = await http.get(
+      Uri.parse('${ApiURLs.baseUrl}${ApiURLs.user_endpoint}$id/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return UserProfile.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to load user profile');
     }
   }
 }

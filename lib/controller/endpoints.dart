@@ -3,6 +3,7 @@ class ApiURLs {
   static const String login_endpoint = "userprofile/users/login/";
   static const String register_endpoint = "userprofile/users/register/";
   static const String follow_request_endpoint = "userprofile/users/follow/get/";
+  static const String follow_check_endpoint = "userprofile/users/follow/";
   static const String user_endpoint = "userprofile/users/";
   static const String check_email_verified =
       "userprofile/users/check_email_verified/";

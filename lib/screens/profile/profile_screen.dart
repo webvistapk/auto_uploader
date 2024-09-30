@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/models/UserProfile/followers.dart';
@@ -5,6 +7,7 @@ import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/profile/widgets/category_icons.dart';
 import 'package:mobile/screens/profile/widgets/profile_header.dart';
 import 'package:mobile/screens/profile/widgets/profile_images.dart';
@@ -16,8 +19,8 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ProfileScreen extends StatefulWidget {
   final int? id; // Accepts an optional ID
-
-  const ProfileScreen({super.key, this.id});
+  final UserProfile? userProfile;
+  const ProfileScreen({super.key, this.id, this.userProfile});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -37,21 +40,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _initializeData() async {
     String? token = await AppUtils.getAuthToken(Prefrences.authToken);
+    // debugger();
     _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
-    final int? passedUserId =
-        widget.id ?? ModalRoute.of(context)?.settings.arguments as int?;
+    // final int? passedUserId =
+    //     widget.id ?? ModalRoute.of(context)?.settings.arguments as int?;
 
-    _userId = passedUserId ?? _loggedInUserId;
+    _userId =
+        //  passedUserId ??
+        _loggedInUserId;
 
-    setState(() {
+    if (widget.userProfile != null) {
+      _userProfile = UserPreferences().getCurrentUser();
+
+      // _isFollowing = _checkIfFollowing(_userId!);
+      setState(() {
+        //
+      });
+    } else {
       _userProfile = _fetchUserProfile(_userId!);
       _isFollowing = _checkIfFollowing(_userId!);
-    });
+      setState(() {
+        //
+      });
+    }
   }
 
   Future<UserProfile?> _fetchUserProfile(int userId) async {
-    return UserService.fetchUserProfile(userId);
+    if (widget.userProfile != null) {
+      return await UserPreferences().getCurrentUser();
+    }
+    return await UserService.fetchUserProfile(userId);
   }
 
   Future<bool> _checkIfFollowing(int userId) async {
@@ -94,6 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return const Center(child: Text('No user profile found.'));
                 } else {
                   final UserProfile user = profileSnapshot.data!;
+                  // debugger();
                   return FutureBuilder<bool>(
                     future: _isFollowing,
                     builder: (context, followSnapshot) {
@@ -109,6 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         final bool canViewProfile = isOwner ||
                             isFollowing ||
                             user.privacy == AppUtils.privacy_public;
+                        // debugger();
 
                         return SingleChildScrollView(
                           child: Column(

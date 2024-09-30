@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
-import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/profile/loading_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +17,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
           title: 'Fillet Social Media App',
           theme: ThemeData(
+            fontFamily: "",
             primarySwatch: Colors.green,
           ),
           home: LoadingScreen()),

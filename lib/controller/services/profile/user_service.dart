@@ -5,10 +5,11 @@ import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/models/UserProfile/followers.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 
 class UserService {
   static Future<UserProfile> fetchUserProfile(int id) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    final String? token = await AppUtils.getAuthToken(Prefrences.authToken);
 
     final response = await http.get(
       Uri.parse('${ApiURLs.baseUrl}${ApiURLs.user_endpoint}$id/'),
@@ -61,39 +62,6 @@ class UserService {
     }
   }
 
-  static Future<String> registerUser({
-    required String username,
-    required String email,
-    required String firstName,
-    required String lastName,
-    required String phoneNumber,
-    required String password,
-  }) async {
-    const url = '${ApiURLs.baseUrl}${ApiURLs.register_endpoint}';
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'username': username,
-        'email': email,
-        'first_name': firstName,
-        'last_name': lastName,
-        'phone_number': phoneNumber,
-        'password': password,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      return responseData['access']; // Return the access token
-    } else {
-      throw Exception('Failed to register user: ${response.body}');
-    }
-  }
-
   static Future<void> changePassword({
     required String oldPassword,
     required String newPassword,
@@ -124,7 +92,7 @@ class UserService {
 
     final response = await http.post(
       Uri.parse(
-          '${ApiURLs.baseUrl}userprofile/users/follow/$followerId/$followingId/'),
+          '${ApiURLs.baseUrl}${ApiURLs.follow_check_endpoint}$followerId/$followingId/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         if (token != null) 'Authorization': 'Bearer $token',

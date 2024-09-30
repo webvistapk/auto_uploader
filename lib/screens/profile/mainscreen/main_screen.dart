@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
@@ -14,15 +15,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
   final email;
-  const MainScreen({super.key, this.email});
+  final UserProfile userProfile;
+  const MainScreen({super.key, this.email, required this.userProfile});
 
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-  bool _isLoading = true; // Loading indicator state
+  int _selectedIndex = 0; // Loading indicator state
 
   final List<Widget> _pages = const [
     HomeScreen(),
@@ -51,9 +52,6 @@ class _MainScreenState extends State<MainScreen> {
           .checkEmailVerification(context, userEmail!);
 
       if (result) {
-        setState(() {
-          _isLoading = false;
-        });
         // Use the provider to check email verification
       } else {
         ToastNotifier.showErrorToast(
@@ -68,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
         );
       }
     } else {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
 
       Navigator.pushAndRemoveUntil(
           context,
@@ -89,7 +87,11 @@ class _MainScreenState extends State<MainScreen> {
                 body: Center(child: CircularProgressIndicator()),
               )
             : Scaffold(
-                body: _pages[_selectedIndex],
+                body: _selectedIndex == 4
+                    ? ProfileScreen(
+                        userProfile: widget.userProfile,
+                      )
+                    : _pages[_selectedIndex],
                 bottomNavigationBar: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
