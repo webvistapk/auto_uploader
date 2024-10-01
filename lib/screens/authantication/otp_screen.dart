@@ -11,8 +11,10 @@ import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
 class OtpScreen extends StatefulWidget {
-  final String userEmail; // Corrected type for userEmail
-  const OtpScreen({Key? key, required this.userEmail}) : super(key: key);
+  final String userEmail;
+  final userID; // Corrected type for userEmail
+  const OtpScreen({Key? key, required this.userEmail, this.userID})
+      : super(key: key);
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -25,9 +27,13 @@ class _OtpScreenState extends State<OtpScreen> {
   bool _isLoading = false; // Track loading state for OTP verification
   bool _isResending = false; // Track loading state for OTP resend
 
+  // Controller for the OTP input field
+  final TextEditingController _otpController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    context.read<AuthProvider>();
     startTimer();
   }
 
@@ -50,23 +56,28 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   void dispose() {
     _timer.cancel();
+    _otpController.dispose(); // Dispose of the controller
     super.dispose();
   }
 
   // Function to handle OTP submission
-  Future<void> _submitOtp(String pin) async {
+  Future<void> _submitOtp(String pin, pro) async {
     setState(() {
       _isLoading = true; // Show loading indicator for OTP verification
     });
 
     try {
-      // Call the provider method to update email verification
-      await Provider.of<AuthProvider>(context, listen: false)
-          .updateEmailVerfied(context, widget.userEmail, pin);
+      await pro.updateEmailVerfied(context, widget.userEmail, otp);
+
+      // Clear OTP field after successful submission
+      _otpController.clear();
+
       // Handle success (e.g., navigate to MainScreen)
     } catch (e) {
-      // Handle error (e.g., show a toast)
       log("Error verifying OTP: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error verifying OTP')),
+      );
     } finally {
       setState(() {
         _isLoading = false; // Hide loading indicator
@@ -81,14 +92,19 @@ class _OtpScreenState extends State<OtpScreen> {
     });
 
     try {
-      // Call your provider method to resend the OTP
       await Provider.of<AuthProvider>(context, listen: false)
           .resendEmailVerified(context, widget.userEmail);
-      // Reset the timer
+
+      // Reset the timer and clear OTP field after resend
       startTimer();
+      _otpController.clear();
+
       log("Resent OTP to ${widget.userEmail}");
     } catch (e) {
       log("Error resending OTP: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error resending OTP')),
+      );
     } finally {
       setState(() {
         _isResending = false; // Hide loading indicator
@@ -98,15 +114,15 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the size of the screen only within the build method
     final size = MediaQuery.of(context).size;
 
     return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              child: Column(
+      child: Builder(builder: (context) {
+        var pro = context.watch<AuthProvider>();
+        return Scaffold(
+          body: Stack(
+            children: [
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
@@ -122,7 +138,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           (route) => false,
                         );
                       },
-                      child: Icon(Icons.arrow_back_ios, size: 25),
+                      child: const Icon(Icons.arrow_back_ios, size: 25),
                     ),
                   ),
                   SizedBox(height: size.height * 0.02),
@@ -148,13 +164,14 @@ class _OtpScreenState extends State<OtpScreen> {
                   Center(
                     child: Pinput(
                       length: 6,
+                      controller: _otpController, // Attach the controller
                       autofocus: true,
                       keyboardType: TextInputType.number,
                       defaultPinTheme: PinTheme(
                         width: 40,
                         height: 55,
                         textStyle: Theme.of(context).textTheme.titleLarge,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
                               color: AppColors.grey,
@@ -169,7 +186,8 @@ class _OtpScreenState extends State<OtpScreen> {
                       },
                       onCompleted: (pin) async {
                         log("OTP Completed: $pin");
-                        await _submitOtp(pin); // Call submit OTP when completed
+                        await _submitOtp(
+                            pin, pro); // Call submit OTP when completed
                       },
                     ),
                   ),
@@ -178,9 +196,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     padding: const EdgeInsets.only(left: 30),
                     child: _start == 0
                         ? TextButton(
-                            onPressed: () {
-                              _resendOtp(); // Resend OTP when the button is pressed
-                            },
+                            onPressed: _resendOtp,
                             child: Text(
                               "Resend code",
                               style: AppTextStyles.poppinsSemiBold(
@@ -193,23 +209,30 @@ class _OtpScreenState extends State<OtpScreen> {
                                 color: AppColors.grey),
                           ),
                   ),
+                  SizedBox(height: size.height * 0.05),
+                  if (pro.isLoading)
+                    const Center(
+                      child: SpinKitCircle(
+                        color: AppColors.primary,
+                        size: 60.0,
+                      ),
+                    ),
                 ],
               ),
-            ),
-            // Loading indicator
-            if (_isResending)
-              Container(
-                color: Colors.black.withOpacity(0.5), // Background blur
-                child: Center(
-                  child: SpinKitCircle(
-                    color: AppColors.primary, // Use your primary color
-                    size: 60.0, // Size of the loader
+              if (_isResending)
+                Container(
+                  color: Colors.black.withOpacity(0.5), // Background blur
+                  child: const Center(
+                    child: SpinKitCircle(
+                      color: AppColors.blue, // Use your primary color
+                      size: 60.0, // Size of the loader
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

@@ -27,7 +27,7 @@ class UserService {
   }
 
   static Future<void> updateUserProfile(UserProfile userProfile) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    final String? token = await Prefrences.getAuthToken();
     int currentUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     // Ensure the user can only update their own profile
@@ -66,7 +66,7 @@ class UserService {
     required String oldPassword,
     required String newPassword,
   }) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    final String? token = await Prefrences.getAuthToken();
     int userId = JwtDecoder.decode(token.toString())['user_id'];
 
     final response = await http.put(
@@ -88,7 +88,7 @@ class UserService {
 
   static Future<FollowRequest> followRequest(
       int followerId, int followingId) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    final String? token = await Prefrences.getAuthToken();
 
     final response = await http.post(
       Uri.parse(
@@ -108,7 +108,7 @@ class UserService {
 
   static Future<FollowRequest> fetchFollowRequestStatus(
       int followerId, int followingId) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    final String? token = await Prefrences.getAuthToken();
 
     final response = await http.get(
       Uri.parse(

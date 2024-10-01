@@ -16,43 +16,52 @@ class AuthProvider extends ChangeNotifier {
   loginUser(context, String email, String password) async {
     isLoading = true;
     notifyListeners();
+
     try {
+      // Perform the login and get tokens
       final data = await ProviderManager.login(context, email, password);
+
       if (data != null) {
         final accessToken = data['access'];
-        isLoading = false;
-        notifyListeners();
+
+        // Save the access token and email
         await Prefrences.SetAuthToken(accessToken);
         await Prefrences.SetUserEmail(email);
+
         log("Access Token: $accessToken");
+
+        // Decode JWT to get userID
         int userID = JwtDecoder.decode(accessToken)['user_id'];
+
         UserPreferences userPrefs = UserPreferences();
         UserProfile? userProfile;
-        userPrefs.getCurrentUser().then((value) {
-          if (value != null) {
-            userProfile = value;
-          } else {
-            Future<UserProfile> currentUser =
-                ProviderManager.fetchUserProfile(userID);
-            currentUser.then((value) async {
-              await userPrefs.saveCurrentUser(value);
-              userProfile = value;
-              notifyListeners();
-            });
-          }
-        });
-        // debugger();
 
-        ///
-        Navigator.pushAndRemoveUntil(
+        // Try to get the current user profile from preferences
+        userProfile = await userPrefs.getCurrentUser();
+        isLoading = false;
+        notifyListeners();
+        if (userProfile == null) {
+          // If the profile is null, fetch from the server
+          userProfile = await ProviderManager.fetchUserProfile(userID);
+          await userPrefs.saveCurrentUser(userProfile);
+        }
+
+        // Ensure userProfile is not null before navigating
+        if (userProfile != null) {
+          Navigator.pushAndRemoveUntil(
             context,
             CupertinoDialogRoute(
-                builder: (_) =>
-                    MainScreen(email: email, userProfile: userProfile!
-                        // accessToken: accessToken,
-                        ),
-                context: context),
-            (route) => false);
+              builder: (_) => MainScreen(
+                email: email,
+                userProfile: userProfile!, // Safe since it's not null here
+              ),
+              context: context,
+            ),
+            (route) => false,
+          );
+        } else {
+          throw Exception("Failed to retrieve user profile");
+        }
       } else {
         isLoading = false;
         notifyListeners();
@@ -127,22 +136,33 @@ class AuthProvider extends ChangeNotifier {
       final result = await ProviderManager.updateEmailVerified(email, otp);
       if (result != null) {
         final status = result['status'];
+        // debugger();
         if (status == "error") {
           isLoading = false;
           notifyListeners();
           final message = result['status'] + '\n' + result['message'];
           ToastNotifier.showErrorToast(context, message);
         } else {
+          // debugger();
+          final message = result['status'] + '\n' + result['message'];
+
+          UserPreferences userPrefs = UserPreferences();
+          UserProfile? userProfile;
+
+          // Try to get the current user profile from preferences
+          userProfile = await userPrefs.getCurrentUser();
           isLoading = false;
           notifyListeners();
-          final message = result['status'] + '\n' + result['message'];
+          // debugger();
+          if (userProfile == null) {
+            // If the profile is null, fetch from the server
+            int userID = Prefrences.getUserId();
+            userProfile = await ProviderManager.fetchUserProfile(userID);
+            await userPrefs.saveCurrentUser(userProfile);
+          }
+
           ToastNotifier.showSuccessToast(context, message);
-          UserProfile? userProfile;
-          UserPreferences userPreferences = UserPreferences();
-          userPreferences.getCurrentUser().then((value) {
-            userProfile = value;
-            notifyListeners();
-          });
+
           Navigator.pushAndRemoveUntil(
               context,
               CupertinoDialogRoute(
@@ -158,6 +178,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       isLoading = false;
       notifyListeners();
+      ToastNotifier.showErrorToast(context, e.toString());
     }
   }
 

@@ -13,7 +13,7 @@ class AppUtils {
   static const String privacy_public = "public";
   static const String privacy_followers = "followers";
   static const String follower_accepted = "accepted";
-  static const String authToken = "auth_token";
+  // static const String authToken = "auth_token";
   static const String testImage =
       "https://static.printler.com/cache/3/a/0/6/1/4/3a0614c4a9deb4f62bf47766860f4ca526debe02.jpg";
 

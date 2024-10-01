@@ -17,6 +17,9 @@ class ProfileImages extends StatelessWidget {
         children: [
           const TabBar(
             isScrollable: true,
+            labelColor: Colors.black, // Text color when the tab is selected
+            unselectedLabelColor:
+                Colors.black54, // Text color for unselected tabs (optional)
             tabs: [
               Tab(text: 'All'),
               Tab(text: 'Photos'),

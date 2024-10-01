@@ -12,6 +12,16 @@ class Prefrences {
     await prefs.setString(authToken, accessToken);
   }
 
+  static getAuthToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(authToken);
+  }
+
+  static getUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(userID);
+  }
+
   static SetUserId(int id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt(userID, id);

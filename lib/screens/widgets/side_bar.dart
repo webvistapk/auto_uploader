@@ -1,4 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
+import 'package:mobile/screens/profile/login_screen.dart';
 
 class SideBar extends StatelessWidget {
   const SideBar({super.key});
@@ -42,6 +46,20 @@ class SideBar extends StatelessWidget {
             onTap: () {
               // Navigate to settings
               Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Logout'),
+            onTap: () async {
+              // Navigate to settings
+              await Prefrences.removeAuthToken();
+              await UserPreferences().clearCurrentUser();
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  CupertinoDialogRoute(
+                      builder: (_) => LoginScreen(), context: context),
+                  (route) => false);
             },
           ),
         ],
