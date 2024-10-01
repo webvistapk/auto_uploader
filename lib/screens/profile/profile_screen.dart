@@ -16,6 +16,9 @@ import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:mobile/screens/widgets/top_bar.dart';
 import 'package:mobile/controller/services/profile/user_service.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:provider/provider.dart';
+
+import '../../controller/services/followers/follower_request.dart';
 
 class ProfileScreen extends StatefulWidget {
   final int? id; // Accepts an optional ID
@@ -31,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<bool>? _isFollowing;
   int? _userId;
   int? _loggedInUserId;
+  Future<FetchResponseModel>? _followRequestsResponse;
 
   @override
   void initState() {
@@ -73,19 +77,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return await UserService.fetchUserProfile(userId);
   }
 
-  Future<bool> _checkIfFollowing(int userId) async {
-    if (_loggedInUserId != null && userId != _loggedInUserId) {
-      try {
-        final FollowRequest followRequest =
-            await UserService.fetchFollowRequestStatus(
-                _loggedInUserId!, userId);
-
-        return followRequest.status == AppUtils.follower_accepted;
-      } catch (e) {
-        return false;
-      }
+  Future<int?> _getUserIdFromToken() async {
+    String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    if (token != null && token.isNotEmpty) {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      return decodedToken['user_id'] as int?;
     }
-    return false;
+    return null;
+  }
+
+  Future<bool> _checkIsFollowig(int userId) async {
+    final int? currentUserId = await _getUserIdFromToken();
+
+    // Await the asynchronous operation to get the follow request status
+    await Provider.of<follower_request_provider>(context, listen: false)
+        .fetchFollowRequestStatus(currentUserId!, userId);
+
+    // After fetching the status, check it and return the corresponding bool value
+    if (Provider.of<follower_request_provider>(context, listen: false).status ==
+        'accepted') {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override

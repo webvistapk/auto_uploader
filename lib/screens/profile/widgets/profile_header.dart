@@ -1,12 +1,20 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_size.dart';
+import 'package:mobile/common/app_snackbar.dart';
+import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/edit_profile_screen.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/services/profile/user_service.dart';
+import 'package:provider/provider.dart';
+
+import '../../../models/UserProfile/followers.dart';
 
 class ProfileHeader extends StatefulWidget {
   final UserProfile user;
@@ -25,7 +33,8 @@ class ProfileHeader extends StatefulWidget {
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
-  bool _followRequestSent = false;
+  //bool _followRequestSent = false;
+  Future<FetchResponseModel>? _followRequestsResponse;
 
   Future<int?> _getUserIdFromToken() async {
     String? token = await AppUtils.getAuthToken(Prefrences.authToken);
@@ -38,23 +47,70 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
   void _handleFollow() async {
     final int? currentUserId = await _getUserIdFromToken();
+    //print("Current User ID : ${currentUserId}");
+    //print("User  ID: ${widget.user.id}");
     if (currentUserId != null) {
       try {
-        await UserService.followRequest(currentUserId, widget.user.id);
+        Provider.of<follower_request_provider>(context, listen: false)
+            .sendfollowRequest(context, currentUserId, widget.user.id);
         setState(() {
-          _followRequestSent = true;
+          refresh();
         });
       } catch (e) {
-        // Handle error, e.g., show a snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send follow request')),
-        );
+        // Handle error, e.g., show a snackbar'
+        print(e);
+        showErrorSnackbar(e.toString(), context);
       }
     }
   }
 
+  void _handleunfollow() async {
+    final int? currentUserId = await _getUserIdFromToken();
+    //print("Current User ID : ${currentUserId}");
+    //print("User  ID: ${widget.user.id}");
+    if (currentUserId != null) {
+      try {
+        print("USER ID : ${currentUserId}");
+
+        print("USER ID 2 : ${widget.user.id}");
+        Provider.of<follower_request_provider>(context, listen: false)
+            .followRequestResponse(
+          context,
+          widget.user.id,
+          currentUserId,
+          "rejected",
+        );
+        setState(() {
+          refresh();
+        });
+      } catch (e) {
+        showErrorSnackbar(e.toString(), context);
+      }
+    }
+  }
+
+  void refresh() {
+    _fetchFollowResponse();
+  }
+
+  void _fetchFollowResponse() async {
+    final int? currentUserId = await _getUserIdFromToken();
+    _followRequestsResponse =
+        Provider.of<follower_request_provider>(context, listen: false)
+            .fetchFollowRequestStatus(currentUserId!, widget.user.id);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _fetchFollowResponse();
+  }
+
   @override
   Widget build(BuildContext context) {
+    print(
+        "Status of request ${Provider.of<follower_request_provider>(context, listen: false).status}");
     return FutureBuilder<int?>(
       future: _getUserIdFromToken(),
       builder: (context, snapshot) {
@@ -107,7 +163,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         children: [
                           const SizedBox(height: 8),
                           Text(
-                            '${widget.user.firstName} ${widget.user.lastName}',
+                            '${widget.user.firstName.toString()} ${widget.user.lastName.toString()}',
                             style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
@@ -222,8 +278,44 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 ] else ...[
                   Row(
                     children: [
-                      if (_followRequestSent)
-                        Expanded(
+                      Consumer<follower_request_provider>(
+                          builder: (context, provider, child) {
+                        return Expanded(
+                          child: ElevatedButton(
+                            onPressed: provider.status == 'pending'
+                                ? () {}
+                                : provider.status == 'initial' ||
+                                        provider.status == 'rejected'
+                                    ? _handleFollow
+                                    : _handleunfollow,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: provider.status == 'pending'
+                                  ? Colors.grey
+                                  : provider.status == 'initial' ||
+                                          provider.status == 'rejected'
+                                      ? Colors.red
+                                      : Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              provider.status == 'pending'
+                                  ? 'Pending'
+                                  : provider.status == 'initial' ||
+                                          provider.status == 'rejected'
+                                      ? 'Follow'
+                                      : 'Unfollow',
+                              style:
+                                  const TextStyle(color: AppColors.whiteColor),
+                            ),
+                          ),
+                        );
+                      }),
+
+                      /*if(provider.status=='pending')
+                      Expanded(
                           child: ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
@@ -239,7 +331,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                             ),
                           ),
                         )
-                      else if (!widget.isFollowing)
+                      else if(provider.status=='initial' || provider.status=='rejected')
                         Expanded(
                           child: ElevatedButton(
                             onPressed: _handleFollow,
@@ -255,11 +347,11 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               style: TextStyle(color: AppColors.whiteColor),
                             ),
                           ),
-                        ),
-                      if (widget.isFollowing)
+                        )
+                     else if(provider.status=='accepted')
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: _handleunfollow,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -272,7 +364,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               style: TextStyle(color: AppColors.whiteColor),
                             ),
                           ),
-                        ),
+                        ),*/
+
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton(
@@ -290,7 +383,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         ),
                       ),
                     ],
-                  ),
+                  )
                 ],
                 const SizedBox(height: 16),
                 Row(
