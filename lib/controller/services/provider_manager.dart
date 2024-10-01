@@ -160,7 +160,7 @@ class ProviderManager {
       if (response.statusCode == 200) {
         data = jsonDecode(response.body);
         return data;
-      } else if (response.statusCode == 200) {
+      } else if (response.statusCode == 400) {
         data = jsonDecode(response.body);
         return data;
       }

@@ -63,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     } else {
       _userProfile = _fetchUserProfile(_userId!);
-      _isFollowing = _checkIfFollowing(_userId!);
+      _isFollowing = _checkIsFollowig(_userId!);
       setState(() {
         //
       });
@@ -78,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<int?> _getUserIdFromToken() async {
-    String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    String? token = await Prefrences.getAuthToken();
     if (token != null && token.isNotEmpty) {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       return decodedToken['user_id'] as int?;

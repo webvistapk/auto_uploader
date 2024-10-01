@@ -133,6 +133,8 @@ class AuthProvider extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     try {
+      debugger();
+
       final result = await ProviderManager.updateEmailVerified(email, otp);
       if (result != null) {
         final status = result['status'];

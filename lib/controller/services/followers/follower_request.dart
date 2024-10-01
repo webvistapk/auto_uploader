@@ -8,6 +8,7 @@ import 'package:mobile/common/app_snackbar.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/models/UserProfile/follower_request.dart';
 import 'package:mobile/models/UserProfile/follower_request.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import '../../../common/utils.dart';
 import '../../../models/UserProfile/followers.dart';
 
@@ -22,10 +23,9 @@ class follower_request_provider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<List<FollowerRequestModel>> getFollowerRequestList(
       BuildContext context) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    final String? token = await Prefrences.getAuthToken();
     int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
     print("User Token $_loggedInUserId");
 
@@ -55,22 +55,18 @@ class follower_request_provider extends ChangeNotifier {
     }
   }
 
-  Future<void> followRequestResponse(BuildContext context, int followerId,
-      followingId, String status) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+  Future<void> followRequestResponse(
+      BuildContext context, int followerId, followingId, String status) async {
+    final String? token = await Prefrences.getAuthToken();
 
-   // print("following ID : ${followingId}");
+    // print("following ID : ${followingId}");
     //print("following ID : ${followerId}");
 
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.accept_follow}${followerId
-        .toString()}/${followingId.toString()}/";
+    String URL =
+        "${ApiURLs.baseUrl}${ApiURLs.accept_follow}${followerId.toString()}/${followingId.toString()}/";
     print(URL);
     setisLoading(true);
-    final body = jsonEncode(
-        {
-          "status": status
-        }
-    );
+    final body = jsonEncode({"status": status});
     try {
       final response = await http.patch(Uri.parse(URL), body: body, headers: {
         "Content-Type": "application/json",
@@ -80,11 +76,9 @@ class follower_request_provider extends ChangeNotifier {
       if (response.statusCode == 200) {
         showSuccessSnackbar("Request Sended", context);
         setisLoading(false);
-      }
-      else if (response.statusCode == 403) {
+      } else if (response.statusCode == 403) {
         showErrorSnackbar("API Misplace", context);
-      }
-      else {
+      } else {
         showErrorSnackbar(
             "There is an Error Occured : ${response.statusCode}", context);
         print("Error Occured ${response.statusCode}");
@@ -100,7 +94,7 @@ class follower_request_provider extends ChangeNotifier {
 
   Future<FetchResponseModel> fetchFollowRequestStatus(
       int followerId, int followingId) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+    final String? token = await Prefrences.getAuthToken();
     print("First ID: $followerId");
     print("Second ID: $followingId");
     setisLoading(true);
@@ -124,17 +118,14 @@ class follower_request_provider extends ChangeNotifier {
         Map<String, dynamic> jsonData = Map<String, dynamic>.from(data);
 
         if (jsonData.isNotEmpty) {
-          status = FetchResponseModel
-              .fromJson(jsonData)
-              .status
-              .toString();
+          status = FetchResponseModel.fromJson(jsonData).status.toString();
           notifyListeners();
           //print("Status: $status");
 
           setisLoading(false);
           return FetchResponseModel.fromJson(jsonData);
         } else {
-         // print('Data is empty or invalid');
+          // print('Data is empty or invalid');
           status = 'initial';
           notifyListeners();
           setisLoading(false);
@@ -148,15 +139,15 @@ class follower_request_provider extends ChangeNotifier {
       }
     } else {
       // Handle HTTP errors
-     // print("Error: ${response.body}");
+      // print("Error: ${response.body}");
       setisLoading(false);
       return FetchResponseModel(); // Return a default FetchResponseModel on failure
     }
   }
 
-  Future<void> sendfollowRequest( BuildContext context,
-      int followerId, int followingId) async {
-    final String? token = await AppUtils.getAuthToken(AppUtils.authToken);
+  Future<void> sendfollowRequest(
+      BuildContext context, int followerId, int followingId) async {
+    final String? token = await Prefrences.getAuthToken();
     setisLoading(true);
     final response = await http.post(
       Uri.parse(
@@ -176,6 +167,4 @@ class follower_request_provider extends ChangeNotifier {
       print(response.body);
     }
   }
-
 }
-

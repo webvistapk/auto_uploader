@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_size.dart';
+import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/screens/profile/loading_screen.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
     screenWidth = MediaQuery.of(context).size.height;
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => follower_request_provider())
+        ChangeNotifierProvider(create: (_) => follower_request_provider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider())
       ],
       child: MaterialApp(
         title: 'Fillet Social Media App',

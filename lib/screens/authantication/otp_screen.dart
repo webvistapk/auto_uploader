@@ -61,7 +61,7 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   // Function to handle OTP submission
-  Future<void> _submitOtp(String pin, pro) async {
+  Future<void> _submitOtp(String pin, AuthProvider pro) async {
     setState(() {
       _isLoading = true; // Show loading indicator for OTP verification
     });
