@@ -128,7 +128,16 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                profileContainer(
+                    AppUtils.testImage,
+                    "${widget.user.firstName.toString()} ${widget.user.lastName.toString()}",
+                    widget.user.position ?? "JobType",
+                    widget.user.description??"description",
+                  widget.user.address??'Address',
+                  widget.user.city??"city",
+                  widget.user.country??'country'
+                ),
+                /*Row(
                   children: [
                     GestureDetector(
                       onTap: () {
@@ -220,7 +229,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       ),
                     ),
                   ],
-                ),
+                ),*/
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -315,57 +324,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         );
                       }),
 
-                      /*if(provider.status=='pending')
-                      Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text(
-                              'Pending',
-                              style: TextStyle(color: AppColors.whiteColor),
-                            ),
-                          ),
-                        )
-                      else if(provider.status=='initial' || provider.status=='rejected')
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _handleFollow,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text(
-                              'Follow',
-                              style: TextStyle(color: AppColors.whiteColor),
-                            ),
-                          ),
-                        )
-                     else if(provider.status=='accepted')
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _handleunfollow,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text(
-                              'Unfollow',
-                              style: TextStyle(color: AppColors.whiteColor),
-                            ),
-                          ),
-                        ),*/
 
                       const SizedBox(width: 8),
                       Expanded(
@@ -447,6 +405,52 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               child: Text('Unable to retrieve user information.'));
         }
       },
+    );
+  }
+
+  //First Profile Container
+  Widget profileContainer(String img, fullName,JobType,description,address,city,country) {
+    return Container(
+      padding: EdgeInsets.all(5),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: header5,
+            backgroundImage: NetworkImage(img),
+          ),
+          const SizedBox(
+            width: 40,
+          ),
+          Flexible(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  fullName,
+                  style: TextStyle(
+                      color: AppColors.greyColor, fontSize: paragraph * 0.55),
+                ),
+                Text(
+                  JobType,
+                  style: TextStyle(
+                      color: AppColors.darkGrey, fontSize: paragraph * 0.35),
+                ),
+                Text(
+                  description,
+                  style: TextStyle(
+                      color: AppColors.lightGrey, fontSize: paragraph * 0.35),
+                ),
+                Text(
+                  "${address}, ${city},${country}",
+                  style: TextStyle(
+                      color: AppColors.darkGrey, fontSize: paragraph * 0.35),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }

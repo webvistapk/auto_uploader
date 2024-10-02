@@ -56,6 +56,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return strength;
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

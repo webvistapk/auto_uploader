@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
 class ProfileImages extends StatelessWidget {
@@ -12,7 +13,7 @@ class ProfileImages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6,
+      length: 7,
       child: Column(
         children: [
           const TabBar(
@@ -27,6 +28,7 @@ class ProfileImages extends StatelessWidget {
               Tab(text: 'Pages'),
               Tab(text: 'Posts'),
               Tab(text: 'Tagged'),
+              Tab(text: 'Info'),
             ],
           ),
           SizedBox(
@@ -40,6 +42,7 @@ class ProfileImages extends StatelessWidget {
                 _buildImageGrid(images),
                 _buildImageGrid(images),
                 _buildImageGrid(images),
+                profile_info()
               ],
             ),
           ),
