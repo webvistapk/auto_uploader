@@ -157,6 +157,7 @@ class ProviderManager {
         body: jsonEncode({'email_verification_code': verificationCode}),
       );
       var data;
+      // debugger();
       if (response.statusCode == 200) {
         data = jsonDecode(response.body);
         return data;
@@ -172,7 +173,7 @@ class ProviderManager {
   }
 
   static Future<UserProfile> fetchUserProfile(int id) async {
-    final String? token = await AppUtils.getAuthToken(Prefrences.authToken);
+    final String? token = await Prefrences.getAuthToken();
 
     final response = await http.get(
       Uri.parse('${ApiURLs.baseUrl}${ApiURLs.user_endpoint}$id/'),
@@ -181,8 +182,9 @@ class ProviderManager {
         if (token != null) 'Authorization': 'Bearer $token',
       },
     );
-
+    // debugger();
     if (response.statusCode == 200) {
+      log(response.body);
       return UserProfile.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load user profile');

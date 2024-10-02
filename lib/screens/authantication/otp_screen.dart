@@ -67,7 +67,8 @@ class _OtpScreenState extends State<OtpScreen> {
     });
 
     try {
-      await pro.updateEmailVerfied(context, widget.userEmail, otp);
+      await pro.updateEmailVerfied(context, widget.userEmail, otp,
+          id: widget.userID);
 
       // Clear OTP field after successful submission
       _otpController.clear();
@@ -87,6 +88,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
   // Function to resend OTP
   Future<void> _resendOtp() async {
+    Focus.of(context).unfocus();
     setState(() {
       _isResending = true; // Show loading indicator for OTP resend
     });
@@ -186,6 +188,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       },
                       onCompleted: (pin) async {
                         log("OTP Completed: $pin");
+                        Focus.of(context).unfocus();
                         await _submitOtp(
                             pin, pro); // Call submit OTP when completed
                       },
@@ -219,7 +222,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                 ],
               ),
-              if (_isResending)
+              if (pro.isResend)
                 Container(
                   color: Colors.black.withOpacity(0.5), // Background blur
                   child: const Center(

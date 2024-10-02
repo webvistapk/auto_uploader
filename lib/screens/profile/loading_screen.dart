@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
@@ -33,7 +35,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     UserPreferences userPreferences = UserPreferences();
 
     UserProfile? userProfile = await userPreferences.getCurrentUser();
-
+    // debugger();
     if (!mounted) return;
 
     // Navigate based on auth token availability
@@ -44,6 +46,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           builder: (_) => MainScreen(
             email: email ?? "",
             userProfile: userProfile!,
+            authToken: data.toString(),
           ),
         ),
         (route) => false,
@@ -61,19 +64,21 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.mainBgColor, // Set greyish background color
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AppLogo(width: 80, height: 80),
-              CircularProgressIndicator.adaptive(),
-              TellusLogo(width: 100, height: 50),
-            ],
+    return SafeArea(
+      child: const Scaffold(
+        backgroundColor: AppColors.mainBgColor, // Set greyish background color
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppLogo(width: 80, height: 80),
+                CircularProgressIndicator.adaptive(),
+                TellusLogo(width: 100, height: 50),
+              ],
+            ),
           ),
         ),
       ),

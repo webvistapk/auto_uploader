@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_styles.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/change_password_screen.dart';
+import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
@@ -116,18 +119,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
 
     try {
+      final token = Prefrences.getAuthToken();
       await UserService.updateUserProfile(updatedUser);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully.')),
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
-        (Route<dynamic> route) => false, // Remove all previous routes
-      );
+      ToastNotifier.showSuccessToast(context, 'Profile updated successfully.');
+
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (_) => MainScreen(
+                    userProfile: updatedUser,
+                    authToken: token.toString(),
+                  )),
+          (route) => false);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update profile: $e')),
-      );
+      ToastNotifier.showErrorToast(context, 'Failed to update profile: $e');
     }
   }
 
@@ -205,7 +210,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       maxLines: 3,
                     ),
-
                     const SizedBox(height: 10),
                     TextField(
                       controller: _addressController,
@@ -227,7 +231,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         labelText: 'Country',
                       ),
                     ),
-
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: _saveProfile,
@@ -265,12 +268,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     const SizedBox(height: 10),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (context) => const ProfileScreen()),
-                          (Route<dynamic> route) =>
-                              false, // Remove all previous routes
-                        );
+                        Navigator.pop(context);
                       },
                       child: const Text(
                         'Cancel',
@@ -283,7 +281,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             );
           } else {
-            return SearchWidget(query: searchQuery);
+            return SearchWidget(
+              query: searchQuery,
+              authToken: Prefrences.getAuthToken().toString(),
+            );
           }
         },
       ),

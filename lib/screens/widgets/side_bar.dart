@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/profile/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SideBar extends StatelessWidget {
   const SideBar({super.key});
@@ -53,8 +55,14 @@ class SideBar extends StatelessWidget {
             title: const Text('Logout'),
             onTap: () async {
               // Navigate to settings
+              SharedPreferences removeUser =
+                  await SharedPreferences.getInstance();
               await Prefrences.removeAuthToken();
+              removeUser.remove(Prefrences.authToken);
               await UserPreferences().clearCurrentUser();
+              await removeUser.remove(UserPreferences.userKey);
+              ToastNotifier.showSuccessToast(
+                  context, "Logout user Successfully");
               Navigator.pushAndRemoveUntil(
                   context,
                   CupertinoDialogRoute(

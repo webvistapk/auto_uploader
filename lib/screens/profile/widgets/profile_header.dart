@@ -37,7 +37,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   Future<FetchResponseModel>? _followRequestsResponse;
 
   Future<int?> _getUserIdFromToken() async {
-    String? token = await AppUtils.getAuthToken(Prefrences.authToken);
+    String? token = await Prefrences.getAuthToken();
     if (token != null && token.isNotEmpty) {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       return decodedToken['user_id'] as int?;
@@ -97,7 +97,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     final int? currentUserId = await _getUserIdFromToken();
     _followRequestsResponse =
         Provider.of<follower_request_provider>(context, listen: false)
-            .fetchFollowRequestStatus(currentUserId!, widget.user.id);
+            .fetchFollowRequestStatus(currentUserId!, widget.user.id,
+                Prefrences.getAuthToken().toString());
   }
 
   @override

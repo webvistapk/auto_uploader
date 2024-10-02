@@ -8,10 +8,12 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
+import 'package:mobile/screens/profile/login_screen.dart';
 import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
+  bool isResend = false;
 
   loginUser(context, String email, String password) async {
     isLoading = true;
@@ -38,14 +40,16 @@ class AuthProvider extends ChangeNotifier {
 
         // Try to get the current user profile from preferences
         userProfile = await userPrefs.getCurrentUser();
-        isLoading = false;
-        notifyListeners();
+
         if (userProfile == null) {
           // If the profile is null, fetch from the server
+          // debugger();
           userProfile = await ProviderManager.fetchUserProfile(userID);
+          // debugger();
           await userPrefs.saveCurrentUser(userProfile);
         }
-
+        isLoading = false;
+        notifyListeners();
         // Ensure userProfile is not null before navigating
         if (userProfile != null) {
           Navigator.pushAndRemoveUntil(
@@ -53,20 +57,23 @@ class AuthProvider extends ChangeNotifier {
             CupertinoDialogRoute(
               builder: (_) => MainScreen(
                 email: email,
-                userProfile: userProfile!, // Safe since it's not null here
+                userProfile: userProfile!,
+                authToken: accessToken, // Safe since it's not null here
               ),
               context: context,
             ),
             (route) => false,
           );
         } else {
-          throw Exception("Failed to retrieve user profile");
+          ToastNotifier.showErrorToast(
+              context, "Failed to retrieve user profile");
         }
       } else {
         isLoading = false;
         notifyListeners();
       }
     } catch (e) {
+      // debugger();
       isLoading = false;
       notifyListeners();
       ToastNotifier.showErrorToast(context, e.toString());
@@ -84,9 +91,10 @@ class AuthProvider extends ChangeNotifier {
         final id = data['id'];
 
         await Prefrences.SetUserId(id);
+        await Prefrences.SetUserEmail(email);
+        notifyListeners();
         isLoading = false;
         notifyListeners();
-        await Prefrences.SetUserEmail(email);
         ToastNotifier.showSuccessToast(
             context, "User Register successfully $email");
         Navigator.push(
@@ -94,6 +102,7 @@ class AuthProvider extends ChangeNotifier {
             CupertinoDialogRoute(
                 builder: (_) => OtpScreen(
                       userEmail: email,
+                      userID: id,
                     ),
                 context: context));
       } else {
@@ -129,7 +138,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  updateEmailVerfied(context, String email, String otp) async {
+  updateEmailVerfied(context, String email, String otp, {int? id}) async {
     isLoading = true;
     notifyListeners();
     try {
@@ -153,16 +162,45 @@ class AuthProvider extends ChangeNotifier {
 
           // Try to get the current user profile from preferences
           userProfile = await userPrefs.getCurrentUser();
+          final token = await Prefrences.getAuthToken();
           isLoading = false;
           notifyListeners();
           // debugger();
-          if (userProfile == null) {
-            // If the profile is null, fetch from the server
-            int userID = Prefrences.getUserId();
-            userProfile = await ProviderManager.fetchUserProfile(userID);
-            await userPrefs.saveCurrentUser(userProfile);
-          }
+          if (token == null) {
+            ToastNotifier.showSuccessToast(context, message);
 
+            Navigator.pushAndRemoveUntil(
+                context,
+                CupertinoDialogRoute(
+                    builder: (_) => LoginScreen(), context: context),
+                (route) => false);
+            return;
+          } else if (userProfile == null) {
+            // If the profile is null, fetch from the server
+            if (id == null) {
+              int userID = Prefrences.getUserId();
+              userProfile = await ProviderManager.fetchUserProfile(userID);
+              await userPrefs.saveCurrentUser(userProfile);
+              notifyListeners();
+            } else {
+              int userID = id;
+              userProfile = await ProviderManager.fetchUserProfile(userID);
+              await userPrefs.saveCurrentUser(userProfile);
+              notifyListeners();
+            }
+            ToastNotifier.showSuccessToast(context, message);
+
+            Navigator.pushAndRemoveUntil(
+                context,
+                CupertinoDialogRoute(
+                    builder: (_) => MainScreen(
+                          email: email,
+                          userProfile: userProfile!,
+                          authToken: Prefrences.getAuthToken().toString(),
+                        ),
+                    context: context),
+                (route) => false);
+          }
           ToastNotifier.showSuccessToast(context, message);
 
           Navigator.pushAndRemoveUntil(
@@ -171,6 +209,7 @@ class AuthProvider extends ChangeNotifier {
                   builder: (_) => MainScreen(
                         email: email,
                         userProfile: userProfile!,
+                        authToken: Prefrences.getAuthToken().toString(),
                       ),
                   context: context),
               (route) => false);
@@ -185,15 +224,15 @@ class AuthProvider extends ChangeNotifier {
   }
 
   resendEmailVerified(context, String email) async {
-    isLoading = true;
+    isResend = true;
     notifyListeners();
     try {
       final data = await ProviderManager.renewEmailVerified(email);
       ToastNotifier.showSuccessToast(context, data);
-      isLoading = false;
+      isResend = false;
       notifyListeners();
     } catch (e) {
-      isLoading = false;
+      isResend = false;
       notifyListeners();
       ToastNotifier.showErrorToast(context, e.toString());
     }

@@ -23,7 +23,9 @@ import '../../controller/services/followers/follower_request.dart';
 class ProfileScreen extends StatefulWidget {
   final int? id; // Accepts an optional ID
   final UserProfile? userProfile;
-  const ProfileScreen({super.key, this.id, this.userProfile});
+  final authToken;
+  const ProfileScreen(
+      {super.key, required this.id, this.userProfile, this.authToken});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -38,42 +40,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    super.initState();
     _initializeData();
+    super.initState();
   }
 
+  String? token;
   Future<void> _initializeData() async {
-    String? token = await AppUtils.getAuthToken(Prefrences.authToken);
-    // debugger();
-    _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
+    try {
+      token = await Prefrences.getAuthToken();
+      int? userId = widget.id;
+      // Ensure the token is not null or empty
+      if (token == null || token!.isEmpty) {
+        throw FormatException("Invalid or empty token.");
+      }
 
-    // final int? passedUserId =
-    //     widget.id ?? ModalRoute.of(context)?.settings.arguments as int?;
+      // debugger();
+      if (userId == null) {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
+        userId = decodedToken['user_id'];
+      }
 
-    _userId =
-        //  passedUserId ??
-        _loggedInUserId;
+      // Check if the token is expired before decoding
 
-    if (widget.userProfile != null) {
-      _userProfile = UserPreferences().getCurrentUser();
+      if (userId != null) {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token!);
+        _loggedInUserId = decodedToken['user_id'];
+      }
 
-      // _isFollowing = _checkIfFollowing(_userId!);
-      setState(() {
-        //
-      });
-    } else {
-      _userProfile = _fetchUserProfile(_userId!);
-      _isFollowing = _checkIsFollowig(_userId!);
-      setState(() {
-        //
-      });
+      // Decode the token safely
+      // debugger();
+
+      if (userId != _loggedInUserId) {
+        _userProfile = _fetchUserProfile(userId!);
+        // debugger();
+        _isFollowing = _checkIsFollowig(userId, _loggedInUserId!, token!);
+        setState(() {});
+      } else {
+        _userProfile = UserPreferences().getCurrentUser();
+        // debugger();
+        _isFollowing = _checkIsFollowig(_loggedInUserId!, userId!, token!);
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint("Error decoding token: $e");
+      // Handle the error accordingly (e.g., navigate to login screen)
     }
   }
 
   Future<UserProfile?> _fetchUserProfile(int userId) async {
-    if (widget.userProfile != null) {
-      return await UserPreferences().getCurrentUser();
-    }
+    // if (widget.userProfile != null) {
+    //   return await UserPreferences().getCurrentUser();
+    // }
     return await UserService.fetchUserProfile(userId);
   }
 
@@ -86,18 +103,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return null;
   }
 
-  Future<bool> _checkIsFollowig(int userId) async {
-    final int? currentUserId = await _getUserIdFromToken();
+  Future<bool> _checkIsFollowig(int userId, int currentId, String token) async {
+    try {
+      int currentUserId = currentId;
 
-    // Await the asynchronous operation to get the follow request status
-    await Provider.of<follower_request_provider>(context, listen: false)
-        .fetchFollowRequestStatus(currentUserId!, userId);
+      // Await the asynchronous operation to get the follow request status
+      await Provider.of<follower_request_provider>(context, listen: false)
+          .fetchFollowRequestStatus(currentUserId, userId, token);
 
-    // After fetching the status, check it and return the corresponding bool value
-    if (Provider.of<follower_request_provider>(context, listen: false).status ==
-        'accepted') {
-      return true;
-    } else {
+      // After fetching the status, check it and return the corresponding bool value
+      if (Provider.of<follower_request_provider>(context, listen: false)
+              .status ==
+          'accepted') {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
       return false;
     }
   }
@@ -185,7 +207,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             );
           } else {
-            return SearchWidget(query: searchQuery);
+            return SearchWidget(
+              query: searchQuery,
+              authToken: "",
+            );
           }
         },
       ),

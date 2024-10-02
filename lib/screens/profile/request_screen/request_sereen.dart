@@ -7,6 +7,7 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/profile/user_service.dart';
 import 'package:mobile/models/UserProfile/follower_request.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/request_screen/widgets/request_tile_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -38,15 +39,18 @@ class _RequestScreenState extends State<RequestScreen> {
 
   void _fetchFollowRequests() {
     setState(() {
-      _followRequests = Provider.of<follower_request_provider>(context, listen: false).getFollowerRequestList(context);
+      _followRequests =
+          Provider.of<follower_request_provider>(context, listen: false)
+              .getFollowerRequestList(context);
     });
   }
 
-  Future <void> Refresh() async{
+  Future<void> Refresh() async {
     _fetchFollowRequests();
-}
+  }
 
-  Future confirmFollow(int followerId, int followingId, String status, BuildContext context) async {
+  Future confirmFollow(int followerId, int followingId, String status,
+      BuildContext context) async {
     // Show the confirm dialog
     bool shouldProceed = await showDialog(
       context: context,
@@ -68,9 +72,7 @@ class _RequestScreenState extends State<RequestScreen> {
               width: MediaQuery.of(context).size.width * 0.85,
               child: Row(
                 children: [
-                  Flexible(
-                      child: Text("Are you sure?")
-                  ),
+                  Flexible(child: Text("Are you sure?")),
                 ],
               ),
             );
@@ -82,12 +84,14 @@ class _RequestScreenState extends State<RequestScreen> {
               children: [
                 InkWell(
                   onTap: () {
-                    Navigator.pop(context, false); // Close the dialog and return false
+                    Navigator.pop(
+                        context, false); // Close the dialog and return false
                   },
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width / 20),
+                      borderRadius: BorderRadius.circular(
+                          MediaQuery.of(context).size.width / 20),
                       boxShadow: [
                         BoxShadow(
                           color: CupertinoColors.systemGrey2,
@@ -98,23 +102,25 @@ class _RequestScreenState extends State<RequestScreen> {
                       ],
                     ),
                     padding: EdgeInsets.symmetric(
-                        vertical: paragraph / 80,
-                        horizontal: paragraph),
-                    child: Text("No", style: TextStyle(
-                      color: Colors.white,
-                    )),
+                        vertical: paragraph / 80, horizontal: paragraph),
+                    child: Text("No",
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
                   ),
                 ),
                 SizedBox(width: MediaQuery.of(context).size.width / 50),
                 InkWell(
                   onTap: () {
-                    Navigator.pop(context, true);// Close the dialog and return true
+                    Navigator.pop(
+                        context, true); // Close the dialog and return true
                     Refresh();
                   },
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.greenColor,
-                      borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width / 20),
+                      borderRadius: BorderRadius.circular(
+                          MediaQuery.of(context).size.width / 20),
                       boxShadow: [
                         BoxShadow(
                           color: CupertinoColors.systemGrey2,
@@ -125,11 +131,11 @@ class _RequestScreenState extends State<RequestScreen> {
                       ],
                     ),
                     padding: EdgeInsets.symmetric(
-                        vertical: paragraph / 80,
-                        horizontal: paragraph * 0.90),
-                    child: Text("Yes", style: TextStyle(
-                      color: Colors.white,
-                    )),
+                        vertical: paragraph / 80, horizontal: paragraph * 0.90),
+                    child: Text("Yes",
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
                   ),
                 ),
               ],
@@ -143,7 +149,8 @@ class _RequestScreenState extends State<RequestScreen> {
     if (shouldProceed == true) {
       // Show the loading dialog or update the state
       setState(() {
-        Provider.of<follower_request_provider>(context, listen: false).followRequestResponse(
+        Provider.of<follower_request_provider>(context, listen: false)
+            .followRequestResponse(
           context,
           followerId,
           followingId,
@@ -164,109 +171,119 @@ class _RequestScreenState extends State<RequestScreen> {
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: ValueListenableBuilder<String?>(
-        valueListenable: SearchStore.searchQuery,
-    builder: (context, searchQuery, child) {
-    if (searchQuery == null || searchQuery.isEmpty){
-          return Consumer<follower_request_provider>(builder: (context,Provider,child){
-          return FutureBuilder<List<FollowerRequestModel>>(
-            future: _followRequests, // Reference to the future list of requests
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator()); // Show a loading spinner
-              } else if (snapshot.hasError) {
-                return Center(
-                    child: Text('An error occurred: ${snapshot.error}'));
-              } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                final pendingRequests = snapshot.data!
-                    .where((request) => request.status == 'pending')
-                    .toList();
-                if (pendingRequests.isNotEmpty) {
-                  // Build a ListView with the follower requests
-                  return Expanded(
-                    child: ListView.builder(
-                      itemCount: pendingRequests.length,
-                      itemBuilder: (context, index) {
-                        final followerRequest = pendingRequests[index];
-                        return ListTile(
-                          leading: const CircleAvatar(
-                            backgroundImage: NetworkImage(
-                                AppUtils.testImage), // Placeholder image
-                          ),
-                          title: Text(
-                            "${followerRequest.follower!.username}",
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                              '${followerRequest.follower!.firstName} ${followerRequest.follower!.lastName}'),
-                          trailing: Wrap(
-                            children: [
-                              IconButton(
-                                icon: Icon(
-                                  Icons.check_circle,
-                                  color: AppColors.greenColor,
-                                  size: paragraph * 0.75,
-                                ),
-                                onPressed: () {
-                                  confirmFollow(
-                                      followerRequest.follower!.id,
-                                      followerRequest.following!.id,
-                                      "accepted",
-                                      context);
-                                  /*Provider.followRequestResponse(
+            valueListenable: SearchStore.searchQuery,
+            builder: (context, searchQuery, child) {
+              if (searchQuery == null || searchQuery.isEmpty) {
+                return Consumer<follower_request_provider>(
+                  builder: (context, Provider, child) {
+                    return FutureBuilder<List<FollowerRequestModel>>(
+                        future:
+                            _followRequests, // Reference to the future list of requests
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child:
+                                    CircularProgressIndicator()); // Show a loading spinner
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text(
+                                    'An error occurred: ${snapshot.error}'));
+                          } else if (snapshot.hasData &&
+                              snapshot.data!.isNotEmpty) {
+                            final pendingRequests = snapshot.data!
+                                .where((request) => request.status == 'pending')
+                                .toList();
+                            if (pendingRequests.isNotEmpty) {
+                              // Build a ListView with the follower requests
+                              return Expanded(
+                                child: ListView.builder(
+                                  itemCount: pendingRequests.length,
+                                  itemBuilder: (context, index) {
+                                    final followerRequest =
+                                        pendingRequests[index];
+                                    return ListTile(
+                                      leading: const CircleAvatar(
+                                        backgroundImage: NetworkImage(AppUtils
+                                            .testImage), // Placeholder image
+                                      ),
+                                      title: Text(
+                                        "${followerRequest.follower!.username}",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      subtitle: Text(
+                                          '${followerRequest.follower!.firstName} ${followerRequest.follower!.lastName}'),
+                                      trailing: Wrap(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.check_circle,
+                                              color: AppColors.greenColor,
+                                              size: paragraph * 0.75,
+                                            ),
+                                            onPressed: () {
+                                              confirmFollow(
+                                                  followerRequest.follower!.id,
+                                                  followerRequest.following!.id,
+                                                  "accepted",
+                                                  context);
+                                              /*Provider.followRequestResponse(
                                           context,
                                           followerRequest.follower!.id,
                                           followerRequest.following!.id,
                                           "accepted"
                                   );*/
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.delete_forever,
-                                  color: AppColors.primary,
-                                  size: paragraph * 0.75,
-                                ),
-                                onPressed: () {
-                                  //Reject Request
-                                  confirmFollow(
-                                      followerRequest.follower!.id,
-                                      followerRequest.following!.id,
-                                      "rejected",
-                                      context);
-                                },
-                              ),
-                            ],
-                          ), // Navigate to profile on tap
-                        );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.delete_forever,
+                                              color: AppColors.primary,
+                                              size: paragraph * 0.75,
+                                            ),
+                                            onPressed: () {
+                                              //Reject Request
+                                              confirmFollow(
+                                                  followerRequest.follower!.id,
+                                                  followerRequest.following!.id,
+                                                  "rejected",
+                                                  context);
+                                            },
+                                          ),
+                                        ],
+                                      ), // Navigate to profile on tap
+                                    );
 
-                        /*RequestListTile(
+                                    /*RequestListTile(
                       fullName: "${followerRequest.follower?.firstName} ${followerRequest.follower?.lastName}",
                       followerId: followerRequest.follower!.id.toString(),
                       followingId:followerRequest.following!.id.toString(),
                       status:status
                     );*/
-                      },
-                    ),
-                  );
-                }
-                else{
-                  return Center(
-                    child: Text('No follow requests available'),
-                  );
-                }
-              } else {
-                return Center(
-                  child: Text('No follow requests available'),
+                                  },
+                                ),
+                              );
+                            } else {
+                              return Center(
+                                child: Text('No follow requests available'),
+                              );
+                            }
+                          } else {
+                            return Center(
+                              child: Text('No follow requests available'),
+                            );
+                          }
+                        });
+                  },
                 );
-              }});
-            },
-          );}
-    else {
-      return SearchWidget(query: searchQuery);
-    }
-        }
-        ),
+              } else {
+                return SearchWidget(
+                  query: searchQuery,
+                  authToken: Prefrences.getAuthToken().toString(),
+                );
+              }
+            }),
       ),
     );
   }

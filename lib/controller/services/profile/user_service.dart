@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/utils.dart';
@@ -9,8 +10,8 @@ import 'package:mobile/prefrences/prefrences.dart';
 
 class UserService {
   static Future<UserProfile> fetchUserProfile(int id) async {
-    final String? token = await AppUtils.getAuthToken(Prefrences.authToken);
-
+    final String? token = await Prefrences.getAuthToken();
+    // debugger();
     final response = await http.get(
       Uri.parse('${ApiURLs.baseUrl}${ApiURLs.user_endpoint}$id'),
       headers: <String, String>{

@@ -93,8 +93,8 @@ class follower_request_provider extends ChangeNotifier {
   }
 
   Future<FetchResponseModel> fetchFollowRequestStatus(
-      int followerId, int followingId) async {
-    final String? token = await Prefrences.getAuthToken();
+      int followerId, int followingId, String authToken) async {
+    final String? token = authToken;
     print("First ID: $followerId");
     print("Second ID: $followingId");
     setisLoading(true);

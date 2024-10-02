@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:mobile/screens/widgets/top_bar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +42,10 @@ class HomeScreen extends StatelessWidget {
               ),
             );
           } else {
-            return SearchWidget(query: searchQuery);
+            return SearchWidget(
+              query: searchQuery,
+              authToken: Prefrences.getAuthToken().toString(),
+            );
           }
         },
       ),

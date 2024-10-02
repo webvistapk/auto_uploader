@@ -1,4 +1,8 @@
+import 'dart:developer';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
@@ -7,7 +11,8 @@ import 'package:mobile/controller/services/search/search_service.dart';
 
 class SearchWidget extends StatefulWidget {
   final String query;
-  const SearchWidget({super.key, required this.query});
+  final String authToken;
+  const SearchWidget({super.key, required this.query, required this.authToken});
 
   @override
   _SearchWidgetState createState() => _SearchWidgetState();
@@ -38,25 +43,27 @@ class _SearchWidgetState extends State<SearchWidget>
       });
     });
 
-    _fetchSearchResults(widget.query);
+    _fetchSearchResults(widget.query, widget.authToken);
   }
 
   @override
   void didUpdateWidget(covariant SearchWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.query != widget.query) {
-      _fetchSearchResults(widget.query);
+      _fetchSearchResults(widget.query, widget.authToken);
     }
   }
 
-  Future<void> _fetchSearchResults(String query) async {
+  Future<void> _fetchSearchResults(String query, String authToken) async {
     setState(() {
       isLoading = true;
     });
-
+    authToken = await Prefrences.getAuthToken();
+    // debugger();
     try {
-      final userResults = await SearchService.fetchSearchResults(query);
-
+      final userResults =
+          await SearchService.fetchSearchResults(query, authToken);
+      // debugger();
       setState(() {
         data['All'] = userResults;
         data['Accounts'] = userResults;
@@ -81,13 +88,19 @@ class _SearchWidgetState extends State<SearchWidget>
 
   void _navigateToProfile(BuildContext context, int userId) {
     SearchStore.searchQuery.value = null;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => const ProfileScreen(),
-        settings: RouteSettings(arguments: userId),
-      ),
-      (Route<dynamic> route) => false, // Remove all previous routes
-    );
+    Navigator.push(
+        context,
+        CupertinoDialogRoute(
+            builder: (_) => ProfileScreen(id: userId), context: context));
+    // Navigator.of(context).pushAndRemoveUntil(
+    //   MaterialPageRoute(
+    //     builder: (context) => ProfileScreen(
+    //       id: userId,
+    //     ),
+    //     settings: RouteSettings(arguments: userId),
+    //   ),
+    //   (Route<dynamic> route) => false, // Remove all previous routes
+    // );
   }
 
   @override

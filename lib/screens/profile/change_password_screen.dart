@@ -56,61 +56,54 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return strength;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(onPressed: (){
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (context) =>
-                const ProfileScreen()),
-                (Route<dynamic> route) =>
-            false, // Remove all previous routes
-          );
-        }, icon: Icon(Icons.arrow_back)),
-      ),
-     // drawer: const SideBar(),
-      // bottomNavigationBar: BottomBar(
-      //   selectedIndex: 1,
-      // ),
-      backgroundColor: AppColors.mainBgColor,
-      body:SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(10),
-          child:Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Create password",style: TextStyle(
-                color: AppColors.blackColor,
-                fontSize: paragraph*0.65
-              ),),
-              const SizedBox(
-                height: 50,
-              ),
-              IndexedStack(
-                index: currentStep,
-                children: [
-                  // Step 1: Enter current password
-                  firstStepContainer(),
-                  // Step 2: Enter new password
-                  secondStepContainer(),
-                  // Step 3: Confirm new password
-                  finalStepContainer(),
-                ],
-              ),
-            ],
-          ),
-        
+        appBar: AppBar(
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back)),
         ),
-      )
-
-    );
+        // drawer: const SideBar(),
+        // bottomNavigationBar: BottomBar(
+        //   selectedIndex: 1,
+        // ),
+        backgroundColor: AppColors.mainBgColor,
+        body: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Create password",
+                  style: TextStyle(
+                      color: AppColors.blackColor, fontSize: paragraph * 0.65),
+                ),
+                const SizedBox(
+                  height: 50,
+                ),
+                IndexedStack(
+                  index: currentStep,
+                  children: [
+                    // Step 1: Enter current password
+                    firstStepContainer(),
+                    // Step 2: Enter new password
+                    secondStepContainer(),
+                    // Step 3: Confirm new password
+                    finalStepContainer(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 
   // Old Password Screen
-  Widget firstStepContainer(){
+  Widget firstStepContainer() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -119,27 +112,28 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             controller: currentPasswordController,
             obscureText: _obscureText,
             decoration: InputDecoration(
-              labelText: 'Current Password',
-                suffixIcon: IconButton(onPressed: (){
-                  setState(() {
-                    _obscureText = !_obscureText;  // Toggle the password visibility
-                  });
-                },
-                    icon: Icon(_obscureText?Icons.lock:Icons.lock_open))
-            ),
+                labelText: 'Current Password',
+                suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _obscureText =
+                            !_obscureText; // Toggle the password visibility
+                      });
+                    },
+                    icon: Icon(_obscureText ? Icons.lock : Icons.lock_open))),
           ),
           const SizedBox(height: 150),
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: (){
+                  onPressed: () {
                     setState(() {
                       currentStep = 1;
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:  Colors.red,
+                    backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -153,14 +147,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
             ],
           )
-
         ],
       ),
     );
   }
 
   //New Password Widget
-Widget secondStepContainer(){
+  Widget secondStepContainer() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -174,42 +167,50 @@ Widget secondStepContainer(){
               });
             },
             decoration: InputDecoration(
-              labelText: 'New Password',
-              suffixIcon: IconButton(onPressed: (){
-                setState(() {
-                  _obscureText = !_obscureText;  // Toggle the password visibility
-                });
-              },
-                  icon: Icon(_obscureText?Icons.lock:Icons.lock_open))
-            ),
+                labelText: 'New Password',
+                suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _obscureText =
+                            !_obscureText; // Toggle the password visibility
+                      });
+                    },
+                    icon: Icon(_obscureText ? Icons.lock : Icons.lock_open))),
           ),
           const SizedBox(height: 20),
-          iconContainer('Password must contain 8 characters' ,newPasswordController.text.length >= 8 ? true : false,),
+          iconContainer(
+            'Password must contain 8 characters',
+            newPasswordController.text.length >= 8 ? true : false,
+          ),
           const SizedBox(height: 5),
-          iconContainer('1 letter and 1 number',(validateNumberAndLetterPassword(newPasswordController.text))),
+          iconContainer('1 letter and 1 number',
+              (validateNumberAndLetterPassword(newPasswordController.text))),
           const SizedBox(height: 5),
-          iconContainer('1 special character exampler:{!@#&*~}',validateSpecialCharPassword(newPasswordController.text)),
-
-
+          iconContainer('1 special character exampler:{!@#&*~}',
+              validateSpecialCharPassword(newPasswordController.text)),
           SizedBox(height: 10),
           LinearProgressIndicator(
             value: passwordStrength,
             minHeight: 5,
             backgroundColor: Colors.grey[300],
-            color: passwordStrength < 0.5 ? Colors.red : (passwordStrength < 1 ? Colors.yellow : Colors.green),
+            color: passwordStrength < 0.5
+                ? Colors.red
+                : (passwordStrength < 1 ? Colors.yellow : Colors.green),
           ),
           SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: validatePassword(newPasswordController.text) ? () {
-                    setState(() {
-                      currentStep = 2;
-                    });
-                  } : null,
+                  onPressed: validatePassword(newPasswordController.text)
+                      ? () {
+                          setState(() {
+                            currentStep = 2;
+                          });
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:  Colors.red,
+                    backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -226,10 +227,10 @@ Widget secondStepContainer(){
         ],
       ),
     );
-}
+  }
 
   //Confirm Password Widget
-  Widget finalStepContainer(){
+  Widget finalStepContainer() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -238,27 +239,34 @@ Widget secondStepContainer(){
             controller: confirmPasswordController,
             obscureText: _obscureText,
             decoration: InputDecoration(
-              labelText: 'Confirm Password',
-              errorText: newPasswordController.text == confirmPasswordController.text ? null : 'Passwords do not match',
-                suffixIcon: IconButton(onPressed: (){
-                  setState(() {
-                    _obscureText = !_obscureText;  // Toggle the password visibility
-                  });
-                },
-                    icon: Icon(_obscureText?Icons.lock:Icons.lock_open))
-            ),
+                labelText: 'Confirm Password',
+                errorText:
+                    newPasswordController.text == confirmPasswordController.text
+                        ? null
+                        : 'Passwords do not match',
+                suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _obscureText =
+                            !_obscureText; // Toggle the password visibility
+                      });
+                    },
+                    icon: Icon(_obscureText ? Icons.lock : Icons.lock_open))),
           ),
           const SizedBox(height: 150),
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: newPasswordController.text == confirmPasswordController.text ? () {
-                    // Handle password change logic
-                    print("Password Changed Successfully");
-                  } : null,
+                  onPressed: newPasswordController.text ==
+                          confirmPasswordController.text
+                      ? () {
+                          // Handle password change logic
+                          print("Password Changed Successfully");
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:  Colors.red,
+                    backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -278,11 +286,15 @@ Widget secondStepContainer(){
   }
 
   //Icon Container
-  Widget iconContainer(String text,bool valid){
+  Widget iconContainer(String text, bool valid) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(valid?Icons.check_circle:Icons.circle,size: valid?20:10,color: valid?AppColors.greenColor:AppColors.grey,),
+        Icon(
+          valid ? Icons.check_circle : Icons.circle,
+          size: valid ? 20 : 10,
+          color: valid ? AppColors.greenColor : AppColors.grey,
+        ),
         const SizedBox(
           width: 10,
         ),

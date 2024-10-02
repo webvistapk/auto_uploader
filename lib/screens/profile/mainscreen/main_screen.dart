@@ -16,7 +16,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MainScreen extends StatefulWidget {
   final email;
   final UserProfile userProfile;
-  const MainScreen({super.key, this.email, required this.userProfile});
+  final String authToken;
+  const MainScreen(
+      {super.key,
+      this.email,
+      required this.userProfile,
+      required this.authToken});
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -25,7 +30,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0; // Loading indicator state
 
-  final List<Widget> _pages = const [
+  final List<Widget> _pages = [
     HomeScreen(),
     Center(
         child:
@@ -34,9 +39,10 @@ class _MainScreenState extends State<MainScreen> {
         child:
             Text("Waiting for Add Post ...", style: TextStyle(fontSize: 24))),
     RequestScreen(),
-    ProfileScreen(),
+    SizedBox(),
   ];
-
+  int? userID;
+  UserProfile? userProfile;
   @override
   void initState() {
     super.initState();
@@ -44,6 +50,12 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _checkEmailVerification() async {
+    if (mounted) {
+      userID = await Prefrences.getUserId();
+      setState(() {
+        userProfile = widget.userProfile;
+      });
+    }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userEmail = prefs.getString(Prefrences
         .userEmail); // Retrieve the user's email from shared preferences
@@ -89,7 +101,9 @@ class _MainScreenState extends State<MainScreen> {
             : Scaffold(
                 body: _selectedIndex == 4
                     ? ProfileScreen(
+                        id: widget.userProfile.id,
                         userProfile: widget.userProfile,
+                        authToken: widget.authToken,
                       )
                     : _pages[_selectedIndex],
                 bottomNavigationBar: SafeArea(
