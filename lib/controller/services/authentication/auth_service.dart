@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,8 +16,8 @@ class AuthService {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove(Prefrences.authToken);
     } else {
-      const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-      await secureStorage.delete(key: Prefrences.authToken);
+      // const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+      // await secureStorage.delete(key: Prefrences.authToken);
     }
   }
 }

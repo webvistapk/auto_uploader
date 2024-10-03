@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppUtils {
-  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  // static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   static const bool devMode = true;
 
@@ -22,7 +22,7 @@ class AppUtils {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(key, value);
     } else {
-      await _secureStorage.write(key: key, value: value);
+      // await _secureStorage.write(key: key, value: value);
     }
   }
 
@@ -31,7 +31,7 @@ class AppUtils {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       return prefs.getString(key);
     } else {
-      return await _secureStorage.read(key: key);
+      // return await _secureStorage.read(key: key);
     }
   }
 
