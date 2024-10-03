@@ -1,15 +1,17 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
-import 'package:mobile/common/app_styles.dart';
-import 'package:mobile/screens/profile/edit_profile_screen.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:http/http.dart' as http;
 import 'package:mobile/screens/profile/profile_screen.dart';
-import 'package:mobile/controller/store/search/search_store.dart';
-import 'package:mobile/common/utils.dart';
-import 'package:mobile/screens/search/widget/search_widget.dart';
-import 'package:mobile/screens/widgets/side_bar.dart';
-import 'package:mobile/screens/widgets/top_bar.dart';
-import 'package:mobile/controller/services/profile/user_service.dart';
+import '../../common/message_toast.dart';
+import '../../controller/endpoints.dart';
+import '../../prefrences/prefrences.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -25,6 +27,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   TextEditingController confirmPasswordController = TextEditingController();
   double passwordStrength = 0.0;
   bool _obscureText = true;
+  final changeformKey = GlobalKey<FormState>();
 
   // Regular expression to check the password strength
   bool validatePassword(String password) {
@@ -54,6 +57,71 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (RegExp(r'[0-9]').hasMatch(password)) strength += 0.25;
     if (RegExp(r'[!@#\$&*~]').hasMatch(password)) strength += 0.25;
     return strength;
+  }
+
+
+  //Check current password
+    checkPassword(context, String password) async {
+    try {
+      String? email = await Prefrences.getUserEmail();
+      final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.login_endpoint);
+
+      final body = {"username_or_email": email, "password": password};
+      final headers = {
+        'Content-Type': 'application/json; charset=UTF-8',
+        // Add any other necessary headers like Authorization here if required
+      };
+
+      Response response = await http.post(completeUrl,
+          body: jsonEncode(body), headers: headers);
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        ToastNotifier.showSuccessToast(context, "Current password is correct");
+        setState(() {
+          currentStep=1;
+        });
+        return data;
+      } else {
+        ToastNotifier.showErrorToast(context, "Your Current Password is incorrect");
+      }
+    } catch (e) {
+      log('Error: $e');
+      ToastNotifier.showErrorToast(context, e.toString());
+      return null;
+    }
+  }
+
+  //Check current password
+  updatePassword(context, String oldPassword,newPassword) async {
+    try {
+      final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.update_password);
+      final String? token = await Prefrences.getAuthToken();
+      int? userid = await Prefrences.getUserId();
+      final body = {"old_password": oldPassword,"new_password": newPassword};
+      final headers = {
+        'Content-Type': 'application/json; charset=UTF-8',
+        "Authorization": "Bearer $token"
+        // Add any other necessary headers like Authorization here if required
+      };
+
+      Response response = await http.put(completeUrl,
+          body: jsonEncode(body), headers: headers);
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+
+        ToastNotifier.showSuccessToast(context, "Your password changed successfully");
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen(id: userid)));
+        return data;
+      } else {
+        ToastNotifier.showErrorToast(context, "Your Current Password is incorrect");
+      }
+    } catch (e) {
+      log('Error: $e');
+      ToastNotifier.showErrorToast(context, e.toString());
+      return null;
+    }
   }
 
 
@@ -87,16 +155,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 const SizedBox(
                   height: 50,
                 ),
-                IndexedStack(
-                  index: currentStep,
-                  children: [
-                    // Step 1: Enter current password
-                    firstStepContainer(),
-                    // Step 2: Enter new password
-                    secondStepContainer(),
-                    // Step 3: Confirm new password
-                    finalStepContainer(),
-                  ],
+                Form(
+                  key: changeformKey,
+                  child: IndexedStack(
+                    index: currentStep,
+                    children: [
+                      // Step 1: Enter current password
+                      firstStepContainer(),
+                      // Step 2: Enter new password
+                      secondStepContainer(),
+                      // Step 3: Confirm new password
+                      finalStepContainer(),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -110,9 +181,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          TextField(
+          TextFormField(
             controller: currentPasswordController,
             obscureText: _obscureText,
+            validator: (value) {
+              if (value!.isEmpty) {
+                return "Please enter current password";
+              }
+              return null;
+            },
             decoration: InputDecoration(
                 labelText: 'Current Password',
                 suffixIcon: IconButton(
@@ -130,9 +207,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() {
+                    if (changeformKey.currentState!.validate())
+                    checkPassword(context, currentPasswordController.text);
+                    /*setState(() {
                       currentStep = 1;
-                    });
+                    });*/
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
@@ -160,9 +239,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          TextField(
+          TextFormField(
+
             controller: newPasswordController,
             obscureText: _obscureText,
+
             onChanged: (value) {
               setState(() {
                 passwordStrength = calculateStrength(value);
@@ -204,6 +285,29 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             children: [
               Expanded(
                 child: ElevatedButton(
+                  onPressed:  () {
+                    setState(() {
+                      if (currentStep > 0) {
+                        currentStep--;
+                      }
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.grey,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Back',
+                    style: const TextStyle(color: AppColors.whiteColor),
+                  ),
+                ),
+              ),
+              SizedBox(width: paragraph*0.5,),
+              Expanded(
+                child: ElevatedButton(
                   onPressed: validatePassword(newPasswordController.text)
                       ? () {
                           setState(() {
@@ -237,7 +341,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          TextField(
+          TextFormField(
             controller: confirmPasswordController,
             obscureText: _obscureText,
             decoration: InputDecoration(
@@ -260,13 +364,36 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: newPasswordController.text ==
-                          confirmPasswordController.text
-                      ? () {
-                          // Handle password change logic
-                          print("Password Changed Successfully");
-                        }
-                      : null,
+                  onPressed:  () {
+                    setState(() {
+                      if (currentStep > 0) {
+                        currentStep--;
+                      }
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.grey,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Back',
+                    style: const TextStyle(color: AppColors.whiteColor),
+                  ),
+                ),
+              ),
+              SizedBox(width: paragraph*0.5,),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed:  () {
+                          if(newPasswordController.text == confirmPasswordController.text)
+                            {
+                            updatePassword(context, currentPasswordController.text, newPasswordController.text);
+                            }
+
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 12),

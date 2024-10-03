@@ -13,4 +13,5 @@ class ApiURLs {
       "userprofile/users/update_email_verified/";
   static const String get_follow_list = "userprofile/users/follow/get/";
   static const String accept_follow = "userprofile/users/follow/status/";
+  static const String update_password="userprofile/users/update_password/";
 }

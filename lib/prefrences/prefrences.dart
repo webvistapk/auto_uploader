@@ -32,6 +32,11 @@ class Prefrences {
     await prefs.setString(userEmail, user_email);
   }
 
+  static Future<String?> getUserEmail() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(userEmail);
+  }
+
   static removeAuthToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove(Prefrences.authToken);
