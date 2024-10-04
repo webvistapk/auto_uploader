@@ -113,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // After fetching the status, check it and return the corresponding bool value
       if (Provider.of<follower_request_provider>(context, listen: false)
-              .status ==
+          .status ==
           'accepted') {
         return true;
       } else {

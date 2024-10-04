@@ -58,11 +58,15 @@ class _SearchWidgetState extends State<SearchWidget>
     setState(() {
       isLoading = true;
     });
+    final String? token = await Prefrences.getAuthToken();
     authToken = await Prefrences.getAuthToken();
-    // debugger();
+     //debugger();
     try {
       final userResults =
           await SearchService.fetchSearchResults(query, authToken);
+
+      print("Auth Token ${authToken}");
+      print("User Results ${userResults}");
       // debugger();
       setState(() {
         data['All'] = userResults;

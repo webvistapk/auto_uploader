@@ -5,6 +5,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/common/app_snackbar.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
@@ -36,6 +37,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   //bool _followRequestSent = false;
   Future<FetchResponseModel>? _followRequestsResponse;
 
+
   Future<int?> _getUserIdFromToken() async {
     String? token = await Prefrences.getAuthToken();
     if (token != null && token.isNotEmpty) {
@@ -44,6 +46,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     }
     return null;
   }
+
 
   void _handleFollow() async {
     final int? currentUserId = await _getUserIdFromToken();
@@ -55,11 +58,12 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             .sendfollowRequest(context, currentUserId, widget.user.id);
         setState(() {
           refresh();
+          print("refresh called");
         });
+
       } catch (e) {
         // Handle error, e.g., show a snackbar'
-        print(e);
-        showErrorSnackbar(e.toString(), context);
+       ToastNotifier.showErrorToast(context, "There is an error occured ${e}");
       }
     }
   }
@@ -70,9 +74,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     //print("User  ID: ${widget.user.id}");
     if (currentUserId != null) {
       try {
-        print("USER ID : ${currentUserId}");
+        //print("USER ID : ${currentUserId}");
 
-        print("USER ID 2 : ${widget.user.id}");
+        //print("USER ID 2 : ${widget.user.id}");
         Provider.of<follower_request_provider>(context, listen: false)
             .followRequestResponse(
           context,
@@ -82,6 +86,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
         );
         setState(() {
           refresh();
+          print("refresh called");
         });
       } catch (e) {
         showErrorSnackbar(e.toString(), context);
@@ -89,16 +94,17 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     }
   }
 
-  void refresh() {
-    _fetchFollowResponse();
-  }
 
   void _fetchFollowResponse() async {
+   // print("Fetch Called");
     final int? currentUserId = await _getUserIdFromToken();
-    _followRequestsResponse =
+     _followRequestsResponse =
         Provider.of<follower_request_provider>(context, listen: false)
-            .fetchFollowRequestStatus(currentUserId!, widget.user.id,
-                Prefrences.getAuthToken().toString());
+            .fetchFollowRequestStatus(currentUserId!, widget.user.id,context);
+  }
+
+  void refresh(){
+    _fetchFollowResponse();
   }
 
   @override
@@ -110,8 +116,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
   @override
   Widget build(BuildContext context) {
-    print(
-        "Status of request ${Provider.of<follower_request_provider>(context, listen: false).status}");
     return FutureBuilder<int?>(
       future: _getUserIdFromToken(),
       builder: (context, snapshot) {
@@ -288,10 +292,43 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 ] else ...[
                   Row(
                     children: [
-                      Consumer<follower_request_provider>(
-                          builder: (context, provider, child) {
-                        return Expanded(
-                          child: ElevatedButton(
+                        Expanded(
+                          child: Consumer<follower_request_provider>(
+                                builder: (context, provider, child) {
+                                  return  ElevatedButton(
+                                    onPressed: provider.status == 'pending'
+                                        ? () {}
+                                        : provider.status == 'initial' ||
+                                        provider.status == 'rejected'
+                                        ? _handleFollow
+                                        : _handleunfollow,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: provider.status == 'pending'
+                                          ? Colors.grey
+                                          : provider.status == 'initial' ||
+                                          provider.status == 'rejected'
+                                          ? Colors.red
+                                          : Colors.red,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child:provider.isFollowLoading?CircularProgressIndicator(color: Colors.white,) :Text(
+                                      provider.status == 'pending'
+                                          ? 'Pending'
+                                          : provider.status == 'initial' ||
+                                          provider.status == 'rejected'
+                                          ? 'Follow'
+                                          : 'Unfollow',
+                                      style:
+                                      const TextStyle(color: AppColors.whiteColor),
+                                    ),
+                                  );
+                                }),
+                        ),
+
+                          /*ElevatedButton(
                             onPressed: provider.status == 'pending'
                                 ? () {}
                                 : provider.status == 'initial' ||
@@ -320,9 +357,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               style:
                                   const TextStyle(color: AppColors.whiteColor),
                             ),
-                          ),
-                        );
-                      }),
+                          ),*/
+
+
 
 
                       const SizedBox(width: 8),
