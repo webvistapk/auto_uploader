@@ -31,15 +31,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
     // Load SharedPreferences and user profile data
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final data = prefs.get(Prefrences.authToken);
-    final email = prefs.get(Prefrences.userEmail);
-    UserPreferences userPreferences = UserPreferences();
 
-    UserProfile? userProfile = await userPreferences.getCurrentUser();
-    // debugger();
-    if (!mounted) return;
-
-    // Navigate based on auth token availability
     if (data != null) {
+      final email = prefs.get(Prefrences.userEmail);
+      UserPreferences userPreferences = UserPreferences();
+
+      UserProfile? userProfile = await userPreferences.getCurrentUser();
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -60,6 +58,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ),
       );
     }
+
+    // debugger();
+
+    // Navigate based on auth token availability
   }
 
   @override

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/screens/profile/forgot_password_screen.dart';
-import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/register_screen.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Scaffold(
         backgroundColor: AppColors.mainBgColor, // Set greyish background color
         resizeToAvoidBottomInset:
-            true, // Ensures content adjusts when keyboard opens
+            false, // Prevent resizing when keyboard is open
         body: Builder(
           builder: (context) {
             var pro = context.watch<AuthProvider>();
@@ -46,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 const AppLogo(width: 80, height: 80),
 
+                // Scrollable content (form and fields)
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                // Fixed Footer
+                // Fixed Footer (remains stable when keyboard appears)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(

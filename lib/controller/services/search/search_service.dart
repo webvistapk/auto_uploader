@@ -8,7 +8,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 class SearchService {
   static Future<List<UserProfile>> fetchSearchResults(
       String query, String authToken) async {
-    final String? token = authToken;
+    final token = authToken;
 
     final response = await http.get(
       Uri.parse('${ApiURLs.baseUrl}search/$query'),

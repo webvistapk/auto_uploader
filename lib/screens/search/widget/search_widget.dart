@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
@@ -43,24 +44,24 @@ class _SearchWidgetState extends State<SearchWidget>
       });
     });
 
-    _fetchSearchResults(widget.query, widget.authToken);
+    _fetchSearchResults(context, widget.query, widget.authToken);
   }
 
   @override
   void didUpdateWidget(covariant SearchWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.query != widget.query) {
-      _fetchSearchResults(widget.query, widget.authToken);
+      _fetchSearchResults(context, widget.query, widget.authToken);
     }
   }
 
-  Future<void> _fetchSearchResults(String query, String authToken) async {
+  Future<void> _fetchSearchResults(
+      context, String query, String authToken) async {
     setState(() {
       isLoading = true;
     });
-    final String? token = await Prefrences.getAuthToken();
     authToken = await Prefrences.getAuthToken();
-     //debugger();
+    // debugger();
     try {
       final userResults =
           await SearchService.fetchSearchResults(query, authToken);
@@ -73,7 +74,8 @@ class _SearchWidgetState extends State<SearchWidget>
         data['Accounts'] = userResults;
       });
     } catch (e) {
-      print("Error fetching search results: $e");
+      ToastNotifier.showErrorToast(
+          context, "Error fetching search results: $e");
     } finally {
       setState(() {
         isLoading = false;
