@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/screens/profile/login_screen.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 import 'auth_service.dart'; // Import your auth_service.dart file
 
 class AuthGuard extends StatelessWidget {

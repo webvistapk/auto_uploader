@@ -3,8 +3,9 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_styles.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
+import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/profile/change_password_screen.dart';
+import 'package:mobile/screens/authantication/change_password_screen.dart';
 import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
@@ -13,6 +14,7 @@ import 'package:mobile/screens/search/widget/search_widget.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:mobile/screens/widgets/top_bar.dart';
 import 'package:mobile/controller/services/profile/user_service.dart';
+import 'package:provider/provider.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -38,6 +40,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<ProfileProvider>();
     _initializeControllers();
   }
 
@@ -96,7 +99,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _saveProfile() async {
+  Future<void> _saveProfile(ProfileProvider pro) async {
     final UserProfile existingUser =
         ModalRoute.of(context)!.settings.arguments as UserProfile;
 
@@ -120,7 +123,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     try {
       final token = Prefrences.getAuthToken();
-      await UserService.updateUserProfile(updatedUser);
+      await pro.updateProfile(context, updatedUser);
       ToastNotifier.showSuccessToast(context, 'Profile updated successfully.');
 
       Navigator.pushAndRemoveUntil(
@@ -151,135 +154,144 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         valueListenable: SearchStore.searchQuery,
         builder: (context, searchQuery, child) {
           if (searchQuery == null || searchQuery.isEmpty) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Edit Profile',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: _usernameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Username',
-                      ),
-                      enabled: false,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _emailController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Email',
-                      ),
-                      enabled: false,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _firstNameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'First Name',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _lastNameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Last Name',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _phoneNumberController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Phone Number',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _descriptionController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Description',
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _addressController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Address',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _cityController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'City',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _countryController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Country',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _saveProfile,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
+            return Builder(builder: (context) {
+              var pro = context.watch<ProfileProvider>();
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Edit Profile',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      child: const Text('Save Changes',
-                          style: AppStyles.buttonTextStyle),
-                    ),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const ChangePasswordScreen()),
-                          (Route<dynamic> route) =>
-                              false, // Remove all previous routes
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _usernameController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Username',
+                        ),
+                        enabled: false,
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _emailController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Email',
+                        ),
+                        enabled: false,
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _firstNameController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'First Name',
                         ),
                       ),
-                      child: const Text('Change Password',
-                          style: AppStyles.buttonTextStyle),
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.blue),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _lastNameController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Last Name',
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _phoneNumberController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Phone Number',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _descriptionController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Description',
+                        ),
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _addressController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Address',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _cityController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'City',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _countryController,
+                        decoration: AppStyles.inputDecoration.copyWith(
+                          labelText: 'Country',
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      pro.isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator.adaptive(),
+                            )
+                          : ElevatedButton(
+                              onPressed: () async {
+                                await _saveProfile(pro);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                              ),
+                              child: const Text('Save Changes',
+                                  style: AppStyles.buttonTextStyle),
+                            ),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const ChangePasswordScreen()),
+                            (Route<dynamic> route) =>
+                                false, // Remove all previous routes
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                        ),
+                        child: const Text('Change Password',
+                            style: AppStyles.buttonTextStyle),
+                      ),
+                      const SizedBox(height: 10),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 ),
-              ),
-            );
+              );
+            });
           } else {
             return SearchWidget(
               query: searchQuery,

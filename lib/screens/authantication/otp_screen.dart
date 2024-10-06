@@ -6,7 +6,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
-import 'package:mobile/screens/profile/login_screen.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 

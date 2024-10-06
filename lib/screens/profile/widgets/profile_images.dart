@@ -16,33 +16,82 @@ class ProfileImages extends StatelessWidget {
       length: 7,
       child: Column(
         children: [
-          const TabBar(
-            isScrollable: true,
-            labelColor: Colors.black, // Text color when the tab is selected
-            unselectedLabelColor:
-                Colors.black54, // Text color for unselected tabs (optional)
-            tabs: [
-              Tab(text: 'All'),
-              Tab(text: 'Photos'),
-              Tab(text: 'Videos'),
-              Tab(text: 'Pages'),
-              Tab(text: 'Posts'),
-              Tab(text: 'Tagged'),
-              Tab(text: 'Info'),
-            ],
+          Theme(
+            data: ThemeData(
+              tabBarTheme: TabBarTheme(
+                labelColor: Colors.black, // Set the color for the selected tab
+                unselectedLabelColor:
+                    Colors.grey, // Set the color for unselected tabs
+                indicator: UnderlineTabIndicator(
+                  borderSide: BorderSide(
+                      color: Colors.black, width: 2.0), // Indicator color
+                ),
+              ),
+            ),
+            child: const TabBar(
+              isScrollable: true,
+
+              labelPadding: EdgeInsets.symmetric(
+                horizontal: 10,
+              ), // Padding for labels
+              indicatorWeight: 1.0,
+              tabs: [
+                Tab(
+                  child: Text(
+                    "All",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Photos",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Videos",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Pages",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Posts",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Tagged",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Info",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(
             height: 500, // Adjust height as needed
             child: TabBarView(
               children: [
-                _buildImageGrid(
-                    images), // Replace with your methods to build each tab's content
                 _buildImageGrid(images),
                 _buildImageGrid(images),
                 _buildImageGrid(images),
                 _buildImageGrid(images),
                 _buildImageGrid(images),
-                profile_info()
+                _buildImageGrid(images),
+                profile_info(),
               ],
             ),
           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/services/authentication/auth_service.dart';
-import 'package:mobile/screens/profile/login_screen.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 
 class LogoutScreen extends StatefulWidget {
   const LogoutScreen({super.key});
@@ -10,7 +10,6 @@ class LogoutScreen extends StatefulWidget {
 }
 
 class _LogoutScreenState extends State<LogoutScreen> {
-  
   @override
   void initState() {
     super.initState();

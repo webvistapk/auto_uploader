@@ -1,8 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
-import 'package:mobile/screens/profile/forgot_password_screen.dart';
-import 'package:mobile/screens/profile/register_screen.dart';
+import 'package:mobile/screens/authantication/forgot_password_screen.dart';
+import 'package:mobile/screens/authantication/register_screen.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 import 'package:provider/provider.dart';
 import '../widgets/app_logo.dart';
@@ -169,12 +170,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterScreen(),
-                            ),
-                            (Route<dynamic> route) => false,
-                          );
+                          Navigator.push(
+                              context,
+                              CupertinoDialogRoute(
+                                  builder: (_) => RegisterScreen(),
+                                  context: context));
                         },
                         style: TextButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),

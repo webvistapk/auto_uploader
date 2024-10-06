@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
@@ -188,6 +189,46 @@ class ProviderManager {
       return UserProfile.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load user profile');
+    }
+  }
+
+  static updateUserProfile(UserProfile userProfile) async {
+    final String? token = await Prefrences.getAuthToken();
+    int currentUserId = JwtDecoder.decode(token.toString())['user_id'];
+
+    // Ensure the user can only update their own profile
+    if (currentUserId != userProfile.id) {
+      throw Exception('You can only edit your own profile.');
+    }
+
+    final url =
+        '${ApiURLs.baseUrl}${ApiURLs.update_user_profile}${userProfile.id}/';
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'email': userProfile.email,
+        'first_name': userProfile.firstName,
+        'last_name': userProfile.lastName,
+        'phone_number': userProfile.phoneNumber,
+        'description': userProfile.description,
+        'position': userProfile.position,
+        'organization': userProfile.organization,
+        'address': userProfile.address,
+        'city': userProfile.city,
+        'country': userProfile.country,
+        'website': userProfile.website,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data;
+    } else {
+      throw Exception("Any thing Else please try Again!");
     }
   }
 }

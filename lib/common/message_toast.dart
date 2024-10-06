@@ -28,7 +28,7 @@ class ToastNotifier {
       ),
       toastSetting: const SlidingToastSetting(
         toastStartPosition: ToastPosition.left,
-        toastAlignment: Alignment.bottomLeft,
+        toastAlignment: Alignment.topLeft,
         displayDuration: Duration(seconds: 2),
       ),
     );

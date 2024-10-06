@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
-import 'package:mobile/screens/profile/login_screen.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SideBar extends StatelessWidget {

@@ -6,7 +6,7 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
-import 'package:mobile/screens/profile/login_screen.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/screens/profile/request_screen/request_sereen.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';

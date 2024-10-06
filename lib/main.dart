@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
+import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
-import 'package:mobile/screens/profile/loading_screen.dart';
+import 'package:mobile/screens/company/company_profile.dart';
+import 'package:mobile/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -18,14 +21,15 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => follower_request_provider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider())
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider())
       ],
       child: MaterialApp(
         title: 'Fillet Social Media App',
         theme: ThemeData(
-          primarySwatch: Colors.green,
-        ),
-        home: LoadingScreen(), // Start with the LoadingScreen
+            primarySwatch: Colors.green,
+            fontFamily: GoogleFonts.poppins().toString()),
+        home: SplashScreen(), // Start with the LoadingScreen
       ),
     );
   }

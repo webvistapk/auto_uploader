@@ -3,7 +3,7 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/components/authentication_type_view.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
-import 'package:mobile/screens/profile/login_screen.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/controller/services/profile/user_service.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
@@ -42,8 +42,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     context.read<AuthProvider>();
   }
 
-  bool x = false;
-  bool y = false;
+  bool x = true;
+  bool y = true;
 
   bool isAuthType = false;
 
@@ -55,8 +55,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         var pro = context.watch<AuthProvider>();
         return Column(
           children: [
-
-            
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -67,15 +65,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         const SizedBox(height: 100),
                         const AppLogo(width: 80, height: 80),
-
                         const SizedBox(height: 30),
-                        AuthenticationTypeView(onTap: (){
-                          setState(() {
-                            isAuthType = !isAuthType;
-                          });
-                        }, isActive: isAuthType),
+                        AuthenticationTypeView(
+                            onTap: () {
+                              setState(() {
+                                isAuthType = !isAuthType;
+                              });
+                            },
+                            isActive: isAuthType),
                         const SizedBox(height: 30),
-
                         TextFormField(
                           validator: (value) {
                             if (value!.isEmpty) {
@@ -168,35 +166,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       : Icon(Icons.visibility))),
                           obscureText: x,
                         ),
-                         const SizedBox(height: 10 ),
-                        if(isAuthType)...[
+                        const SizedBox(height: 10),
+                        if (isAuthType) ...[
                           TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Enter your Company name";
-                            }
-                            return null;
-                          },
-                          controller: _companyNameController,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                            labelText: 'Company Name',
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Enter your Company name";
+                              }
+                              return null;
+                            },
+                            controller: _companyNameController,
+                            decoration: AppStyles.inputDecoration.copyWith(
+                              labelText: 'Company Name',
+                            ),
                           ),
-                        ),
-                       
-                        const SizedBox(height: 10), 
-                        TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Enter your Website Url";
-                            }
-                            return null;
-                          },
-                          controller: _websiteUrl,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                            labelText: 'Website Url',
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Enter your Website Url";
+                              }
+                              return null;
+                            },
+                            controller: _websiteUrl,
+                            decoration: AppStyles.inputDecoration.copyWith(
+                              labelText: 'Website Url',
+                            ),
                           ),
-                        ),
-                        
                         ],
                         const SizedBox(height: 10),
                         TextFormField(
@@ -228,18 +224,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: CircularProgressIndicator.adaptive(),
                               )
                             : ElevatedButton(
-                                onPressed: !isAuthType? () async {
-                                  if (formKey.currentState!.validate()) {
-                                    await pro.registerUser(
-                                        context,
-                                        _usernameController.text.trim(),
-                                        _emailController.text.trim(),
-                                        _firstNameController.text.trim(),
-                                        _lastNameController.text.trim(),
-                                        _phoneNumberController.text.trim(),
-                                        _passwordController.text.trim());
-                                  }
-                                } : (){}, // Trigger registration on button press
+                                onPressed: !isAuthType
+                                    ? () async {
+                                        if (formKey.currentState!.validate()) {
+                                          await pro.registerUser(
+                                              context,
+                                              _usernameController.text.trim(),
+                                              _emailController.text.trim(),
+                                              _firstNameController.text.trim(),
+                                              _lastNameController.text.trim(),
+                                              _phoneNumberController.text
+                                                  .trim(),
+                                              _passwordController.text.trim());
+                                        }
+                                      }
+                                    : () {}, // Trigger registration on button press
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue,
                                   minimumSize: const Size(double.infinity, 50),
@@ -271,16 +270,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               style: const TextStyle(color: Colors.red),
                             ),
                           ),
-                               const SizedBox(height: 10),
-            const TellusLogo(width: 100, height: 50),
-            const SizedBox(height: 20),
+                        const SizedBox(height: 10),
+                        const TellusLogo(width: 100, height: 50),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
                 ),
               ),
             ),
-       
           ],
         );
       }),

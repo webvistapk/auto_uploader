@@ -59,9 +59,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return strength;
   }
 
-
   //Check current password
-    checkPassword(context, String password) async {
+  checkPassword(context, String password) async {
     try {
       String? email = await Prefrences.getUserEmail();
       final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.login_endpoint);
@@ -79,11 +78,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       if (response.statusCode == 200) {
         ToastNotifier.showSuccessToast(context, "Current password is correct");
         setState(() {
-          currentStep=1;
+          currentStep = 1;
         });
         return data;
       } else {
-        ToastNotifier.showErrorToast(context, "Your Current Password is incorrect");
+        ToastNotifier.showErrorToast(
+            context, "Your Current Password is incorrect");
       }
     } catch (e) {
       log('Error: $e');
@@ -93,29 +93,31 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   //Check current password
-  updatePassword(context, String oldPassword,newPassword) async {
+  updatePassword(context, String oldPassword, newPassword) async {
     try {
       final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.update_password);
       final String? token = await Prefrences.getAuthToken();
       int? userid = await Prefrences.getUserId();
-      final body = {"old_password": oldPassword,"new_password": newPassword};
+      final body = {"old_password": oldPassword, "new_password": newPassword};
       final headers = {
         'Content-Type': 'application/json; charset=UTF-8',
         "Authorization": "Bearer $token"
         // Add any other necessary headers like Authorization here if required
       };
 
-      Response response = await http.put(completeUrl,
-          body: jsonEncode(body), headers: headers);
+      Response response =
+          await http.put(completeUrl, body: jsonEncode(body), headers: headers);
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-
-        ToastNotifier.showSuccessToast(context, "Your password changed successfully");
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen(id: userid)));
+        ToastNotifier.showSuccessToast(
+            context, "Your password changed successfully");
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => ProfileScreen(id: userid)));
         return data;
       } else {
-        ToastNotifier.showErrorToast(context, "Your Current Password is incorrect");
+        ToastNotifier.showErrorToast(
+            context, "Your Current Password is incorrect");
       }
     } catch (e) {
       log('Error: $e');
@@ -123,8 +125,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return null;
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +208,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (changeformKey.currentState!.validate())
-                    checkPassword(context, currentPasswordController.text);
+                      checkPassword(context, currentPasswordController.text);
                     /*setState(() {
                       currentStep = 1;
                     });*/
@@ -240,10 +240,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       child: Column(
         children: [
           TextFormField(
-
             controller: newPasswordController,
             obscureText: _obscureText,
-
             onChanged: (value) {
               setState(() {
                 passwordStrength = calculateStrength(value);
@@ -285,7 +283,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed:  () {
+                  onPressed: () {
                     setState(() {
                       if (currentStep > 0) {
                         currentStep--;
@@ -305,7 +303,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ),
                 ),
               ),
-              SizedBox(width: paragraph*0.5,),
+              SizedBox(
+                width: paragraph * 0.5,
+              ),
               Expanded(
                 child: ElevatedButton(
                   onPressed: validatePassword(newPasswordController.text)
@@ -364,7 +364,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed:  () {
+                  onPressed: () {
                     setState(() {
                       if (currentStep > 0) {
                         currentStep--;
@@ -384,16 +384,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ),
                 ),
               ),
-              SizedBox(width: paragraph*0.5,),
+              SizedBox(
+                width: paragraph * 0.5,
+              ),
               Expanded(
                 child: ElevatedButton(
-                  onPressed:  () {
-                          if(newPasswordController.text == confirmPasswordController.text)
-                            {
-                            updatePassword(context, currentPasswordController.text, newPasswordController.text);
-                            }
-
-                        },
+                  onPressed: () {
+                    if (newPasswordController.text ==
+                        confirmPasswordController.text) {
+                      updatePassword(context, currentPasswordController.text,
+                          newPasswordController.text);
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 12),

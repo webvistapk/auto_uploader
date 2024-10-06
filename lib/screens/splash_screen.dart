@@ -7,17 +7,17 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
-import 'package:mobile/screens/profile/login_screen.dart'; // Import the login screen
+import 'package:mobile/screens/authantication/login_screen.dart'; // Import the login screen
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../widgets/app_logo.dart';
+import 'widgets/app_logo.dart';
 
-class LoadingScreen extends StatefulWidget {
+class SplashScreen extends StatefulWidget {
   @override
-  State<LoadingScreen> createState() => _LoadingScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _LoadingScreenState extends State<LoadingScreen> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();

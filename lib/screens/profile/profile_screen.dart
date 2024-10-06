@@ -40,6 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
+    // _getUserIdFromToken();
     _initializeData();
     super.initState();
   }
@@ -94,13 +95,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return await UserService.fetchUserProfile(userId);
   }
 
-  Future<int?> _getUserIdFromToken() async {
+  _getUserIdFromToken() async {
     String? token = await Prefrences.getAuthToken();
     if (token != null && token.isNotEmpty) {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      return decodedToken['user_id'] as int?;
+      return decodedToken['user_id'];
     }
-    return null;
+    return 0;
   }
 
   Future<bool> _checkIsFollowig(int userId, int currentId, String token) async {
@@ -126,97 +127,123 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: TopBar(
-        onSearch: (query) => SearchStore.updateSearchQuery(query),
-      ),
-      drawer: const SideBar(),
-      backgroundColor: AppColors.mainBgColor,
-      body: ValueListenableBuilder<String?>(
-        valueListenable: SearchStore.searchQuery,
-        builder: (context, searchQuery, child) {
-          if (searchQuery == null || searchQuery.isEmpty) {
-            return FutureBuilder<UserProfile?>(
-              future: _userProfile,
-              builder: (context, profileSnapshot) {
-                if (profileSnapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (profileSnapshot.hasError) {
-                  return Center(child: Text('Error: ${profileSnapshot.error}'));
-                } else if (!profileSnapshot.hasData ||
-                    profileSnapshot.data == null) {
-                  return const Center(child: Text('No user profile found.'));
-                } else {
-                  final UserProfile user = profileSnapshot.data!;
-                  // debugger();
-                  return FutureBuilder<bool>(
-                    future: _isFollowing,
-                    builder: (context, followSnapshot) {
-                      if (followSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (followSnapshot.hasError) {
-                        return const Center(
-                            child: Text('Error checking follow status.'));
-                      } else {
-                        final bool isFollowing = followSnapshot.data ?? false;
-                        final bool isOwner = _loggedInUserId == user.id;
-                        final bool canViewProfile = isOwner ||
-                            isFollowing ||
-                            user.privacy == AppUtils.privacy_public;
-                        // debugger();
+    return Builder(builder: (context) {
+      print(_loggedInUserId);
+      return SafeArea(
+        child: Scaffold(
+          appBar: _loggedInUserId == widget.id
+              ? TopBar(
+                  onSearch: (query) => SearchStore.updateSearchQuery(query),
+                )
+              : null,
+          // PreferredSize(
+          //     preferredSize: Size.fromHeight(50), child: AppBar()),
+          drawer: const SideBar(),
+          backgroundColor: AppColors.mainBgColor,
+          body: ValueListenableBuilder<String?>(
+            valueListenable: SearchStore.searchQuery,
+            builder: (context, searchQuery, child) {
+              if (searchQuery == null || searchQuery.isEmpty) {
+                return FutureBuilder<UserProfile?>(
+                  future: _userProfile,
+                  builder: (context, profileSnapshot) {
+                    if (profileSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (profileSnapshot.hasError) {
+                      return Center(
+                          child: Text('Error: ${profileSnapshot.error}'));
+                    } else if (!profileSnapshot.hasData ||
+                        profileSnapshot.data == null) {
+                      return const Center(
+                          child: Text('No user profile found.'));
+                    } else {
+                      final UserProfile user = profileSnapshot.data!;
+                      // debugger();
+                      return FutureBuilder<bool>(
+                        future: _isFollowing,
+                        builder: (context, followSnapshot) {
+                          if (followSnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (followSnapshot.hasError) {
+                            return const Center(
+                                child: Text('Error checking follow status.'));
+                          } else {
+                            final bool isFollowing =
+                                followSnapshot.data ?? false;
+                            final bool isOwner = _loggedInUserId == user.id;
+                            final bool canViewProfile = isOwner ||
+                                isFollowing ||
+                                user.privacy == AppUtils.privacy_public;
+                            // debugger();
 
-                        return SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ProfileHeader(
-                                  user: user,
-                                  canViewProfile: canViewProfile,
-                                  isFollowing: isFollowing),
-                              if (canViewProfile) ...[
-                                const CategoryIcons(images: [
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                ]),
-                                const ProfileImages(images: [
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                  AppUtils.testImage,
-                                ]),
-                              ] else ...[
-                                const Center(
-                                  child: Text("This profile is private."),
-                                ),
-                              ],
-                            ],
-                          ),
-                        );
-                      }
-                    },
-                  );
-                }
-              },
-            );
-          } else {
-            return SearchWidget(
-              query: searchQuery,
-              authToken: token!,
-            );
-          }
-        },
-      ),
-      // bottomNavigationBar: BottomBar(
-      //   selectedIndex: 1,
-      // ),
-    );
+                            return SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  if (_loggedInUserId != widget.id)
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Icon(Icons.arrow_back),
+                                      ),
+                                    ),
+                                  ProfileHeader(
+                                      user: user,
+                                      canViewProfile: canViewProfile,
+                                      isFollowing: isFollowing),
+                                  if (canViewProfile) ...[
+                                    const CategoryIcons(images: [
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                    ]),
+                                    const ProfileImages(images: [
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                      AppUtils.testImage,
+                                    ]),
+                                  ] else ...[
+                                    const Center(
+                                      child: Text("This profile is private."),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                      );
+                    }
+                  },
+                );
+              } else {
+                return SearchWidget(
+                  query: searchQuery,
+                  authToken: token!,
+                );
+              }
+            },
+          ),
+          // bottomNavigationBar: BottomBar(
+          //   selectedIndex: 1,
+          // ),
+        ),
+      );
+    });
   }
 }

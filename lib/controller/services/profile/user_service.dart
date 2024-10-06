@@ -36,7 +36,8 @@ class UserService {
       throw Exception('You can only edit your own profile.');
     }
 
-    final url = '${ApiURLs.baseUrl}${userProfile.id}/';
+    final url =
+        '${ApiURLs.baseUrl}${ApiURLs.update_user_profile}${userProfile.id}/';
     final response = await http.put(
       Uri.parse(url),
       headers: {
