@@ -5,6 +5,7 @@ import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/change_password_screen.dart';
 import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
@@ -124,6 +125,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       final token = Prefrences.getAuthToken();
       await pro.updateProfile(context, updatedUser);
+      await UserPreferences().saveCurrentUser(updatedUser);
       ToastNotifier.showSuccessToast(context, 'Profile updated successfully.');
 
       Navigator.pushAndRemoveUntil(

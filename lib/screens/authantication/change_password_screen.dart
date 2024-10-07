@@ -63,6 +63,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   checkPassword(context, String password) async {
     try {
       String? email = await Prefrences.getUserEmail();
+
       final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.login_endpoint);
 
       final body = {"username_or_email": email, "password": password};
@@ -95,19 +96,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   //Check current password
   updatePassword(context, String oldPassword, newPassword) async {
     try {
-      final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.update_password);
       final String? token = await Prefrences.getAuthToken();
       int? userid = await Prefrences.getUserId();
       final body = {"old_password": oldPassword, "new_password": newPassword};
+
+      final completeUrl =
+          Uri.parse(ApiURLs.baseUrl + ApiURLs.update_password + '${userid}/');
       final headers = {
         'Content-Type': 'application/json; charset=UTF-8',
         "Authorization": "Bearer $token"
         // Add any other necessary headers like Authorization here if required
       };
-
-      Response response =
+      debugger();
+      var response =
           await http.put(completeUrl, body: jsonEncode(body), headers: headers);
-
+      debugger();
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         ToastNotifier.showSuccessToast(
@@ -120,6 +123,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             context, "Your Current Password is incorrect");
       }
     } catch (e) {
+      debugger();
       log('Error: $e');
       ToastNotifier.showErrorToast(context, e.toString());
       return null;
@@ -199,7 +203,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             !_obscureText; // Toggle the password visibility
                       });
                     },
-                    icon: Icon(_obscureText ? Icons.lock : Icons.lock_open))),
+                    icon: Icon(_obscureText
+                        ? Icons.visibility_off
+                        : Icons.visibility))),
           ),
           const SizedBox(height: 150),
           Row(
