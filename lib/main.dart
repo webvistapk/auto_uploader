@@ -4,6 +4,7 @@ import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/company/company_profile.dart';
 import 'package:mobile/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             primarySwatch: Colors.green,
             fontFamily: GoogleFonts.poppins().toString()),
-        home: SplashScreen(), // Start with the LoadingScreen
+        home: LoginScreen() // Start with the LoadingScreen
       ),
     );
   }

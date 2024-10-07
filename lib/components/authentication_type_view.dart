@@ -18,7 +18,7 @@ class AuthenticationTypeView extends StatelessWidget {
   Widget build(BuildContext context) {
    var size = MediaQuery.of(context).size;
     return Container(
-     width: size.width*0.7,
+     width: size.width*0.8,
       decoration: BoxDecoration(
         color: Color(0xffdcdedc),
         borderRadius: BorderRadius.circular(50),
