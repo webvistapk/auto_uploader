@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
               primarySwatch: Colors.green,
               fontFamily: GoogleFonts.poppins().toString()),
-          home: OldPasswordScreen() // Start with the LoadingScreen
+          home: LoginScreen() // Start with the LoadingScreen
           ),
     );
   }

@@ -54,10 +54,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       try {
         Provider.of<follower_request_provider>(context, listen: false)
             .sendfollowRequest(context, currentUserId, widget.user.id);
-        setState(() {
-          refresh();
-          print("refresh called");
-        });
       } catch (e) {
         // Handle error, e.g., show a snackbar'
         ToastNotifier.showErrorToast(context, "There is an error occured ${e}");
@@ -81,10 +77,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           currentUserId,
           "rejected",
         );
-        setState(() {
-          refresh();
-          print("refresh called");
-        });
       } catch (e) {
         showErrorSnackbar(e.toString(), context);
       }
@@ -99,9 +91,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             .fetchFollowRequestStatus(currentUserId!, widget.user.id, context);
   }
 
-  void refresh() {
-    _fetchFollowResponse();
-  }
 
   @override
   void initState() {
@@ -291,7 +280,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         child: Builder(builder: (context) {
                           var provider =
                               context.watch<follower_request_provider>();
-                          return ElevatedButton(
+                          return provider.isLoading?Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          ):ElevatedButton(
                             onPressed: provider.status == 'pending'
                                 ? () {}
                                 : provider.status == 'initial' ||
@@ -310,11 +301,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: provider.isFollowLoading
-                                ? CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
-                                : Text(
+                            child: Text(
                                     provider.status == 'pending'
                                         ? 'Pending'
                                         : provider.status == 'initial' ||

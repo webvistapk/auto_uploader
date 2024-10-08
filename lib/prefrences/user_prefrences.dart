@@ -60,7 +60,7 @@ class UserPreferences {
   }
 
   // Get the current UserProfile from SharedPreferences
-  Future<UserProfile?> getCurrentUser() async {
+   getCurrentUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     // Retrieve the JSON string from SharedPreferences

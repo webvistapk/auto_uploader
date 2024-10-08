@@ -53,135 +53,137 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Container(
-          child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: formkey,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 50,
-                    ),
-                    Text("New Password", style: AppTextStyles.poppinsBold()),
-                    const SizedBox(
-                      height: 50,
-                    ),
-                    TextFormField(
-                      controller: newPasswordController,
-                      obscureText: obsecure,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Password will not be Empty";
-                        } else if (passwordStrength < 1) {
-                          return "Your Password Is Week";
-                        }
-                        return null;
-                      },
-                      onChanged: (value) {
-                        setState(() {
-                          passwordStrength = calculateStrength(value);
-                        });
-                      },
-                      decoration: AppStyles.inputDecoration.copyWith(
-                          labelText: 'New Password',
-                          suffixIcon: IconButton(
+        body: SingleChildScrollView(
+          child: Container(
+            child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: formkey,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 50,
+                      ),
+                      Text("New Password", style: AppTextStyles.poppinsBold()),
+                      const SizedBox(
+                        height: 50,
+                      ),
+                      TextFormField(
+                        controller: newPasswordController,
+                        obscureText: obsecure,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Password will not be Empty";
+                          } else if (passwordStrength < 1) {
+                            return "Your Password Is Week";
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {
+                            passwordStrength = calculateStrength(value);
+                          });
+                        },
+                        decoration: AppStyles.inputDecoration.copyWith(
+                            labelText: 'New Password',
+                            suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    obsecure =
+                                        !obsecure; // Toggle the password visibility
+                                  });
+                                },
+                                icon: Icon(obsecure
+                                    ? Icons.visibility_off
+                                    : Icons.visibility))),
+                      ),
+                      const SizedBox(height: 30),
+                      iconContainer(
+                        'Password must contain 8 characters',
+                        newPasswordController.text.length >= 8 ? true : false,
+                      ),
+                      const SizedBox(height: 5),
+                      iconContainer(
+                          '1 letter and 1 number',
+                          (validateNumberAndLetterPassword(
+                              newPasswordController.text))),
+                      const SizedBox(height: 5),
+                      iconContainer(
+                          '1 special character exampler:{!@#&*~}',
+                          validateSpecialCharPassword(
+                              newPasswordController.text)),
+                      SizedBox(height: 10),
+                      LinearProgressIndicator(
+                        value: passwordStrength,
+                        minHeight: 5,
+                        backgroundColor: Colors.grey[300],
+                        color: passwordStrength < 0.5
+                            ? Colors.red
+                            : (passwordStrength < 1
+                                ? Colors.yellow
+                                : Colors.green),
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
                               onPressed: () {
-                                setState(() {
-                                  obsecure =
-                                      !obsecure; // Toggle the password visibility
-                                });
+                                Navigator.pop(context);
                               },
-                              icon: Icon(obsecure
-                                  ? Icons.visibility_off
-                                  : Icons.visibility))),
-                    ),
-                    const SizedBox(height: 30),
-                    iconContainer(
-                      'Password must contain 8 characters',
-                      newPasswordController.text.length >= 8 ? true : false,
-                    ),
-                    const SizedBox(height: 5),
-                    iconContainer(
-                        '1 letter and 1 number',
-                        (validateNumberAndLetterPassword(
-                            newPasswordController.text))),
-                    const SizedBox(height: 5),
-                    iconContainer(
-                        '1 special character exampler:{!@#&*~}',
-                        validateSpecialCharPassword(
-                            newPasswordController.text)),
-                    SizedBox(height: 10),
-                    LinearProgressIndicator(
-                      value: passwordStrength,
-                      minHeight: 5,
-                      backgroundColor: Colors.grey[300],
-                      color: passwordStrength < 0.5
-                          ? Colors.red
-                          : (passwordStrength < 1
-                              ? Colors.yellow
-                              : Colors.green),
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.grey,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.grey,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                'Back',
+                                style:
+                                    const TextStyle(color: AppColors.whiteColor),
                               ),
                             ),
-                            child: Text(
-                              'Back',
-                              style:
-                                  const TextStyle(color: AppColors.whiteColor),
-                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (formkey.currentState!.validate()) {
-                                Navigator.push(
-                                    context,
-                                    CupertinoDialogRoute(
-                                        builder: (_) => ConfirmPasswordScreen(
-                                            oldPassword: widget.oldPassword,
-                                            newPassword: newPasswordController
-                                                .text
-                                                .trim()),
-                                        context: context));
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (formkey.currentState!.validate()) {
+                                  Navigator.push(
+                                      context,
+                                      CupertinoDialogRoute(
+                                          builder: (_) => ConfirmPasswordScreen(
+                                              oldPassword: widget.oldPassword,
+                                              newPassword: newPasswordController
+                                                  .text
+                                                  .trim()),
+                                          context: context));
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                'Next',
+                                style:
+                                    const TextStyle(color: AppColors.whiteColor),
                               ),
                             ),
-                            child: Text(
-                              'Next',
-                              style:
-                                  const TextStyle(color: AppColors.whiteColor),
-                            ),
                           ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              )),
+                        ],
+                      )
+                    ],
+                  ),
+                )),
+          ),
         ),
       ),
     );

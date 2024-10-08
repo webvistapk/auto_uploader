@@ -68,6 +68,8 @@ class follower_request_provider extends ChangeNotifier {
 
   Future<void> followRequestResponse(
       BuildContext context, int followerId, followingId, String status) async {
+
+    setisLoading(true);
     final String? token = await Prefrences.getAuthToken();
 
     // print("following ID : ${followingId}");
@@ -76,7 +78,6 @@ class follower_request_provider extends ChangeNotifier {
     String URL =
         "${ApiURLs.baseUrl}${ApiURLs.accept_follow}${followerId.toString()}/${followingId.toString()}/";
     print(URL);
-    setisLoading(true);
     final body = jsonEncode({"status": status});
     try {
       final response = await http.patch(Uri.parse(URL), body: body, headers: {
@@ -85,11 +86,15 @@ class follower_request_provider extends ChangeNotifier {
       });
       print("This is follow request response");
       if (response.statusCode == 200) {
-        showSuccessSnackbar("Request Sended", context);
+        //showSuccessSnackbar("Request Sended", context);
+        fetchFollowRequestStatus(followerId, followingId, context);
 
         setisLoading(false);
       } else if (response.statusCode == 403) {
         showErrorSnackbar("API Misplace", context);
+
+        setisLoading(false);
+        notifyListeners();
       } else {
         showErrorSnackbar(
             "There is an Error Occured : ${response.statusCode}", context);
@@ -177,7 +182,7 @@ class follower_request_provider extends ChangeNotifier {
         setisLoading(false);
         setisFollowLoading(false);
         //print("API Hitted");
-        ToastNotifier.showSuccessToast(context, "Follower Request Sended");
+        fetchFollowRequestStatus(followerId, followingId, context);
       } else {
         setisLoading(false);
         setisFollowLoading(false);
