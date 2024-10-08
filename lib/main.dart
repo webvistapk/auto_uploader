@@ -5,6 +5,7 @@ import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
+import 'package:mobile/screens/authantication/update%20password/old_password_screen.dart';
 import 'package:mobile/screens/company/company_profile.dart';
 import 'package:mobile/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
@@ -26,12 +27,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProfileProvider())
       ],
       child: MaterialApp(
-        title: 'Fillet Social Media App',
-        theme: ThemeData(
-            primarySwatch: Colors.green,
-            fontFamily: GoogleFonts.poppins().toString()),
-        home: LoginScreen() // Start with the LoadingScreen
-      ),
+          title: 'Fillet Social Media App',
+          theme: ThemeData(
+              primarySwatch: Colors.green,
+              fontFamily: GoogleFonts.poppins().toString()),
+          home: OldPasswordScreen() // Start with the LoadingScreen
+          ),
     );
   }
 }
