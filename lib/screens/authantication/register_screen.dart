@@ -66,14 +66,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 100),
                         const AppLogo(width: 80, height: 80),
                         const SizedBox(height: 30),
-                        AuthenticationTypeView(
-                            onTap: () {
-                              setState(() {
-                                isAuthType = !isAuthType;
-                              });
-                            },
-                            isActive: isAuthType),
-                        const SizedBox(height: 30),
+                        // AuthenticationTypeView(
+                        //     onTap: () {
+                        //       setState(() {
+                        //         isAuthType = !isAuthType;
+                        //       });
+                        //     },
+                        //     isActive: isAuthType),
+                        // const SizedBox(height: 30),
                         TextFormField(
                           validator: (value) {
                             if (value!.isEmpty) {
@@ -227,6 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 onPressed: !isAuthType
                                     ? () async {
                                         if (formKey.currentState!.validate()) {
+                                          FocusScope.of(context).unfocus();
                                           await pro.registerUser(
                                               context,
                                               _usernameController.text.trim(),

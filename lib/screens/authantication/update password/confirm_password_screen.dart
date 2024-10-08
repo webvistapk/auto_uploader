@@ -27,9 +27,14 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
+  bool isLoading = false;
+
   Future<void> updatePassword(
       BuildContext context, String oldPassword, String newPassword) async {
     try {
+      setState(() {
+        isLoading = true;
+      });
       final String? token = await Prefrences.getAuthToken();
       int currentUserId = JwtDecoder.decode(token.toString())['user_id'];
       final userProfile = await UserPreferences().getCurrentUser();
@@ -47,6 +52,9 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
             {"old_password": oldPassword, "new_password": newPassword}),
       );
       if (response.statusCode == 200) {
+        setState(() {
+          isLoading = false;
+        });
         ToastNotifier.showSuccessToast(
             context, "Password Changed Successfully");
         Navigator.push(
@@ -56,8 +64,15 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
                   userProfile: UserProfile(id: userProfile!.id),
                   authToken: token.toString())),
         );
+      } else {
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       ToastNotifier.showErrorToast(context, "There is an Error occured:${e}");
     }
     // Call your API to update the password here
@@ -75,6 +90,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
         child: Form(
             key: formkey,
             child: CustomPasswordScreen(
+                isLoading: isLoading,
                 onPressed: () {
                   if (confirmPasswordController.text == widget.newPassword) {
                     updatePassword(

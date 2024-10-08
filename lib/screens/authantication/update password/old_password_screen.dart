@@ -23,39 +23,50 @@ class _OldPasswordScreenState extends State<OldPasswordScreen> {
   final TextEditingController currentPasswordController =
       TextEditingController();
 
+  bool isLoading = false;
+
   Future<void> checkPassword(BuildContext context, String password) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      String? email = await Prefrences.getUserEmail();
+      final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.login_endpoint);
 
-      try {
-        String? email = await Prefrences.getUserEmail();
-        final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.login_endpoint);
+      final body = {"username_or_email": email, "password": password};
+      final headers = {
+        'Content-Type': 'application/json; charset=UTF-8',
+        // Add any other necessary headers like Authorization here if required
+      };
 
-        final body = {"username_or_email": email, "password": password};
-        final headers = {
-          'Content-Type': 'application/json; charset=UTF-8',
-          // Add any other necessary headers like Authorization here if required
-        };
+      Response response = await http.post(completeUrl,
+          body: jsonEncode(body), headers: headers);
 
-        Response response = await http.post(completeUrl,
-            body: jsonEncode(body), headers: headers);
-
-        if (response.statusCode == 200) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => NewPasswordScreen(oldPassword: password)),
-          );
-        } else {
-          ToastNotifier.showErrorToast(
-              context, "Your Current Password is incorrect");
-        }
-      } catch (e) {
-        ToastNotifier.showErrorToast(context, e.toString());
-
+      if (response.statusCode == 200) {
+        setState(() {
+          isLoading = false;
+        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => NewPasswordScreen(oldPassword: password)),
+        );
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        ToastNotifier.showErrorToast(
+            context, "Your Current Password is incorrect");
       }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ToastNotifier.showErrorToast(context, e.toString());
+    }
 
     // Call your API here to verify the old password
     // If success, navigate to NewPasswordScreen
-
   }
 
   bool _obscureText = false;
@@ -71,6 +82,7 @@ class _OldPasswordScreenState extends State<OldPasswordScreen> {
           child: Form(
               key: formkey,
               child: CustomPasswordScreen(
+                  isLoading: isLoading,
                   title: "Create password",
                   onPressed: () {
                     if (formkey.currentState!.validate()) {

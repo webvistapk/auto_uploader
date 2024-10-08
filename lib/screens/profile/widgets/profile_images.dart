@@ -102,6 +102,8 @@ class ProfileImages extends StatelessWidget {
 
   Widget _buildImageGrid(List<String> imagesToDisplay) {
     return GridView.builder(
+      // scrollDirection: Axis.vertical,
+      physics: NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(8.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,

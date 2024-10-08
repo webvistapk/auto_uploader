@@ -197,7 +197,10 @@ class _OtpScreenState extends State<OtpScreen> {
                       padding: const EdgeInsets.only(left: 30),
                       child: _start == 0
                           ? TextButton(
-                              onPressed: _resendOtp,
+                              onPressed: () {
+                                FocusScope.of(context).unfocus();
+                                _resendOtp();
+                              },
                               child: Text(
                                 "Resend code",
                                 style: AppTextStyles.poppinsSemiBold(

@@ -30,10 +30,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Load SharedPreferences and user profile data
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final data = prefs.get(Prefrences.authToken);
-
+    final data = await Prefrences.getAuthToken();
+    // debugger();
     if (data != null) {
-      final email = prefs.get(Prefrences.userEmail);
+      final email = await Prefrences.getUserEmail();
       UserPreferences userPreferences = UserPreferences();
 
       UserProfile? userProfile = await userPreferences.getCurrentUser();

@@ -51,7 +51,7 @@ class SideBar extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.settings),
+            leading: const Icon(Icons.logout_outlined),
             title: const Text('Logout'),
             onTap: () async {
               // Navigate to settings

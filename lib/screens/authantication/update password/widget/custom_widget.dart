@@ -9,11 +9,13 @@ class CustomPasswordScreen extends StatefulWidget {
   final controller;
   bool obsecure;
   String title;
+  bool isLoading;
   CustomPasswordScreen(
       {super.key,
       required this.onPressed,
       required this.controller,
       required this.obsecure,
+      required this.isLoading,
       required this.title});
 
   @override
@@ -28,7 +30,25 @@ class _CustomPasswordScreenState extends State<CustomPasswordScreen> {
         const SizedBox(
           height: 50,
         ),
-        Text(widget.title, style: AppTextStyles.poppinsBold()),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: widget.isLoading
+                  ? () {}
+                  : () {
+                      Navigator.pop(context);
+                    },
+              child: Icon(
+                Icons.arrow_back,
+                size: 24,
+                color: Colors.black,
+              ),
+            ),
+            Text(widget.title, style: AppTextStyles.poppinsBold()),
+            SizedBox()
+          ],
+        ),
         const SizedBox(
           height: 50,
         ),
@@ -60,21 +80,25 @@ class _CustomPasswordScreenState extends State<CustomPasswordScreen> {
         const SizedBox(height: 30),
         Row(
           children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: widget.onPressed,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            widget.isLoading
+                ? Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  )
+                : Expanded(
+                    child: ElevatedButton(
+                      onPressed: widget.onPressed,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text('Next',
+                          style: AppTextStyles.poppinsMedium(
+                              color: AppColors.whiteColor)),
+                    ),
                   ),
-                ),
-                child: Text('Next',
-                    style: AppTextStyles.poppinsMedium(
-                        color: AppColors.whiteColor)),
-              ),
-            ),
           ],
         )
       ],

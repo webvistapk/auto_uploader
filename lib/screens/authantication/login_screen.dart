@@ -106,6 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               : ElevatedButton(
                                   onPressed: () async {
                                     if (formKey.currentState!.validate()) {
+                                      FocusScope.of(context).unfocus();
                                       await pro.loginUser(
                                         context,
                                         _usernameController.text.trim(),
