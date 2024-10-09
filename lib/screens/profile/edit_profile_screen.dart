@@ -128,14 +128,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await UserPreferences().saveCurrentUser(updatedUser);
       ToastNotifier.showSuccessToast(context, 'Profile updated successfully.');
 
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (_) => MainScreen(
-                    userProfile: updatedUser,
-                    authToken: token.toString(),
-                  )),
-          (route) => false);
+      Navigator.pop(context);
     } catch (e) {
       ToastNotifier.showErrorToast(context, 'Failed to update profile: $e');
     }

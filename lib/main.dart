@@ -7,7 +7,7 @@ import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/authantication/update%20password/old_password_screen.dart';
 import 'package:mobile/screens/company/company_profile.dart';
-import 'package:mobile/screens/post/post_screen.dart';
+import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 

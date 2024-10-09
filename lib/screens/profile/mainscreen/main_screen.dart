@@ -5,7 +5,8 @@ import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
-import 'package:mobile/screens/post/post_screen.dart';
+import 'package:mobile/screens/post/create_post_screen.dart';
+import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
@@ -36,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
     Center(
         child:
             Text("Waiting for Searching ...", style: TextStyle(fontSize: 24))),
-            PostScreen(),
+    CreatePostScreen(),
     RequestScreen(),
     SizedBox(),
   ];
@@ -98,13 +99,17 @@ class _MainScreenState extends State<MainScreen> {
                 body: Center(child: CircularProgressIndicator()),
               )
             : Scaffold(
-                body: _selectedIndex == 4
-                    ? ProfileScreen(
-                        id: widget.userProfile.id,
+                body: _selectedIndex == 2
+                    ? CreatePostScreen(
                         userProfile: widget.userProfile,
-                        authToken: widget.authToken,
                       )
-                    : _pages[_selectedIndex],
+                    : _selectedIndex == 4
+                        ? ProfileScreen(
+                            id: widget.userProfile.id,
+                            userProfile: widget.userProfile,
+                            authToken: widget.authToken,
+                          )
+                        : _pages[_selectedIndex],
                 bottomNavigationBar: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
