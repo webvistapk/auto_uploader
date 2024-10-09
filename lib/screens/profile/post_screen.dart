@@ -1,26 +1,59 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/common/utils.dart';
 import 'package:mobile/screens/profile/widgets/single_post.dart';
 
-import '../../common/utils.dart';
-
 class PostScreen extends StatelessWidget {
-  const PostScreen({super.key});
+  final List<Map<String, dynamic>> posts = [
+    {
+      'username': 'kashif_official',
+      'location': 'Nawabshah, Sindh',
+      'date': 'Oct 9th 2024',
+      'caption': 'Beautiful sunset view #nature #photography',
+      'mediaUrl': AppUtils.testImage,
+      'isVideo': false,
+    },
+    {
+      'username': 'kashif_official',
+      'location': 'Karachi, Sindh',
+      'date': 'Oct 8th 2024',
+      'caption': 'Enjoying the city life! #urban #explore',
+      'mediaUrl': 'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
+      'isVideo': true,
+    },
+    {
+      'username': 'kashif_official',
+      'location': 'Lahore, Punjab',
+      'date': 'Oct 7th 2024',
+      'caption': 'A day at the park with friends #friends #fun',
+      'mediaUrl': AppUtils.testImage,
+      'isVideo': false,
+    },
+    {
+      'username': 'kashif_official',
+      'location': 'Islamabad, Capital Territory',
+      'date': 'Oct 6th 2024',
+      'caption': 'Morning run #fitness #motivation',
+      'mediaUrl': 'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
+      'isVideo': true,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body:  ListView.builder(
-        itemCount: 10, // Number of posts
+      appBar: AppBar(title: Text("Posts")),
+      body: ListView.builder(
+        itemCount: posts.length,
         itemBuilder: (context, index) {
+          final post = posts[index];
           return PostWidget(
-            username: 'kashif_official',
-            location: 'Nawabshah, Sindh',
-            date: 'Oct 9th 2024',
-            caption: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. #developer #flutter',
-            postImageUrl: AppUtils.testImage, // Example image URL
-            profileImageUrl: AppUtils.testImage, // Example profile URL
+            username: post['username'],
+            location: post['location'],
+            date: post['date'],
+            caption: post['caption'],
+            mediaUrl: post['mediaUrl'],
+            profileImageUrl: AppUtils.testImage, // Example profile image
+            isVideo: post['isVideo'],
             likes: '2.4k',
             comments: '669',
             shares: '129',

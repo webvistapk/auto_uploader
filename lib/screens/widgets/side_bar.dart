@@ -4,6 +4,7 @@ import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
+import 'package:mobile/screens/profile/ReelScreen.dart';
 import 'package:mobile/screens/profile/post_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,6 +49,14 @@ class SideBar extends StatelessWidget {
             title: const Text('Post'),
             onTap: () {
              Navigator.push(context, MaterialPageRoute(builder: (context)=>PostScreen()));
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.post_add),
+            title: const Text('Reel'),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>ReelScreen()));
             },
           ),
 

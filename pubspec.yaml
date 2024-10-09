@@ -50,7 +50,10 @@ dependencies:
   shared_preferences: ^2.0.6
   url_launcher: ^6.0.9
   jwt_decoder: ^2.0.1
-  win32: 
+  win32:
+  video_player: ^2.9.2
+  chewie: ^1.8.5
+  card_swiper: ^3.0.1
 
 
 dev_dependencies:

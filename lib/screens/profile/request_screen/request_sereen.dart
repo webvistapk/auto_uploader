@@ -196,73 +196,71 @@ class _RequestScreenState extends State<RequestScreen> {
                                 .toList();
                             if (pendingRequests.isNotEmpty) {
                               // Build a ListView with the follower requests
-                              return Expanded(
-                                child: ListView.builder(
-                                  itemCount: pendingRequests.length,
-                                  itemBuilder: (context, index) {
-                                    final followerRequest =
-                                        pendingRequests[index];
-                                    return ListTile(
-                                      leading: const CircleAvatar(
-                                        backgroundImage: NetworkImage(AppUtils
-                                            .testImage), // Placeholder image
-                                      ),
-                                      title: Text(
-                                        "${followerRequest.follower!.username}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      subtitle: Text(
-                                          '${followerRequest.follower!.firstName} ${followerRequest.follower!.lastName}'),
-                                      trailing: Wrap(
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.check_circle,
-                                              color: AppColors.greenColor,
-                                              size: paragraph * 0.75,
-                                            ),
-                                            onPressed: () {
-                                              confirmFollow(
-                                                  followerRequest.follower!.id,
-                                                  followerRequest.following!.id,
-                                                  "accepted",
-                                                  context);
-                                              /*Provider.followRequestResponse(
-                                          context,
-                                          followerRequest.follower!.id,
-                                          followerRequest.following!.id,
-                                          "accepted"
-                                  );*/
-                                            },
+                              return ListView.builder(
+                                itemCount: pendingRequests.length,
+                                itemBuilder: (context, index) {
+                                  final followerRequest =
+                                      pendingRequests[index];
+                                  return ListTile(
+                                    leading: const CircleAvatar(
+                                      backgroundImage: NetworkImage(AppUtils
+                                          .testImage), // Placeholder image
+                                    ),
+                                    title: Text(
+                                      "${followerRequest.follower!.username}",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(
+                                        '${followerRequest.follower!.firstName} ${followerRequest.follower!.lastName}'),
+                                    trailing: Wrap(
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.check_circle,
+                                            color: AppColors.greenColor,
+                                            size: paragraph * 0.75,
                                           ),
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.delete_forever,
-                                              color: AppColors.primary,
-                                              size: paragraph * 0.75,
-                                            ),
-                                            onPressed: () {
-                                              //Reject Request
-                                              confirmFollow(
-                                                  followerRequest.follower!.id,
-                                                  followerRequest.following!.id,
-                                                  "rejected",
-                                                  context);
-                                            },
+                                          onPressed: () {
+                                            confirmFollow(
+                                                followerRequest.follower!.id,
+                                                followerRequest.following!.id,
+                                                "accepted",
+                                                context);
+                                            /*Provider.followRequestResponse(
+                                        context,
+                                        followerRequest.follower!.id,
+                                        followerRequest.following!.id,
+                                        "accepted"
+                                );*/
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.delete_forever,
+                                            color: AppColors.primary,
+                                            size: paragraph * 0.75,
                                           ),
-                                        ],
-                                      ), // Navigate to profile on tap
-                                    );
+                                          onPressed: () {
+                                            //Reject Request
+                                            confirmFollow(
+                                                followerRequest.follower!.id,
+                                                followerRequest.following!.id,
+                                                "rejected",
+                                                context);
+                                          },
+                                        ),
+                                      ],
+                                    ), // Navigate to profile on tap
+                                  );
 
-                                    /*RequestListTile(
-                      fullName: "${followerRequest.follower?.firstName} ${followerRequest.follower?.lastName}",
-                      followerId: followerRequest.follower!.id.toString(),
-                      followingId:followerRequest.following!.id.toString(),
-                      status:status
-                    );*/
-                                  },
-                                ),
+                                  /*RequestListTile(
+                                                    fullName: "${followerRequest.follower?.firstName} ${followerRequest.follower?.lastName}",
+                                                    followerId: followerRequest.follower!.id.toString(),
+                                                    followingId:followerRequest.following!.id.toString(),
+                                                    status:status
+                                                  );*/
+                                },
                               );
                             } else {
                               return Center(
