@@ -37,7 +37,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   //bool _followRequestSent = false;
   Future<FetchResponseModel>? _followRequestsResponse;
 
-
   Future<int?> _getUserIdFromToken() async {
     String? token = await Prefrences.getAuthToken();
     if (token != null && token.isNotEmpty) {
@@ -47,7 +46,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     return null;
   }
 
-
   void _handleFollow() async {
     final int? currentUserId = await _getUserIdFromToken();
     //print("Current User ID : ${currentUserId}");
@@ -56,14 +54,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       try {
         Provider.of<follower_request_provider>(context, listen: false)
             .sendfollowRequest(context, currentUserId, widget.user.id);
-        setState(() {
-          refresh();
-          print("refresh called");
-        });
-
       } catch (e) {
         // Handle error, e.g., show a snackbar'
-       ToastNotifier.showErrorToast(context, "There is an error occured ${e}");
+        ToastNotifier.showErrorToast(context, "There is an error occured ${e}");
       }
     }
   }
@@ -84,28 +77,20 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           currentUserId,
           "rejected",
         );
-        setState(() {
-          refresh();
-          print("refresh called");
-        });
       } catch (e) {
         showErrorSnackbar(e.toString(), context);
       }
     }
   }
 
-
   void _fetchFollowResponse() async {
-   // print("Fetch Called");
+    // print("Fetch Called");
     final int? currentUserId = await _getUserIdFromToken();
-     _followRequestsResponse =
+    _followRequestsResponse =
         Provider.of<follower_request_provider>(context, listen: false)
-            .fetchFollowRequestStatus(currentUserId!, widget.user.id,context);
+            .fetchFollowRequestStatus(currentUserId!, widget.user.id, context);
   }
 
-  void refresh(){
-    _fetchFollowResponse();
-  }
 
   @override
   void initState() {
@@ -136,11 +121,10 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     AppUtils.testImage,
                     "${widget.user.firstName.toString()} ${widget.user.lastName.toString()}",
                     widget.user.position ?? "JobType",
-                    widget.user.description??"description",
-                  widget.user.address??'Address',
-                  widget.user.city??"city",
-                  widget.user.country??'country'
-                ),
+                    widget.user.description ?? "description",
+                    widget.user.address ?? 'Address',
+                    widget.user.city ?? "city",
+                    widget.user.country ?? 'country'),
                 /*Row(
                   children: [
                     GestureDetector(
@@ -292,43 +276,46 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 ] else ...[
                   Row(
                     children: [
-                        Expanded(
-                          child: Consumer<follower_request_provider>(
-                                builder: (context, provider, child) {
-                                  return  ElevatedButton(
-                                    onPressed: provider.status == 'pending'
-                                        ? () {}
-                                        : provider.status == 'initial' ||
+                      Expanded(
+                        child: Builder(builder: (context) {
+                          var provider =
+                              context.watch<follower_request_provider>();
+                          return provider.isLoading?Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          ):ElevatedButton(
+                            onPressed: provider.status == 'pending'
+                                ? () {}
+                                : provider.status == 'initial' ||
                                         provider.status == 'rejected'
-                                        ? _handleFollow
-                                        : _handleunfollow,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: provider.status == 'pending'
-                                          ? Colors.grey
-                                          : provider.status == 'initial' ||
+                                    ? _handleFollow
+                                    : _handleunfollow,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: provider.status == 'pending'
+                                  ? Colors.grey
+                                  : provider.status == 'initial' ||
                                           provider.status == 'rejected'
-                                          ? Colors.red
-                                          : Colors.red,
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child:provider.isFollowLoading?CircularProgressIndicator(color: Colors.white,) :Text(
-                                      provider.status == 'pending'
-                                          ? 'Pending'
-                                          : provider.status == 'initial' ||
-                                          provider.status == 'rejected'
-                                          ? 'Follow'
-                                          : 'Unfollow',
-                                      style:
-                                      const TextStyle(color: AppColors.whiteColor),
-                                    ),
-                                  );
-                                }),
-                        ),
+                                      ? Colors.red
+                                      : Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                                    provider.status == 'pending'
+                                        ? 'Pending'
+                                        : provider.status == 'initial' ||
+                                                provider.status == 'rejected'
+                                            ? 'Follow'
+                                            : 'Unfollow',
+                                    style: const TextStyle(
+                                        color: AppColors.whiteColor),
+                                  ),
+                          );
+                        }),
+                      ),
 
-                          /*ElevatedButton(
+                      /*ElevatedButton(
                             onPressed: provider.status == 'pending'
                                 ? () {}
                                 : provider.status == 'initial' ||
@@ -358,9 +345,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                                   const TextStyle(color: AppColors.whiteColor),
                             ),
                           ),*/
-
-
-
 
                       const SizedBox(width: 8),
                       Expanded(
@@ -446,7 +430,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   }
 
   //First Profile Container
-  Widget profileContainer(String img, fullName,JobType,description,address,city,country) {
+  Widget profileContainer(
+      String img, fullName, JobType, description, address, city, country) {
     return Container(
       padding: EdgeInsets.all(5),
       child: Row(

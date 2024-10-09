@@ -107,10 +107,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         "Authorization": "Bearer $token"
         // Add any other necessary headers like Authorization here if required
       };
-      debugger();
+      // debugger();
       var response =
           await http.put(completeUrl, body: jsonEncode(body), headers: headers);
-      debugger();
+      // debugger();
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         ToastNotifier.showSuccessToast(
@@ -123,7 +123,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             context, "Your Current Password is incorrect");
       }
     } catch (e) {
-      debugger();
+      // debugger();
       log('Error: $e');
       ToastNotifier.showErrorToast(context, e.toString());
       return null;

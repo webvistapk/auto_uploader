@@ -61,13 +61,15 @@ class follower_request_provider extends ChangeNotifier {
       print("Exception: No Record Available");
       print(e);
       return [];
-    }
-    finally{
+    } finally {
       notifyListeners();
     }
   }
+
   Future<void> followRequestResponse(
       BuildContext context, int followerId, followingId, String status) async {
+
+    setisLoading(true);
     final String? token = await Prefrences.getAuthToken();
 
     // print("following ID : ${followingId}");
@@ -76,7 +78,6 @@ class follower_request_provider extends ChangeNotifier {
     String URL =
         "${ApiURLs.baseUrl}${ApiURLs.accept_follow}${followerId.toString()}/${followingId.toString()}/";
     print(URL);
-    setisLoading(true);
     final body = jsonEncode({"status": status});
     try {
       final response = await http.patch(Uri.parse(URL), body: body, headers: {
@@ -85,11 +86,15 @@ class follower_request_provider extends ChangeNotifier {
       });
       print("This is follow request response");
       if (response.statusCode == 200) {
-        showSuccessSnackbar("Request Sended", context);
+        //showSuccessSnackbar("Request Sended", context);
+        fetchFollowRequestStatus(followerId, followingId, context);
 
         setisLoading(false);
       } else if (response.statusCode == 403) {
         showErrorSnackbar("API Misplace", context);
+
+        setisLoading(false);
+        notifyListeners();
       } else {
         showErrorSnackbar(
             "There is an Error Occured : ${response.statusCode}", context);
@@ -104,9 +109,8 @@ class follower_request_provider extends ChangeNotifier {
     }
   }
 
-
   Future<FetchResponseModel> fetchFollowRequestStatus(
-      int followerId, int followingId,context) async {
+      int followerId, int followingId, context) async {
     final String? token = await Prefrences.getAuthToken();
     print("First ID: $followerId");
     print("Second ID: $followingId");
@@ -132,7 +136,7 @@ class follower_request_provider extends ChangeNotifier {
 
         if (jsonData.isNotEmpty) {
           status = FetchResponseModel.fromJson(jsonData).status.toString();
-          print("Status is ${status}")   ;
+          print("Status is ${status}");
           notifyListeners();
           //print("Status: $status");
 
@@ -157,7 +161,6 @@ class follower_request_provider extends ChangeNotifier {
       setisLoading(false);
       return FetchResponseModel(); // Return a default FetchResponseModel on failure
     }
-
   }
 
   Future<void> sendfollowRequest(
@@ -165,33 +168,31 @@ class follower_request_provider extends ChangeNotifier {
     final String? token = await Prefrences.getAuthToken();
     setisLoading(true);
     setisFollowLoading(true);
-   try{
-     final response = await http.post(
-       Uri.parse(
-           "${ApiURLs.baseUrl}${ApiURLs.follow_request_endpoint}$followerId/$followingId/"),
-       headers: <String, String>{
-         'Content-Type': 'application/json; charset=UTF-8',
-         'Authorization': 'Bearer $token',
-       },
-     );
+    try {
+      final response = await http.post(
+        Uri.parse(
+            "${ApiURLs.baseUrl}${ApiURLs.follow_request_endpoint}$followerId/$followingId/"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-     if (response.statusCode == 201) {
-       setisLoading(false);
-       setisFollowLoading(false);
-       //print("API Hitted");
-       ToastNotifier.showSuccessToast(context, "Follower Request Sended");
-     } else {
-       setisLoading(false);
-       setisFollowLoading(false);
-       ToastNotifier.showErrorToast(context, "There is an Error : ${response.statusCode}");
-       //print("This is Error body: ${response.body}");
-     }
-   }
-   catch(e){
-     ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
-     setisFollowLoading(false);
-   }
-
+      if (response.statusCode == 201) {
+        setisLoading(false);
+        setisFollowLoading(false);
+        //print("API Hitted");
+        fetchFollowRequestStatus(followerId, followingId, context);
+      } else {
+        setisLoading(false);
+        setisFollowLoading(false);
+        ToastNotifier.showErrorToast(
+            context, "There is an Error : ${response.statusCode}");
+        //print("This is Error body: ${response.body}");
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
+      setisFollowLoading(false);
+    }
   }
-
 }

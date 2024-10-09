@@ -6,7 +6,7 @@ import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
-import 'package:mobile/screens/authantication/change_password_screen.dart';
+import 'package:mobile/screens/authantication/update%20password/old_password_screen.dart';
 import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
@@ -262,8 +262,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         onPressed: () {
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    const ChangePasswordScreen()),
+                                builder: (context) => OldPasswordScreen()),
                             (Route<dynamic> route) =>
                                 false, // Remove all previous routes
                           );
