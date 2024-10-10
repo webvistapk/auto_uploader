@@ -56,8 +56,8 @@ class UserProfile {
       city: json['city'],
       country: json['country'],
       website: json['website'],
-      followers_count: json['followers_count'],
-      following_count: json['following_count'],
+      followers_count: json['followers_count'] ?? 0,
+      following_count: json['following_count'] ?? 0,
       privacy: json['privacy'],
       roles: json['roles'] != null ? Roles.fromJson(json['roles']) : null,
     );
@@ -78,8 +78,8 @@ class UserProfile {
       'city': city,
       'country': country,
       'website': website,
-      'followers_count': followers_count,
-      'following_count': following_count,
+      'followers_count': followers_count ?? 0,
+      'following_count': following_count ?? 0,
       'privacy': privacy,
       'roles': roles?.toJson(), // Assuming Roles class also has a toJson method
     };

@@ -19,18 +19,20 @@ class MainScreen extends StatefulWidget {
   final email;
   final UserProfile userProfile;
   final String authToken;
-  const MainScreen(
+  int selectedIndex;
+  MainScreen(
       {super.key,
       this.email,
       required this.userProfile,
-      required this.authToken});
+      required this.authToken,
+      this.selectedIndex = 0});
 
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // Loading indicator state
+  // Loading indicator state
 
   final List<Widget> _pages = [
     HomeScreen(),
@@ -99,26 +101,26 @@ class _MainScreenState extends State<MainScreen> {
                 body: Center(child: CircularProgressIndicator()),
               )
             : Scaffold(
-                body: _selectedIndex == 2
+                body: widget.selectedIndex == 2
                     ? CreatePostScreen(
                         userProfile: widget.userProfile,
                       )
-                    : _selectedIndex == 4
+                    : widget.selectedIndex == 4
                         ? ProfileScreen(
                             id: widget.userProfile.id,
                             userProfile: widget.userProfile,
                             authToken: widget.authToken,
                           )
-                        : _pages[_selectedIndex],
+                        : _pages[widget.selectedIndex],
                 bottomNavigationBar: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8.0),
                     child: SalomonBottomBar(
-                      currentIndex: _selectedIndex,
+                      currentIndex: widget.selectedIndex,
                       onTap: (index) {
                         setState(() {
-                          _selectedIndex = index;
+                          widget.selectedIndex = index;
                         });
                       },
                       items: [

@@ -1,14 +1,18 @@
 import 'dart:convert';
+import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/authantication/update%20password/widget/custom_widget.dart';
 import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../controller/endpoints.dart';
 import '../../../prefrences/prefrences.dart';
@@ -42,6 +46,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
 
       final url =
           '${ApiURLs.baseUrl}${ApiURLs.update_user_profile}${currentUserId}/';
+      // debugger();
       final response = await http.put(
         Uri.parse(url),
         headers: {
@@ -51,19 +56,24 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
         body: jsonEncode(
             {"old_password": oldPassword, "new_password": newPassword}),
       );
+      // debugger();
       if (response.statusCode == 200) {
+        ToastNotifier.showSuccessToast(
+            context, "Password Changed Successfully");
+        SharedPreferences removeUser = await SharedPreferences.getInstance();
+        await Prefrences.removeAuthToken();
+        removeUser.remove(Prefrences.authToken);
+        await UserPreferences().clearCurrentUser();
+        await removeUser.remove(UserPreferences.userKey);
         setState(() {
           isLoading = false;
         });
-        ToastNotifier.showSuccessToast(
-            context, "Password Changed Successfully");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MainScreen(
-                  userProfile: UserProfile(id: userProfile!.id),
-                  authToken: token.toString())),
-        );
+        ToastNotifier.showSuccessToast(context, "Logout user Successfully");
+        Navigator.pushAndRemoveUntil(
+            context,
+            CupertinoDialogRoute(
+                builder: (_) => LoginScreen(), context: context),
+            (route) => false);
       } else {
         setState(() {
           isLoading = false;
