@@ -34,15 +34,16 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   Future<UserProfile?>? _userProfile;
   Future<bool>? _isFollowing;
-  int? _userId;
   int? _loggedInUserId;
   Future<FetchResponseModel>? _followRequestsResponse;
+  String? userName;
 
   @override
   void initState() {
     // _getUserIdFromToken();
     _initializeData();
     super.initState();
+
   }
 
   String? token;
@@ -79,6 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else {
         _userProfile = UserPreferences().getCurrentUser();
         // debugger();
+
         _isFollowing = _checkIsFollowig(_loggedInUserId!, userId!, token!);
         setState(() {});
       }
@@ -92,6 +94,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // if (widget.userProfile != null) {
     //   return await UserPreferences().getCurrentUser();
     // }
+    UserProfile? userProfile = await UserService.fetchUserProfile(userId);
+    setState(() {
+      userName = userProfile.username; // Assign the user's name to the variable
+    });
     return await UserService.fetchUserProfile(userId);
   }
 
@@ -131,14 +137,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print(_loggedInUserId);
       return SafeArea(
         child: Scaffold(
-          appBar: _loggedInUserId == widget.id
-              ? TopBar(
+          appBar:_loggedInUserId != widget.id
+            ?AppBar(
+            title:Text(userName??'',
+              style:const TextStyle(
+                fontSize: 10,
+                color: AppColors.greyColor
+            ),),
+           centerTitle: true,
+          ):
+              TopBar(
                   onSearch: (query) => SearchStore.updateSearchQuery(query),
-                )
-              : null,
+                ),
           // PreferredSize(
           //     preferredSize: Size.fromHeight(50), child: AppBar()),
-          drawer: const SideBar(),
+          endDrawer: const SideBar(),
           backgroundColor: AppColors.mainBgColor,
           body: ValueListenableBuilder<String?>(
             valueListenable: SearchStore.searchQuery,
@@ -186,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   SizedBox(
                                     height: 10,
                                   ),
-                                  if (_loggedInUserId != widget.id)
+                                 /* if (_loggedInUserId != widget.id)
                                     GestureDetector(
                                       onTap: () {
                                         Navigator.pop(context);
@@ -195,20 +208,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         padding: const EdgeInsets.all(8.0),
                                         child: Icon(Icons.arrow_back),
                                       ),
-                                    ),
+                                    ),*/
                                   ProfileHeader(
                                       user: user,
                                       canViewProfile: canViewProfile,
                                       isFollowing: isFollowing),
                                   if (canViewProfile) ...[
-                                    const CategoryIcons(images: [
+                                   /* const CategoryIcons(images: [
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
-                                    ]),
+                                    ]),*/
                                     const ProfileImages(images: [
                                       AppUtils.testImage,
                                       AppUtils.testImage,
@@ -216,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
-                                    ]),
+                                    ],),
                                   ] else ...[
                                     const Center(
                                       child: Text("This profile is private."),

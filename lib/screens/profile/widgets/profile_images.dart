@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_size.dart';
 import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
@@ -81,6 +83,50 @@ class ProfileImages extends StatelessWidget {
               ],
             ),
           ),
+
+          SizedBox(
+            height: 10,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightGrey,
+                         // Grey border
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        'Category Name',
+                        style: TextStyle(fontSize: 10),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 5,horizontal: paragraph*1.5),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey,), // Grey border
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.add,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
           SizedBox(
             height: 500, // Adjust height as needed
             child: TabBarView(
