@@ -5,6 +5,7 @@ import 'package:mobile/screens/profile/widgets/single_post.dart';
 class PostScreen extends StatelessWidget {
   final List<Map<String, dynamic>> posts = [
     {
+      'index':1,
       'username': 'kashif_official',
       'location': 'Nawabshah, Sindh',
       'date': 'Oct 9th 2024',
@@ -13,6 +14,7 @@ class PostScreen extends StatelessWidget {
       'isVideo': false,
     },
     {
+      'index':2,
       'username': 'kashif_official',
       'location': 'Karachi, Sindh',
       'date': 'Oct 8th 2024',
@@ -21,6 +23,7 @@ class PostScreen extends StatelessWidget {
       'isVideo': true,
     },
     {
+      'index':3,
       'username': 'kashif_official',
       'location': 'Lahore, Punjab',
       'date': 'Oct 7th 2024',
@@ -29,6 +32,7 @@ class PostScreen extends StatelessWidget {
       'isVideo': false,
     },
     {
+      'index':4,
       'username': 'kashif_official',
       'location': 'Islamabad, Capital Territory',
       'date': 'Oct 6th 2024',
@@ -37,6 +41,7 @@ class PostScreen extends StatelessWidget {
       'isVideo': true,
     },
   ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -64,3 +69,5 @@ class PostScreen extends StatelessWidget {
     );
   }
 }
+
+

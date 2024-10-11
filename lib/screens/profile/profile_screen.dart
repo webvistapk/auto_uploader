@@ -37,13 +37,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int? _loggedInUserId;
   Future<FetchResponseModel>? _followRequestsResponse;
   String? userName;
+  List<Map<String, dynamic>> posts = [];
 
   @override
   void initState() {
     // _getUserIdFromToken();
     _initializeData();
     super.initState();
+    _fetchPosts();
 
+  }
+
+  void _fetchPosts() async {
+    // images and videos fetch and simulated from an API
+    List<Map<String, dynamic>> fetchedPosts = [
+      {
+        'mediaUrl': AppUtils.testImage,
+        'isVideo': false,
+      },
+      {
+        'mediaUrl': AppUtils.testImage,
+        'isVideo': false,
+      },
+      {
+        'mediaUrl': AppUtils.testImage,
+        'isVideo': false,
+      },
+      {
+        'mediaUrl': AppUtils.testImage,
+        'isVideo': false,
+      },
+      {
+        'mediaUrl': AppUtils.testImage,
+        'isVideo': false,
+      },
+      {
+        'mediaUrl': AppUtils.testImage,
+        'isVideo': false,
+      },
+
+
+    ];
+
+    setState(() {
+      posts = fetchedPosts;
+    });
   }
 
   String? token;
@@ -222,14 +260,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                     ]),*/
-                                    const ProfileImages(images: [
+                                    ProfileImages(images: const [
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
-                                    ],),
+                                    ], posts: posts,),
                                   ] else ...[
                                     const Center(
                                       child: Text("This profile is private."),

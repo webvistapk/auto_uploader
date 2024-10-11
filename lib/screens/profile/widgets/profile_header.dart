@@ -23,6 +23,7 @@ class ProfileHeader extends StatefulWidget {
   final bool canViewProfile;
   final bool isFollowing;
 
+
   const ProfileHeader({
     super.key,
     required this.user,

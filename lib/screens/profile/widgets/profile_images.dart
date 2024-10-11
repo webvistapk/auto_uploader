@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
+import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
 class ProfileImages extends StatelessWidget {
   final List<String> images;
+  final List<Map<String, dynamic>> posts;
 
   const ProfileImages({
     super.key,
     required this.images,
+    required this.posts
   });
 
+
+  //Image Post
+  List<String> getImagePosts() {
+    return posts
+        .where((post) => !post['isVideo']) // Filter for images
+        .map((post) => post['mediaUrl'].toString())
+        .toList();
+  }
+
+  // Video posts
+  List<String> getVideoPosts() {
+    return posts
+        .where((post) => post['isVideo']) // Filter for videos
+        .map((post) => post['mediaUrl'].toString())
+        .toList();
+  }
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -131,12 +150,12 @@ class ProfileImages extends StatelessWidget {
             height: 500, // Adjust height as needed
             child: TabBarView(
               children: [
-                _buildImageGrid(images),
-                _buildImageGrid(images),
-                _buildImageGrid(images),
-                _buildImageGrid(images),
-                _buildImageGrid(images),
-                _buildImageGrid(images),
+                PostGrid(posts: posts),
+                PostGrid(posts: posts),
+                PostGrid(posts: posts),
+                PostGrid(posts: posts),
+                PostGrid(posts: posts),
+                PostGrid(posts: posts),
                 profile_info(),
               ],
             ),
