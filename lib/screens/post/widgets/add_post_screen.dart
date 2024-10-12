@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:mobile/common/app_text_styles.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:video_player/video_player.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -10,244 +13,253 @@ class AddPostScreen extends StatefulWidget {
 
 class _AddPostScreenState extends State<AddPostScreen> {
   final TextEditingController _textController = TextEditingController();
-  int _selectedIndex = 0;
-  // final ImagePicker _picker = ImagePicker(); // For selecting media
+  final ImagePicker _picker = ImagePicker();
+  List<File> _mediaFiles = [];
+  List<VideoPlayerController?> _videoControllers = [];
 
-  Future<void> _pickImage() async {
-    // final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    // if (pickedFile != null) {
-    //   // Handle image selection
-    // }
+  // Unified method to pick multiple images and videos
+  Future<void> _pickMedia({required bool isVideo}) async {
+    if (isVideo) {
+      final pickedVideo = await _picker.pickVideo(source: ImageSource.gallery);
+      if (pickedVideo != null) {
+        File videoFile = File(pickedVideo.path);
+        setState(() {
+          _mediaFiles.add(videoFile);
+          _initializeVideoPlayer(videoFile);
+        });
+      }
+    } else {
+      final pickedImages = await _picker.pickMultiImage();
+      if (pickedImages != null) {
+        setState(() {
+          _mediaFiles.addAll(pickedImages.map((file) => File(file.path)));
+          _videoControllers.addAll(List.generate(
+              pickedImages.length, (_) => null)); // Add placeholders for images
+        });
+      }
+    }
   }
 
-  Future<void> _pickVideo() async {
-    // final pickedFile = await _picker.pickVideo(source: ImageSource.gallery);
-    // if (pickedFile != null) {
-    //   // Handle video selection
-    // }
+  Future<void> _initializeVideoPlayer(File videoFile) async {
+    final controller = VideoPlayerController.file(videoFile);
+    await controller.initialize();
+    setState(() {
+      _videoControllers.add(controller);
+    });
   }
 
-  Future<void> _openCamera() async {
-    // final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    // if (pickedFile != null) {
-    //   // Handle camera capture
-    // }
+  Future<void> _captureMedia({required bool isVideo}) async {
+    if (await _requestCameraPermission()) {
+      final pickedFile = isVideo
+          ? await _picker.pickVideo(source: ImageSource.camera)
+          : await _picker.pickImage(source: ImageSource.camera);
+
+      if (pickedFile != null) {
+        File file = File(pickedFile.path);
+        setState(() {
+          _mediaFiles.add(file);
+          if (isVideo) {
+            _initializeVideoPlayer(file);
+          } else {
+            _videoControllers.add(null); // Placeholder for images
+          }
+        });
+      }
+    }
+  }
+
+  Future<bool> _requestCameraPermission() async {
+    var status = await Permission.camera.request();
+    return status.isGranted;
+  }
+
+  void _removeMedia(int index) {
+    setState(() {
+      if (_isVideo(_mediaFiles[index])) {
+        _videoControllers[index]?.dispose();
+      }
+      _mediaFiles.removeAt(index);
+      _videoControllers.removeAt(index);
+    });
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _videoControllers) {
+      controller?.dispose();
+    }
+    super.dispose();
+  }
+
+  bool _isVideo(File file) {
+    return file.path.endsWith('.mp4') ? true : false;
+  }
+
+  Widget _buildVideoPlayer(VideoPlayerController? controller) {
+    if (controller != null && controller.value.isInitialized) {
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          AspectRatio(
+            aspectRatio: 1,
+            child: VideoPlayer(controller),
+          ),
+          IconButton(
+            icon: Icon(
+              controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+              color: Colors.white,
+              size: 40,
+            ),
+            onPressed: () {
+              setState(() {
+                controller.value.isPlaying
+                    ? controller.pause()
+                    : controller.play();
+              });
+            },
+          ),
+        ],
+      );
+    } else {
+      return const Center(child: CircularProgressIndicator());
+    }
+  }
+
+  // Function to show the popup for selecting image or video
+  void _showMediaSelectionDialog() {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.image),
+                title: Text('Select Images'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickMedia(isVideo: false);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.videocam),
+                title: Text('Select Videos'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickMedia(isVideo: true);
+                },
+              ),
+            ],
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
-              child: Row(
-                children: [
-                  Icon(Icons.arrow_back_sharp, size: 30),
-                  SizedBox(width: 15),
-                  Text(
-                    "Create post",
-                    style:
-                        AppTextStyles.poppinsRegular().copyWith(fontSize: 19),
-                  ),
-                  Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      // Handle post submission
-                    },
-                    child: Container(
-                      width: size.width * 0.19,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: const Color(0xffD3D3D3),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "POST",
-                          style: AppTextStyles.poppinsMedium()
-                              .copyWith(fontSize: 17, color: Colors.grey),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Divider(color: Colors.grey),
-            Padding(
-              padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(
-                        "https://wallpaper.dog/large/20486428.jpg"),
-                  ),
-                  SizedBox(width: 15),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Ahsan Khan",
-                        style:
-                            AppTextStyles.poppinsBold().copyWith(fontSize: 20),
-                      ),
-                      SizedBox(height: 5),
-                      Container(
-                        width: size.width * 0.33,
-                        height: 29,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: Color.fromARGB(82, 118, 184, 228),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.people,
-                              color: Color.fromARGB(255, 10, 126, 222),
-                              size: 18,
-                            ),
-                            SizedBox(width: 5),
-                            Text(
-                              'Friends',
-                              style: AppTextStyles.poppinsRegular().copyWith(
-                                  color: Color.fromARGB(255, 10, 126, 222)),
-                            ),
-                            SizedBox(width: 5),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: Color.fromARGB(255, 10, 126, 222),
-                              size: 25,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20, right: 20, left: 15),
-              child: TextField(
-                controller: _textController,
-                cursorHeight: 40,
-                cursorColor: const Color.fromARGB(255, 10, 126, 222),
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white)),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  hintText: "What's on your mind?",
-                  hintStyle: AppTextStyles.poppinsRegular()
-                      .copyWith(fontSize: 23, color: Colors.grey),
-                ),
-                keyboardType: TextInputType.multiline,
-                maxLines: null, // Allows for a long text
-              ),
-            ),
-            Spacer(),
-            Padding(
-              padding: const EdgeInsets.only(left: 15, bottom: 20),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      // Handle text formatting (if needed)
-                    },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 2.0),
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(color: Colors.grey, blurRadius: 6)
-                        ],
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.red,
-                            Colors.orange,
-                            Colors.yellow,
-                            Colors.green,
-                            Colors.blue,
-                            Colors.purple,
-                          ],
-                          begin: Alignment.centerRight,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Aa",
-                          style: AppTextStyles.poppinsBold(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          leading: const Icon(Icons.arrow_back),
+          title: const Text("Create Post"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Handle post action
+              },
+              child: const Text(
+                "POST",
+                style: TextStyle(color: Colors.blue),
               ),
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-            if (index == 0) {
-              _pickImage(); // Handle adding photo/video
-            } else if (index == 1) {
-              // Handle tagging people (implementation can vary)
-            } else if (index == 2) {
-              _openCamera(); // Handle opening camera
-            }
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.photo_album_outlined,
-              color: Colors.green,
-              size: 30,
-            ),
-            label: 'Photo/video',
+        body: Container(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: TextField(
+                      controller: _textController,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      decoration: InputDecoration(
+                        hintText: "What's on your mind?",
+                        hintStyle: TextStyle(fontSize: 18, color: Colors.grey),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (_mediaFiles.isNotEmpty)
+                Expanded(
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: _mediaFiles.length,
+                    itemBuilder: (context, index) {
+                      return Stack(
+                        children: [
+                          _isVideo(_mediaFiles[index])
+                              ? (index < _videoControllers.length &&
+                                      _videoControllers[index] != null)
+                                  ? _buildVideoPlayer(_videoControllers[index])
+                                  : const Center(
+                                      child: CircularProgressIndicator())
+                              : Image.file(
+                                  _mediaFiles[index],
+                                  fit: BoxFit.cover,
+                                  height: 150,
+                                  width: 150,
+                                ),
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: () => _removeMedia(index),
+                              child: const CircleAvatar(
+                                radius: 12,
+                                backgroundColor: Colors.red,
+                                child: Icon(Icons.close,
+                                    size: 15, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_photo_alternate,
+                          color: Colors.green),
+                      onPressed: _showMediaSelectionDialog,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.camera_alt, color: Colors.blue),
+                      onPressed: () => _captureMedia(isVideo: false),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.videocam, color: Colors.red),
+                      onPressed: () => _captureMedia(isVideo: true),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person,
-              color: Colors.blueAccent,
-              size: 30,
-            ),
-            label: 'Tag people',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.camera_alt,
-              color: Colors.red,
-              size: 30,
-            ),
-            label: 'Camera',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.more_horiz,
-              color: Colors.grey,
-              size: 30,
-            ),
-            label: '',
-          ),
-        ],
-        type: BottomNavigationBarType.fixed,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
+        ),
       ),
     );
   }

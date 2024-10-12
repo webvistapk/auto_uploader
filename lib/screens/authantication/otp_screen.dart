@@ -213,7 +213,6 @@ class _OtpScreenState extends State<OtpScreen> {
                                   color: AppColors.grey),
                             ),
                     ),
-                    SizedBox(height: size.height * 0.05),
                     if (pro.isLoading)
                       const Center(
                         child: SpinKitCircle(
