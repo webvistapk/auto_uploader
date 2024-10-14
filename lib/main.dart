@@ -9,6 +9,7 @@ import 'package:mobile/screens/authantication/update%20password/old_password_scr
 import 'package:mobile/screens/company/company_profile.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
+import 'package:mobile/screens/widget/alert_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
               primarySwatch: Colors.green,
               fontFamily: GoogleFonts.poppins().toString()),
-          home: SplashScreen() // Start with the LoadingScreen
+          home: AddPostScreen() // Start with the LoadingScreen
           ),
     );
   }

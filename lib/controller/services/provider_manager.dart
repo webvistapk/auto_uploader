@@ -231,4 +231,27 @@ class ProviderManager {
       throw Exception("Any thing Else please try Again!");
     }
   }
+
+
+
+
+  createNewPost(token,data)async{
+     try {
+       final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.create_new_post);
+       final body = {};
+       final headers = {
+        'Authorization': 'Bearer $token',
+        'Content-type': 'application/json'
+       };
+
+       final response = await http.post(completeUrl,headers: headers,body: body);
+       if(response.statusCode == 200){
+
+       }else{
+        
+       }
+     } catch (e) {
+       
+     }
+  }
 }

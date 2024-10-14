@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/common/app_text_styles.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../widget/alert_screen.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -161,15 +164,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
           leading: const Icon(Icons.arrow_back),
           title: const Text("Create Post"),
           actions: [
-            TextButton(
-              onPressed: () {
-                // Handle post action
-              },
-              child: const Text(
-                "POST",
-                style: TextStyle(color: Colors.blue),
-              ),
-            ),
+            ElevatedButton(onPressed: (){
+              print(Keyword);
+              //  showHelpDialog(context);
+            }, child: Text("Post"))
           ],
         ),
         body: Container(
@@ -182,6 +180,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     child: TextField(
                       controller: _textController,
                       maxLines: null,
+                      onChanged: (value) {
+                        setState(() {
+                          Keyword = extractHashtags(value);
+                        });
+                      },
                       keyboardType: TextInputType.multiline,
                       decoration: InputDecoration(
                         hintText: "What's on your mind?",
@@ -241,18 +244,42 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.add_photo_alternate,
-                          color: Colors.green),
-                      onPressed: _showMediaSelectionDialog,
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.add_photo_alternate,
+                              color: Colors.green),
+                          onPressed: _showMediaSelectionDialog,
+                        ),
+                        Text("Photos/Videos",style: AppTextStyles.poppinsRegular().copyWith(fontSize: 10),)
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.camera_alt, color: Colors.blue),
-                      onPressed: () => _captureMedia(isVideo: false),
+                      Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.people, color: Colors.blue),
+                          onPressed: () => _captureMedia(isVideo: true),
+                        ),
+                         Text("Tag People",style: AppTextStyles.poppinsRegular().copyWith(fontSize: 10),)
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.videocam, color: Colors.red),
-                      onPressed: () => _captureMedia(isVideo: true),
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.camera_alt, color: Colors.blue),
+                          onPressed: () => _captureMedia(isVideo: false),
+                        ),
+                         Text("Camera",style: AppTextStyles.poppinsRegular().copyWith(fontSize: 10),)
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.videocam, color: Colors.red),
+                          onPressed: () => _captureMedia(isVideo: true),
+                        ),
+                         Text("Video Camera",style: AppTextStyles.poppinsRegular().copyWith(fontSize: 10),)
+                      ],
                     ),
                   ],
                 ),
@@ -263,4 +290,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
       ),
     );
   }
+  List<String> extractHashtags(String text) {
+  // Split the text by spaces and keep all words
+  List<String> words = text.split(' ');
+
+  // Extract hashtags from words and allow incomplete hashtags (the word being typed)
+  List<String> hashtags =
+      words.where((word) => word.startsWith('#')).toList
+      ();
+
+  return hashtags;
+}
+   List<String> Keyword = []; 
 }
