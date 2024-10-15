@@ -5,7 +5,7 @@ import 'package:mobile/common/app_text_styles.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../widget/alert_screen.dart';
+import '../../widget/bottom_sheet_screen.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -19,6 +19,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
   final ImagePicker _picker = ImagePicker();
   List<File> _mediaFiles = [];
   List<VideoPlayerController?> _videoControllers = [];
+  List<String> Keyword = [];
+  
+  get isFormFilled => false; // Initialize here
 
   // Unified method to pick multiple images and videos
   Future<void> _pickMedia({required bool isVideo}) async {
@@ -95,7 +98,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   }
 
   bool _isVideo(File file) {
-    return file.path.endsWith('.mp4') ? true : false;
+    return file.path.endsWith('.mp4');
   }
 
   Widget _buildVideoPlayer(VideoPlayerController? controller) {
@@ -115,9 +118,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
             ),
             onPressed: () {
               setState(() {
-                controller.value.isPlaying
-                    ? controller.pause()
-                    : controller.play();
+                controller.value.isPlaying ? controller.pause() : controller.play();
               });
             },
           ),
@@ -131,175 +132,408 @@ class _AddPostScreenState extends State<AddPostScreen> {
   // Function to show the popup for selecting image or video
   void _showMediaSelectionDialog() {
     showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return Wrap(
+      context: context,
+      builder: (context) {
+        return Wrap(
+          children: [
+            ListTile(
+              leading: Icon(Icons.image),
+              title: Text('Select Images'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickMedia(isVideo: false);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.videocam),
+              title: Text('Select Videos'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickMedia(isVideo: true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  String? _selectedValue;
+  final TextEditingController _keywordController = TextEditingController();
+  List<String> hashtags = [];
+
+
+
+  // Function to show the bottom sheet for posting
+  void _showPostBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20.0),
+          height: 500,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ListTile(
-                leading: Icon(Icons.image),
-                title: Text('Select Images'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _pickMedia(isVideo: false);
-                },
+              Text(
+                "Confirmation Post",
+                style: AppTextStyles.poppinsSemiBold().copyWith(fontSize: 16),
               ),
-              ListTile(
-                leading: Icon(Icons.videocam),
-                title: Text('Select Videos'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _pickMedia(isVideo: true);
-                },
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.close,
+                  size: 25,
+                ),
               ),
             ],
-          );
-        });
+          ),
+          const SizedBox(height: 20),
+          // Updated hashtag display
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: hashtags
+                  .map((hashtag) => Text(
+                        hashtag,
+                        style: AppTextStyles.poppinsRegular(),
+                      ))
+                  .toList(),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Choose who can see your post",
+            style: AppTextStyles.poppinsSemiBold().copyWith(fontSize: 13),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            height: 55,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: DropdownButton<String>(
+              hint: Text(
+                "Public",
+                style: AppTextStyles.poppinsRegular().copyWith(color: Colors.grey),
+              ),
+              value: _selectedValue,
+              underline: SizedBox(),
+              isExpanded: true,
+              icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
+              items: <String>['Public', 'Only Followers see', 'Only me']
+                  .map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedValue = newValue;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            "Add Keywords to Display",
+            style: AppTextStyles.poppinsSemiBold().copyWith(fontSize: 13),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _keywordController,
+            cursorColor: Colors.black,
+            maxLines: 4,
+            onChanged: (text) {
+              setState(() {
+                hashtags = extractHashtags(text);
+              });
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey),
+              ),
+              hintText: "#Keyword",
+              hintStyle: AppTextStyles.poppinsRegular().copyWith(color: Colors.grey),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          GestureDetector(
+            onTap: isFormFilled ? () {
+              // Handle confirmation action here
+            } : null,
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: isFormFilled ? Colors.red : Colors.grey,
+              ),
+              child: Center(
+                child: Text(
+                  "Confirm",
+                  style: AppTextStyles.poppinsMedium().copyWith(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+                  ],
+                ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+      bool isFormFilled = _selectedValue != null && _keywordController.text.isNotEmpty;
+    var size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          
           leading: const Icon(Icons.arrow_back),
           title: const Text("Create Post"),
           actions: [
-            ElevatedButton(onPressed: (){
-              print(Keyword);
-              //  showHelpDialog(context);
-            }, child: Text("Post"))
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: ElevatedButton(
+                onPressed: (){
+                  showHelpBottomSheet(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue, // Background color
+                  foregroundColor: Colors.white, // Text color
+                  shadowColor: Colors.blueAccent, // Shadow color
+                  elevation: 10, // Elevation for shadow
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                  ),
+                ).copyWith(
+                  // Interactive states (hover, pressed, focused)
+                  elevation: MaterialStateProperty.resolveWith<double?>(
+                    (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.pressed)) {
+                        return 15; // Elevation when pressed
+                      }
+                      return 10; // Default elevation
+                    },
+                  ),
+                  backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                    (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.pressed)) {
+                        return Colors.blue[700]; // Darker color when pressed
+                      } else if (states.contains(MaterialState.hovered)) {
+                        return Colors.blue[600]; // Slightly darker color when hovered
+                      }
+                      return Colors.blue; // Default color
+                    },
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(),
+                  // horizontal: 24.0, vertical: 12.0
+                  child: Text(
+                    "Post",
+                    style: TextStyle(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
           ],
         ),
         body: Container(
           child: Column(
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: TextField(
-                      controller: _textController,
-                      maxLines: null,
-                      onChanged: (value) {
-                        setState(() {
-                          Keyword = extractHashtags(value);
-                        });
-                      },
-                      keyboardType: TextInputType.multiline,
-                      decoration: InputDecoration(
-                        hintText: "What's on your mind?",
-                        hintStyle: TextStyle(fontSize: 18, color: Colors.grey),
-                        border: InputBorder.none,
-                      ),
-                    ),
+SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              // crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Text input field for the post content
+                Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                  TextField(
+                                    controller: _textController,
+                                    maxLines: null,
+                                    onChanged: (value) {
+                  setState(() {
+                    Keyword = extractHashtags(value);
+                  });
+                                    },
+                                    keyboardType: TextInputType.multiline,
+                                    decoration: InputDecoration(
+                  hintText: "What's on your mind?",
+                  hintStyle: TextStyle(fontSize: 18, color: Colors.grey),
+                  border: InputBorder.none,
+                                    ),
+                                  ),
+                  
+                                  const SizedBox(height: 15),
+                  
+                                  // Display media files
+                                  if (_mediaFiles.isNotEmpty) _buildMediaGrid(size),
+                  
+                                  const SizedBox(height: 15),
+                    ],
                   ),
                 ),
-              ),
-              if (_mediaFiles.isNotEmpty)
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(8.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                      childAspectRatio: 1,
-                    ),
-                    itemCount: _mediaFiles.length,
-                    itemBuilder: (context, index) {
-                      return Stack(
-                        children: [
-                          _isVideo(_mediaFiles[index])
-                              ? (index < _videoControllers.length &&
-                                      _videoControllers[index] != null)
-                                  ? _buildVideoPlayer(_videoControllers[index])
-                                  : const Center(
-                                      child: CircularProgressIndicator())
-                              : Image.file(
-                                  _mediaFiles[index],
-                                  fit: BoxFit.cover,
-                                  height: 150,
-                                  width: 150,
-                                ),
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: GestureDetector(
-                              onTap: () => _removeMedia(index),
-                              child: const CircleAvatar(
-                                radius: 12,
-                                backgroundColor: Colors.red,
-                                child: Icon(Icons.close,
-                                    size: 15, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.add_photo_alternate,
-                              color: Colors.green),
-                          onPressed: _showMediaSelectionDialog,
-                        ),
-                        Text("Photos/Videos",style: AppTextStyles.poppinsRegular().copyWith(fontSize: 10),)
-                      ],
-                    ),
-                      Column(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.people, color: Colors.blue),
-                          onPressed: () => _captureMedia(isVideo: true),
-                        ),
-                         Text("Tag People",style: AppTextStyles.poppinsRegular().copyWith(fontSize: 10),)
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.camera_alt, color: Colors.blue),
-                          onPressed: () => _captureMedia(isVideo: false),
-                        ),
-                         Text("Camera",style: AppTextStyles.poppinsRegular().copyWith(fontSize: 10),)
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.videocam, color: Colors.red),
-                          onPressed: () => _captureMedia(isVideo: true),
-                        ),
-                         Text("Video Camera",style: AppTextStyles.poppinsRegular().copyWith(fontSize: 10),)
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                // SizedBox(),
+                // Bottom action bar
+                
+              ],
+            ),
+            
           ),
         ),
+       const Spacer(),
+     _buildBottomBar(),
+            ],
+          ),
+        )
+
+     
       ),
     );
   }
-  List<String> extractHashtags(String text) {
-  // Split the text by spaces and keep all words
-  List<String> words = text.split(' ');
 
-  // Extract hashtags from words and allow incomplete hashtags (the word being typed)
-  List<String> hashtags =
-      words.where((word) => word.startsWith('#')).toList
-      ();
+   Widget _buildBottomBar() {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              IconButton(
+                icon: Icon(Icons.add_photo_alternate, color: Colors.green),
+                onPressed: _showMediaSelectionDialog,
+              ),
+              Text("Photos/Videos", style: TextStyle(fontSize: 10)),
+            ],
+          ),
+          Column(
+            children: [
+              IconButton(
+                icon: Icon(Icons.people, color: Colors.blue),
+                onPressed: () {
+                  // Handle tagging people functionality
+                },
+              ),
+              Text("Tag People", style: TextStyle(fontSize: 10)),
+            ],
+          ),
+          Column(
+            children: [
+              IconButton(
+                icon: Icon(Icons.camera_alt, color: Colors.blue),
+                onPressed: () {
+                  _pickMedia(isVideo: false); // Open camera for photos
+                },
+              ),
+              Text("Camera", style: TextStyle(fontSize: 10)),
+            ],
+          ),
+          Column(
+            children: [
+              IconButton(
+                icon: Icon(Icons.videocam, color: Colors.red),
+                onPressed: () {
+                  _pickMedia(isVideo: true); // Open camera for videos
+                },
+              ),
+              Text("Video Camera", style: TextStyle(fontSize: 10)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-  return hashtags;
+  // Widget to build the grid of selected media files
+  Widget _buildMediaGrid(Size size) {
+    return GridView.builder(
+      padding: EdgeInsets.all(8.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8.0,
+        mainAxisSpacing: 8.0,
+        childAspectRatio: 1,
+      ),
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(), // Disable scrolling of GridView
+      itemCount: _mediaFiles.length,
+      itemBuilder: (context, index) {
+        return 
+        
+      Stack(
+                                children: [
+                                  _isVideo(_mediaFiles[index])
+                                      ? (_videoControllers.length > index && _videoControllers[index] != null)
+                                          ? _buildVideoPlayer(_videoControllers[index])
+                                          : const Center(child: CircularProgressIndicator())
+                                      : Image.file(
+                                          _mediaFiles[index],
+                                          fit: BoxFit.cover,
+                                          height: size.height * 0.40, // Adjust height as needed
+                                          width: double.infinity,
+                                        ),
+                                  Positioned(
+                                    top: 10,
+                                    right: 10,
+                                    child: GestureDetector(
+                                      onTap: () => _removeMedia(index),
+                                      child: const CircleAvatar(
+                                        radius: 12,
+                                        backgroundColor: Colors.red,
+                                        child: Icon(Icons.close, size: 15, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+      },
+    );
+  }
+
+// Function to show the Bottom Sheet
+void showHelpBottomSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true, // Allowing full height
+    builder: (BuildContext context) {
+      return BottomSheetScreen();
+    },
+  );
 }
-   List<String> Keyword = []; 
+
+
+  List<String> extractHashtags(String text) {
+    // Split the text by spaces and keep all words
+    List<String> words = text.split(' ');
+
+    // Extract hashtags from words and allow incomplete hashtags (the word being typed)
+    List<String> hashtags = words.where((word) => word.startsWith('#')).toList();
+
+    return hashtags;
+  }
 }
