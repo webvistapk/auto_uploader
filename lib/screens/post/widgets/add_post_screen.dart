@@ -2,7 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/controller/providers/profile_provider.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:mobile/screens/post/component/tag_users.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../widget/bottom_sheet_screen.dart';
@@ -20,7 +24,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   List<File> _mediaFiles = [];
   List<VideoPlayerController?> _videoControllers = [];
   List<String> Keyword = [];
-  
+
   get isFormFilled => false; // Initialize here
 
   // Unified method to pick multiple images and videos
@@ -107,7 +111,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         alignment: Alignment.center,
         children: [
           AspectRatio(
-            aspectRatio: 1,
+            aspectRatio: 0.95,
             child: VideoPlayer(controller),
           ),
           IconButton(
@@ -118,7 +122,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
             ),
             onPressed: () {
               setState(() {
-                controller.value.isPlaying ? controller.pause() : controller.play();
+                controller.value.isPlaying
+                    ? controller.pause()
+                    : controller.play();
               });
             },
           ),
@@ -157,11 +163,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
       },
     );
   }
+
   String? _selectedValue;
   final TextEditingController _keywordController = TextEditingController();
   List<String> hashtags = [];
-
-
 
   // Function to show the bottom sheet for posting
   void _showPostBottomSheet() {
@@ -173,145 +178,166 @@ class _AddPostScreenState extends State<AddPostScreen> {
           height: 500,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Confirmation Post",
-                style: AppTextStyles.poppinsSemiBold().copyWith(fontSize: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Confirmation Post",
+                    style:
+                        AppTextStyles.poppinsSemiBold().copyWith(fontSize: 16),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Icon(
+                      Icons.close,
+                      size: 25,
+                    ),
+                  ),
+                ],
               ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.close,
-                  size: 25,
+              const SizedBox(height: 20),
+              // Updated hashtag display
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: hashtags
+                      .map((hashtag) => Text(
+                            hashtag,
+                            style: AppTextStyles.poppinsRegular(),
+                          ))
+                      .toList(),
                 ),
               ),
+              const SizedBox(height: 10),
+              Text(
+                "Choose who can see your post",
+                style: AppTextStyles.poppinsSemiBold().copyWith(fontSize: 13),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                height: 55,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: DropdownButton<String>(
+                  hint: Text(
+                    "Public",
+                    style: AppTextStyles.poppinsRegular()
+                        .copyWith(color: Colors.grey),
+                  ),
+                  value: _selectedValue,
+                  underline: SizedBox(),
+                  isExpanded: true,
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  items: <String>['Public', 'Only Followers see', 'Only me']
+                      .map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedValue = newValue;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Add Keywords to Display",
+                style: AppTextStyles.poppinsSemiBold().copyWith(fontSize: 13),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _keywordController,
+                cursorColor: Colors.black,
+                maxLines: 4,
+                onChanged: (text) {
+                  setState(() {
+                    hashtags = extractHashtags(text);
+                  });
+                },
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  hintText: "#Keyword",
+                  hintStyle: AppTextStyles.poppinsRegular()
+                      .copyWith(color: Colors.grey),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: isFormFilled
+                    ? () {
+                        // Handle confirmation action here
+                      }
+                    : null,
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isFormFilled ? Colors.red : Colors.grey,
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Confirm",
+                      style: AppTextStyles.poppinsMedium()
+                          .copyWith(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
             ],
           ),
-          const SizedBox(height: 20),
-          // Updated hashtag display
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: hashtags
-                  .map((hashtag) => Text(
-                        hashtag,
-                        style: AppTextStyles.poppinsRegular(),
-                      ))
-                  .toList(),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            "Choose who can see your post",
-            style: AppTextStyles.poppinsSemiBold().copyWith(fontSize: 13),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            height: 55,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: DropdownButton<String>(
-              hint: Text(
-                "Public",
-                style: AppTextStyles.poppinsRegular().copyWith(color: Colors.grey),
-              ),
-              value: _selectedValue,
-              underline: SizedBox(),
-              isExpanded: true,
-              icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
-              items: <String>['Public', 'Only Followers see', 'Only me']
-                  .map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedValue = newValue;
-                });
-              },
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            "Add Keywords to Display",
-            style: AppTextStyles.poppinsSemiBold().copyWith(fontSize: 13),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _keywordController,
-            cursorColor: Colors.black,
-            maxLines: 4,
-            onChanged: (text) {
-              setState(() {
-                hashtags = extractHashtags(text);
-              });
-            },
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey),
-              ),
-              hintText: "#Keyword",
-              hintStyle: AppTextStyles.poppinsRegular().copyWith(color: Colors.grey),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          GestureDetector(
-            onTap: isFormFilled ? () {
-              // Handle confirmation action here
-            } : null,
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: isFormFilled ? Colors.red : Colors.grey,
-              ),
-              child: Center(
-                child: Text(
-                  "Confirm",
-                  style: AppTextStyles.poppinsMedium().copyWith(color: Colors.white),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-                  ],
-                ),
         );
       },
     );
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<PostProvider>();
+  }
+
+  @override
   Widget build(BuildContext context) {
-      bool isFormFilled = _selectedValue != null && _keywordController.text.isNotEmpty;
+    bool isFormFilled =
+        _selectedValue != null && _keywordController.text.isNotEmpty;
     var size = MediaQuery.of(context).size;
+    final pro = context.read<PostProvider>();
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          
           leading: const Icon(Icons.arrow_back),
           title: const Text("Create Post"),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 10.0),
               child: ElevatedButton(
-                onPressed: (){
-                  showHelpBottomSheet(context);
+                onPressed: () {
+                  showHelpBottomSheet(
+                    context,
+                    _textController.text.trim(),
+                    [1],
+                    Keyword,
+                    "",
+                    _mediaFiles,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue, // Background color
@@ -336,7 +362,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       if (states.contains(MaterialState.pressed)) {
                         return Colors.blue[700]; // Darker color when pressed
                       } else if (states.contains(MaterialState.hovered)) {
-                        return Colors.blue[600]; // Slightly darker color when hovered
+                        return Colors
+                            .blue[600]; // Slightly darker color when hovered
                       }
                       return Colors.blue; // Default color
                     },
@@ -348,75 +375,70 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   child: Text(
                     "Post",
                     style: TextStyle(
-                      fontSize: 16, 
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
             ),
-
           ],
         ),
         body: Container(
+          height: double.infinity,
+          width: double.infinity,
           child: Column(
             children: [
-SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              // crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Text input field for the post content
-                Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                  TextField(
-                                    controller: _textController,
-                                    maxLines: null,
-                                    onChanged: (value) {
-                  setState(() {
-                    Keyword = extractHashtags(value);
-                  });
-                                    },
-                                    keyboardType: TextInputType.multiline,
-                                    decoration: InputDecoration(
-                  hintText: "What's on your mind?",
-                  hintStyle: TextStyle(fontSize: 18, color: Colors.grey),
-                  border: InputBorder.none,
-                                    ),
-                                  ),
-                  
-                                  const SizedBox(height: 15),
-                  
-                                  // Display media files
-                                  if (_mediaFiles.isNotEmpty) _buildMediaGrid(size),
-                  
-                                  const SizedBox(height: 15),
-                    ],
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Column(
+                      children: [
+                        // Text input field for the post content
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              TextField(
+                                controller: _textController,
+                                maxLines: null,
+                                onChanged: (value) {
+                                  setState(() {
+                                    Keyword = extractHashtags(value);
+                                  });
+                                },
+                                keyboardType: TextInputType.multiline,
+                                decoration: InputDecoration(
+                                  hintText: "What's on your mind?",
+                                  hintStyle: TextStyle(
+                                      fontSize: 18, color: Colors.grey),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+
+                              // Display media files
+                              if (_mediaFiles.isNotEmpty) _buildMediaGrid(size),
+
+                              const SizedBox(height: 15),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                // SizedBox(),
-                // Bottom action bar
-                
-              ],
-            ),
-            
-          ),
-        ),
-       const Spacer(),
-     _buildBottomBar(),
+              ),
+              _buildBottomBar(),
             ],
           ),
-        )
-
-     
+        ),
       ),
     );
   }
 
-   Widget _buildBottomBar() {
+  Widget _buildBottomBar() {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Row(
@@ -436,6 +458,12 @@ SingleChildScrollView(
               IconButton(
                 icon: Icon(Icons.people, color: Colors.blue),
                 onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const SearchableDialog();
+                    },
+                  );
                   // Handle tagging people functionality
                 },
               ),
@@ -447,7 +475,7 @@ SingleChildScrollView(
               IconButton(
                 icon: Icon(Icons.camera_alt, color: Colors.blue),
                 onPressed: () {
-                  _pickMedia(isVideo: false); // Open camera for photos
+                  _captureMedia(isVideo: false); // Open camera for photos
                 },
               ),
               Text("Camera", style: TextStyle(fontSize: 10)),
@@ -458,7 +486,7 @@ SingleChildScrollView(
               IconButton(
                 icon: Icon(Icons.videocam, color: Colors.red),
                 onPressed: () {
-                  _pickMedia(isVideo: true); // Open camera for videos
+                  _captureMedia(isVideo: true); // Open camera for videos
                 },
               ),
               Text("Video Camera", style: TextStyle(fontSize: 10)),
@@ -483,56 +511,70 @@ SingleChildScrollView(
       physics: NeverScrollableScrollPhysics(), // Disable scrolling of GridView
       itemCount: _mediaFiles.length,
       itemBuilder: (context, index) {
-        return 
-        
-      Stack(
-                                children: [
-                                  _isVideo(_mediaFiles[index])
-                                      ? (_videoControllers.length > index && _videoControllers[index] != null)
-                                          ? _buildVideoPlayer(_videoControllers[index])
-                                          : const Center(child: CircularProgressIndicator())
-                                      : Image.file(
-                                          _mediaFiles[index],
-                                          fit: BoxFit.cover,
-                                          height: size.height * 0.40, // Adjust height as needed
-                                          width: double.infinity,
-                                        ),
-                                  Positioned(
-                                    top: 10,
-                                    right: 10,
-                                    child: GestureDetector(
-                                      onTap: () => _removeMedia(index),
-                                      child: const CircleAvatar(
-                                        radius: 12,
-                                        backgroundColor: Colors.red,
-                                        child: Icon(Icons.close, size: 15, color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
+        return Stack(
+          children: [
+            _isVideo(_mediaFiles[index])
+                ? (_videoControllers.length > index &&
+                        _videoControllers[index] != null)
+                    ? _buildVideoPlayer(_videoControllers[index])
+                    : const Center(child: CircularProgressIndicator())
+                : Image.file(
+                    _mediaFiles[index],
+                    fit: BoxFit.cover,
+                    height: size.height * 0.40, // Adjust height as needed
+                    width: double.infinity,
+                  ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: GestureDetector(
+                onTap: () => _removeMedia(index),
+                child: const CircleAvatar(
+                  radius: 12,
+                  backgroundColor: Colors.red,
+                  child: Icon(Icons.close, size: 15, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
       },
     );
   }
 
 // Function to show the Bottom Sheet
-void showHelpBottomSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true, // Allowing full height
-    builder: (BuildContext context) {
-      return BottomSheetScreen();
-    },
-  );
-}
-
+  void showHelpBottomSheet(
+    BuildContext context,
+    String postTitle,
+    List<int> peopleTags,
+    List<String> keywordsList,
+    String privacyPost,
+    List<File> mediaFiles,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allowing full height
+      builder: (BuildContext context) {
+        Keyword = extractHashtags(postTitle);
+        final pro = context.read<PostProvider>();
+        return BottomSheetScreen(
+            pro: pro,
+            postTitle: postTitle,
+            peopleTags: peopleTags,
+            keywordsList: keywordsList,
+            privacyPost: privacyPost,
+            mediaFiles: mediaFiles);
+      },
+    );
+  }
 
   List<String> extractHashtags(String text) {
     // Split the text by spaces and keep all words
     List<String> words = text.split(' ');
 
     // Extract hashtags from words and allow incomplete hashtags (the word being typed)
-    List<String> hashtags = words.where((word) => word.startsWith('#')).toList();
+    List<String> hashtags =
+        words.where((word) => word.startsWith('#')).toList();
 
     return hashtags;
   }

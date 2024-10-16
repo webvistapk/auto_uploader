@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
@@ -232,26 +233,24 @@ class ProviderManager {
     }
   }
 
-
-
-
-  createNewPost(token,data)async{
-     try {
-       final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.create_new_post);
-       final body = {};
-       final headers = {
+  createNewPost(token,
+      {required String postTitle,
+      required List<int> peopleTags,
+      required List<String> keywordsList,
+      required String privacyPost,
+      required List<File> mediaFiles}) async {
+    try {
+      final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.create_new_post);
+      final body = {};
+      final headers = {
         'Authorization': 'Bearer $token',
         'Content-type': 'application/json'
-       };
+      };
 
-       final response = await http.post(completeUrl,headers: headers,body: body);
-       if(response.statusCode == 200){
-
-       }else{
-        
-       }
-     } catch (e) {
-       
-     }
+      final response =
+          await http.post(completeUrl, headers: headers, body: body);
+      if (response.statusCode == 200) {
+      } else {}
+    } catch (e) {}
   }
 }
