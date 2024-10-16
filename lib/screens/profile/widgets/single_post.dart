@@ -8,7 +8,7 @@ class PostWidget extends StatelessWidget {
   final String caption;
   final String mediaUrl; // Either image or video
   final String profileImageUrl;
-  final bool isVideo; // To determine if the post is a video
+  final String isVideo; // To determine if the post is a video
   final String likes;
   final String comments;
   final String shares;
@@ -64,7 +64,7 @@ class PostWidget extends StatelessWidget {
           SizedBox(height: 10),
 
           // Post Media (either Image or Video)
-          isVideo
+          isVideo=='video'
               ? _buildVideoPlayer(mediaUrl) // If it's a video, show video player
               : ClipRRect(
             borderRadius: BorderRadius.circular(10),

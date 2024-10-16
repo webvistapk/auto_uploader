@@ -58,6 +58,7 @@ class follower_request_provider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
       print("Exception: No Record Available");
       print(e);
       return [];
@@ -105,6 +106,7 @@ class follower_request_provider extends ChangeNotifier {
     } catch (e) {
       print("Exception: Error ${e}");
       print(e);
+      ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
       setisLoading(false);
     }
   }

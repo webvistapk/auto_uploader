@@ -1,73 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/utils.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/screens/profile/widgets/single_post.dart';
+import 'package:provider/provider.dart';
 
-class PostScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> posts = [
-    {
-      'index':1,
-      'username': 'kashif_official',
-      'location': 'Nawabshah, Sindh',
-      'date': 'Oct 9th 2024',
-      'caption': 'Beautiful sunset view #nature #photography',
-      'mediaUrl': AppUtils.testImage,
-      'isVideo': false,
-    },
-    {
-      'index':2,
-      'username': 'kashif_official',
-      'location': 'Karachi, Sindh',
-      'date': 'Oct 8th 2024',
-      'caption': 'Enjoying the city life! #urban #explore',
-      'mediaUrl': 'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
-      'isVideo': true,
-    },
-    {
-      'index':3,
-      'username': 'kashif_official',
-      'location': 'Lahore, Punjab',
-      'date': 'Oct 7th 2024',
-      'caption': 'A day at the park with friends #friends #fun',
-      'mediaUrl': AppUtils.testImage,
-      'isVideo': false,
-    },
-    {
-      'index':4,
-      'username': 'kashif_official',
-      'location': 'Islamabad, Capital Territory',
-      'date': 'Oct 6th 2024',
-      'caption': 'Morning run #fitness #motivation',
-      'mediaUrl': 'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
-      'isVideo': true,
-    },
-  ];
+class PostScreen extends StatefulWidget {
+  @override
+  State<PostScreen> createState() => _PostScreenState();
+}
 
+class _PostScreenState extends State<PostScreen> {
+  Future<List<PostModel>>?
+  _posts;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPost();
+  }
+
+  _fetchPost() {
+    setState(() {
+      _posts =
+          Provider.of<PostProvider>(context, listen: false)
+              .getPost(context);
+
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Posts")),
-      body: ListView.builder(
-        itemCount: posts.length,
-        itemBuilder: (context, index) {
-          final post = posts[index];
-          return PostWidget(
-            username: post['username'],
-            location: post['location'],
-            date: post['date'],
-            caption: post['caption'],
-            mediaUrl: post['mediaUrl'],
-            profileImageUrl: AppUtils.testImage, // Example profile image
-            isVideo: post['isVideo'],
-            likes: '2.4k',
-            comments: '669',
-            shares: '129',
-            saved: '205',
-          );
+      body: FutureBuilder<List<PostModel>>(
+        future: _posts,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            print("Post is caalled ${snapshot.data}");
+            print("FutureBuilder snapshot: ${snapshot.connectionState}, ${snapshot.data}");
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('An error occurred: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            final posts = snapshot.data; // Ensure posts is correctly accessed
+            if (posts!.isNotEmpty) {
+              return ListView.builder(
+                itemCount: posts.length,
+                itemBuilder: (context, index) {
+                  final post = posts[index].posts;
+                  return PostWidget(
+                    username: post[index].user.username.toString(),
+                    location: "Location",
+                    date: post[index].createdAt.day.toString(),
+                    caption: post[index].post.toString(),
+                    mediaUrl: post[index].media.isNotEmpty ? post[index].media[index].file : '', // Check for media existence
+                    profileImageUrl: AppUtils.testImage, // Example profile image
+                    isVideo: post[index].media.isNotEmpty ? post[index].media[index].mediaType.toString() : '', // Check for media existence
+                    likes: '100',
+                    comments: '100',
+                    shares: "100",
+                    saved: '100',
+                  );
+                },
+              );
+            } else {
+              return Center(child: Text("No Post Yet"));
+            }
+          } else {
+            return Center(child: Text("No Post Yet"));
+          }
         },
       ),
     );
   }
 }
-
-

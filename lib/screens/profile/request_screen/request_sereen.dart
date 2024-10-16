@@ -29,7 +29,7 @@ class RequestScreen extends StatefulWidget {
 class _RequestScreenState extends State<RequestScreen> {
   var userDetails;
   Future<List<FollowerRequestModel>>?
-      _followRequests; // Changed to a list of requests
+      _followRequests;
 
   @override
   void initState() {
