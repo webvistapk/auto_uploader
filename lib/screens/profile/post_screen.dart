@@ -11,8 +11,7 @@ class PostScreen extends StatefulWidget {
 }
 
 class _PostScreenState extends State<PostScreen> {
-  Future<List<PostModel>>?
-  _posts;
+  Future<List<PostModel>>? _posts;
 
   @override
   void initState() {
@@ -23,9 +22,7 @@ class _PostScreenState extends State<PostScreen> {
   _fetchPost() {
     setState(() {
       _posts =
-          Provider.of<PostProvider>(context, listen: false)
-              .getPost(context);
-
+          Provider.of<PostProvider>(context, listen: false).getPost(context);
     });
   }
 
@@ -38,7 +35,8 @@ class _PostScreenState extends State<PostScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             print("Post is caalled ${snapshot.data}");
-            print("FutureBuilder snapshot: ${snapshot.connectionState}, ${snapshot.data}");
+            print(
+                "FutureBuilder snapshot: ${snapshot.connectionState}, ${snapshot.data}");
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('An error occurred: ${snapshot.error}'));
@@ -48,15 +46,20 @@ class _PostScreenState extends State<PostScreen> {
               return ListView.builder(
                 itemCount: posts.length,
                 itemBuilder: (context, index) {
-                  final post = posts[index].posts;
+                  final post = posts[index];
                   return PostWidget(
-                    username: post[index].user.username.toString(),
+                    username: post.user.username.toString(),
                     location: "Location",
-                    date: post[index].createdAt.day.toString(),
-                    caption: post[index].post.toString(),
-                    mediaUrl: post[index].media.isNotEmpty ? post[index].media[index].file : '', // Check for media existence
-                    profileImageUrl: AppUtils.testImage, // Example profile image
-                    isVideo: post[index].media.isNotEmpty ? post[index].media[index].mediaType.toString() : '', // Check for media existence
+                    date: post.createdAt.toString(),
+                    caption: post.post.toString(),
+                    mediaUrl: post.media.isNotEmpty
+                        ? post.media[index].file
+                        : '', // Check for media existence
+                    profileImageUrl:
+                        AppUtils.testImage, // Example profile image
+                    isVideo: post.media.isNotEmpty
+                        ? post.media[index].mediaType.toString()
+                        : '', // Check for media existence
                     likes: '100',
                     comments: '100',
                     shares: "100",

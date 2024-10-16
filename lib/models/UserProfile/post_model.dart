@@ -1,30 +1,4 @@
 class PostModel {
-  final String status;
-  final List<Post> posts;
-  final int totalCount;
-  final bool hasNextPage;
-  final dynamic nextOffset;
-
-  PostModel({
-    required this.status,
-    required this.posts,
-    required this.totalCount,
-    required this.hasNextPage,
-    this.nextOffset,
-  });
-
-  factory PostModel.fromJson(Map<String, dynamic> json) {
-    return PostModel(
-      status: json['status']??'',
-      posts: List<Post>.from(json['posts'].map((post) => Post.fromJson(post))),
-      totalCount: json['total_count']??0,
-      hasNextPage: json['has_next_page']??'',
-      nextOffset: json['next_offset']??'',
-    );
-  }
-}
-
-class Post {
   final int id;
   final String post;
   final List<Tag> tags;
@@ -32,10 +6,10 @@ class Post {
   final List<Media> media;
   final User user;
   final String privacy;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String createdAt;
+  final String updatedAt;
 
-  Post({
+  PostModel({
     required this.id,
     required this.post,
     required this.tags,
@@ -47,17 +21,19 @@ class Post {
     required this.updatedAt,
   });
 
-  factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
-      id: json['id']??0,
-      post: json['post']??'',
-      tags: List<Tag>.from(json['tags'].map((tag) => Tag.fromJson(tag))),
-      keywords: List<Keyword>.from(json['keywords'].map((keyword) => Keyword.fromJson(keyword))),
-      media: List<Media>.from(json['media'].map((media) => Media.fromJson(media))),
+  // Factory method to parse JSON data
+  factory PostModel.fromJson(Map<String, dynamic> json) {
+    return PostModel(
+      id: json['id'],
+      post: json['post'],
+      tags: (json['tags'] as List).map((tag) => Tag.fromJson(tag)).toList(),
+      keywords:
+          (json['keywords'] as List).map((kw) => Keyword.fromJson(kw)).toList(),
+      media: (json['media'] as List).map((m) => Media.fromJson(m)).toList(),
       user: User.fromJson(json['user']),
-      privacy: json['privacy']??'',
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      privacy: json['privacy'],
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
     );
   }
 }

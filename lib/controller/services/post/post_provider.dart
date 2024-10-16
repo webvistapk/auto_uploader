@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
@@ -16,39 +17,44 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<PostModel>>getPost(BuildContext context)async{
-    print("Fetching APIS11");
+  Future<List<PostModel>> getPost(BuildContext context) async {
+    print("Fetching API");
     final String? token = await Prefrences.getAuthToken();
 
     int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}$_loggedInUserId";
-    print("Fetching APIS");
-    try{
+    print("Fetching API");
+    try {
       final response = await http.get(Uri.parse(URL), headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token"
       });
       print(response.body);
-      if(response.statusCode==200){
 
-        List<dynamic> jsonList = jsonDecode(response.body);
-        List<PostModel> postList = jsonList
-            .map((json) => PostModel.fromJson(json))
-            .toList();
+      if (response.statusCode == 200) {
+        final jsonList = jsonDecode(response.body);
+
+        print(jsonList);
+        log("Post Data: ${jsonList['posts']}");
+        // debugger();
+
+        List<PostModel> postList = [];
+        for (var postJson in jsonList['posts']) {
+          final post = PostModel.fromJson(postJson);
+          postList.add(post);
+        }
+
         notifyListeners();
         return postList;
-      }
-      else{
+      } else {
         return [];
       }
-    }
-    catch(e){
-      ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
       print(e);
       return [];
-    }
-    finally{
+    } finally {
       setIsLoading(false);
     }
   }

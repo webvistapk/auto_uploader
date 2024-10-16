@@ -45,7 +45,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _initializeData();
     super.initState();
     _fetchPosts();
-
   }
 
   void _fetchPosts() async {
@@ -75,8 +74,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'mediaUrl': AppUtils.testImage,
         'isVideo': false,
       },
-
-
     ];
 
     setState(() {
@@ -175,17 +172,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print(_loggedInUserId);
       return SafeArea(
         child: Scaffold(
-          appBar:_loggedInUserId != widget.id
-            ?AppBar(
-            title:Text(userName??'',
-              style:const TextStyle(
-                fontSize: 10,
-                color: AppColors.greyColor
-            ),),
-           centerTitle: true,
-          ):
-              TopBar(
-                  onSearch: (query) => SearchStore.updateSearchQuery(query),
+          appBar: _loggedInUserId != widget.id
+              ? AppBar(
+                  title: Text(
+                    userName ?? '',
+                    style: const TextStyle(
+                        fontSize: 10, color: AppColors.greyColor),
+                  ),
+                  centerTitle: true,
+                )
+              : PreferredSize(
+                  preferredSize: Size.fromHeight(50.0),
+                  child: TopBar(
+                    onSearch: (query) => SearchStore.updateSearchQuery(query),
+                  ),
                 ),
           // PreferredSize(
           //     preferredSize: Size.fromHeight(50), child: AppBar()),
@@ -237,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   SizedBox(
                                     height: 10,
                                   ),
-                                 /* if (_loggedInUserId != widget.id)
+                                  /* if (_loggedInUserId != widget.id)
                                     GestureDetector(
                                       onTap: () {
                                         Navigator.pop(context);
@@ -252,7 +252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       canViewProfile: canViewProfile,
                                       isFollowing: isFollowing),
                                   if (canViewProfile) ...[
-                                   /* const CategoryIcons(images: [
+                                    /* const CategoryIcons(images: [
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                       AppUtils.testImage,
@@ -260,14 +260,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       AppUtils.testImage,
                                       AppUtils.testImage,
                                     ]),*/
-                                    ProfileImages(images: const [
-                                      AppUtils.testImage,
-                                      AppUtils.testImage,
-                                      AppUtils.testImage,
-                                      AppUtils.testImage,
-                                      AppUtils.testImage,
-                                      AppUtils.testImage,
-                                    ], posts: posts,),
+                                    ProfileImages(
+                                      images: const [
+                                        AppUtils.testImage,
+                                        AppUtils.testImage,
+                                        AppUtils.testImage,
+                                        AppUtils.testImage,
+                                        AppUtils.testImage,
+                                        AppUtils.testImage,
+                                      ],
+                                      posts: posts,
+                                    ),
                                   ] else ...[
                                     const Center(
                                       child: Text("This profile is private."),
