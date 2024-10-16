@@ -190,6 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // PreferredSize(
           //     preferredSize: Size.fromHeight(50), child: AppBar()),
           endDrawer: const SideBar(),
+
           backgroundColor: AppColors.mainBgColor,
           body: ValueListenableBuilder<String?>(
             valueListenable: SearchStore.searchQuery,
