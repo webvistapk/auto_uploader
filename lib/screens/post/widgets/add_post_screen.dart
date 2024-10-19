@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/post/component/tag_users.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,8 @@ import 'package:video_player/video_player.dart';
 import '../../widget/bottom_sheet_screen.dart';
 
 class AddPostScreen extends StatefulWidget {
-  const AddPostScreen({super.key});
+  final UserProfile userProfile;
+  const AddPostScreen({super.key, required this.userProfile});
 
   @override
   _AddPostScreenState createState() => _AddPostScreenState();
@@ -558,6 +560,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         Keyword = extractHashtags(postTitle);
         final pro = context.read<PostProvider>();
         return BottomSheetScreen(
+            userProfile: widget.userProfile,
             pro: pro,
             postTitle: postTitle,
             peopleTags: peopleTags,

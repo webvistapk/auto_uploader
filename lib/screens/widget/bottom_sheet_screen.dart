@@ -1,10 +1,15 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post_manager.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
 import 'package:provider/provider.dart';
 
 class BottomSheetScreen extends StatefulWidget {
@@ -14,15 +19,16 @@ class BottomSheetScreen extends StatefulWidget {
   final String privacyPost;
   final List<File> mediaFiles;
   final PostProvider pro;
-  BottomSheetScreen({
-    super.key,
-    required this.postTitle,
-    required this.peopleTags,
-    required this.keywordsList,
-    required this.privacyPost,
-    required this.mediaFiles,
-    required this.pro,
-  });
+  final UserProfile userProfile;
+  BottomSheetScreen(
+      {super.key,
+      required this.postTitle,
+      required this.peopleTags,
+      required this.keywordsList,
+      required this.privacyPost,
+      required this.mediaFiles,
+      required this.pro,
+      required this.userProfile});
 
   @override
   State<BottomSheetScreen> createState() => _BottomSheetScreenState();
@@ -164,7 +170,10 @@ class _BottomSheetScreenState extends State<BottomSheetScreen> {
                           isLoading = true;
                         });
                       final keywords = removeHashFromList(widget.postTitle);
-                      debugger();
+                      if (keywords.isEmpty) {
+                        keywords.add('0');
+                      }
+                      // debugger();
                       final data = await widget.pro.createNewPost(context,
                           postTitle: widget.postTitle,
                           peopleTags: widget.peopleTags,
@@ -172,15 +181,28 @@ class _BottomSheetScreenState extends State<BottomSheetScreen> {
                           privacyPost: "followers",
                           mediaFiles: widget.mediaFiles);
                       if (data != null) {
-                        if (mounted)
-                          setState(() {
-                            isLoading = false;
-                          });
+                        ToastNotifier.showSuccessToast(
+                            context, "Post Successfully posted!");
+                        // if (mounted)
+                        setState(() {
+                          isLoading = false;
+                        });
+                        final token = await Prefrences.getAuthToken();
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => MainScreen(
+                                    userProfile: widget.userProfile,
+                                    authToken: token),
+                                context: context),
+                            (route) => false);
                       } else {
-                        if (mounted)
-                          setState(() {
-                            isLoading = false;
-                          });
+                        // if (mounted)
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ToastNotifier.showErrorToast(
+                            context, "Something else Missing from Developer");
                       }
                     },
                     child: Container(

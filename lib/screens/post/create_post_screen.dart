@@ -118,7 +118,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                             Navigator.push(
                                 context,
                                 CupertinoDialogRoute(
-                                    builder: (_) => AddPostScreen(),
+                                    builder: (_) => AddPostScreen(
+                                          userProfile: widget.userProfile!,
+                                        ),
                                     context: context));
                           },
                           style: ElevatedButton.styleFrom(

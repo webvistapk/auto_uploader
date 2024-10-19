@@ -19,7 +19,7 @@ class PostProvider extends ChangeNotifier {
       notifyListeners();
       log("$postTitle, $peopleTags, $keywordsList, $privacyPost, $mediaFiles");
       final token = await Prefrences.getAuthToken();
-      debugger();
+      // debugger();
       if (token != null) {
         final response = await PostManager().createPost(
             postTitle: postTitle,

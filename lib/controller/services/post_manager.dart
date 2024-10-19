@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:mobile/common/message_toast.dart';
@@ -51,16 +52,19 @@ class PostManager {
       var response = await http.Response.fromStream(streamedResponse);
 
       // Check the response status
+      // debugger();
       if (response.statusCode == 201) {
-        print('Post created successfully: ${response.body}');
+        log('Post created successfully: ${response.body}');
 
         return jsonDecode(response.body);
       } else {
+        debugger();
         print(
             'Failed to create post: ${response.statusCode}, ${response.body}');
         return null;
       }
     } catch (error) {
+      debugger();
       print('Error occurred: $error');
       return null;
     }
