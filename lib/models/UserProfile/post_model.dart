@@ -8,6 +8,8 @@ class PostModel {
   final String privacy;
   final String createdAt;
   final String updatedAt;
+  final int likes_count;
+  final int commnets_count;
 
   PostModel({
     required this.id,
@@ -19,6 +21,8 @@ class PostModel {
     required this.privacy,
     required this.createdAt,
     required this.updatedAt,
+    required this.likes_count,
+    required this.commnets_count
   });
 
   // Factory method to parse JSON data
@@ -34,6 +38,8 @@ class PostModel {
       privacy: json['privacy'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
+      likes_count: json['likes_count'],
+      commnets_count: json['comments_count']
     );
   }
 }

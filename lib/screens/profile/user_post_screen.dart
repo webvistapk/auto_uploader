@@ -122,8 +122,8 @@ class _UserPostScreenState extends State<UserPostScreen> {
                           : '',
                       profileImageUrl: AppUtils.testImage,
                       isVideo: post.media[0].mediaType,
-                      likes: '100',
-                      comments: '100',
+                      likes: post.likes_count.toString(),
+                      comments: post.commnets_count.toString(),
                       shares: "100",
                       saved: '100',
                       refresh: (){
