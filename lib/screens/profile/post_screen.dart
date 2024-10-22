@@ -64,6 +64,8 @@ class _PostScreenState extends State<PostScreen> {
                     comments: '100',
                     shares: "100",
                     saved: '100',
+                    postId: '',
+                    refresh: () {  },
                   );
                 },
               );

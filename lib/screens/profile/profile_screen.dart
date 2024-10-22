@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/followers.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
@@ -19,6 +20,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:provider/provider.dart';
 
 import '../../controller/services/followers/follower_request.dart';
+import '../../models/UserProfile/post_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   final int? id; // Accepts an optional ID
@@ -38,7 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<FetchResponseModel>? _followRequestsResponse;
   String? userName;
   List<Map<String, dynamic>> posts = [];
-
+  Future<List<PostModel>>? _posts;
   @override
   void initState() {
     // _getUserIdFromToken();
@@ -49,35 +51,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _fetchPosts() async {
     // images and videos fetch and simulated from an API
-    List<Map<String, dynamic>> fetchedPosts = [
-      {
-        'mediaUrl': AppUtils.testImage,
-        'isVideo': false,
-      },
-      {
-        'mediaUrl': AppUtils.testImage,
-        'isVideo': false,
-      },
-      {
-        'mediaUrl': AppUtils.testImage,
-        'isVideo': false,
-      },
-      {
-        'mediaUrl': AppUtils.testImage,
-        'isVideo': false,
-      },
-      {
-        'mediaUrl': AppUtils.testImage,
-        'isVideo': false,
-      },
-      {
-        'mediaUrl': AppUtils.testImage,
-        'isVideo': false,
-      },
-    ];
-
     setState(() {
-      posts = fetchedPosts;
+      _posts=Provider.of<PostProvider>(context,listen: false).getPost(context);
     });
   }
 
@@ -155,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // After fetching the status, check it and return the corresponding bool value
       if (Provider.of<follower_request_provider>(context, listen: false)
-              .status ==
+          .status ==
           'accepted') {
         return true;
       } else {
@@ -174,19 +149,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Scaffold(
           appBar: _loggedInUserId != widget.id
               ? AppBar(
-                  title: Text(
-                    userName ?? '',
-                    style: const TextStyle(
-                        fontSize: 10, color: AppColors.greyColor),
-                  ),
-                  centerTitle: true,
-                )
+            title: Text(
+              userName ?? '',
+              style: const TextStyle(
+                  fontSize: 10, color: AppColors.greyColor),
+            ),
+            centerTitle: true,
+          )
               : PreferredSize(
-                  preferredSize: Size.fromHeight(50.0),
-                  child: TopBar(
-                    onSearch: (query) => SearchStore.updateSearchQuery(query),
-                  ),
-                ),
+            preferredSize: Size.fromHeight(50.0),
+            child: TopBar(
+              onSearch: (query) => SearchStore.updateSearchQuery(query),
+            ),
+          ),
           // PreferredSize(
           //     preferredSize: Size.fromHeight(50), child: AppBar()),
           endDrawer: const SideBar(),
@@ -262,15 +237,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       AppUtils.testImage,
                                     ]),*/
                                     ProfileImages(
-                                      images: const [
-                                        AppUtils.testImage,
-                                        AppUtils.testImage,
-                                        AppUtils.testImage,
-                                        AppUtils.testImage,
-                                        AppUtils.testImage,
-                                        AppUtils.testImage,
-                                      ],
-                                      posts: posts,
+                                      posts: _posts,
+                                      refresh: (String postID) {
+                                        _fetchPosts();
+                                      },
                                     ),
                                   ] else ...[
                                     const Center(

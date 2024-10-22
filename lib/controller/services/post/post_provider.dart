@@ -58,4 +58,41 @@ class PostProvider extends ChangeNotifier {
       setIsLoading(false);
     }
   }
+
+  void deletePost(String postId,BuildContext context) async {
+    final String? token = await Prefrences.getAuthToken();
+
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.delete_post}$postId/";
+    setIsLoading(true);
+    try {
+      // Make the DELETE request
+      final response = await http.delete(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Show success message
+        ToastNotifier.showSuccessToast(context, "Post deleted successfully");
+        getPost(context);
+        setIsLoading(false);
+
+      } else {
+        // Show error message if deletion failed
+        ToastNotifier.showErrorToast(
+            context, "Sorry post is not deleted. Please Try Again!");
+
+        setIsLoading(false);
+      }
+    }
+    catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+
+      setIsLoading(false);
+    }
+  }
+
 }

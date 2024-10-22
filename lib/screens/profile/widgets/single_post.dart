@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
-class PostWidget extends StatelessWidget {
+class PostWidget extends StatefulWidget {
+  final String postId;
   final String username;
   final String location;
   final String date;
@@ -13,9 +16,12 @@ class PostWidget extends StatelessWidget {
   final String comments;
   final String shares;
   final String saved;
+  final VoidCallback refresh;
+
 
   const PostWidget({
     Key? key,
+    required this.postId,
     required this.username,
     required this.location,
     required this.date,
@@ -27,8 +33,14 @@ class PostWidget extends StatelessWidget {
     required this.comments,
     required this.shares,
     required this.saved,
+    required this.refresh
   }) : super(key: key);
 
+  @override
+  State<PostWidget> createState() => _PostWidgetState();
+}
+
+class _PostWidgetState extends State<PostWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -41,35 +53,60 @@ class PostWidget extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundImage: NetworkImage(profileImageUrl),
+                backgroundImage: NetworkImage(widget.profileImageUrl),
               ),
               SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    username,
+                    widget.username,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    location,
+                    widget.location,
                     style: TextStyle(color: Colors.grey, fontSize: 9),
                   ),
                 ],
               ),
               Spacer(),
-              Icon(Icons.more_horiz),
+              // More options icon with dropdown menu
+              PopupMenuButton<int>(
+                icon: Icon(Icons.more_horiz),
+                onSelected: (value) {
+                  if (value == 1) {
+                    // Handle edit action
+                    print('Edit Post');
+                  } else if (value == 2) {
+                    // Handle delete action
+                    setState(() {
+                      //Provider.of<PostProvider>(context,listen: false).deletePost(widget.postId,context);
+                      widget.refresh();
+                    });
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Text('Edit'),
+                  ),
+                  PopupMenuItem<int>(
+                    value: 2,
+                    child: Text('Delete'),
+                  ),
+                ],
+              ),
             ],
           ),
           SizedBox(height: 10),
 
           // Post Media (either Image or Video)
-          isVideo=='video'
-              ? _buildVideoPlayer(mediaUrl) // If it's a video, show video player
+          widget.isVideo=='video'
+              ? _buildVideoPlayer(widget.mediaUrl) // If it's a video, show video player
               : ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.network(
-              mediaUrl, // Post Image
+              widget.mediaUrl, // Post Image
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -85,11 +122,11 @@ class PostWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    location,
+                    widget.location,
                     style: TextStyle(color: Colors.black54, fontSize: 9),
                   ),
                   Text(
-                    date,
+                    widget.date,
                     style: TextStyle(color: Colors.black54, fontSize: 9),
                   ),
                 ],
@@ -99,28 +136,28 @@ class PostWidget extends StatelessWidget {
                   Column(
                     children: [
                       Icon(Icons.bookmark_border, size: 20),
-                      Text(saved, style: TextStyle(fontSize: 9)),
+                      Text(widget.saved, style: TextStyle(fontSize: 9)),
                     ],
                   ),
                   SizedBox(width: 10),
                   Column(
                     children: [
                       Icon(Icons.favorite_border, size: 20),
-                      Text(likes, style: TextStyle(fontSize: 9)),
+                      Text(widget.likes, style: TextStyle(fontSize: 9)),
                     ],
                   ),
                   SizedBox(width: 10),
                   Column(
                     children: [
                       Icon(Icons.comment, size: 20),
-                      Text(comments, style: TextStyle(fontSize: 9)),
+                      Text(widget.comments, style: TextStyle(fontSize: 9)),
                     ],
                   ),
                   SizedBox(width: 10),
                   Column(
                     children: [
                       Icon(Icons.share, size: 20),
-                      Text(shares, style: TextStyle(fontSize: 9)),
+                      Text(widget.shares, style: TextStyle(fontSize: 9)),
                     ],
                   ),
                 ],
@@ -138,16 +175,16 @@ class PostWidget extends StatelessWidget {
                   style: TextStyle(color: Colors.black, fontSize: 11),
                   children: [
                     TextSpan(
-                      text: '$username ',
+                      text: '${widget.username} ',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    TextSpan(text: caption),
+                    TextSpan(text: widget.caption),
                   ],
                 ),
               ),
               SizedBox(height: 8),
               Text(
-                'View all $comments comments',
+                'View all ${widget.comments} comments',
                 style: TextStyle(color: Colors.grey, fontSize: 11),
               ),
             ],
@@ -162,7 +199,7 @@ class PostWidget extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        width: double.infinity,
+          width: double.infinity,
           height: 400,
           child: VideoPlayerWidget(videoUrl: videoUrl)),
     );

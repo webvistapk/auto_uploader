@@ -5,32 +5,38 @@ import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
-class ProfileImages extends StatelessWidget {
-  final List<String> images;
-  final List<Map<String, dynamic>> posts;
+import '../../../models/UserProfile/post_model.dart';
 
-  const ProfileImages({
+class ProfileImages extends StatefulWidget {
+  //final List<String> images;
+  final Future<List<PostModel>>?  posts;
+  final Function(String postID) refresh;
+  ProfileImages({
     super.key,
-    required this.images,
-    required this.posts
+    //required this.images,
+    required this.posts,
+    required this.refresh
   });
 
+  @override
+  State<ProfileImages> createState() => _ProfileImagesState();
+}
 
-  //Image Post
-  List<String> getImagePosts() {
-    return posts
-        .where((post) => !post['isVideo']) // Filter for images
-        .map((post) => post['mediaUrl'].toString())
-        .toList();
+class _ProfileImagesState extends State<ProfileImages> {
+  List<PostModel> getImagePosts(List<PostModel> posts) {
+    return posts.where((post) {
+      return post.media[0].mediaType == 'image';
+    }).toList();
+
   }
 
-  // Video posts
-  List<String> getVideoPosts() {
-    return posts
-        .where((post) => post['isVideo']) // Filter for videos
-        .map((post) => post['mediaUrl'].toString())
-        .toList();
+  // Filter Video Posts
+  List<PostModel> getVideoPosts(List<PostModel> posts) {
+    return posts.where((post) {
+      return post.media[0].mediaType == 'video';
+    }).toList();
   }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -42,7 +48,7 @@ class ProfileImages extends StatelessWidget {
               tabBarTheme: TabBarTheme(
                 labelColor: Colors.black, // Set the color for the selected tab
                 unselectedLabelColor:
-                    Colors.grey, // Set the color for unselected tabs
+                Colors.grey, // Set the color for unselected tabs
                 indicator: UnderlineTabIndicator(
                   borderSide: BorderSide(
                       color: Colors.black, width: 2.0), // Indicator color
@@ -117,7 +123,7 @@ class ProfileImages extends StatelessWidget {
                       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                       decoration: BoxDecoration(
                         color: AppColors.lightGrey,
-                         // Grey border
+                        // Grey border
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text(
@@ -148,17 +154,49 @@ class ProfileImages extends StatelessWidget {
 
           SizedBox(
             height: 500, // Adjust height as needed
-            child: TabBarView(
+            child:FutureBuilder<List<PostModel>>(
+              future: widget.posts,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator()); // Loading state
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text("Error loading posts")); // Error state
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No posts available")); // Empty state
+                }
+
+                // Data is ready
+                List<PostModel> allPosts = snapshot.data!;
+                List<PostModel> imagePosts = getImagePosts(allPosts);
+                List<PostModel> videoPosts = getVideoPosts(allPosts);
+
+                return TabBarView(
+                  children: [
+                    PostGrid(posts: allPosts,refresh: widget.refresh,filterType: "allPost",),        // All Posts
+                    PostGrid(posts: imagePosts,refresh: widget.refresh,filterType: "imagesPost"),      // Filtered Image Posts
+                    PostGrid(posts: videoPosts,refresh: widget.refresh,filterType: "videoPost"),      // Filtered Video Posts
+                    PostGrid(posts: allPosts,refresh: widget.refresh,filterType: "allPost"),        // Placeholder for Pages
+                    PostGrid(posts: allPosts,refresh: widget.refresh,filterType: "allPost"),        // Placeholder for Posts
+                    PostGrid(posts: allPosts,refresh: widget.refresh,filterType: "allPost"),        // Placeholder for Tagged
+                    const profile_info(),             // Info tab
+                  ],
+                );
+              },
+            ),
+
+
+
+            /*TabBarView(
               children: [
                 PostGrid(posts: posts),
-                PostGrid(posts: posts),
+                PostGrid(posts: imagePosts),
                 PostGrid(posts: posts),
                 PostGrid(posts: posts),
                 PostGrid(posts: posts),
                 PostGrid(posts: posts),
                 profile_info(),
               ],
-            ),
+            ),*/
           ),
         ],
       ),
