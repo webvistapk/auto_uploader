@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:mobile/models/UserProfile/SinglePostModel.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import '../../../common/message_toast.dart';
@@ -9,8 +10,10 @@ import '../../endpoints.dart';
 import 'package:http/http.dart' as http;
 
 class PostProvider extends ChangeNotifier {
+  PostDetails? _post;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  PostDetails? get post => _post;
 
   setIsLoading(bool value) {
     _isLoading = value;
@@ -92,6 +95,31 @@ class PostProvider extends ChangeNotifier {
       ToastNotifier.showErrorToast(context, "There is an Error: $e");
 
       setIsLoading(false);
+    }
+  }
+
+  Future<void> getSinglePost(String postID) async {
+    final String? token = await Prefrences.getAuthToken();
+    setIsLoading(true);
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_single_post}${postID}/";
+    try {
+      final response = await http.get(Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        _post = PostDetails.fromJson(data['posts']);
+        print(_post);
+      } else {
+        throw Exception('Failed to load post');
+      }
+    } catch (e) {
+      throw e;
+    } finally {
+     setIsLoading(false);
     }
   }
 

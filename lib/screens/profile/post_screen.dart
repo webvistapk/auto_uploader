@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
-import 'package:mobile/screens/profile/widgets/single_post.dart';
+import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:provider/provider.dart';
 
 class PostScreen extends StatefulWidget {

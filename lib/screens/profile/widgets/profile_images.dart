@@ -173,8 +173,8 @@ class _ProfileImagesState extends State<ProfileImages> {
                 return TabBarView(
                   children: [
                     PostGrid(posts: allPosts,filterType: "allPost",),        // All Posts
-                    PostGrid(posts: imagePosts,filterType: "imagesPost"),      // Filtered Image Posts
-                    PostGrid(posts: videoPosts,filterType: "videoPost"),      // Filtered Video Posts
+                    PostGrid(posts: imagePosts,filterType: "image"),      // Filtered Image Posts
+                    PostGrid(posts: videoPosts,filterType: "video"),      // Filtered Video Posts
                     PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Pages
                     PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Posts
                     PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Tagged

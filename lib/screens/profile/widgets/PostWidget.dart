@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
@@ -100,46 +101,52 @@ class _PostWidgetState extends State<PostWidget> {
           SizedBox(height: 10),
 
           // Post Media (either Image or Video)
-          widget.isVideo == 'video'
-              ? _buildVideoPlayer(
-                  widget.mediaUrl) // If it's a video, show video player
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    widget.mediaUrl, // Display the media URL
-                    fit: BoxFit.cover,
-                    height: 200,
-                    width: double.infinity,
-                    loadingBuilder: (BuildContext context, Widget child,
-                        ImageChunkEvent? loadingProgress) {
-                      if (loadingProgress == null) {
-                        // Image has fully loaded
-                        return child;
-                      } else {
-                        // Image is still loading, show CircularProgressIndicator
-                        return SizedBox(
-                          height: 200,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      (loadingProgress.expectedTotalBytes ?? 1)
-                                  : null,
+
+          InkWell(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>SinglePost(postId: widget.postId)));
+            },
+            child: widget.isVideo == 'video'
+                ? _buildVideoPlayer(
+                    widget.mediaUrl) // If it's a video, show video player
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      widget.mediaUrl, // Display the media URL
+                      fit: BoxFit.cover,
+                      height: 200,
+                      width: double.infinity,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          // Image has fully loaded
+                          return child;
+                        } else {
+                          // Image is still loading, show CircularProgressIndicator
+                          return SizedBox(
+                            height: 200,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        (loadingProgress.expectedTotalBytes ?? 1)
+                                    : null,
+                              ),
                             ),
-                          ),
-                        );
-                      }
-                    },
-                    errorBuilder: (context, error, stackTrace) =>
-                        Icon(Icons.broken_image),
-                  )
-                  /*  Image.network(
-              widget.mediaUrl, // Post Image
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),*/
-                  ),
+                          );
+                        }
+                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(Icons.broken_image),
+                    )
+                    /*  Image.network(
+                widget.mediaUrl, // Post Image
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),*/
+                    ),
+          ),
           SizedBox(height: 10),
 
           // Date and Interaction icons

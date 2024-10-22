@@ -17,4 +17,5 @@ class ApiURLs {
   static const String update_user_profile = "userprofile/users/update/";
   static const String get_post="posts/get/";
   static const String delete_post="posts/delete/";
+  static const String get_single_post="posts/get/single/";
 }
