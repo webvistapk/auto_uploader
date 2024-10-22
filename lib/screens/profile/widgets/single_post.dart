@@ -18,23 +18,22 @@ class PostWidget extends StatefulWidget {
   final String saved;
   final VoidCallback refresh;
 
-
-  const PostWidget({
-    Key? key,
-    required this.postId,
-    required this.username,
-    required this.location,
-    required this.date,
-    required this.caption,
-    required this.mediaUrl,
-    required this.profileImageUrl,
-    required this.isVideo,
-    required this.likes,
-    required this.comments,
-    required this.shares,
-    required this.saved,
-    required this.refresh
-  }) : super(key: key);
+  const PostWidget(
+      {Key? key,
+      required this.postId,
+      required this.username,
+      required this.location,
+      required this.date,
+      required this.caption,
+      required this.mediaUrl,
+      required this.profileImageUrl,
+      required this.isVideo,
+      required this.likes,
+      required this.comments,
+      required this.shares,
+      required this.saved,
+      required this.refresh})
+      : super(key: key);
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
@@ -101,17 +100,46 @@ class _PostWidgetState extends State<PostWidget> {
           SizedBox(height: 10),
 
           // Post Media (either Image or Video)
-          widget.isVideo=='video'
-              ? _buildVideoPlayer(widget.mediaUrl) // If it's a video, show video player
+          widget.isVideo == 'video'
+              ? _buildVideoPlayer(
+                  widget.mediaUrl) // If it's a video, show video player
               : ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    widget.mediaUrl, // Display the media URL
+                    fit: BoxFit.cover,
+                    height: 200,
+                    width: double.infinity,
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent? loadingProgress) {
+                      if (loadingProgress == null) {
+                        // Image has fully loaded
+                        return child;
+                      } else {
+                        // Image is still loading, show CircularProgressIndicator
+                        return SizedBox(
+                          height: 200,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      (loadingProgress.expectedTotalBytes ?? 1)
+                                  : null,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    errorBuilder: (context, error, stackTrace) =>
+                        Icon(Icons.broken_image),
+                  )
+                  /*  Image.network(
               widget.mediaUrl, // Post Image
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
-            ),
-          ),
+            ),*/
+                  ),
           SizedBox(height: 10),
 
           // Date and Interaction icons
@@ -239,9 +267,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: VideoPlayer(_controller),
-    )
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
+          )
         : Center(child: CircularProgressIndicator());
   }
 }

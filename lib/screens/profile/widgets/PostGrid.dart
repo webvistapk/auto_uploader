@@ -8,7 +8,6 @@ import '../user_post_screen.dart';
 class PostGrid extends StatelessWidget {
   final List<PostModel> posts; // Future that fetches posts
   final bool isVideo;
-  final Function(String postId) refresh;
   String filterType;
 
 
@@ -16,7 +15,6 @@ class PostGrid extends StatelessWidget {
     super.key,
     required this.posts,
     this.isVideo = false,
-    required this.refresh,
     required this.filterType,
   });
 
@@ -42,7 +40,6 @@ class PostGrid extends StatelessWidget {
                 builder: (context) =>  UserPostScreen(
                     posts: posts,
                     initialIndex: index,
-                    refresh:refresh,
                     filterType:filterType
                 ),
               ),
@@ -57,11 +54,27 @@ class PostGrid extends StatelessWidget {
                 child: VideoPlayerWidget(videoUrl: "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"))
                 :
             Image.network(
-              post.media.isNotEmpty ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}" : '', // Display the media URL
+              post.media.isNotEmpty
+                  ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
+                  : '', // Display the media URL
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Icon(Icons.broken_image),
-            ),
+              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                if (loadingProgress == null) {
+                  // Image has fully loaded
+                  return child;
+                } else {
+                  // Image is still loading, show CircularProgressIndicator
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                          : null,
+                    ),
+                  );
+                }
+              },
+              errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
+            )
           ),
         );
       },
@@ -100,11 +113,18 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: VideoPlayer(_controller),
-    )
-        : Center(child: CircularProgressIndicator());
+    return Stack(
+      alignment: Alignment.center, // Center the CircularProgressIndicator
+      children: [
+        AspectRatio(
+          aspectRatio: _controller.value.isInitialized
+              ? _controller.value.aspectRatio
+              : 16 / 9, // Placeholder aspect ratio while loading
+          child: VideoPlayer(_controller),
+        ),
+        if (!_controller.value.isInitialized)
+          const CircularProgressIndicator(), // Show loading indicator
+      ],
+    );
   }
 }

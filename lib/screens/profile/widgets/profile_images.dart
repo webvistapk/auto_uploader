@@ -172,12 +172,12 @@ class _ProfileImagesState extends State<ProfileImages> {
 
                 return TabBarView(
                   children: [
-                    PostGrid(posts: allPosts,refresh: widget.refresh,filterType: "allPost",),        // All Posts
-                    PostGrid(posts: imagePosts,refresh: widget.refresh,filterType: "imagesPost"),      // Filtered Image Posts
-                    PostGrid(posts: videoPosts,refresh: widget.refresh,filterType: "videoPost"),      // Filtered Video Posts
-                    PostGrid(posts: allPosts,refresh: widget.refresh,filterType: "allPost"),        // Placeholder for Pages
-                    PostGrid(posts: allPosts,refresh: widget.refresh,filterType: "allPost"),        // Placeholder for Posts
-                    PostGrid(posts: allPosts,refresh: widget.refresh,filterType: "allPost"),        // Placeholder for Tagged
+                    PostGrid(posts: allPosts,filterType: "allPost",),        // All Posts
+                    PostGrid(posts: imagePosts,filterType: "imagesPost"),      // Filtered Image Posts
+                    PostGrid(posts: videoPosts,filterType: "videoPost"),      // Filtered Video Posts
+                    PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Pages
+                    PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Posts
+                    PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Tagged
                     const profile_info(),             // Info tab
                   ],
                 );
@@ -200,41 +200,6 @@ class _ProfileImagesState extends State<ProfileImages> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildImageGrid(List<String> imagesToDisplay) {
-    return GridView.builder(
-      // scrollDirection: Axis.vertical,
-      physics: NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(8.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
-      itemCount: imagesToDisplay.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FullScreenImage(
-                    imageUrl: imagesToDisplay[index],
-                    tag: "profile_images_$index"),
-              ),
-            );
-          },
-          child: Hero(
-            tag: 'profile_images_$index', // Unique tag for each image
-            child: Image.network(
-              imagesToDisplay[index],
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
     );
   }
 }

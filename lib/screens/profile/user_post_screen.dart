@@ -10,14 +10,12 @@ import '../../controller/services/post/post_provider.dart';
 class UserPostScreen extends StatefulWidget {
   final List<PostModel> posts;
   final int initialIndex;
-  final Function(String postId) refresh;
   final String filterType;
 
   const UserPostScreen({
     Key? key,
     required this.posts,
     required this.initialIndex,
-    required this.refresh,
     required this.filterType,
   }) : super(key: key);
 
@@ -64,7 +62,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
 
   Future<void> DeletePost(String postID)async{
     Provider.of<PostProvider>(context,listen: false).deletePost(postID, context);
-    await _fetchPosts();
+    _fetchPosts();
   }
 
 
@@ -75,7 +73,8 @@ class _UserPostScreenState extends State<UserPostScreen> {
       appBar: AppBar(
         title: Text("Post Details"),
       ),
-      body: FutureBuilder<List<PostModel>>(
+      body:
+      FutureBuilder<List<PostModel>>(
         future: _newposts,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,7 +111,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Provider.of<PostProvider>(context,listen: false).isLoading?CircularProgressIndicator(color: Colors.black,):PostWidget(
+                    PostWidget(
                       postId: post.id.toString(),
                       username: post.user.username.toString(),
                       location: "Location",
