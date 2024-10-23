@@ -79,6 +79,7 @@ class _CustomPasswordScreenState extends State<CustomPasswordScreen> {
         ),
         const SizedBox(height: 30),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             widget.isLoading
                 ? Center(

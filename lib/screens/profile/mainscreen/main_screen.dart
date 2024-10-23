@@ -5,6 +5,8 @@ import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
+import 'package:mobile/screens/post/create_post_screen.dart';
+import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
@@ -17,27 +19,27 @@ class MainScreen extends StatefulWidget {
   final email;
   final UserProfile userProfile;
   final String authToken;
-  const MainScreen(
+  int selectedIndex;
+  MainScreen(
       {super.key,
       this.email,
       required this.userProfile,
-      required this.authToken});
+      required this.authToken,
+      this.selectedIndex = 0});
 
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // Loading indicator state
+  // Loading indicator state
 
   final List<Widget> _pages = [
     HomeScreen(),
     Center(
         child:
             Text("Waiting for Searching ...", style: TextStyle(fontSize: 24))),
-    Center(
-        child:
-            Text("Waiting for Add Post ...", style: TextStyle(fontSize: 24))),
+    CreatePostScreen(),
     RequestScreen(),
     SizedBox(),
   ];
@@ -99,22 +101,26 @@ class _MainScreenState extends State<MainScreen> {
                 body: Center(child: CircularProgressIndicator()),
               )
             : Scaffold(
-                body: _selectedIndex == 4
-                    ? ProfileScreen(
-                        id: widget.userProfile.id,
+                body: widget.selectedIndex == 2
+                    ? CreatePostScreen(
                         userProfile: widget.userProfile,
-                        authToken: widget.authToken,
                       )
-                    : _pages[_selectedIndex],
+                    : widget.selectedIndex == 4
+                        ? ProfileScreen(
+                            id: widget.userProfile.id,
+                            userProfile: widget.userProfile,
+                            authToken: widget.authToken,
+                          )
+                        : _pages[widget.selectedIndex],
                 bottomNavigationBar: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8.0),
                     child: SalomonBottomBar(
-                      currentIndex: _selectedIndex,
+                      currentIndex: widget.selectedIndex,
                       onTap: (index) {
                         setState(() {
-                          _selectedIndex = index;
+                          widget.selectedIndex = index;
                         });
                       },
                       items: [

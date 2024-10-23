@@ -134,6 +134,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               builder: (_) => MainScreen(
                     userProfile: updatedUser,
                     authToken: token.toString(),
+                    selectedIndex: 4,
                   )),
           (route) => false);
     } catch (e) {
@@ -260,12 +261,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (context) => OldPasswordScreen()),
-                            (Route<dynamic> route) =>
-                                false, // Remove all previous routes
-                          );
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => OldPasswordScreen()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,

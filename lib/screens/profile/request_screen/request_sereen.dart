@@ -255,11 +255,11 @@ class _RequestScreenState extends State<RequestScreen> {
                                   );
 
                                   /*RequestListTile(
-                                                    fullName: "${followerRequest.follower?.firstName} ${followerRequest.follower?.lastName}",
-                                                    followerId: followerRequest.follower!.id.toString(),
-                                                    followingId:followerRequest.following!.id.toString(),
-                                                    status:status
-                                                  );*/
+                      fullName: "${followerRequest.follower?.firstName} ${followerRequest.follower?.lastName}",
+                      followerId: followerRequest.follower!.id.toString(),
+                      followingId:followerRequest.following!.id.toString(),
+                      status:status
+                    );*/
                                 },
                               );
                             } else {

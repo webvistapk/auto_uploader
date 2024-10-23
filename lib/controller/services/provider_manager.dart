@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/models/post/tag_people.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 
 class ProviderManager {
@@ -230,5 +232,66 @@ class ProviderManager {
     } else {
       throw Exception("Any thing Else please try Again!");
     }
+  }
+
+  static createNewPost(token,
+      {required String postTitle,
+      required List<int> peopleTags,
+      required List<String> keywordsList,
+      required String privacyPost,
+      required List<File> mediaFiles}) async {
+    try {
+      final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.create_new_post);
+      final body = {};
+      final headers = {
+        'Authorization': 'Bearer $token',
+        'Content-type': 'application/json'
+      };
+
+      final response =
+          await http.post(completeUrl, headers: headers, body: body);
+      if (response.statusCode == 200) {
+      } else {}
+    } catch (e) {}
+  }
+
+  static Future<List<TagUser>> fetchFollowersAndFollowings(
+      String token, int id) async {
+    final String url = '${ApiURLs.baseUrl}userprofile/users/follow/getall/$id/';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // debugger();
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      return combineFollowersAndFollowings(responseData);
+    } else {
+      throw Exception('Failed to load followers and followings');
+    }
+  }
+
+  static List<TagUser> combineFollowersAndFollowings(
+      Map<String, dynamic> response) {
+    List<TagUser> combinedList = [];
+
+    // Parse followers
+    if (response['followers'] != null) {
+      for (var follower in response['followers']) {
+        combinedList.add(TagUser.fromJson(follower));
+      }
+    }
+
+    // Parse followings
+    if (response['followings'] != null) {
+      for (var following in response['followings']) {
+        combinedList.add(TagUser.fromJson(following));
+      }
+    }
+
+    return combinedList;
   }
 }
