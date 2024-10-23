@@ -58,7 +58,7 @@ class PostManager {
 
         return jsonDecode(response.body);
       } else {
-        debugger();
+        // debugger();
         print(
             'Failed to create post: ${response.statusCode}, ${response.body}');
         return null;
