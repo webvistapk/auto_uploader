@@ -6,6 +6,7 @@ import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/post/widgets/add_post.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 import 'package:shimmer/shimmer.dart'; // Import the shimmer package
@@ -37,17 +38,17 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
   void initState() {
     super.initState();
     _fetchAlbums();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).unfocus();
-    });
   }
 
   // Fetch albums and initial media
+
   Future<void> _fetchAlbums() async {
     _isLoadingPreview = true;
     setState(() {});
-    final PermissionState ps = await PhotoManager.requestPermissionExtend();
-    if (ps.isAuth) {
+
+    // Handle permission based on Android version
+    if (await _requestPermissions()) {
+      // If permission granted
       List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
         type: RequestType.common,
         hasAll: true,
@@ -58,23 +59,57 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
         _albums = albums;
         await _fetchMedia(
             _selectedAlbum!, _currentPage); // Fetch media for the first album
+
         // Automatically select the first media item
         if (_mediaList.isNotEmpty) {
           final file = await _mediaList[0].file;
           _selectedMedia = _mediaList[0];
           _selectedFile = file;
           mediaFiles.add(_selectedFile!);
+
           final checker = List.filled(_mediaList.length, false);
           selectedFiles.addAll(checker);
           selectedFiles[0] = true;
           _isLoadingPreview = false;
         }
       }
-
       setState(() {});
     } else {
+      // If permissions are denied, open settings to manually grant permissions
       PhotoManager.openSetting();
     }
+  }
+
+// Function to request appropriate permissions for Android 11 and above
+  Future<bool> _requestPermissions() async {
+    final ps = await PhotoManager.requestPermissionExtend();
+    if (ps.isAuth) {
+      return true; // Permission is granted
+    }
+
+    // Special handling for Android 11 and above
+    if (await Permission.storage.isDenied || await Permission.photos.isDenied) {
+      // Request storage and media permissions
+      final result = await [
+        Permission.storage,
+        Permission.photos, // This handles the photo access permission
+      ].request();
+
+      if (result[Permission.storage] == PermissionStatus.granted &&
+          result[Permission.photos] == PermissionStatus.granted) {
+        return true;
+      }
+    }
+
+    // Android 11+ specific permission for managing external storage
+    if (await Permission.manageExternalStorage.isDenied) {
+      final result = await Permission.manageExternalStorage.request();
+      if (result == PermissionStatus.granted) {
+        return true;
+      }
+    }
+
+    return false; // Permissions denied
   }
 
   // Fetch media for a selected album with pagination

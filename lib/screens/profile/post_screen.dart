@@ -53,19 +53,21 @@ class _PostScreenState extends State<PostScreen> {
                     date: post.createdAt.toString(),
                     caption: post.post.toString(),
                     mediaUrl: post.media.isNotEmpty
-                        ? post.media[index].file
-                        : '', // Check for media existence
+                        ? post.media[0].file
+                        : '', // Use the first media file
+                    isVideo: post.media.isNotEmpty
+                        ? post.media[0].mediaType.toString()
+                        : '', // Use the first media type
+                    // Check for media existence
                     profileImageUrl:
                         AppUtils.testImage, // Example profile image
-                    isVideo: post.media.isNotEmpty
-                        ? post.media[index].mediaType.toString()
-                        : '', // Check for media existence
+                    // Check for media existence
                     likes: '100',
                     comments: '100',
                     shares: "100",
                     saved: '100',
                     postId: '',
-                    refresh: () {  },
+                    refresh: () {},
                   );
                 },
               );

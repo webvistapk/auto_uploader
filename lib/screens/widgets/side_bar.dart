@@ -29,37 +29,37 @@ class SideBar extends StatelessWidget {
               ),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () {
-              // Navigate to home
-              Navigator.pushReplacementNamed(context, '/');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.account_circle),
-            title: const Text('Profile'),
-            onTap: () {
-              Navigator.pushReplacementNamed(context, '/profile');
-            },
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.home),
+          //   title: const Text('Home'),
+          //   onTap: () {
+          //     // Navigate to home
+          //     // Navigator.pushReplacementNamed(context, '/');
+          //   },
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.account_circle),
+          //   title: const Text('Profile'),
+          //   onTap: () {
+          //     // Navigator.pushReplacementNamed(context, '/profile');
+          //   },
+          // ),
           ListTile(
             leading: const Icon(Icons.post_add),
             title: const Text('Post'),
             onTap: () {
-             Navigator.push(context, MaterialPageRoute(builder: (context)=>PostScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => PostScreen()));
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.post_add),
             title: const Text('Reel'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>ReelScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ReelScreen()));
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
