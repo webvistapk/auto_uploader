@@ -6,7 +6,6 @@ import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
-import 'package:mobile/screens/post/component/content_selection_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
 // import 'package:mobile/screens/widget/alert_screen.dart';
 import 'package:provider/provider.dart';

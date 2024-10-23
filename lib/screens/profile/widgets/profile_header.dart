@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/common/app_colors.dart';
@@ -21,6 +22,7 @@ class ProfileHeader extends StatefulWidget {
   final UserProfile user;
   final bool canViewProfile;
   final bool isFollowing;
+
 
   const ProfileHeader({
     super.key,
@@ -113,259 +115,18 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           final bool isCurrentUser = widget.user.id == currentUserId;
 
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
                 profileContainer(
                     AppUtils.testImage,
                     "${widget.user.firstName.toString()} ${widget.user.lastName.toString()}",
                     widget.user.position ?? "JobType",
-                    widget.user.description ?? "description",
                     widget.user.address ?? 'Address',
                     widget.user.city ?? "city",
                     widget.user.country ?? 'country'),
-                /*Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const FullScreenImage(
-                              imageUrl: AppUtils.testImage,
-                              tag: "profile-image",
-                            ),
-                          ),
-                        );
-                      },
-                      child: Hero(
-                        tag: 'profile-image',
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            image: const DecorationImage(
-                              image: NetworkImage(AppUtils.testImage),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
-                          Text(
-                            '${widget.user.firstName.toString()} ${widget.user.lastName.toString()}',
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          if (widget.canViewProfile) ...[
-                            Text(
-                              widget.user.position ?? "",
-                              style: const TextStyle(
-                                  fontSize: 10, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              widget.user.description!,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: AppColors.greyColor,
-                              ),
-                            ),
-                            Text(
-                              [
-                                if (widget.user.address!.isNotEmpty)
-                                  widget.user.address,
-                                if (widget.user.city!.isNotEmpty)
-                                  widget.user.city,
-                                if (widget.user.country!.isNotEmpty)
-                                  widget.user.country,
-                              ].where((part) => part!.isNotEmpty).join(', '),
-                            ),
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () {
-                                AppUtils.launchUrl(widget.user.website!);
-                              },
-                              child: Text(
-                                widget.user.website ?? "",
-                                style: const TextStyle(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ] else ...[
-                            const SizedBox(height: 8),
-                            const Text(
-                              "This profile is private.",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.greyColor,
-                              ),
-                            ),
-                            const SizedBox(height: 48),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),*/
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Text(
-                      '@${widget.user.username}',
-                      style: const TextStyle(color: AppColors.greyColor),
-                    ),
-                    const Spacer(),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                if (isCurrentUser) ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => EditProfileScreen(),
-                                settings: RouteSettings(arguments: widget.user),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Edit Profile',
-                            style: TextStyle(color: AppColors.whiteColor),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Share Profile',
-                            style: TextStyle(color: AppColors.blackColor),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ] else ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Builder(builder: (context) {
-                          var provider =
-                              context.watch<follower_request_provider>();
-                          return provider.isLoading?Center(
-                            child: CircularProgressIndicator.adaptive(),
-                          ):ElevatedButton(
-                            onPressed: provider.status == 'pending'
-                                ? () {}
-                                : provider.status == 'initial' ||
-                                        provider.status == 'rejected'
-                                    ? _handleFollow
-                                    : _handleunfollow,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: provider.status == 'pending'
-                                  ? Colors.grey
-                                  : provider.status == 'initial' ||
-                                          provider.status == 'rejected'
-                                      ? Colors.red
-                                      : Colors.red,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(
-                                    provider.status == 'pending'
-                                        ? 'Pending'
-                                        : provider.status == 'initial' ||
-                                                provider.status == 'rejected'
-                                            ? 'Follow'
-                                            : 'Unfollow',
-                                    style: const TextStyle(
-                                        color: AppColors.whiteColor),
-                                  ),
-                          );
-                        }),
-                      ),
-
-                      /*ElevatedButton(
-                            onPressed: provider.status == 'pending'
-                                ? () {}
-                                : provider.status == 'initial' ||
-                                        provider.status == 'rejected'
-                                    ? _handleFollow
-                                    : _handleunfollow,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: provider.status == 'pending'
-                                  ? Colors.grey
-                                  : provider.status == 'initial' ||
-                                          provider.status == 'rejected'
-                                      ? Colors.red
-                                      : Colors.red,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(
-                              provider.status == 'pending'
-                                  ? 'Pending'
-                                  : provider.status == 'initial' ||
-                                          provider.status == 'rejected'
-                                      ? 'Follow'
-                                      : 'Unfollow',
-                              style:
-                                  const TextStyle(color: AppColors.whiteColor),
-                            ),
-                          ),*/
-
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Message',
-                            style: TextStyle(color: AppColors.blackColor),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -375,12 +136,12 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         Text(
                           '${widget.user.following_count}',
                           style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         const Text(
                           'Following',
                           style: TextStyle(
-                              fontSize: 12, color: AppColors.greyColor),
+                              fontSize: 10, color: AppColors.greyColor),
                         ),
                       ],
                     ),
@@ -391,12 +152,12 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         Text(
                           '${widget.user.followers_count}',
                           style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         const Text(
                           'Followers',
                           style: TextStyle(
-                              fontSize: 12, color: AppColors.greyColor),
+                              fontSize: 10, color: AppColors.greyColor),
                         ),
                       ],
                     ),
@@ -407,17 +168,141 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         Text(
                           '0',
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Posts',
                           style: TextStyle(
-                              fontSize: 12, color: AppColors.greyColor),
+                              fontSize: 10, color: AppColors.greyColor),
                         ),
                       ],
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 16),
+                if (isCurrentUser) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => EditProfileScreen(),
+                              settings: RouteSettings(arguments: widget.user),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Edit Profile',
+                          style: TextStyle(color: AppColors.whiteColor),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: AppColors.lightGrey,
+                          padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Share Profile',
+                          style: TextStyle(color: AppColors.blackColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Builder(builder: (context) {
+                        var provider =
+                            context.watch<follower_request_provider>();
+                        return provider.isLoading?Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        ):ElevatedButton(
+                          onPressed: provider.status == 'pending'
+                              ? () {}
+                              : provider.status == 'initial' ||
+                                      provider.status == 'rejected'
+                                  ? _handleFollow
+                                  : _handleunfollow,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: provider.status == 'pending'
+                                ? Colors.grey
+                                : provider.status == 'initial' ||
+                                        provider.status == 'rejected'
+                                    ? Colors.blueAccent
+                                    : AppColors.lightGrey,
+                            padding: EdgeInsets.symmetric(vertical: provider.status=='accepted'?0:8,horizontal: provider.status=='accepted'?0:25),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: provider.status=="accepted"?Icon(CupertinoIcons.person_crop_circle,color: AppColors.black,size: 30,):Text(
+                                  provider.status == 'pending'
+                                      ? 'Pending'
+                                      : provider.status == 'initial' ||
+                                              provider.status == 'rejected'
+                                          ? 'Follow'
+                                          : 'Unfollow',
+                                  style: const TextStyle(
+                                      color: AppColors.whiteColor),
+                                ),
+                        );
+                      }),
+
+
+                      const SizedBox(width: 8),
+                      OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: AppColors.lightGrey,
+                          padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Message',
+                          style: TextStyle(color: AppColors.blackColor),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+                const SizedBox(height: 10),
+                Center(
+                  child: Column(
+                    children: [
+                      Text(widget.user.website??'www.website.com',style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.w100,
+                        fontSize: paragraph * 0.32
+                      ),),
+                      const SizedBox(height: 10),
+                      Text(
+                          widget.user.description ?? "description",
+                        style: TextStyle(
+                            color: AppColors.lightGrey, fontSize: paragraph * 0.38),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                )
               ],
             ),
           );
@@ -431,47 +316,37 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
   //First Profile Container
   Widget profileContainer(
-      String img, fullName, JobType, description, address, city, country) {
-    return Container(
-      padding: EdgeInsets.all(5),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: header5,
-            backgroundImage: NetworkImage(img),
-          ),
-          const SizedBox(
-            width: 40,
-          ),
-          Flexible(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  fullName,
-                  style: TextStyle(
-                      color: AppColors.greyColor, fontSize: paragraph * 0.55),
-                ),
-                Text(
-                  JobType,
-                  style: TextStyle(
-                      color: AppColors.darkGrey, fontSize: paragraph * 0.35),
-                ),
-                Text(
-                  description,
-                  style: TextStyle(
-                      color: AppColors.lightGrey, fontSize: paragraph * 0.35),
-                ),
-                Text(
-                  "${address}, ${city},${country}",
-                  style: TextStyle(
-                      color: AppColors.darkGrey, fontSize: paragraph * 0.35),
-                )
-              ],
+      String img, fullName, JobType,  address, city, country) {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.all(5),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: header5,
+              backgroundImage: NetworkImage(img),
             ),
-          )
-        ],
+            const SizedBox(
+              width: 40,
+            ),
+            Text(
+              fullName,
+              style: TextStyle(
+                  color: AppColors.greyColor, fontSize: paragraph * 0.52),
+            ),
+            Text(
+              JobType,
+              style: TextStyle(
+                  color: AppColors.darkGrey, fontSize: paragraph * 0.32),
+            ),
+
+            Text(
+              "${address}, ${city},${country}",
+              style: TextStyle(
+                  color: AppColors.darkGrey, fontSize: paragraph * 0.32),
+            )
+          ],
+        ),
       ),
     );
   }

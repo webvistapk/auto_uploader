@@ -18,4 +18,7 @@ class ApiURLs {
   static const String create_new_post = "posts/new/";
   static const String fetch_peoples_endpoint =
       "userprofile/users/follow/getall/";
+  static const String get_post = "posts/get/";
+  static const String delete_post = "posts/delete/";
+  static const String get_single_post = "posts/get/single/";
 }
