@@ -7,6 +7,7 @@ import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
 import 'package:mobile/screens/splash_screen.dart';
+import 'package:mobile/screens/widget/video_player_widget.dart';
 // import 'package:mobile/screens/widget/alert_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -33,8 +34,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
               primarySwatch: Colors.green,
               fontFamily: GoogleFonts.poppins().toString()),
-          home: SplashScreen() // Start with the LoadingScreen
-          ),
+          home: SplashScreen()),
     );
   }
 }

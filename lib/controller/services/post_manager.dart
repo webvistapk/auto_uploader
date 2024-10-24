@@ -32,10 +32,15 @@ class PostManager {
     request.headers.addAll(headers);
 
     // Add fields
+
     request.fields['post'] = postTitle;
     request.fields['privacy'] = privacyPost;
-    request.fields['tags'] = peopleTags.join(',');
+
     request.fields['keywords'] = keywordsList.join(',');
+    if (peopleTags.isEmpty) {
+    } else {
+      request.fields['tags'] = peopleTags.join(',');
+    }
 
     // Add media files
     for (var file in mediaFiles) {
@@ -59,12 +64,11 @@ class PostManager {
         return jsonDecode(response.body);
       } else {
         // debugger();
-        print(
-            'Failed to create post: ${response.statusCode}, ${response.body}');
+        log('Failed to create post: ${response.statusCode}, ${response.body}');
         return null;
       }
     } catch (error) {
-      debugger();
+      // debugger();
       print('Error occurred: $error');
       return null;
     }

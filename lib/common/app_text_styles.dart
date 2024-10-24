@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_colors.dart';
-import 'package:sizer/sizer.dart';
 
 class AppTextStyles {
   static TextStyle poppinsRegular({
