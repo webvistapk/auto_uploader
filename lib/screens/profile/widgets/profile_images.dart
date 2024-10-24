@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
@@ -9,14 +11,13 @@ import '../../../models/UserProfile/post_model.dart';
 
 class ProfileImages extends StatefulWidget {
   //final List<String> images;
-  final Future<List<PostModel>>?  posts;
+  final Future<List<PostModel>>? posts;
   final Function(String postID) refresh;
-  ProfileImages({
-    super.key,
-    //required this.images,
-    required this.posts,
-    required this.refresh
-  });
+  ProfileImages(
+      {super.key,
+      //required this.images,
+      required this.posts,
+      required this.refresh});
 
   @override
   State<ProfileImages> createState() => _ProfileImagesState();
@@ -27,7 +28,6 @@ class _ProfileImagesState extends State<ProfileImages> {
     return posts.where((post) {
       return post.media[0].mediaType == 'image';
     }).toList();
-
   }
 
   // Filter Video Posts
@@ -48,7 +48,7 @@ class _ProfileImagesState extends State<ProfileImages> {
               tabBarTheme: TabBarTheme(
                 labelColor: Colors.black, // Set the color for the selected tab
                 unselectedLabelColor:
-                Colors.grey, // Set the color for unselected tabs
+                    Colors.grey, // Set the color for unselected tabs
                 indicator: UnderlineTabIndicator(
                   borderSide: BorderSide(
                       color: Colors.black, width: 2.0), // Indicator color
@@ -108,7 +108,6 @@ class _ProfileImagesState extends State<ProfileImages> {
               ],
             ),
           ),
-
           SizedBox(
             height: 10,
           ),
@@ -116,11 +115,11 @@ class _ProfileImagesState extends State<ProfileImages> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-
                 Row(
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                       decoration: BoxDecoration(
                         color: AppColors.lightGrey,
                         // Grey border
@@ -132,11 +131,13 @@ class _ProfileImagesState extends State<ProfileImages> {
                       ),
                     ),
                     SizedBox(width: 10),
-
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 5,horizontal: paragraph*1.5),
+                      padding: EdgeInsets.symmetric(
+                          vertical: 5, horizontal: paragraph * 1.5),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey,), // Grey border
+                        border: Border.all(
+                          color: Colors.grey,
+                        ), // Grey border
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: const Center(
@@ -151,40 +152,54 @@ class _ProfileImagesState extends State<ProfileImages> {
               ],
             ),
           ),
-
           SizedBox(
             height: 500, // Adjust height as needed
-            child:FutureBuilder<List<PostModel>>(
+            child: FutureBuilder<List<PostModel>>(
               future: widget.posts,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator()); // Loading state
+                  return const Center(
+                      child: CircularProgressIndicator()); // Loading state
                 } else if (snapshot.hasError) {
-                  return const Center(child: Text("Error loading posts")); // Error state
+                  return const Center(
+                      child: Text("Error loading posts")); // Error state
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No posts available")); // Empty state
+                  return const Center(
+                      child: Text("No posts available")); // Empty state
                 }
 
                 // Data is ready
                 List<PostModel> allPosts = snapshot.data!;
                 List<PostModel> imagePosts = getImagePosts(allPosts);
                 List<PostModel> videoPosts = getVideoPosts(allPosts);
-
+                print("Video List: $videoPosts");
                 return TabBarView(
                   children: [
-                    PostGrid(posts: allPosts,filterType: "allPost",),        // All Posts
-                    PostGrid(posts: imagePosts,filterType: "image"),      // Filtered Image Posts
-                    PostGrid(posts: videoPosts,filterType: "video"),      // Filtered Video Posts
-                    PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Pages
-                    PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Posts
-                    PostGrid(posts: allPosts,filterType: "allPost"),        // Placeholder for Tagged
-                    const profile_info(),             // Info tab
+                    PostGrid(
+                      posts: allPosts,
+                      filterType: "allPost",
+                    ), // All Posts
+                    PostGrid(
+                        posts: imagePosts,
+                        filterType: "image"), // Filtered Image Posts
+                    PostGrid(
+                        posts: videoPosts,
+                        isVideo: true,
+                        filterType: "video"), // Filtered Video Posts
+                    PostGrid(
+                        posts: allPosts,
+                        filterType: "allPost"), // Placeholder for Pages
+                    PostGrid(
+                        posts: allPosts,
+                        filterType: "allPost"), // Placeholder for Posts
+                    PostGrid(
+                        posts: allPosts,
+                        filterType: "allPost"), // Placeholder for Tagged
+                    const profile_info(), // Info tab
                   ],
                 );
               },
             ),
-
-
 
             /*TabBarView(
               children: [

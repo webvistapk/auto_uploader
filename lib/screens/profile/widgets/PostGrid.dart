@@ -10,8 +10,7 @@ class PostGrid extends StatelessWidget {
   final bool isVideo;
   String filterType;
 
-
-   PostGrid({
+  PostGrid({
     super.key,
     required this.posts,
     this.isVideo = false,
@@ -20,7 +19,7 @@ class PostGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  GridView.builder(
+    return GridView.builder(
       padding: const EdgeInsets.all(8.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
@@ -37,51 +36,50 @@ class PostGrid extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>  UserPostScreen(
-                    posts: posts,
-                    initialIndex: index,
-                    filterType:filterType
-                ),
+                builder: (context) => UserPostScreen(
+                    posts: posts, initialIndex: index, filterType: filterType),
               ),
             );
           },
           child: Hero(
-            tag: 'profile_images_$index',
-            child: post.media[0].mediaType=='video'?
-            Container(
-                width: double.infinity,
-                height: 400,
-                child: VideoPlayerWidget(videoUrl: "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"))
-                :
-            Image.network(
-              post.media.isNotEmpty
-                  ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
-                  : '', // Display the media URL
-              fit: BoxFit.cover,
-              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                if (loadingProgress == null) {
-                  // Image has fully loaded
-                  return child;
-                } else {
-                  // Image is still loading, show CircularProgressIndicator
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                          : null,
-                    ),
-                  );
-                }
-              },
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
-            )
-          ),
+              tag: 'profile_images_$index',
+              child: post.media[0].mediaType == 'video'
+                  ? Container(
+                      width: double.infinity,
+                      height: 400,
+                      child: VideoPlayerWidget(
+                          videoUrl:
+                              "http://147.79.117.253:8001/api${post.media[0].file}"))
+                  : Image.network(
+                      post.media.isNotEmpty
+                          ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
+                          : '', // Display the media URL
+                      fit: BoxFit.cover,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          // Image has fully loaded
+                          return child;
+                        } else {
+                          // Image is still loading, show CircularProgressIndicator
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      (loadingProgress.expectedTotalBytes ?? 1)
+                                  : null,
+                            ),
+                          );
+                        }
+                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(Icons.broken_image),
+                    )),
         );
       },
     );
   }
 }
-
 
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;

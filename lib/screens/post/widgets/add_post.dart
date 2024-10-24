@@ -256,6 +256,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     if (keywords.isEmpty) {
                       keywords.add('0');
                     }
+
                     log("Medias: ${widget.mediFiles}");
                     log("Keywords: $keywords");
                     log("Tag User id: $selectedTagUsers");
