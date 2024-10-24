@@ -51,9 +51,7 @@ class _SinglePostState extends State<SinglePost> {
                   location: "Location",
                   date: post.createdAt.toString(),
                   caption: post.post.toString(),
-                  mediaUrl: post.media.isNotEmpty
-                      ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
-                      : '',
+                  mediaUrls:post.media.map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}").toList(),
                   profileImageUrl: AppUtils.testImage,
                   isVideo: post.media[0].mediaType,
                   likes: post.likesCount.toString(),

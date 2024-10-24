@@ -5,6 +5,8 @@ import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:provider/provider.dart';
 
+import '../../controller/endpoints.dart';
+
 class PostScreen extends StatefulWidget {
   @override
   State<PostScreen> createState() => _PostScreenState();
@@ -52,9 +54,7 @@ class _PostScreenState extends State<PostScreen> {
                     location: "Location",
                     date: post.createdAt.toString(),
                     caption: post.post.toString(),
-                    mediaUrl: post.media.isNotEmpty
-                        ? post.media[0].file
-                        : '', // Use the first media file
+                    mediaUrls: post.media.map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}").toList(), // Use the first media file
                     isVideo: post.media.isNotEmpty
                         ? post.media[0].mediaType.toString()
                         : '', // Use the first media type

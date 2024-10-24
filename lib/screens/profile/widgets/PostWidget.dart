@@ -1,7 +1,6 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
-import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 class PostWidget extends StatefulWidget {
@@ -10,37 +9,39 @@ class PostWidget extends StatefulWidget {
   final String location;
   final String date;
   final String caption;
-  final String mediaUrl; // Either image or video
+  final List<String> mediaUrls; // List of media URLs (multiple images or video)
   final String profileImageUrl;
-  final String isVideo; // To determine if the post is a video
+  final String isVideo; // To determine if the post contains a video
   final String likes;
   final String comments;
   final String shares;
   final String saved;
   final VoidCallback refresh;
 
-  const PostWidget(
-      {Key? key,
-      required this.postId,
-      required this.username,
-      required this.location,
-      required this.date,
-      required this.caption,
-      required this.mediaUrl,
-      required this.profileImageUrl,
-      required this.isVideo,
-      required this.likes,
-      required this.comments,
-      required this.shares,
-      required this.saved,
-      required this.refresh})
-      : super(key: key);
+  const PostWidget({
+    Key? key,
+    required this.postId,
+    required this.username,
+    required this.location,
+    required this.date,
+    required this.caption,
+    required this.mediaUrls, // Updated to accept a list of URLs
+    required this.profileImageUrl,
+    required this.isVideo,
+    required this.likes,
+    required this.comments,
+    required this.shares,
+    required this.saved,
+    required this.refresh,
+  }) : super(key: key);
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
 }
 
 class _PostWidgetState extends State<PostWidget> {
+  int _currentImageIndex = 0; // Track the current image index in the slider
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -78,9 +79,7 @@ class _PostWidgetState extends State<PostWidget> {
                     // Handle edit action
                     print('Edit Post');
                   } else if (value == 2) {
-                    // Handle delete action
                     setState(() {
-                      //Provider.of<PostProvider>(context,listen: false).deletePost(widget.postId,context);
                       widget.refresh();
                     });
                   }
@@ -100,52 +99,20 @@ class _PostWidgetState extends State<PostWidget> {
           ),
           SizedBox(height: 10),
 
-          // Post Media (either Image or Video)
-
+          // Post Media (Image Carousel or Video)
           InkWell(
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>SinglePost(postId: widget.postId)));
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SinglePost(postId: widget.postId)));
             },
             child: widget.isVideo == 'video'
-                ? _buildVideoPlayer(
-                    widget.mediaUrl) // If it's a video, show video player
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      widget.mediaUrl, // Display the media URL
-                      fit: BoxFit.cover,
-                      height: 200,
-                      width: double.infinity,
-                      loadingBuilder: (BuildContext context, Widget child,
-                          ImageChunkEvent? loadingProgress) {
-                        if (loadingProgress == null) {
-                          // Image has fully loaded
-                          return child;
-                        } else {
-                          // Image is still loading, show CircularProgressIndicator
-                          return SizedBox(
-                            height: 200,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        (loadingProgress.expectedTotalBytes ?? 1)
-                                    : null,
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          Icon(Icons.broken_image),
-                    )
-                    /*  Image.network(
-                widget.mediaUrl, // Post Image
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),*/
-                    ),
+                ? _buildVideoPlayer(widget.mediaUrls.first) // If it's a video, show video player
+                : Column(
+              children: [
+                _buildImageCarousel(widget.mediaUrls), // Handle multiple images with a carousel
+                SizedBox(height: 8),
+                _buildImageIndicator(widget.mediaUrls.length), // Dots indicator below the carousel
+              ],
+            ),
           ),
           SizedBox(height: 10),
 
@@ -201,7 +168,7 @@ class _PostWidgetState extends State<PostWidget> {
           ),
           SizedBox(height: 8),
 
-          // Caption
+          // Caption and Comments
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -234,12 +201,61 @@ class _PostWidgetState extends State<PostWidget> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Container(
-          width: double.infinity,
-          height: 400,
-          child: VideoPlayerWidget(videoUrl: videoUrl)),
+        width: double.infinity,
+        height: 400,
+        child: VideoPlayerWidget(videoUrl: videoUrl),
+      ),
+    );
+  }
+
+  // Method to build an image carousel for multiple images
+  Widget _buildImageCarousel(List<String> imageUrls) {
+    return CarouselSlider.builder(
+      itemCount: imageUrls.length,
+      itemBuilder: (context, index, realIndex) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.network(
+            imageUrls[index],
+            fit: BoxFit.cover,
+            width: double.infinity,
+          ),
+        );
+      },
+      options: CarouselOptions(
+        height: 200,
+        enableInfiniteScroll: false,
+        enlargeCenterPage: true,
+        viewportFraction: 1.0,
+        autoPlay: false,
+        onPageChanged: (index, reason) {
+          setState(() {
+            _currentImageIndex = index;
+          });
+        },
+      ),
+    );
+  }
+
+  // Dots indicator widget
+  Widget _buildImageIndicator(int itemCount) {
+    return itemCount<2?Container():Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(itemCount, (index) {
+        return Container(
+          width: 8,
+          height: 8,
+          margin: EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _currentImageIndex == index ? Colors.black : Colors.grey,
+          ),
+        );
+      }),
     );
   }
 }
+
 
 // Widget for Video Player
 class VideoPlayerWidget extends StatefulWidget {
@@ -274,9 +290,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
-          )
+      aspectRatio: _controller.value.aspectRatio,
+      child: VideoPlayer(_controller),
+    )
         : Center(child: CircularProgressIndicator());
   }
 }

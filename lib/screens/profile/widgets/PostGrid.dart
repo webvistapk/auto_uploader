@@ -6,59 +6,62 @@ import '../post_screen.dart';
 import '../user_post_screen.dart';
 
 class PostGrid extends StatelessWidget {
-  final List<PostModel> posts; // Future that fetches posts
-  final bool isVideo;
-  String filterType;
+  final List<PostModel> posts; // List of posts
+  final String filterType; // Filter type (all, images, videos)
 
-
-   PostGrid({
-    super.key,
+  PostGrid({
+    Key? key,
     required this.posts,
-    this.isVideo = false,
     required this.filterType,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return  GridView.builder(
+    // Collect all media from all posts into a single list
+    List<Media> allMedia = [];
+    for (var post in posts) {
+      allMedia.addAll(post.media);
+    }
+
+    return GridView.builder(
       padding: const EdgeInsets.all(8.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
-      itemCount: posts.length, // Use the length of the post list
+      itemCount: allMedia.length, // Number of total media files
       itemBuilder: (context, index) {
-        final post = posts[index]; // Access the specific post
+        final media = allMedia[index]; // Access the specific media file
 
         return GestureDetector(
           onTap: () {
-            // Navigate to PostScreen on tap
+            // Navigate to UserPostScreen on tap (optionally handle media details)
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>  UserPostScreen(
-                    posts: posts,
-                    initialIndex: index,
-                    filterType:filterType
+                builder: (context) => UserPostScreen(
+                  posts: posts,
+                  initialIndex: index ~/ posts.first.media.length, // Map media index to post index
+                  filterType: filterType,
                 ),
               ),
             );
           },
           child: Hero(
-            tag: 'profile_images_$index',
-            child: post.media[0].mediaType=='video'?
-            Container(
+            tag: 'profile_media_$index',
+            child: media.mediaType == 'video'
+                ? Container(
                 width: double.infinity,
                 height: 400,
-                child: VideoPlayerWidget(videoUrl: "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"))
-                :
-            Image.network(
-              post.media.isNotEmpty
-                  ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
-                  : '', // Display the media URL
+                child: VideoPlayerWidget(
+                    videoUrl:
+                    "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}"))
+                : Image.network(
+              "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}",
               fit: BoxFit.cover,
-              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+              loadingBuilder: (BuildContext context, Widget child,
+                  ImageChunkEvent? loadingProgress) {
                 if (loadingProgress == null) {
                   // Image has fully loaded
                   return child;
@@ -67,14 +70,16 @@ class PostGrid extends StatelessWidget {
                   return Center(
                     child: CircularProgressIndicator(
                       value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                          ? loadingProgress.cumulativeBytesLoaded /
+                          (loadingProgress.expectedTotalBytes ?? 1)
                           : null,
                     ),
                   );
                 }
               },
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
-            )
+              errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.broken_image),
+            ),
           ),
         );
       },
