@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/post/widgets/add_post.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -82,34 +83,46 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
 
 // Function to request appropriate permissions for Android 11 and above
   Future<bool> _requestPermissions() async {
-    final ps = await PhotoManager.requestPermissionExtend();
-    if (ps.isAuth) {
-      return true; // Permission is granted
-    }
+    bool permissions = await Prefrences.getMediaPermission();
 
-    // Special handling for Android 11 and above
-    if (await Permission.storage.isDenied || await Permission.photos.isDenied) {
-      // Request storage and media permissions
-      final result = await [
-        Permission.storage,
-        Permission.photos, // This handles the photo access permission
-      ].request();
-
-      if (result[Permission.storage] == PermissionStatus.granted &&
-          result[Permission.photos] == PermissionStatus.granted) {
-        return true;
+    if (permissions) {
+      return true;
+    } else {
+      final ps = await PhotoManager.requestPermissionExtend();
+      if (ps.isAuth) {
+        await Prefrences.setMediaPermission(true);
+        return true; // Permission is granted
       }
-    }
 
-    // Android 11+ specific permission for managing external storage
-    if (await Permission.manageExternalStorage.isDenied) {
-      final result = await Permission.manageExternalStorage.request();
-      if (result == PermissionStatus.granted) {
-        return true;
+      // Special handling for Android 11 and above
+      if (await Permission.storage.isDenied ||
+          await Permission.photos.isDenied) {
+        // Request storage and media permissions
+        final result = await [
+          Permission.storage,
+          Permission.photos, // This handles the photo access permission
+        ].request();
+
+        if (result[Permission.storage] == PermissionStatus.granted &&
+            result[Permission.photos] == PermissionStatus.granted) {
+          await Prefrences.setMediaPermission(true);
+          return true;
+        }
       }
-    }
 
-    return false; // Permissions denied
+      // Android 11+ specific permission for managing external storage
+      if (await Permission.manageExternalStorage.isDenied) {
+        final result = await Permission.manageExternalStorage.request();
+        if (result == PermissionStatus.granted) {
+          await Prefrences.setMediaPermission(true);
+          return true;
+        }
+      }
+
+      await Prefrences.setMediaPermission(false);
+
+      return false; // Permissions denied
+    }
   }
 
   // Fetch media for a selected album with pagination
@@ -200,6 +213,7 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size * 1;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Content Selection'),
@@ -230,7 +244,7 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
                     highlightColor: Colors.grey[100]!,
                     child: Container(
                       width: double.infinity,
-                      height: 400,
+                      height: size.height * .35,
                       color: Colors.white,
                     ),
                   )

@@ -4,7 +4,7 @@ class Prefrences {
   static const String authToken = "authToken";
   static const String refreshKey = "refreshToken";
   static const String userEmail = "userEmail";
-
+  static const String mediaPermission = "mediaPermission";
   static const String userID = "id";
 
   static SetAuthToken(String accessToken) async {
@@ -40,5 +40,15 @@ class Prefrences {
   static removeAuthToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove(Prefrences.authToken);
+  }
+
+  static setMediaPermission(bool permission) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(mediaPermission, permission);
+  }
+
+  static getMediaPermission() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(mediaPermission) ?? false;
   }
 }

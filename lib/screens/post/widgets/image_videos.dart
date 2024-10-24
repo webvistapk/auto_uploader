@@ -49,7 +49,7 @@ class _FileCarouselState extends State<FileCarousel> {
   Widget build(BuildContext context) {
     return CarouselSlider(
       options: CarouselOptions(
-        height: 400,
+        height: MediaQuery.of(context).size.height * .35,
         autoPlay: true,
         enlargeCenterPage: true,
         aspectRatio: 16 / 9,
