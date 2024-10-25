@@ -40,6 +40,7 @@ class _MainScreenState extends State<MainScreen> {
         child:
             Text("Waiting for Searching ...", style: TextStyle(fontSize: 24))),
     CreatePostScreen(),
+    // CameraScreen(),
     RequestScreen(),
     SizedBox(),
   ];
@@ -103,6 +104,7 @@ class _MainScreenState extends State<MainScreen> {
             : Scaffold(
                 body: widget.selectedIndex == 2
                     ? CreatePostScreen(
+                        token: widget.authToken,
                         userProfile: widget.userProfile,
                       )
                     : widget.selectedIndex == 4

@@ -333,6 +333,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     if (isVideo(mediaFile)) {
       // Display video
       return Stack(
+        alignment: Alignment.center,
         children: [
           if (_videoController != null && _videoController!.value.isInitialized)
             AspectRatio(
@@ -354,12 +355,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
             },
             child: !_videoController!.value.isPlaying
                 ? Icon(
-                    Icons.play_circle_outline,
+                    Icons.play_arrow,
                     size: 60,
                     color: Colors.white,
                   )
                 : Icon(
-                    Icons.play_disabled,
+                    Icons.pause,
                     size: 60,
                     color: Colors.white,
                   ),
