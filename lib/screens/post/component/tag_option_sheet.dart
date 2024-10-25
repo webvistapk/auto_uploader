@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
@@ -35,6 +37,14 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
     }
   }
 
+  void _onTagUserSelected(int index) {
+    setState(() {
+      widget.selectedTagUser.add(_filteredItems[index].id);
+      _filteredItems.removeAt(index);
+    });
+    Navigator.of(context).pop(); // Close on selection
+  }
+
   @override
   void initState() {
     super.initState();
@@ -44,15 +54,20 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
   void _initializeItems() async {
     var pro = context.read<TagsProvider>();
     final futureUser = await UserPreferences().getCurrentUser();
-    List<TagUser> tagUsers = await pro.getTagUsersList(futureUser!);
+    var tagUsers = await pro.getTagUsersList(futureUser!);
 
+    if (tagUsers.isEmpty) {
+      print(tagUsers);
+      // debugger();
+    } else {
+      List<TagUser> uniqueTagUsers = tagUsers.toSet().toList();
+
+      setState(() {
+        _allItems = uniqueTagUsers;
+        _filteredItems = List.from(_allItems);
+      });
+    }
     // Remove duplicates by converting the list to a Set and back to a List
-    List<TagUser> uniqueTagUsers = tagUsers.toSet().toList();
-
-    setState(() {
-      _allItems = uniqueTagUsers;
-      _filteredItems = List.from(_allItems);
-    });
   }
 
   @override
@@ -123,61 +138,36 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
                     itemBuilder: (context, index) {
                       if (widget.selectedTagUser
                           .contains(_filteredItems[index].id)) {
-                        _filteredItems.removeAt(index);
-                        if (_filteredItems.isEmpty) {
-                          return SizedBox(
-                            height: 100,
-                            child: Center(
-                              child: Text(
-                                "No friends found",
-                                style: Theme.of(context).textTheme.titleMedium,
+                        return SizedBox(); // Skip already selected users
+                      }
+                      return GestureDetector(
+                        onTap: () => _onTagUserSelected(
+                            index), // Call function to handle selection
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            CircleAvatar(
+                                child: const Icon(Icons.person), radius: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${_filteredItems[index].firstName} ${_filteredItems[index].lastName}",
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  Text(
+                                    _filteredItems[index].username,
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.grey),
+                                  ),
+                                ],
                               ),
                             ),
-                          );
-                        }
-                        return SizedBox(); // Skip already selected users
-                      } else
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              widget.selectedTagUser
-                                  .add(_filteredItems[index].id);
-                              _filteredItems.removeAt(index);
-                              // ToastNotifier.showSuccessToast(context,
-                              //     "User Tagged Successfully ${_filteredItems[index].firstName}");
-                              print(widget.selectedTagUser);
-                            });
-                            Navigator.of(context).pop(); // Dismiss on selection
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                child: const Icon(Icons.person),
-                                radius: 20,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${_filteredItems[index].firstName} ${_filteredItems[index].lastName}",
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                    Text(
-                                      _filteredItems[index].username,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                          ],
+                        ),
+                      );
                     },
                     separatorBuilder: (context, index) => const Divider(),
                   ),

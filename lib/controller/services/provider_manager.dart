@@ -270,7 +270,7 @@ class ProviderManager {
       final Map<String, dynamic> responseData = json.decode(response.body);
       return combineFollowersAndFollowings(responseData);
     } else {
-      throw Exception('Failed to load followers and followings');
+      return [];
     }
   }
 

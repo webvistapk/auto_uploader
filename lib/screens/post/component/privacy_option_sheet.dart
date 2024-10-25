@@ -79,7 +79,8 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
                 const Spacer(),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(
+                        context, _getPrivacyFromOption(selectedPrivacyOption));
                   },
                   child: const Icon(Icons.close),
                 ),

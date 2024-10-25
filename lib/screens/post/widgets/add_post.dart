@@ -81,6 +81,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     // Example current privacy value
     final updatedPrivacy = await showModalBottomSheet<String>(
       context: context,
+      isDismissible: false,
       builder: (context) => PrivacyOptionsSheet(privacyPolicy: privacyPolicy),
     );
 
