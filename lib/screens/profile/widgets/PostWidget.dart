@@ -1,9 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
+import 'package:mobile/screens/profile/imageFullScreen.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../widgets/full_screen_image.dart';
+
 class PostWidget extends StatefulWidget {
+  final bool isTrue;
   final String postId;
   final String username;
   final String location;
@@ -20,6 +24,7 @@ class PostWidget extends StatefulWidget {
 
   const PostWidget({
     Key? key,
+    this.isTrue=true,
     required this.postId,
     required this.username,
     required this.location,
@@ -101,8 +106,19 @@ class _PostWidgetState extends State<PostWidget> {
 
           // Post Media (Image Carousel or Video)
           InkWell(
-            onTap: () {
+            onTap:widget.isTrue?() {
               Navigator.push(context, MaterialPageRoute(builder: (context) => SinglePost(postId: widget.postId)));
+            }:(){
+              // Navigate to a new fullscreen image screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => postFullScreen(
+                      mediaUrls: widget.mediaUrls,
+                      initialIndex: _currentImageIndex
+                  )
+                ),
+              );
             },
             child: widget.isVideo == 'video'
                 ? _buildVideoPlayer(widget.mediaUrls.first) // If it's a video, show video player

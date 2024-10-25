@@ -46,6 +46,7 @@ class _SinglePostState extends State<SinglePost> {
               } else {
                 final post = postProvider.post!;
                 return PostWidget(
+                  isTrue: false,
                   postId: post.id.toString(),
                   username: post.user.username.toString(),
                   location: "Location",
