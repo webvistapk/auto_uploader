@@ -440,62 +440,42 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
                                           color: Colors.white),
                                     ),
                                   Positioned(
-                                    // Moved GestureDetector outside the Positioned
                                     top: 4,
                                     right: 4,
                                     child: GestureDetector(
                                       onTap: () async {
+                                        // Toggle selection state
                                         selectedFiles[index] =
                                             !selectedFiles[index];
 
-                                        setState(() {});
+                                        // Get the media file asynchronously
                                         final file = await media.file;
+
+                                        // Start updating UI state
+                                        setState(() {
+                                          _isLoadingPreview =
+                                              true; // Start loading indicator
+                                        });
+
                                         if (selectedFiles[index]) {
-                                          setState(() {
-                                            _isLoadingPreview = true;
-                                          });
-                                          // Get the media file
-                                          setState(() {
-                                            _selectedMedia = media;
-                                            _selectedFile = file;
-                                            if (_selectedMedia!.type ==
-                                                AssetType.video) {
-                                              _videoPlayerController?.dispose();
-                                              _videoPlayerController = null;
-                                            }
-                                            mediaFiles.add(
-                                                file!); // Add the file to the list
-                                            _isLoadingPreview = false;
-                                          });
-                                          log("MediaFiles added: $mediaFiles");
-                                        } else {
-                                          setState(() {
-                                            _isLoadingPreview = true;
-                                          });
-
-                                          // Handle file removal from mediaFiles
-                                          if (_selectedMedia != null) {
-                                            // Check if _selectedMedia is not null
-                                            if (_selectedMedia!.type ==
-                                                AssetType.video) {
-                                              _videoPlayerController?.dispose();
-                                              _videoPlayerController = null;
-                                            }
-                                            // Remove the file from mediaFiles based on the media reference
-                                            mediaFiles.removeWhere((element) =>
-                                                element.path == file!.path);
-
-                                            // Reset selected media and file
-                                            _selectedMedia = null;
-                                            _selectedFile = null;
+                                          // If selected, add the file to mediaFiles
+                                          if (file != null) {
+                                            mediaFiles.add(file);
+                                            log("MediaFiles added: $mediaFiles");
                                           }
-
-                                          setState(() {
-                                            _isLoadingPreview = false;
-                                          });
-
-                                          log("MediaFiles removed: $mediaFiles");
+                                        } else {
+                                          // If deselected, remove the file from mediaFiles
+                                          if (file != null) {
+                                            mediaFiles.removeWhere((element) =>
+                                                element.path == file.path);
+                                            log("MediaFiles removed: $mediaFiles");
+                                          }
                                         }
+
+                                        // Stop loading indicator
+                                        setState(() {
+                                          _isLoadingPreview = false;
+                                        });
                                       },
                                       child: Icon(
                                         Icons.check_box,

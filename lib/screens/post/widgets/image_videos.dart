@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_text_styles.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 
@@ -48,37 +49,42 @@ class _FileCarouselState extends State<FileCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    return CarouselSlider.builder(
-      itemCount: widget.files.length,
-      options: CarouselOptions(
-        height: MediaQuery.of(context).size.height * .35,
-        autoPlay: false,
-        enlargeCenterPage: true,
-        aspectRatio: 16 / 9,
-        enableInfiniteScroll: false,
-        onPageChanged: (index, reason) {
-          setState(() {
-            // Pause the current video if it's playing
-            if (videoControllers[widget.files[currentIndex].path]
-                    ?.value
-                    .isPlaying ??
-                false) {
-              videoControllers[widget.files[currentIndex].path]?.pause();
-            }
-            currentIndex = index;
+    return widget.files.isEmpty
+        ? Text(
+            "No Files Selected",
+            style: AppTextStyles.poppinsBold(color: Colors.white),
+          )
+        : CarouselSlider.builder(
+            itemCount: widget.files.length,
+            options: CarouselOptions(
+              height: MediaQuery.of(context).size.height * .35,
+              autoPlay: false,
+              enlargeCenterPage: true,
+              aspectRatio: 16 / 9,
+              enableInfiniteScroll: false,
+              onPageChanged: (index, reason) {
+                setState(() {
+                  // Pause the current video if it's playing
+                  if (videoControllers[widget.files[currentIndex].path]
+                          ?.value
+                          .isPlaying ??
+                      false) {
+                    videoControllers[widget.files[currentIndex].path]?.pause();
+                  }
+                  currentIndex = index;
 
-            // Initialize the new video's controller if needed
-            initializeVideoController(widget.files[currentIndex]);
-          });
-        },
-      ),
-      itemBuilder: (context, index, realIndex) {
-        final file = widget.files[index];
-        return file.path.endsWith('.mp4')
-            ? buildVideoPlayer(file)
-            : buildImage(file);
-      },
-    );
+                  // Initialize the new video's controller if needed
+                  initializeVideoController(widget.files[currentIndex]);
+                });
+              },
+            ),
+            itemBuilder: (context, index, realIndex) {
+              final file = widget.files[index];
+              return file.path.endsWith('.mp4')
+                  ? buildVideoPlayer(file)
+                  : buildImage(file);
+            },
+          );
   }
 
   Widget buildVideoPlayer(File file) {

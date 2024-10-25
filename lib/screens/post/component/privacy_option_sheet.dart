@@ -149,7 +149,7 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
     // Here you can do something with the updated privacy policy, like passing it back to a parent widget or storing it
     print("Updated privacy policy: $newPrivacy");
     // You can also pass this back using Navigator.pop() if required.
-    Navigator.pop(context,
-        newPrivacy); // Pass the updated privacy back when closing the sheet
+    // Navigator.pop(context,
+    //     newPrivacy); // Pass the updated privacy back when closing the sheet
   }
 }

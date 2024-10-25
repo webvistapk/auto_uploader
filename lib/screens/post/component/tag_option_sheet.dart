@@ -45,8 +45,12 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
     var pro = context.read<TagsProvider>();
     final futureUser = await UserPreferences().getCurrentUser();
     List<TagUser> tagUsers = await pro.getTagUsersList(futureUser!);
+
+    // Remove duplicates by converting the list to a Set and back to a List
+    List<TagUser> uniqueTagUsers = tagUsers.toSet().toList();
+
     setState(() {
-      _allItems = tagUsers;
+      _allItems = uniqueTagUsers;
       _filteredItems = List.from(_allItems);
     });
   }
