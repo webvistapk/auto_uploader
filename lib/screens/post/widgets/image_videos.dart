@@ -14,26 +14,12 @@ class FileCarousel extends StatefulWidget {
 
 class _FileCarouselState extends State<FileCarousel> {
   Map<String, VideoPlayerController> videoControllers = {};
+  int currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize video controllers for video files
-    for (var file in widget.files) {
-      if (file.path.endsWith('.mp4')) {
-        final controller = VideoPlayerController.file(file)
-          ..initialize().then((_) {
-            setState(() {
-              // The controller is initialized
-              debugPrint('Video initialized: ${file.path}');
-            });
-          }).catchError((error) {
-            debugPrint('Error initializing video: ${file.path}, Error: $error');
-          });
-        videoControllers[file.path] = controller;
-      }
-    }
+    initializeVideoController(widget.files[currentIndex]);
   }
 
   @override
@@ -45,21 +31,53 @@ class _FileCarouselState extends State<FileCarousel> {
     super.dispose();
   }
 
+  void initializeVideoController(File file) {
+    if (file.path.endsWith('.mp4') &&
+        !videoControllers.containsKey(file.path)) {
+      final controller = VideoPlayerController.file(file)
+        ..initialize().then((_) {
+          setState(() {
+            // Video is ready to play
+          });
+        }).catchError((error) {
+          debugPrint('Error initializing video: ${file.path}, Error: $error');
+        });
+      videoControllers[file.path] = controller;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CarouselSlider(
+    return CarouselSlider.builder(
+      itemCount: widget.files.length,
       options: CarouselOptions(
         height: MediaQuery.of(context).size.height * .35,
-        autoPlay: true,
+        autoPlay: false,
         enlargeCenterPage: true,
         aspectRatio: 16 / 9,
         enableInfiniteScroll: false,
+        onPageChanged: (index, reason) {
+          setState(() {
+            // Pause the current video if it's playing
+            if (videoControllers[widget.files[currentIndex].path]
+                    ?.value
+                    .isPlaying ??
+                false) {
+              videoControllers[widget.files[currentIndex].path]?.pause();
+            }
+            currentIndex = index;
+
+            // Initialize the new video's controller if needed
+            initializeVideoController(widget.files[currentIndex]);
+          });
+        },
       ),
-      items: widget.files.map((file) {
+      itemBuilder: (context, index, realIndex) {
+        final file = widget.files[index];
         return file.path.endsWith('.mp4')
             ? buildVideoPlayer(file)
             : buildImage(file);
-      }).toList(),
+      },
     );
   }
 

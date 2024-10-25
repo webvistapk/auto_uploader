@@ -582,3 +582,101 @@
 //     return hashtags;
 //   }
 // }
+
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+class CameraScreen extends StatefulWidget {
+  @override
+  _CameraScreenState createState() => _CameraScreenState();
+}
+
+class _CameraScreenState extends State<CameraScreen>
+    with SingleTickerProviderStateMixin {
+  final ImagePicker _picker = ImagePicker();
+  bool _isDropdownVisible = false;
+
+  Future<void> _openCamera(bool isPhoto) async {
+    // Request camera permission
+    PermissionStatus permissionStatus = await Permission.camera.request();
+
+    if (permissionStatus.isGranted) {
+      // Check if the user wants to capture a photo or record a video
+      final XFile? file = await (isPhoto
+          ? _picker.pickImage(source: ImageSource.camera)
+          : _picker.pickVideo(source: ImageSource.camera));
+
+      if (file != null) {
+        print('File path: ${file.path}');
+      }
+    } else if (permissionStatus.isDenied) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Camera permission is required')),
+      );
+    } else if (permissionStatus.isPermanentlyDenied) {
+      openAppSettings();
+    }
+  }
+
+  void _toggleDropdown() {
+    setState(() {
+      _isDropdownVisible = !_isDropdownVisible;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Camera App')),
+      body: Center(
+          child: Text('Click the camera button to take a photo or video')),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_isDropdownVisible)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.camera_alt, color: Colors.blueAccent),
+                    title: Text('Take Photo'),
+                    onTap: () {
+                      _toggleDropdown();
+                      _openCamera(true);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.videocam, color: Colors.blueAccent),
+                    title: Text('Record Video'),
+                    onTap: () {
+                      _toggleDropdown();
+                      _openCamera(false);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          FloatingActionButton(
+            onPressed: _toggleDropdown,
+            child: Icon(_isDropdownVisible ? Icons.close : Icons.camera_alt),
+            backgroundColor: Colors.blueAccent,
+          ),
+        ],
+      ),
+    );
+  }
+}
