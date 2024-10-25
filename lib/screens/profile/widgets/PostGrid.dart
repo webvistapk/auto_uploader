@@ -9,12 +9,14 @@ class PostGrid extends StatelessWidget {
   final List<PostModel> posts; // Future that fetches posts
   final bool isVideo;
   String filterType;
+  String userId;
 
   PostGrid({
     super.key,
     required this.posts,
     this.isVideo = false,
     required this.filterType,
+    required this.userId
   });
 
   @override
@@ -37,7 +39,7 @@ class PostGrid extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => UserPostScreen(
-                    posts: posts, initialIndex: index, filterType: filterType),
+                    posts: posts, initialIndex: index, filterType: filterType,userId: userId,),
               ),
             );
           },

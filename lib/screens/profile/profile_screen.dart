@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _fetchPosts() async {
     // images and videos fetch and simulated from an API
     setState(() {
-      _posts=Provider.of<PostProvider>(context,listen: false).getPost(context);
+      _posts=Provider.of<PostProvider>(context,listen: false).getPost(context,widget.id.toString());
     });
   }
 
@@ -104,6 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // if (widget.userProfile != null) {
     //   return await UserPreferences().getCurrentUser();
     // }
+    print("THIS is User ID: ${userId}");
     UserProfile? userProfile = await UserService.fetchUserProfile(userId);
     setState(() {
       userName = userProfile.username; // Assign the user's name to the variable
@@ -248,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         posts: _posts,
                                         refresh: (String postID) {
                                           _fetchPosts();
-                                        },
+                                        }, userid: widget.id.toString(),
                                       ),
                                     ] else ...[
                                       const Center(

@@ -24,7 +24,7 @@ class _PostScreenState extends State<PostScreen> {
   _fetchPost() {
     setState(() {
       _posts =
-          Provider.of<PostProvider>(context, listen: false).getPost(context);
+          Provider.of<PostProvider>(context, listen: false).getPost(context,"");
     });
   }
 

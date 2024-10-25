@@ -65,13 +65,13 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<PostModel>> getPost(BuildContext context) async {
+  Future<List<PostModel>> getPost(BuildContext context ,String id) async {
     print("Fetching API");
     final String? token = await Prefrences.getAuthToken();
 
     int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}$_loggedInUserId";
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}${id}";
     print("Fetching API");
     try {
       final response = await http.get(Uri.parse(URL), headers: {
@@ -125,7 +125,7 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         // Show success message
         ToastNotifier.showSuccessToast(context, "Post deleted successfully");
-        getPost(context);
+        //getPost(context);
         setIsLoading(false);
       } else {
         // Show error message if deletion failed

@@ -11,12 +11,14 @@ class UserPostScreen extends StatefulWidget {
   final List<PostModel> posts;
   final int initialIndex;
   final String filterType;
+  final String userId;
 
   const UserPostScreen({
     Key? key,
     required this.posts,
     required this.initialIndex,
     required this.filterType,
+    required this.userId,
   }) : super(key: key);
 
   @override
@@ -40,7 +42,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
  Future<void> _fetchPosts() async {
     // images and videos fetch and simulated from an API
     setState(() {
-      _newposts=Provider.of<PostProvider>(context,listen: false).getPost(context);
+      _newposts=Provider.of<PostProvider>(context,listen: false).getPost(context,widget.userId);
     });
   }
 

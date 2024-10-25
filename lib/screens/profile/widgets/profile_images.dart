@@ -10,14 +10,16 @@ import 'package:mobile/screens/widgets/full_screen_image.dart';
 import '../../../models/UserProfile/post_model.dart';
 
 class ProfileImages extends StatefulWidget {
-  //final List<String> images;
+  String userid;
   final Future<List<PostModel>>? posts;
   final Function(String postID) refresh;
   ProfileImages(
       {super.key,
       //required this.images,
       required this.posts,
-      required this.refresh});
+      required this.refresh,
+      required this.userid,
+      });
 
   @override
   State<ProfileImages> createState() => _ProfileImagesState();
@@ -178,23 +180,34 @@ class _ProfileImagesState extends State<ProfileImages> {
                     PostGrid(
                       posts: allPosts,
                       filterType: "allPost",
+                     userId:  widget.userid,
                     ), // All Posts
                     PostGrid(
                         posts: imagePosts,
-                        filterType: "image"), // Filtered Image Posts
+                        filterType: "image",
+                      userId: widget.userid,
+                    ), // Filtered Image Posts
                     PostGrid(
                         posts: videoPosts,
                         isVideo: true,
-                        filterType: "video"), // Filtered Video Posts
+                        filterType: "video",
+                      userId:  widget.userid,
+                    ), // Filtered Video Posts
                     PostGrid(
                         posts: allPosts,
-                        filterType: "allPost"), // Placeholder for Pages
+                        filterType: "allPost",
+                      userId: widget.userid,
+                    ), // Placeholder for Pages
                     PostGrid(
                         posts: allPosts,
-                        filterType: "allPost"), // Placeholder for Posts
+                        filterType: "allPost",
+                      userId: widget.userid,
+                    ), // Placeholder for Posts
                     PostGrid(
                         posts: allPosts,
-                        filterType: "allPost"), // Placeholder for Tagged
+                        filterType: "allPost",
+                      userId: widget.userid,
+                    ), // Placeholder for Tagged
                     const profile_info(), // Info tab
                   ],
                 );
