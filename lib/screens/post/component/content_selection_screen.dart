@@ -272,9 +272,11 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
           floatingActionButton: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // SizedBox(),
+              // Spacer(),
               if (_isDropdownVisible)
                 Container(
-                  width: size.width * .80,
+                  width: size.width * .60,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -287,30 +289,26 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
                       ),
                     ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading:
-                              Icon(Icons.camera_alt, color: Colors.blueAccent),
-                          title: Text('Take Photo'),
-                          onTap: () {
-                            _toggleDropdown();
-                            _openCamera(true);
-                          },
-                        ),
-                        ListTile(
-                          leading:
-                              Icon(Icons.videocam, color: Colors.blueAccent),
-                          title: Text('Record Video'),
-                          onTap: () {
-                            _toggleDropdown();
-                            _openCamera(false);
-                          },
-                        ),
-                      ],
-                    ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading:
+                            Icon(Icons.camera_alt, color: Colors.blueAccent),
+                        title: Text('Take Photo'),
+                        onTap: () {
+                          _toggleDropdown();
+                          _openCamera(true);
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.videocam, color: Colors.blueAccent),
+                        title: Text('Record Video'),
+                        onTap: () {
+                          _toggleDropdown();
+                          _openCamera(false);
+                        },
+                      ),
+                    ],
                   ),
                 ),
               FloatingActionButton(
