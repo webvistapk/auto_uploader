@@ -11,17 +11,18 @@ class PostGrid extends StatelessWidget {
   String filterType;
   String userId;
 
-  PostGrid({
-    super.key,
-    required this.posts,
-    this.isVideo = false,
-    required this.filterType,
-    required this.userId
-  });
+  PostGrid(
+      {super.key,
+      required this.posts,
+      this.isVideo = false,
+      required this.filterType,
+      required this.userId});
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
+      scrollDirection: Axis.vertical,
+      physics: NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(8.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
@@ -39,7 +40,11 @@ class PostGrid extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => UserPostScreen(
-                    posts: posts, initialIndex: index, filterType: filterType,userId: userId,),
+                  posts: posts,
+                  initialIndex: index,
+                  filterType: filterType,
+                  userId: userId,
+                ),
               ),
             );
           },

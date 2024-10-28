@@ -79,17 +79,19 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   void _showPrivacyBottomSheet(BuildContext context) async {
     // Example current privacy value
-    final updatedPrivacy = await showModalBottomSheet<String>(
+    String? result = await showModalBottomSheet<String>(
       context: context,
       isDismissible: false,
-      builder: (context) => PrivacyOptionsSheet(privacyPolicy: privacyPolicy),
+      builder: (_) => PrivacyOptionsSheet(privacyPolicy: privacyPolicy),
     );
 
-    if (updatedPrivacy != null) {
-      print('Updated privacy: $updatedPrivacy');
-      privacyPolicy = updatedPrivacy;
-      setState(() {}); // You can use the updated privacy here
+    if (result != null) {
+      setState(() {
+        privacyPolicy = result; // Update the parent state with the new value
+      });
     }
+
+    print('Updated Policy : $privacyPolicy');
   }
 
   bool isLoading = false;
@@ -324,10 +326,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 // Widget to build media display (either image or video)
   Widget _buildMediaWidget() {
     if (widget.mediFiles == null || widget.mediFiles!.isEmpty) {
-      return Container(
-        color: Colors.grey[300],
-        child: Center(child: Text("No media")),
-      );
+      return Center(child: Text("No media"));
     }
 
     File mediaFile = widget.mediFiles![mediaFileIndex()];

@@ -10,8 +10,8 @@ class PrivacyOptionsSheet extends StatefulWidget {
 }
 
 class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
-  // Track the selected option
-  late String selectedPrivacyOption; // Initialize based on the passed string
+  late ValueNotifier<String>
+      selectedPrivacyOption; // Notifier for real-time updates
 
   // Define privacy policy options
   final List<String> privacyPolicyOptions = ['public', 'followers', 'private'];
@@ -19,8 +19,9 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
   @override
   void initState() {
     super.initState();
-    // Set the initial privacy option based on the passed value
-    selectedPrivacyOption = _getOptionFromPrivacy(widget.privacyPolicy);
+    // Initialize the ValueNotifier based on the initial privacy policy
+    selectedPrivacyOption =
+        ValueNotifier(_getOptionFromPrivacy(widget.privacyPolicy));
   }
 
   // Convert the privacy policy string to corresponding option text
@@ -79,8 +80,8 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
                 const Spacer(),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(
-                        context, _getPrivacyFromOption(selectedPrivacyOption));
+                    Navigator.pop(context,
+                        _getPrivacyFromOption(selectedPrivacyOption.value));
                   },
                   child: const Icon(Icons.close),
                 ),
@@ -117,29 +118,34 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
   // Custom method to build each checkbox option
   Widget _buildCheckboxOption(
       BuildContext context, String option, String description) {
-    return CheckboxListTile(
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            option,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+    return ValueListenableBuilder<String>(
+      valueListenable: selectedPrivacyOption,
+      builder: (context, value, _) {
+        return CheckboxListTile(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                option,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                description,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
           ),
-          Text(
-            description,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-        ],
-      ),
-      activeColor: Colors.red,
-      value:
-          selectedPrivacyOption == option, // Check if this option is selected
-      onChanged: (bool? value) {
-        setState(() {
-          selectedPrivacyOption = option; // Update selected option
-        });
-        // Call a function or do something with the selected value
-        _updatePrivacyPolicy(option);
+          activeColor: Colors.red,
+          value: value == option, // Check if this option is selected
+          onChanged: (bool? selected) {
+            if (selected == true) {
+              selectedPrivacyOption.value = option;
+
+              // Update selected option
+              _updatePrivacyPolicy(option);
+            }
+          },
+        );
       },
     );
   }
@@ -147,10 +153,13 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
   // Update the privacy policy value based on user selection
   void _updatePrivacyPolicy(String option) {
     String newPrivacy = _getPrivacyFromOption(option);
-    // Here you can do something with the updated privacy policy, like passing it back to a parent widget or storing it
     print("Updated privacy policy: $newPrivacy");
-    // You can also pass this back using Navigator.pop() if required.
-    // Navigator.pop(context,
-    //     newPrivacy); // Pass the updated privacy back when closing the sheet
+  }
+
+  @override
+  void dispose() {
+    selectedPrivacyOption
+        .dispose(); // Dispose ValueNotifier to prevent memory leaks
+    super.dispose();
   }
 }

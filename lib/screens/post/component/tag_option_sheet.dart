@@ -37,12 +37,14 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
     }
   }
 
-  void _onTagUserSelected(int index) {
+  void _onTagUserSelected(int id) {
     setState(() {
-      widget.selectedTagUser.add(_filteredItems[index].id);
-      _filteredItems.removeAt(index);
+      if (widget.selectedTagUser.contains(id)) {
+        widget.selectedTagUser.remove(id); // Deselect if already selected
+      } else {
+        widget.selectedTagUser.add(id); // Select if not selected
+      }
     });
-    Navigator.of(context).pop(); // Close on selection
   }
 
   @override
@@ -58,7 +60,6 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
 
     if (tagUsers.isEmpty) {
       print(tagUsers);
-      // debugger();
     } else {
       List<TagUser> uniqueTagUsers = tagUsers.toSet().toList();
 
@@ -67,7 +68,6 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
         _filteredItems = List.from(_allItems);
       });
     }
-    // Remove duplicates by converting the list to a Set and back to a List
   }
 
   @override
@@ -83,7 +83,6 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(),
                     const SizedBox(),
                     Text(
                       "Tag People",
@@ -136,16 +135,19 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
                   child: ListView.separated(
                     itemCount: _filteredItems.length,
                     itemBuilder: (context, index) {
-                      if (widget.selectedTagUser
-                          .contains(_filteredItems[index].id)) {
-                        return SizedBox(); // Skip already selected users
-                      }
                       return GestureDetector(
-                        onTap: () => _onTagUserSelected(
-                            index), // Call function to handle selection
+                        onTap: () =>
+                            _onTagUserSelected(_filteredItems[index].id),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
+                            Checkbox(
+                              activeColor: Colors.red,
+                              value: widget.selectedTagUser
+                                  .contains(_filteredItems[index].id),
+                              onChanged: (_) =>
+                                  _onTagUserSelected(_filteredItems[index].id),
+                            ),
                             CircleAvatar(
                                 child: const Icon(Icons.person), radius: 20),
                             const SizedBox(width: 10),
@@ -177,7 +179,6 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
           );
   }
 
-  // Shimmer effect widget
   Widget _buildShimmerEffect() {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
