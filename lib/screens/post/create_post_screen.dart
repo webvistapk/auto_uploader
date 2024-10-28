@@ -20,10 +20,11 @@ class CreatePostScreen extends StatefulWidget {
 class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
-    return AddPostScreen(userProfile: widget.userProfile, mediFiles: []);
-    // ContentSelectionScreen(
-    //   userProfile: widget.userProfile,
-    //   token: widget.token,
-    // );
+    return
+        // AddPostScreen(userProfile: widget.userProfile, mediFiles: []);
+        ContentSelectionScreen(
+      userProfile: widget.userProfile,
+      token: widget.token,
+    );
   }
 }
