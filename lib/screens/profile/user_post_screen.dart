@@ -4,7 +4,6 @@ import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:provider/provider.dart';
-
 import '../../controller/services/post/post_provider.dart';
 
 class UserPostScreen extends StatefulWidget {
@@ -26,123 +25,115 @@ class UserPostScreen extends StatefulWidget {
 }
 
 class _UserPostScreenState extends State<UserPostScreen> {
-  late PageController _pageController;
-  late List<PostModel> _posts;
-  bool _isFirstLoad = true; // Track if it's the first time loading the screen
+  late ScrollController _scrollController;
+  List<PostModel> _posts = [];
+  int limit = 10; // Default limit
+  int offset = 0; // Offset for pagination
+  bool _isLoadingMore = false; // To track if more posts are being loaded
+  bool _hasMore = true; // To track if there are more posts to load
+  bool _isFirstLoad = true; // Track if it's the first time loading posts
 
-  Future<List<PostModel>>? _newposts;
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget.initialIndex);
-    _fetchPosts();
-
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    _fetchPosts(); // Initial fetch for the first 10 posts
   }
 
- Future<void> _fetchPosts() async {
-    // images and videos fetch and simulated from an API
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // Fetch posts with pagination
+  Future<void> _fetchPosts() async {
+    if (_isLoadingMore || !_hasMore) return; // Prevent multiple calls if already loading or no more data
+
     setState(() {
-      _newposts=Provider.of<PostProvider>(context,listen: false).getPost(context,widget.userId);
+      _isLoadingMore = true;
     });
+
+    try {
+      List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
+          .getPost(context, widget.userId, limit.toString(), offset.toString());
+
+      setState(() {
+        if (newPosts.length < limit) {
+          _hasMore = false; // No more data available if the returned posts are less than the limit
+        }
+        _posts.addAll(newPosts); // Append new posts to the existing list
+        offset += limit; // Increment the offset for pagination
+        _isFirstLoad = false; // Mark first load as complete
+      });
+    } finally {
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
   }
 
-
-
-  List<PostModel> getImagePosts(List<PostModel> posts) {
-  return posts.where((post) {
-  return post.media[0].mediaType == 'image';
-  }).toList();
-
+  // Detect when user scrolls to the bottom
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      // When the user scrolls close to the bottom (200 pixels from the end), fetch more posts
+      _fetchPosts();
+    }
   }
 
-  // Filter Video Posts
-  List<PostModel> getVideoPosts(List<PostModel> posts) {
-  return posts.where((post) {
-  return post.media[0].mediaType == 'video';
-  }).toList();
+  Future<void> deletePost(String postID) async {
+    Provider.of<PostProvider>(context, listen: false).deletePost(postID, context);
+    _fetchPosts(); // Reload posts after deletion
   }
-
-  Future<void> DeletePost(String postID)async{
-    Provider.of<PostProvider>(context,listen: false).deletePost(postID, context);
-    _fetchPosts();
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Post Details"),
+        title: const Text("Post Details"),
       ),
-      body:
-      FutureBuilder<List<PostModel>>(
-        future: _newposts,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator()); // Loading state
-          } else if (snapshot.hasError) {
-            return const Center(child: Text("Error loading posts")); // Error state
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No posts available")); // Empty state
+      body: _isFirstLoad
+          ? const Center(child: CircularProgressIndicator()) // Initial loading state
+          : ListView.builder(
+        controller: _scrollController,
+        itemCount: _posts.length + (_isLoadingMore ? 1 : 0), // Add 1 for the loading indicator
+        itemBuilder: (context, index) {
+          if (index == _posts.length) {
+            // Show CircularProgressIndicator at the bottom while loading more posts
+            return const Center(child: CircularProgressIndicator());
           }
 
-          // Data is ready
-          List<PostModel> allPosts = snapshot.data!;
-
-          // Apply filtering based on the filterType
-          List<PostModel> filteredPosts;
-          if (widget.filterType == 'image') {
-            filteredPosts = getImagePosts(allPosts); // Filter for image posts
-          } else if (widget.filterType == 'video') {
-            filteredPosts = getVideoPosts(allPosts); // Filter for video posts
-          } else {
-            filteredPosts = allPosts; // Show all posts if no specific filter
-          }
-
-          if (filteredPosts.isEmpty) {
-            return const Center(child: Text("No posts available for this filter"));
-          }
-
-          return ListView.builder(
-            controller: _pageController,
-            itemCount: filteredPosts.length,
-            itemBuilder: (context, index) {
-              final post = filteredPosts[index];
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PostWidget(
-                      postId: post.id.toString(),
-                      username: post.user.username.toString(),
-                      location: "Location",
-                      date: post.createdAt.toString(),
-                      caption: post.post.toString(),
-                      mediaUrls: post.media.map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}").toList(),
-                      profileImageUrl: AppUtils.testImage,
-                      isVideo: post.media[0].mediaType,
-                      likes: post.likes_count.toString(),
-                      comments: post.commnets_count.toString(),
-                      shares: "100",
-                      saved: '100',
-                      refresh: (){
-                        DeletePost(post.id.toString());
-                      }, // Use the refresh function
-                    ),
-                  ],
+          final post = _posts[index];
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PostWidget(
+                  postId: post.id.toString(),
+                  username: post.user.username.toString(),
+                  location: "Location",
+                  date: post.createdAt.toString(),
+                  caption: post.post.toString(),
+                  mediaUrls: post.media
+                      .map((media) =>
+                  "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
+                      .toList(),
+                  profileImageUrl: AppUtils.testImage,
+                  isVideo: post.media[0].mediaType,
+                  likes: post.likes_count.toString(),
+                  comments: post.commnets_count.toString(),
+                  shares: "100",
+                  saved: '100',
+                  refresh: () {
+                    deletePost(post.id.toString());
+                  },
                 ),
-              );
-            },
+              ],
+            ),
           );
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 }

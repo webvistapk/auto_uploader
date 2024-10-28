@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _fetchPosts() async {
     // images and videos fetch and simulated from an API
     setState(() {
-      _posts=Provider.of<PostProvider>(context,listen: false).getPost(context,widget.id.toString());
+      _posts=Provider.of<PostProvider>(context,listen: false).getPost(context,widget.id.toString(),"10","0");
     });
   }
 
