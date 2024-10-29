@@ -11,10 +11,14 @@ import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/edit_profile_screen.dart';
+import 'package:mobile/screens/profile/follower/follower_screen.dart';
+import 'package:mobile/screens/profile/following/following_screen.dart';
+import 'package:mobile/screens/profile/widgets/profle_edit_screen.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/services/profile/user_service.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../models/UserProfile/followers.dart';
 
@@ -22,11 +26,12 @@ class ProfileHeader extends StatefulWidget {
   final UserProfile user;
   final bool canViewProfile;
   final bool isFollowing;
-
+  final token;
 
   const ProfileHeader({
     super.key,
     required this.user,
+    required this.token,
     required this.canViewProfile,
     required this.isFollowing,
   });
@@ -40,9 +45,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   Future<FetchResponseModel>? _followRequestsResponse;
 
   Future<int?> _getUserIdFromToken() async {
-    String? token = await Prefrences.getAuthToken();
-    if (token != null && token.isNotEmpty) {
-      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    // token = await Prefrences.getAuthToken();
+    if (widget.token != null && widget.token.isNotEmpty) {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(widget.token);
       return decodedToken['user_id'] as int?;
     }
     return null;
@@ -91,8 +96,10 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     _followRequestsResponse =
         Provider.of<follower_request_provider>(context, listen: false)
             .fetchFollowRequestStatus(currentUserId!, widget.user.id, context);
-  }
 
+    print(_followRequestsResponse);
+    // debugger();
+  }
 
   @override
   void initState() {
@@ -115,13 +122,15 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           final bool isCurrentUser = widget.user.id == currentUserId;
 
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
                 profileContainer(
-                    AppUtils.testImage,
+                    widget.user.profileUrl == null
+                        ? AppUtils.testImage
+                        : 'http://147.79.117.253:8001' +
+                            widget.user.profileUrl!,
                     "${widget.user.firstName.toString()} ${widget.user.lastName.toString()}",
                     widget.user.position ?? "JobType",
                     widget.user.address ?? 'Address',
@@ -130,36 +139,62 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${widget.user.following_count}',
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
+                    InkWell(
+                      onTap: () async {
+                        Navigator.push(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => FollowingScreen(
+                                    token: widget.token,
+                                    userProfile: widget.user),
+                                context: context));
+                      },
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${widget.user.following_count}',
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            const Text(
+                              'Following',
+                              style: TextStyle(
+                                  fontSize: 10, color: AppColors.greyColor),
+                            ),
+                          ],
                         ),
-                        const Text(
-                          'Following',
-                          style: TextStyle(
-                              fontSize: 10, color: AppColors.greyColor),
-                        ),
-                      ],
+                      ),
                     ),
                     const SizedBox(width: 24), // Spacing between columns
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${widget.user.followers_count}',
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
+                    InkWell(
+                      onTap: () async {
+                        Navigator.push(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => FollowersScreen(
+                                    token: widget.token,
+                                    userProfile: widget.user),
+                                context: context));
+                      },
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${widget.user.followers_count}',
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            const Text(
+                              'Followers',
+                              style: TextStyle(
+                                  fontSize: 10, color: AppColors.greyColor),
+                            ),
+                          ],
                         ),
-                        const Text(
-                          'Followers',
-                          style: TextStyle(
-                              fontSize: 10, color: AppColors.greyColor),
-                        ),
-                      ],
+                      ),
                     ),
                     const SizedBox(width: 24), // Spacing between columns
                     const Column(
@@ -179,7 +214,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
                 if (isCurrentUser) ...[
                   Row(
@@ -196,7 +230,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
-                          padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 12),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -211,7 +246,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           backgroundColor: AppColors.lightGrey,
-                          padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 12),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -231,47 +267,60 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       Builder(builder: (context) {
                         var provider =
                             context.watch<follower_request_provider>();
-                        return provider.isLoading?Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        ):ElevatedButton(
-                          onPressed: provider.status == 'pending'
-                              ? () {}
-                              : provider.status == 'initial' ||
-                                      provider.status == 'rejected'
-                                  ? _handleFollow
-                                  : _handleunfollow,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: provider.status == 'pending'
-                                ? Colors.grey
-                                : provider.status == 'initial' ||
-                                        provider.status == 'rejected'
-                                    ? Colors.blueAccent
-                                    : AppColors.lightGrey,
-                            padding: EdgeInsets.symmetric(vertical: provider.status=='accepted'?0:8,horizontal: provider.status=='accepted'?0:25),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: provider.status=="accepted"?Icon(CupertinoIcons.person_crop_circle,color: AppColors.black,size: 30,):Text(
-                                  provider.status == 'pending'
-                                      ? 'Pending'
+                        return provider.isLoading
+                            ? Center(
+                                child: CircularProgressIndicator.adaptive(),
+                              )
+                            : ElevatedButton(
+                                onPressed: provider.status == 'pending'
+                                    ? () {}
+                                    : provider.status == 'initial' ||
+                                            provider.status == 'rejected'
+                                        ? _handleFollow
+                                        : _handleunfollow,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: provider.status == 'pending'
+                                      ? Colors.grey
                                       : provider.status == 'initial' ||
                                               provider.status == 'rejected'
-                                          ? 'Follow'
-                                          : 'Unfollow',
-                                  style: const TextStyle(
-                                      color: AppColors.whiteColor),
+                                          ? Colors.blueAccent
+                                          : AppColors.lightGrey,
+                                  padding: EdgeInsets.symmetric(
+                                      vertical:
+                                          provider.status == 'accepted' ? 0 : 8,
+                                      horizontal: provider.status == 'accepted'
+                                          ? 0
+                                          : 25),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
-                        );
+                                child: provider.status == "accepted"
+                                    ? Icon(
+                                        CupertinoIcons.person_crop_circle,
+                                        color: AppColors.black,
+                                        size: 30,
+                                      )
+                                    : Text(
+                                        provider.status == 'pending'
+                                            ? 'Pending'
+                                            : provider.status == 'initial' ||
+                                                    provider.status ==
+                                                        'rejected'
+                                                ? 'Follow'
+                                                : 'Unfollow',
+                                        style: const TextStyle(
+                                            color: AppColors.whiteColor),
+                                      ),
+                              );
                       }),
-
-
                       const SizedBox(width: 8),
                       OutlinedButton(
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           backgroundColor: AppColors.lightGrey,
-                          padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 15),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -288,16 +337,19 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 Center(
                   child: Column(
                     children: [
-                      Text(widget.user.website??'www.website.com',style: TextStyle(
-                        color: Colors.blueAccent,
-                        fontWeight: FontWeight.w100,
-                        fontSize: paragraph * 0.32
-                      ),),
+                      Text(
+                        widget.user.website ?? 'www.website.com',
+                        style: TextStyle(
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.w100,
+                            fontSize: paragraph * 0.32),
+                      ),
                       const SizedBox(height: 10),
                       Text(
-                          widget.user.description ?? "description",
+                        widget.user.description ?? "description",
                         style: TextStyle(
-                            color: AppColors.lightGrey, fontSize: paragraph * 0.38),
+                            color: AppColors.lightGrey,
+                            fontSize: paragraph * 0.38),
                       ),
                       const SizedBox(height: 10),
                     ],
@@ -316,15 +368,55 @@ class _ProfileHeaderState extends State<ProfileHeader> {
 
   //First Profile Container
   Widget profileContainer(
-      String img, fullName, JobType,  address, city, country) {
+      String img, fullName, JobType, address, city, country) {
     return Center(
       child: Container(
         padding: EdgeInsets.all(5),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: header5,
-              backgroundImage: NetworkImage(img),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  CupertinoDialogRoute(
+                    builder: (_) => ProfileEditScreen(
+                      authToken: widget.token,
+                      imageUrl: img,
+                      userProfile: widget.user,
+                    ),
+                    context: context,
+                  ),
+                );
+              },
+              child: CircleAvatar(
+                radius: header5,
+                backgroundColor: Colors.grey[200],
+                child: ClipOval(
+                  child: Image.network(
+                    img,
+                    fit: BoxFit.cover,
+                    width: header5 * 2,
+                    height: header5 * 2,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          width: header5 * 2,
+                          height: header5 * 2,
+                          color: Colors.white,
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.error,
+                      color: Colors.red,
+                      size: header5,
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(
               width: 40,
@@ -339,7 +431,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               style: TextStyle(
                   color: AppColors.darkGrey, fontSize: paragraph * 0.32),
             ),
-
             Text(
               "${address}, ${city},${country}",
               style: TextStyle(

@@ -7,6 +7,7 @@ import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/models/follower_following/follower_model.dart';
 import 'package:mobile/models/post/tag_people.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 
@@ -293,5 +294,39 @@ class ProviderManager {
     }
 
     return combinedList;
+  }
+
+  // _________________ Followers Data ___________________/////////////
+  static fetchFollowers(String authToken, int userID) async {
+    String token = authToken;
+    final String url =
+        "${ApiURLs.baseUrl}${ApiURLs.fetch_peoples_endpoint}$userID/";
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Token $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        List<dynamic> followersData = data["followers"] ?? [];
+        final followers = followersData
+            .map((followerJson) => Follower.fromJson(followerJson))
+            .toList();
+
+        await Prefrences.saveFollowers(followersData);
+        return followers;
+      } else {
+        print("Failed to load followers");
+        throw Exception("Failed to load followers");
+      }
+    } catch (error) {
+      print("Error fetching followers: $error");
+      throw Exception("Error fetching followers: $error");
+    }
   }
 }

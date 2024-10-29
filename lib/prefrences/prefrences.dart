@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:mobile/models/follower_following/follower_model.dart';
+import 'package:mobile/models/follower_following/following_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Prefrences {
@@ -6,6 +10,8 @@ class Prefrences {
   static const String userEmail = "userEmail";
   static const String mediaPermission = "mediaPermission";
   static const String userID = "id";
+  static const String followerKey = 'followers';
+  static const String followingKey = 'followings';
 
   static SetAuthToken(String accessToken) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -50,5 +56,47 @@ class Prefrences {
   static getMediaPermission() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool(mediaPermission) ?? false;
+  }
+
+  static Future<void> saveFollowers(List<dynamic> followersData) async {
+    final List<Follower> followers = followersData
+        .map((followerJson) => Follower.fromJson(followerJson))
+        .toList();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(Prefrences.followerKey,
+        json.encode(followers.map((f) => f.toJson()).toList()));
+  }
+
+  static Future<void> saveFollowings(List<dynamic> followingsData) async {
+    final List<Following> followings = followingsData
+        .map((followingJson) => Following.fromJson(followingJson))
+        .toList();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(Prefrences.followingKey,
+        json.encode(followings.map((f) => f.toJson()).toList()));
+  }
+
+  static Future<List<Follower>> getFollowers() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? followersString = prefs.getString(Prefrences.followerKey);
+
+    if (followersString != null) {
+      List<dynamic> followersJson = json.decode(followersString);
+      return followersJson.map((json) => Follower.fromJson(json)).toList();
+    }
+    return [];
+  }
+
+  static Future<List<Following>> getFollowings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? followingsString = prefs.getString(Prefrences.followingKey);
+
+    if (followingsString != null) {
+      List<dynamic> followingsJson = json.decode(followingsString);
+      return followingsJson.map((json) => Following.fromJson(json)).toList();
+    }
+    return [];
   }
 }

@@ -89,8 +89,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isFollowing = _checkIsFollowig(userId, _loggedInUserId!, token!);
         setState(() {});
       } else {
-        _userProfile = UserPreferences().getCurrentUser();
+        _userProfile = _fetchUserProfile(widget.userProfile!.id);
         // debugger();
+        _userProfile!
+            .then((value) => UserPreferences().saveCurrentUser(value!));
 
         _isFollowing = _checkIsFollowig(_loggedInUserId!, userId!, token!);
         setState(() {});
@@ -236,6 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ),
                                       ),*/
                                     ProfileHeader(
+                                        token: widget.authToken,
                                         user: user,
                                         canViewProfile: canViewProfile,
                                         isFollowing: isFollowing),
