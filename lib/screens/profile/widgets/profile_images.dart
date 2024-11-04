@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
+import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
@@ -42,7 +43,7 @@ class _ProfileImagesState extends State<ProfileImages> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 7,
+      length: 8,
       child: Column(
         children: [
           Theme(
@@ -98,6 +99,12 @@ class _ProfileImagesState extends State<ProfileImages> {
                 Tab(
                   child: Text(
                     "Tagged",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Reels",
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -202,12 +209,15 @@ class _ProfileImagesState extends State<ProfileImages> {
                         posts: allPosts,
                         filterType: "allPost",
                       userId: widget.userid,
-                    ), // Placeholder for Posts
+                    ),
                     PostGrid(
-                        posts: allPosts,
-                        filterType: "allPost",
+                      posts: allPosts,
+                      filterType: "allPost",
                       userId: widget.userid,
-                    ), // Placeholder for Tagged
+                    ), // Placeholder for Posts
+                    ReelPostGrid(
+                        userId: widget.userid
+                    ),
                     const profile_info(), // Info tab
                   ],
                 );

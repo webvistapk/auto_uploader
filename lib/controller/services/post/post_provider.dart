@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/services/post_manager.dart';
+import 'package:mobile/models/ReelPostModel.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 
 import 'dart:convert';
@@ -62,6 +63,53 @@ class PostProvider extends ChangeNotifier {
       notifyListeners();
       print(e.toString());
       return null;
+    }
+  }
+
+  Future<List<ReelPostModel>> fetchReels(BuildContext context, String id, int limit, int offset) async {
+    final String? token = await Prefrences.getAuthToken();
+
+    // Base URL and API path
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id";
+
+    // Add query parameters for pagination (limit and offset)
+    Uri uri = Uri.parse(URL).replace(queryParameters: {
+      'limit': limit.toString(),    // How many posts per page
+      'offset': offset.toString() // Offset for pagination
+    });
+
+    try {
+      final response = await http.get(uri, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      });
+
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        final jsonList = jsonDecode(response.body);
+        print("REEL GETTED SUCCESSFULLY");
+       // print(jsonList);
+        //log("Reel Data: ${jsonList['reels']}"); // Log the correct data
+
+        List<ReelPostModel> reelList = [];
+        for (var reelJson in jsonList['reels']) { // Change 'posts' to 'reels'
+          final reel = ReelPostModel.fromJson(reelJson);
+          reelList.add(reel);
+        }
+        print("PROVIDER REEL :${reelList}");
+
+        notifyListeners();
+        return reelList;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      print(e);
+      return [];  // Return an empty list on exception
+    } finally {
+      setIsLoading(false);
     }
   }
 

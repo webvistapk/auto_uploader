@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
+import 'package:mobile/models/ReelPostModel.dart';
+import 'package:mobile/screens/profile/ReelScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
@@ -10,26 +12,20 @@ import '../../../controller/services/post/post_provider.dart';
 import '../../../models/UserProfile/post_model.dart';
 import '../user_post_screen.dart';
 
-class PostGrid extends StatefulWidget {
-  final List<PostModel> posts;
-  final bool isVideo;
-  final String filterType;
+class ReelPostGrid extends StatefulWidget {
   final String userId;
 
-  const PostGrid({
+  const ReelPostGrid({
     Key? key,
-    required this.posts,
-    this.isVideo = false,
-    required this.filterType,
     required this.userId,
   }) : super(key: key);
 
   @override
-  _PostGridState createState() => _PostGridState();
+  _ReelPostGridState createState() => _ReelPostGridState();
 }
 
-class _PostGridState extends State<PostGrid> {
-  List<PostModel> _posts = [];
+class _ReelPostGridState extends State<ReelPostGrid> {
+  List<ReelPostModel> _reel= [];
   bool _isLoadingMore = false;
   bool _hasMore = true;
   ScrollController _scrollController = ScrollController();
@@ -39,46 +35,55 @@ class _PostGridState extends State<PostGrid> {
   @override
   void initState() {
     super.initState();
-    _posts = widget.posts;
     _scrollController.addListener(_onScroll);
+    _fetchReelPosts();
   }
 
-  Future<void> _fetchPosts() async {
+  Future<void> _fetchReelPosts() async {
+
+    // Check if already loading more or if there's no more data to load
     if (_isLoadingMore || !_hasMore) return;
 
     setState(() {
-      _isLoadingMore = true;
+      _isLoadingMore = true; // Set loading state
     });
 
     try {
-      List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
-          .getPost(context, widget.userId, limit.toString(), offset.toString());
+      // Fetch new posts from the provider
+      List<ReelPostModel> newReel= await Provider.of<PostProvider>(context, listen: false)
+          .fetchReels(context, widget.userId, limit, offset); // Use int for limit and offset
 
       setState(() {
-        _posts.addAll(newPosts);
-        offset += limit;
+        _reel.addAll(newReel); // Add new posts to the existing list
+        offset += limit; // Increment offset for the next fetch
 
-        if (newPosts.length < limit) {
+        // If the number of new posts is less than the limit, set hasMore to false
+        if (newReel.length < limit) {
           _hasMore = false;
         }
       });
     } catch (error) {
+      // Show an error message in case of failure
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load posts: $error')),
+        SnackBar(content: Text('Failed to load reels: $error')),
       );
     } finally {
-      //await Future.delayed(Duration(seconds: 2));
       setState(() {
-        _isLoadingMore = false;
+        _isLoadingMore = false; // Reset loading state
       });
     }
   }
+
   void _onScroll() {
+    // Check if the user has scrolled near the bottom of the list
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300 && !_isLoadingMore && _hasMore) {
-      _fetchPosts();
+        _scrollController.position.maxScrollExtent - 300 &&
+        !_isLoadingMore &&
+        _hasMore) {
+      _fetchReelPosts(); // Call the fetch function
     }
   }
+
 
   @override
   void dispose() {
@@ -91,9 +96,7 @@ class _PostGridState extends State<PostGrid> {
     return Column(
       children: [
         Expanded(
-          child: _posts.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : GridView.builder(
+          child: GridView.builder(
             controller: _scrollController,
             padding: const EdgeInsets.all(8.0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -101,64 +104,25 @@ class _PostGridState extends State<PostGrid> {
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
-            itemCount: _posts.length,
+            itemCount: _reel.length,
             itemBuilder: (context, index) {
-              final post = _posts[index];
+              final reels = _reel[index];
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => UserPostScreen(
-                        posts: _posts,
-                        initialIndex: index,
-                        filterType: widget.filterType,
-                        userId: widget.userId,
+                      builder: (context) => ReelScreen(
+                        posts: _reel.map((reel) => reel.file).toList(), // List of URLs
+                        initialIndex: index, // Start at the tapped index
                       ),
                     ),
                   );
                 },
                 child: Hero(
                   tag: 'profile_images_$index',
-                  child: post.media[0].mediaType == 'video'
-                      ? VideoPlayerWidget(videoUrl: "http://147.79.117.253:8001/api${post.media[0].file}")
-                      : Image.network(
-                    post.media.isNotEmpty
-                        ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
-                        : '',
-                    fit: BoxFit.cover,
-                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                      if (loadingProgress == null) {
-                        // Image is fully loaded, return the child
-                        return child;
-                      } else {
-                        // Show shimmer effect with CircularProgressIndicator while loading
-                        return Stack(
-                          alignment: Alignment.center, // Align progress indicator to the center
-                          children: [
-                            Shimmer.fromColors(
-                              baseColor: Colors.grey[300]!,   // Base color of the shimmer
-                              highlightColor: Colors.grey[100]!,  // Highlight color of the shimmer
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                color: Colors.grey[300], // Placeholder color during loading
-                              ),
-                            ),
-                            Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                    : null,
-                                strokeWidth: 2.0, // Adjust the size of the progress indicator
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-                    },
-                    errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image), // Fallback for error
-                  ),
+                  child: VideoPlayerWidget(videoUrl: "http://147.79.117.253:8001/api${reels.file[0]}")
+
                 ),
               );
             },
@@ -166,14 +130,14 @@ class _PostGridState extends State<PostGrid> {
         ),
         if (_hasMore) // Show "Load More" button only if there are more posts
           ElevatedButton(
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.transparent), // Transparent background
-                elevation: MaterialStateProperty.all(0)
-            ),
-            onPressed: _isLoadingMore ? null : _fetchPosts,
-            child: _isLoadingMore
-                ? CircularProgressIndicator(
-            ):Container()
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.transparent), // Transparent background
+                  elevation: MaterialStateProperty.all(0)
+              ),
+              onPressed: _isLoadingMore ? null : _fetchReelPosts,
+              child: _isLoadingMore
+                  ? CircularProgressIndicator(
+              ):Container()
           ),
       ],
     );
