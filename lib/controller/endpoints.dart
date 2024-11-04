@@ -21,5 +21,6 @@ class ApiURLs {
   static const String get_post = "posts/get/";
   static const String delete_post = "posts/delete/";
   static const String get_single_post = "posts/get/single/";
-  static const String get_reel_post = "posts/reel/get/";
+  static const String user_profile_image_endpoint =
+      "userprofile/users/profile_image/save/";
 }

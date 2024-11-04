@@ -52,7 +52,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _fetchPosts() async {
     // images and videos fetch and simulated from an API
     setState(() {
-      _posts=Provider.of<PostProvider>(context,listen: false).getPost(context,widget.id.toString(),"10","0");
+      _posts = Provider.of<PostProvider>(context, listen: false)
+          .getPost(context, widget.id.toString());
     });
   }
 
@@ -88,8 +89,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isFollowing = _checkIsFollowig(userId, _loggedInUserId!, token!);
         setState(() {});
       } else {
-        _userProfile = UserPreferences().getCurrentUser();
+        _userProfile = _fetchUserProfile(widget.userProfile!.id);
         // debugger();
+        _userProfile!
+            .then((value) => UserPreferences().saveCurrentUser(value!));
 
         _isFollowing = _checkIsFollowig(_loggedInUserId!, userId!, token!);
         setState(() {});
@@ -131,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // After fetching the status, check it and return the corresponding bool value
       if (Provider.of<follower_request_provider>(context, listen: false)
-          .status ==
+              .status ==
           'accepted') {
         return true;
       } else {
@@ -141,6 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return false;
     }
   }
+
   Future<void> _refresh() async {
     // Refresh logic here, for example, fetching new data
     _fetchPosts();
@@ -156,19 +160,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Scaffold(
           appBar: _loggedInUserId != widget.id
               ? AppBar(
-            title: Text(
-              userName ?? '',
-              style: const TextStyle(
-                  fontSize: 10, color: AppColors.greyColor),
-            ),
-            centerTitle: true,
-          )
+                  title: Text(
+                    userName ?? '',
+                    style: const TextStyle(
+                        fontSize: 10, color: AppColors.greyColor),
+                  ),
+                  centerTitle: true,
+                )
               : PreferredSize(
-            preferredSize: Size.fromHeight(50.0),
-            child: TopBar(
-              onSearch: (query) => SearchStore.updateSearchQuery(query),
-            ),
-          ),
+                  preferredSize: Size.fromHeight(50.0),
+                  child: TopBar(
+                    onSearch: (query) => SearchStore.updateSearchQuery(query),
+                  ),
+                ),
           // PreferredSize(
           //     preferredSize: Size.fromHeight(50), child: AppBar()),
           endDrawer: const SideBar(),
@@ -216,6 +220,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               // debugger();
 
                               return SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -233,6 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ),
                                       ),*/
                                     ProfileHeader(
+                                        token: widget.authToken,
                                         user: user,
                                         canViewProfile: canViewProfile,
                                         isFollowing: isFollowing),
@@ -249,7 +255,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         posts: _posts,
                                         refresh: (String postID) {
                                           _fetchPosts();
-                                        }, userid: widget.id.toString(),
+                                        },
+                                        userid: widget.id.toString(),
                                       ),
                                     ] else ...[
                                       const Center(

@@ -5,6 +5,7 @@ import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/post/component/content_selection_screen.dart';
+import 'package:mobile/screens/post/widgets/add_post.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 
 class CreatePostScreen extends StatefulWidget {
@@ -19,7 +20,9 @@ class CreatePostScreen extends StatefulWidget {
 class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
-    return ContentSelectionScreen(
+    return
+        // AddPostScreen(userProfile: widget.userProfile, mediFiles: []);
+        ContentSelectionScreen(
       userProfile: widget.userProfile,
       token: widget.token,
     );

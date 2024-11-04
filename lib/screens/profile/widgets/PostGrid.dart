@@ -16,134 +16,70 @@ class PostGrid extends StatefulWidget {
   final String filterType;
   final String userId;
 
-  const PostGrid({
-    Key? key,
-    required this.posts,
-    this.isVideo = false,
-    required this.filterType,
-    required this.userId,
-  }) : super(key: key);
-
-  @override
-  _PostGridState createState() => _PostGridState();
-}
-
-class _PostGridState extends State<PostGrid> {
-  List<PostModel> _posts = [];
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
-  ScrollController _scrollController = ScrollController();
-  int limit = 9;
-  int offset = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _posts = widget.posts;
-    _scrollController.addListener(_onScroll);
-  }
-
-  Future<void> _fetchPosts() async {
-    if (_isLoadingMore || !_hasMore) return;
-
-    setState(() {
-      _isLoadingMore = true;
-    });
-
-    try {
-      List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
-          .getPost(context, widget.userId, limit.toString(), offset.toString());
-
-      setState(() {
-        _posts.addAll(newPosts);
-        offset += limit;
-
-        if (newPosts.length < limit) {
-          _hasMore = false;
-        }
-      });
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load posts: $error')),
-      );
-    } finally {
-      //await Future.delayed(Duration(seconds: 2));
-      setState(() {
-        _isLoadingMore = false;
-      });
-    }
-  }
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300 && !_isLoadingMore && _hasMore) {
-      _fetchPosts();
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  PostGrid(
+      {super.key,
+      required this.posts,
+      this.isVideo = false,
+      required this.filterType,
+      required this.userId});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: _posts.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : GridView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.all(8.0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: _posts.length,
-            itemBuilder: (context, index) {
-              final post = _posts[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UserPostScreen(
-                        posts: _posts,
-                        initialIndex: index,
-                        filterType: widget.filterType,
-                        userId: widget.userId,
-                      ),
-                    ),
-                  );
-                },
-                child: Hero(
-                  tag: 'profile_images_$index',
-                  child: post.media[0].mediaType == 'video'
-                      ? VideoPlayerWidget(videoUrl: "http://147.79.117.253:8001/api${post.media[0].file}")
-                      : Image.network(
-                    post.media.isNotEmpty
-                        ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
-                        : '',
-                    fit: BoxFit.cover,
-                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                      if (loadingProgress == null) {
-                        // Image is fully loaded, return the child
-                        return child;
-                      } else {
-                        // Show shimmer effect with CircularProgressIndicator while loading
-                        return Stack(
-                          alignment: Alignment.center, // Align progress indicator to the center
-                          children: [
-                            Shimmer.fromColors(
-                              baseColor: Colors.grey[300]!,   // Base color of the shimmer
-                              highlightColor: Colors.grey[100]!,  // Highlight color of the shimmer
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                color: Colors.grey[300], // Placeholder color during loading
-                              ),
+    return GridView.builder(
+      scrollDirection: Axis.vertical,
+      physics: NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(8.0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: posts.length, // Use the length of the post list
+      itemBuilder: (context, index) {
+        final post = posts[index]; // Access the specific post
+
+        return GestureDetector(
+          onTap: () {
+            // Navigate to PostScreen on tap
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserPostScreen(
+                  posts: posts,
+                  initialIndex: index,
+                  filterType: filterType,
+                  userId: userId,
+                ),
+              ),
+            );
+          },
+          child: Hero(
+              tag: 'profile_images_$index',
+              child: post.media[0].mediaType == 'video'
+                  ? Container(
+                      width: double.infinity,
+                      height: 400,
+                      child: VideoPlayerWidget(
+                          videoUrl:
+                              "http://147.79.117.253:8001/api${post.media[0].file}"))
+                  : Image.network(
+                      post.media.isNotEmpty
+                          ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
+                          : '', // Display the media URL
+                      fit: BoxFit.cover,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          // Image has fully loaded
+                          return child;
+                        } else {
+                          // Image is still loading, show CircularProgressIndicator
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      (loadingProgress.expectedTotalBytes ?? 1)
+                                  : null,
                             ),
                             Center(
                               child: CircularProgressIndicator(

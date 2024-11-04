@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
@@ -35,6 +37,16 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
     }
   }
 
+  void _onTagUserSelected(int id) {
+    setState(() {
+      if (widget.selectedTagUser.contains(id)) {
+        widget.selectedTagUser.remove(id); // Deselect if already selected
+      } else {
+        widget.selectedTagUser.add(id); // Select if not selected
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -44,15 +56,18 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
   void _initializeItems() async {
     var pro = context.read<TagsProvider>();
     final futureUser = await UserPreferences().getCurrentUser();
-    List<TagUser> tagUsers = await pro.getTagUsersList(futureUser!);
+    var tagUsers = await pro.getTagUsersList(futureUser!);
 
-    // Remove duplicates by converting the list to a Set and back to a List
-    List<TagUser> uniqueTagUsers = tagUsers.toSet().toList();
+    if (tagUsers.isEmpty) {
+      print(tagUsers);
+    } else {
+      List<TagUser> uniqueTagUsers = tagUsers.toSet().toList();
 
-    setState(() {
-      _allItems = uniqueTagUsers;
-      _filteredItems = List.from(_allItems);
-    });
+      setState(() {
+        _allItems = uniqueTagUsers;
+        _filteredItems = List.from(_allItems);
+      });
+    }
   }
 
   @override
@@ -68,7 +83,6 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(),
                     const SizedBox(),
                     Text(
                       "Tag People",
@@ -121,63 +135,41 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
                   child: ListView.separated(
                     itemCount: _filteredItems.length,
                     itemBuilder: (context, index) {
-                      if (widget.selectedTagUser
-                          .contains(_filteredItems[index].id)) {
-                        _filteredItems.removeAt(index);
-                        if (_filteredItems.isEmpty) {
-                          return SizedBox(
-                            height: 100,
-                            child: Center(
-                              child: Text(
-                                "No friends found",
-                                style: Theme.of(context).textTheme.titleMedium,
+                      return GestureDetector(
+                        onTap: () =>
+                            _onTagUserSelected(_filteredItems[index].id),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Checkbox(
+                              activeColor: Colors.red,
+                              value: widget.selectedTagUser
+                                  .contains(_filteredItems[index].id),
+                              onChanged: (_) =>
+                                  _onTagUserSelected(_filteredItems[index].id),
+                            ),
+                            CircleAvatar(
+                                child: const Icon(Icons.person), radius: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${_filteredItems[index].firstName} ${_filteredItems[index].lastName}",
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  Text(
+                                    _filteredItems[index].username,
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.grey),
+                                  ),
+                                ],
                               ),
                             ),
-                          );
-                        }
-                        return SizedBox(); // Skip already selected users
-                      } else
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              widget.selectedTagUser
-                                  .add(_filteredItems[index].id);
-                              _filteredItems.removeAt(index);
-                              // ToastNotifier.showSuccessToast(context,
-                              //     "User Tagged Successfully ${_filteredItems[index].firstName}");
-                              print(widget.selectedTagUser);
-                            });
-                            Navigator.of(context).pop(); // Dismiss on selection
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                child: const Icon(Icons.person),
-                                radius: 20,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${_filteredItems[index].firstName} ${_filteredItems[index].lastName}",
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                    Text(
-                                      _filteredItems[index].username,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                          ],
+                        ),
+                      );
                     },
                     separatorBuilder: (context, index) => const Divider(),
                   ),
@@ -187,7 +179,6 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
           );
   }
 
-  // Shimmer effect widget
   Widget _buildShimmerEffect() {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
