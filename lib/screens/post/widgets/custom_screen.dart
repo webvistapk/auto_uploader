@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/screens/post/component/reel_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
 class PostAndReels extends StatefulWidget {
@@ -124,7 +125,9 @@ class _PostAndReelsState extends State<PostAndReels>
                   // Content for "Posts" tab
                   buildMediaContent(size, "Posts"),
                   // Content for "Reels" tab
-                  buildMediaContent(size, "Reels"),
+                  ReelsScreenData(
+                    size: size,
+                  ),
                 ],
               ),
             ),

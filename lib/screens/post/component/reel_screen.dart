@@ -1,27 +1,39 @@
 import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
+import 'package:shimmer/shimmer.dart';
 
-class ReelsScreen extends StatefulWidget {
+class ReelsScreenData extends StatefulWidget {
+  final size;
+  const ReelsScreenData({
+    Key? key,
+    required this.size,
+  }) : super(key: key);
   @override
-  _ReelsScreenState createState() => _ReelsScreenState();
+  _ReelsScreenDataState createState() => _ReelsScreenDataState();
 }
 
-class _ReelsScreenState extends State<ReelsScreen> {
-  List<AssetEntity> _mediaList = [];
+class _ReelsScreenDataState extends State<ReelsScreenData> {
   List<AssetEntity> _reelList = [];
   bool _isLoadingMore = false;
   int _currentPage = 0;
-  final int _pageSize = 100;
-
+  final int _pageSize = 100; // Fetch smaller pages for faster initial load
   AssetPathEntity? _selectedAlbum;
+  ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _fetchAlbums();
+    _scrollController.addListener(_scrollListener); // Set up pagination
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchAlbums() async {
@@ -33,9 +45,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
 
       if (albums.isNotEmpty) {
         _selectedAlbum = albums[0];
-        // _albums = albums;
-        await _fetchReels(
-            _selectedAlbum!, _currentPage); // Fetch reels from the first album
+        await _fetchReels(_selectedAlbum!, _currentPage);
       }
     } else {
       PhotoManager.openSetting();
@@ -47,10 +57,11 @@ class _ReelsScreenState extends State<ReelsScreen> {
     return ps.isAuth;
   }
 
-  // Fetch videos for reels based on 60 seconds duration or less
   Future<void> _fetchReels(AssetPathEntity album, int page) async {
     if (_isLoadingMore) return;
-    _isLoadingMore = true;
+    setState(() {
+      _isLoadingMore = true;
+    });
 
     final List<AssetEntity> media =
         await album.getAssetListPaged(page: page, size: _pageSize);
@@ -64,28 +75,44 @@ class _ReelsScreenState extends State<ReelsScreen> {
     });
   }
 
-  // Load more reels when reaching the end of the list
-  void _loadMoreReels() async {
-    if (!_isLoadingMore) {
-      _currentPage++;
-      await _fetchReels(_selectedAlbum!, _currentPage);
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !_isLoadingMore) {
+      _loadMoreReels();
     }
   }
 
-  // Build reels list view
-  Widget _buildReelsList() {
-    return ListView.builder(
-      itemCount: _reelList.length,
+  void _loadMoreReels() async {
+    _currentPage++;
+    await _fetchReels(_selectedAlbum!, _currentPage);
+  }
+
+  Widget _buildReelsGrid() {
+    return GridView.builder(
+      controller: _scrollController,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 8.0,
+        crossAxisSpacing: 8.0,
+        childAspectRatio: 1.0,
+      ),
+      itemCount: _reelList.length + (_isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index >= _reelList.length) {
+          return _buildShimmerEffect(
+              widget.size); // Show shimmer effect while loading more items
+        }
+
         final media = _reelList[index];
-        return FutureBuilder<File?>(
-          future: media.file,
+        return FutureBuilder<Uint8List?>(
+          future: media.thumbnailData, // Get a fast thumbnail
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
+              return _buildShimmerEffect(widget.size);
             }
             if (snapshot.hasData && snapshot.data != null) {
-              return _buildReelPreview(snapshot.data!);
+              return _buildReelThumbnail(media, snapshot.data!);
             } else {
               return SizedBox.shrink();
             }
@@ -95,26 +122,65 @@ class _ReelsScreenState extends State<ReelsScreen> {
     );
   }
 
-  Widget _buildReelPreview(File videoFile) {
-    VideoPlayerController videoController =
-        VideoPlayerController.file(videoFile)
-          ..initialize().then((_) {
-            setState(() {}); // Update to show video preview
-          });
-
-    return Container(
-      height: 300,
-      child: AspectRatio(
-        aspectRatio: videoController.value.aspectRatio,
-        child: VideoPlayer(videoController),
+  Widget _buildShimmerEffect(
+    Size size,
+  ) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[800]!,
+      highlightColor: Colors.grey[600]!,
+      child: GridView.builder(
+        padding: EdgeInsets.all(16),
+        itemCount: 18, // Example shimmer placeholders
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemBuilder: (context, index) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[800],
+              borderRadius: BorderRadius.circular(15),
+            ),
+          );
+        },
       ),
     );
+  }
+
+  Widget _buildReelThumbnail(AssetEntity media, thumbnailFile) {
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        Image.memory(
+          thumbnailFile,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+        Container(
+          color: Colors.black54,
+          padding: EdgeInsets.all(4.0),
+          child: Text(
+            _formatDuration(media.duration),
+            style: TextStyle(color: Colors.white, fontSize: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDuration(int seconds) {
+    final Duration duration = Duration(seconds: seconds);
+    final String minutes = duration.inMinutes.toString().padLeft(2, '0');
+    final String secs = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$secs";
   }
 
   @override
   Widget build(BuildContext context) {
     return _reelList.isNotEmpty
-        ? _buildReelsList()
-        : Center(child: Text("No reels found"));
+        ? _buildReelsGrid()
+        : _buildShimmerEffect(widget.size);
   }
 }
