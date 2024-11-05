@@ -192,18 +192,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               : 16 / 9,
           child: VideoPlayer(_controller),
         ),
-        if (!_controller.value.isInitialized)
-          const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 4,
-              color: AppColors.blue,
-            ),
-          ),
-        if (_isBuffering)
+        if (_isBuffering || !_controller.value.isInitialized)
           Center(
             child: Container(
-              width: 60, // Adjust the size for YouTube-like spinner
-              height: 60,
+              width: 40, // Adjust the size for YouTube-like spinner
+              height: 40,
               child: const CircularProgressIndicator(
                 strokeWidth: 4.0,
                 color: AppColors.blue, // White spinner for YouTube-like effect

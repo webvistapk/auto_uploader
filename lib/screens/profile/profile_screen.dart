@@ -41,6 +41,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? userName;
   List<Map<String, dynamic>> posts = [];
   Future<List<PostModel>>? _posts;
+  int limit = 9;
+  int offset = 0;
+
   @override
   void initState() {
     // _getUserIdFromToken();
@@ -53,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // images and videos fetch and simulated from an API
     setState(() {
       _posts = Provider.of<PostProvider>(context, listen: false)
-          .getPost(context, widget.id.toString());
+          .getPost(context, widget.id.toString(),limit,offset);
     });
   }
 
