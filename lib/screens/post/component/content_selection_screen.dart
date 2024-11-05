@@ -250,6 +250,16 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
     super.dispose();
   }
 
+  bool isReelSelected = false;
+  // Toggle between "Posts" and "Reels"
+  void toggleSelection(bool isReel, AssetPathEntity album, int page) {
+    setState(() {
+      isReelSelected = isReel;
+      _mediaList.clear(); // Clear media list to reload based on selection
+      _fetchMedia(album, page); // Re-fetch media based on the selected mode
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size * 1;
@@ -512,6 +522,123 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _fetchMediaReels(AssetPathEntity album, int page) async {
+    if (_isLoadingMore) return; // Avoid duplicate loads
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    final List<AssetEntity> media =
+        await album.getAssetListPaged(page: page, size: _pageSize);
+
+    // Filter for Reels with duration of at least 60 seconds
+    final List<AssetEntity> filteredMedia =
+        media.where((item) => item.duration >= 60).toList();
+
+    List<bool> boolean = List.filled(filteredMedia.length, false);
+    setState(() {
+      _mediaList.addAll(filteredMedia);
+      selectedFiles.addAll(boolean); // Add new media with false selected state
+      _isLoadingMore = false;
+    });
+  }
+
+  var _scrollController;
+  Widget buildReelsGrid() {
+    return GridView.builder(
+      itemCount: _mediaList.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemBuilder: (context, index) {
+        final media = _mediaList[index];
+
+        return FutureBuilder<Uint8List?>(
+          future: media.thumbnailData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasData) {
+              return Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: selectedFiles[index]
+                            ? Colors.blueAccent
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.memory(snapshot.data!, fit: BoxFit.cover),
+                    ),
+                  ),
+                  if (media.type == AssetType.video)
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Icon(Icons.play_circle_fill,
+                          color: Colors.white.withOpacity(0.8)),
+                    ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () async {
+                        selectedFiles[index] = !selectedFiles[index];
+                        final file = await media.file;
+                        setState(() {
+                          _isLoadingPreview = true;
+                        });
+
+                        if (selectedFiles[index]) {
+                          if (file != null) mediaFiles.add(file);
+                        } else {
+                          if (file != null)
+                            mediaFiles.removeWhere(
+                                (element) => element.path == file.path);
+                        }
+
+                        setState(() {
+                          _isLoadingPreview = false;
+                        });
+                      },
+                      child: Icon(
+                        selectedFiles[index]
+                            ? Icons.check_circle
+                            : Icons.radio_button_unchecked,
+                        color: selectedFiles[index]
+                            ? Colors.blueAccent
+                            : Colors.white.withOpacity(0.6),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            } else {
+              return Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            }
+          },
+        );
+      },
     );
   }
 }

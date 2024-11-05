@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -13,7 +14,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 import '../../../common/utils.dart';
 import '../../../models/UserProfile/followers.dart';
 
-class follower_request_provider extends ChangeNotifier {
+class FollowerRequestProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isFollowLoading = false;
   String status = '';
@@ -69,7 +70,6 @@ class follower_request_provider extends ChangeNotifier {
 
   Future<void> followRequestResponse(
       BuildContext context, int followerId, followingId, String status) async {
-
     setisLoading(true);
     final String? token = await Prefrences.getAuthToken();
 
@@ -126,7 +126,7 @@ class follower_request_provider extends ChangeNotifier {
         'Authorization': 'Bearer $token',
       },
     );
-
+    // debugger();
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
 
@@ -141,10 +141,11 @@ class follower_request_provider extends ChangeNotifier {
           print("Status is ${status}");
           notifyListeners();
           //print("Status: $status");
-
+          // debugger();
           setisLoading(false);
           return FetchResponseModel.fromJson(jsonData);
         } else {
+          // debugger();
           // print('Data is empty or invalid');
           status = 'initial';
           notifyListeners();
@@ -152,12 +153,14 @@ class follower_request_provider extends ChangeNotifier {
           return FetchResponseModel();
         }
       } else {
+        // debugger();
         //print('Invalid response data');
         status = 'initial';
         setisLoading(false);
         return FetchResponseModel();
       }
     } else {
+      // debugger();
       // Handle HTTP errors
       // print("Error: ${response.body}");
       setisLoading(false);
@@ -170,6 +173,7 @@ class follower_request_provider extends ChangeNotifier {
     final String? token = await Prefrences.getAuthToken();
     setisLoading(true);
     setisFollowLoading(true);
+    // debugger();
     try {
       final response = await http.post(
         Uri.parse(

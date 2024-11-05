@@ -28,8 +28,7 @@ class RequestScreen extends StatefulWidget {
 
 class _RequestScreenState extends State<RequestScreen> {
   var userDetails;
-  Future<List<FollowerRequestModel>>?
-      _followRequests;
+  Future<List<FollowerRequestModel>>? _followRequests;
 
   @override
   void initState() {
@@ -40,7 +39,7 @@ class _RequestScreenState extends State<RequestScreen> {
   void _fetchFollowRequests() {
     setState(() {
       _followRequests =
-          Provider.of<follower_request_provider>(context, listen: false)
+          Provider.of<FollowerRequestProvider>(context, listen: false)
               .getFollowerRequestList(context);
     });
   }
@@ -149,7 +148,7 @@ class _RequestScreenState extends State<RequestScreen> {
     if (shouldProceed == true) {
       // Show the loading dialog or update the state
       setState(() {
-        Provider.of<follower_request_provider>(context, listen: false)
+        Provider.of<FollowerRequestProvider>(context, listen: false)
             .followRequestResponse(
           context,
           followerId,
@@ -174,7 +173,7 @@ class _RequestScreenState extends State<RequestScreen> {
             valueListenable: SearchStore.searchQuery,
             builder: (context, searchQuery, child) {
               if (searchQuery == null || searchQuery.isEmpty) {
-                return Consumer<follower_request_provider>(
+                return Consumer<FollowerRequestProvider>(
                   builder: (context, Provider, child) {
                     return FutureBuilder<List<FollowerRequestModel>>(
                         future:

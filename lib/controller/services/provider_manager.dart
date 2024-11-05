@@ -36,7 +36,7 @@ class ProviderManager {
       if (response.statusCode == 200) {
         ToastNotifier.showSuccessToast(context, "Login Successfully");
         return data;
-      } else if (response.statusCode == 400 || response.statusCode == 403) {
+      } else if (response.statusCode == 400 || response.statusCode == 404) {
         final message = data['message'] ?? 'Unauthorized access';
         ToastNotifier.showErrorToast(context, message);
         return null;

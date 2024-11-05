@@ -58,7 +58,7 @@ class _FileCarouselState extends State<FileCarousel> {
             itemCount: widget.files.length,
             options: CarouselOptions(
               height: MediaQuery.of(context).size.height * .35,
-              autoPlay: false,
+              autoPlay: true,
               enlargeCenterPage: true,
               aspectRatio: 16 / 9,
               enableInfiniteScroll: false,

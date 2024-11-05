@@ -45,9 +45,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   Future<FetchResponseModel>? _followRequestsResponse;
 
   Future<int?> _getUserIdFromToken() async {
-    // token = await Prefrences.getAuthToken();
-    if (widget.token != null && widget.token.isNotEmpty) {
-      Map<String, dynamic> decodedToken = JwtDecoder.decode(widget.token);
+    final token = await Prefrences.getAuthToken();
+    if (token != null && token.isNotEmpty) {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       return decodedToken['user_id'] as int?;
     }
     return null;
@@ -59,7 +59,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     //print("User  ID: ${widget.user.id}");
     if (currentUserId != null) {
       try {
-        Provider.of<follower_request_provider>(context, listen: false)
+        Provider.of<FollowerRequestProvider>(context, listen: false)
             .sendfollowRequest(context, currentUserId, widget.user.id);
       } catch (e) {
         // Handle error, e.g., show a snackbar'
@@ -77,7 +77,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
         //print("USER ID : ${currentUserId}");
 
         //print("USER ID 2 : ${widget.user.id}");
-        Provider.of<follower_request_provider>(context, listen: false)
+        Provider.of<FollowerRequestProvider>(context, listen: false)
             .followRequestResponse(
           context,
           widget.user.id,
@@ -85,7 +85,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           "rejected",
         );
       } catch (e) {
-        showErrorSnackbar(e.toString(), context);
+        ToastNotifier.showErrorToast(context, e.toString());
       }
     }
   }
@@ -94,7 +94,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     // print("Fetch Called");
     final int? currentUserId = await _getUserIdFromToken();
     _followRequestsResponse =
-        Provider.of<follower_request_provider>(context, listen: false)
+        Provider.of<FollowerRequestProvider>(context, listen: false)
             .fetchFollowRequestStatus(currentUserId!, widget.user.id, context);
 
     print(_followRequestsResponse);
@@ -113,14 +113,15 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     return FutureBuilder<int?>(
       future: _getUserIdFromToken(),
       builder: (context, snapshot) {
+        // debugger();
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
           final int? currentUserId = snapshot.data;
-          final bool isCurrentUser = widget.user.id == currentUserId;
-
+          final bool isCurrentUser = (widget.user.id == currentUserId);
+          // debugger();
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
             child: Column(
@@ -265,8 +266,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Builder(builder: (context) {
-                        var provider =
-                            context.watch<follower_request_provider>();
+                        var provider = context.watch<FollowerRequestProvider>();
                         return provider.isLoading
                             ? Center(
                                 child: CircularProgressIndicator.adaptive(),

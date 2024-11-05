@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
+import 'package:mobile/controller/services/followers/follower_provider.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
@@ -25,11 +26,12 @@ class MyApp extends StatelessWidget {
     screenWidth = MediaQuery.of(context).size.height;
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => follower_request_provider()),
+        ChangeNotifierProvider(create: (_) => FollowerRequestProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => PostProvider()),
         ChangeNotifierProvider(create: (_) => TagsProvider()),
+        ChangeNotifierProvider(create: (_) => FollowerProvider()),
       ],
       child: MaterialApp(
           title: 'Fillet Social Media App',

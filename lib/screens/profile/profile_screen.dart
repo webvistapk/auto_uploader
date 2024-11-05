@@ -41,6 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? userName;
   List<Map<String, dynamic>> posts = [];
   Future<List<PostModel>>? _posts;
+
   @override
   void initState() {
     // _getUserIdFromToken();
@@ -98,6 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {});
       }
     } catch (e) {
+      // debugger();
       debugPrint("Error decoding token: $e");
       // Handle the error accordingly (e.g., navigate to login screen)
     }
@@ -112,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       userName = userProfile.username; // Assign the user's name to the variable
     });
-    return await UserService.fetchUserProfile(userId);
+    return userProfile;
   }
 
   _getUserIdFromToken() async {
@@ -127,20 +129,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<bool> _checkIsFollowig(int userId, int currentId, String token) async {
     try {
       int currentUserId = currentId;
-
+      // debugger();
       // Await the asynchronous operation to get the follow request status
-      await Provider.of<follower_request_provider>(context, listen: false)
+      await Provider.of<FollowerRequestProvider>(context, listen: false)
           .fetchFollowRequestStatus(currentUserId, userId, token);
-
+      // debugger();
       // After fetching the status, check it and return the corresponding bool value
-      if (Provider.of<follower_request_provider>(context, listen: false)
-              .status ==
+      if (Provider.of<FollowerRequestProvider>(context, listen: false).status ==
           'accepted') {
+        // debugger();
         return true;
       } else {
+        // debugger();
         return false;
       }
     } catch (e) {
+      // debugger();
       return false;
     }
   }

@@ -17,8 +17,11 @@ import 'package:video_player/video_player.dart'; // Add video player package for
 class AddPostScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final List<File>? mediFiles;
-  const AddPostScreen(
-      {super.key, required this.userProfile, required this.mediFiles});
+  const AddPostScreen({
+    super.key,
+    required this.userProfile,
+    required this.mediFiles,
+  });
 
   @override
   _AddPostScreenState createState() => _AddPostScreenState();
