@@ -4,53 +4,36 @@ import 'package:flutter/material.dart';
 import 'package:mobile/screens/profile/widgets/reel_post.dart';
 
 class ReelScreen extends StatefulWidget {
-  final List<String> posts; // List of reel video URLs or data
-  final int initialIndex; // Index of the reel to start with
-
-  const ReelScreen({
-    Key? key,
-    required this.posts,
-    required this.initialIndex,
-  }) : super(key: key);
+  const ReelScreen({super.key});
 
   @override
   State<ReelScreen> createState() => _ReelScreenState();
 }
 
 class _ReelScreenState extends State<ReelScreen> {
-  late SwiperController _swiperController; // Controller for Swiper
-
-  @override
-  void initState() {
-    super.initState();
-    _swiperController = SwiperController();
-    // Set the initial index to be shown by Swiper
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _swiperController.move(widget.initialIndex, animation: false);
-    });
-  }
-
-  @override
-  void dispose() {
-    _swiperController.dispose();
-    super.dispose();
-  }
+  final List<String> videos = [
+    'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
+    'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
+    'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
+    'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
+    'https://assets.mixkit.co/videos/preview/mixkit-young-mother-with-her-little-daughter-decorating-a-christmas-tree-39745-large.mp4',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Stack(
+      body:   Stack(
         fit: StackFit.expand,
         children: [
+          //We need swiper for every content
           Swiper(
-            controller: _swiperController, // Assign the SwiperController
             itemBuilder: (BuildContext context, int index) {
               return ReelPost(
-                src: widget.posts[index],
+                src: videos[index],
               );
             },
-            itemCount: widget.posts.length,
+            itemCount: videos.length,
             scrollDirection: Axis.vertical,
           ),
           Positioned(
@@ -62,36 +45,36 @@ class _ReelScreenState extends State<ReelScreen> {
                   onTap: () {
                     // Handle Like Action
                   },
-                  child: Icon(Icons.favorite_outline, color: Colors.white, size: 30),
+                  child: Icon(Icons.favorite_outline, color: Colors.white, size: 30,),
                 ),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
                     // Handle Comment Action
                   },
-                  child: Icon(Icons.messenger, color: Colors.white, size: 30),
+                  child: Icon(Icons.messenger, color: Colors.white, size: 30,),
                 ),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    // Handle Share Action
+                    // Handle Comment Action
                   },
                   child: Icon(Icons.share_outlined, color: Colors.white, size: 30),
                 ),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    // Handle Bookmark Action
+                    // Handle Share Action
                   },
                   child: Icon(Icons.bookmark_outline, color: Colors.white, size: 30),
                 ),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    // Handle More Action
-                  },
+                  // Handle Bookmark Action
+                 },
                   child: Icon(Icons.more_vert, color: Colors.white, size: 30),
-                ),
+                )
               ],
             ),
           ),

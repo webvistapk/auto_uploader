@@ -56,8 +56,8 @@ class SideBar extends StatelessWidget {
             leading: const Icon(Icons.post_add),
             title: const Text('Reel'),
             onTap: () {
-              /*Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ReelScreen()));*/
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ReelScreen()));
             },
           ),
           ListTile(

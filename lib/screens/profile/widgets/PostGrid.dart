@@ -1,9 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile/common/app_colors.dart';
-import 'package:mobile/common/app_size.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
 import '../../../controller/endpoints.dart';
 import '../../../controller/services/post/post_provider.dart';
@@ -129,35 +125,19 @@ class _PostGridState extends State<PostGrid> {
                     fit: BoxFit.cover,
                     loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                       if (loadingProgress == null) {
-                        // Image is fully loaded, return the child
                         return child;
                       } else {
-                        // Show shimmer effect with CircularProgressIndicator while loading
-                        return Stack(
-                          alignment: Alignment.center, // Align progress indicator to the center
-                          children: [
-                            Shimmer.fromColors(
-                              baseColor: Colors.grey[300]!,   // Base color of the shimmer
-                              highlightColor: Colors.grey[100]!,  // Highlight color of the shimmer
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                color: Colors.grey[300], // Placeholder color during loading
-                              ),
-                            ),
-                            Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                    : null,
-                                strokeWidth: 2.0, // Adjust the size of the progress indicator
-                              ),
-                            ),
-                          ],
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                (loadingProgress.expectedTotalBytes ?? 1)
+                                : null,
+                          ),
                         );
                       }
                     },
-                    errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image), // Fallback for error
+                    errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
                   ),
                 ),
               );
@@ -183,8 +163,7 @@ class _PostGridState extends State<PostGrid> {
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
 
-
-  VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
+  const VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -192,21 +171,13 @@ class VideoPlayerWidget extends StatefulWidget {
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
-  bool _isBuffering = true;
+
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.network(widget.videoUrl)
-      ..addListener(() {
-        setState(() {
-          // Check if the video is buffering
-          _isBuffering = _controller.value.isBuffering;
-        });
-      })
       ..initialize().then((_) {
-        setState(() {
-          _isBuffering = false; // Video initialized, stop buffering
-        });
+        setState(() {});
         _controller.play();
       });
   }
@@ -229,23 +200,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           child: VideoPlayer(_controller),
         ),
         if (!_controller.value.isInitialized)
-          const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 4,
-              color: AppColors.blue,
-            ),
-          ),
-        if (_isBuffering)
-          Center(
-            child: Container(
-              width: 60, // Adjust the size for YouTube-like spinner
-              height: 60,
-              child: const CircularProgressIndicator(
-                strokeWidth: 4.0,
-                color: AppColors.blue, // White spinner for YouTube-like effect
-              ),
-            ),
-          ),
+          const CircularProgressIndicator(),
       ],
     );
   }

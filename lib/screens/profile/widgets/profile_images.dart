@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
-import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
@@ -43,7 +42,7 @@ class _ProfileImagesState extends State<ProfileImages> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 8,
+      length: 7,
       child: Column(
         children: [
           Theme(
@@ -100,12 +99,6 @@ class _ProfileImagesState extends State<ProfileImages> {
                 Tab(
                   child: Text(
                     "Tagged",
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    "Reels",
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -212,6 +205,7 @@ class _ProfileImagesState extends State<ProfileImages> {
                       PostGrid(
                         posts: allPosts,
                         filterType: "allPost",
+<<<<<<< HEAD
                         userId: widget.userid,
                       ),
                       PostGrid(
@@ -225,6 +219,20 @@ class _ProfileImagesState extends State<ProfileImages> {
                   );
                 },
               ),
+=======
+                      userId: widget.userid,
+                    ), // Placeholder for Posts
+                    PostGrid(
+                        posts: allPosts,
+                        filterType: "allPost",
+                      userId: widget.userid,
+                    ), // Placeholder for Tagged
+                    const profile_info(), // Info tab
+                  ],
+                );
+              },
+            ),
+>>>>>>> parent of e5915b4 (changes done)
 
               /*TabBarView(
                 children: [

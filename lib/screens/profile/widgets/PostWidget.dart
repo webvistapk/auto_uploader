@@ -1,13 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../common/app_colors.dart';
-import '../../../common/app_size.dart';
 import '../../widgets/full_screen_image.dart';
 
 class PostWidget extends StatefulWidget {
@@ -281,8 +277,7 @@ class _PostWidgetState extends State<PostWidget> {
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
 
-
-  VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
+  const VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -290,22 +285,14 @@ class VideoPlayerWidget extends StatefulWidget {
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
-  bool _isBuffering = true;
+
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.network(widget.videoUrl)
-      ..addListener(() {
-        setState(() {
-          // Check if the video is buffering
-          _isBuffering = _controller.value.isBuffering;
-        });
-      })
       ..initialize().then((_) {
-        setState(() {
-          _isBuffering = false; // Video initialized, stop buffering
-        });
-        _controller.play();
+        setState(() {});
+        _controller.play(); // Auto-play the video
       });
   }
 
@@ -317,27 +304,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        AspectRatio(
-          aspectRatio: _controller.value.isInitialized
-              ? _controller.value.aspectRatio
-              : 16 / 9,
-          child: VideoPlayer(_controller),
-        ),
-        if (!_controller.value.isInitialized || _isBuffering )
-          Center(
-            child: Container(
-              width: 60, // Adjust the size for YouTube-like spinner
-              height: 60,
-              child: const CircularProgressIndicator(
-                strokeWidth: 4.0,
-                color: AppColors.blue, // White spinner for YouTube-like effect
-              ),
-            ),
-          ),
-      ],
-    );
+    return _controller.value.isInitialized
+        ? AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: VideoPlayer(_controller),
+    )
+        : Center(child: CircularProgressIndicator());
   }
 }
