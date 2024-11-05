@@ -10,7 +10,7 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/authantication/update%20password/widget/custom_widget.dart';
-import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

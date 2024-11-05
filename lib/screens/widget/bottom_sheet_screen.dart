@@ -9,7 +9,7 @@ import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post_manager.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:provider/provider.dart';
 
 class BottomSheetScreen extends StatefulWidget {

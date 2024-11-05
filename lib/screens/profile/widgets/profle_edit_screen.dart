@@ -9,7 +9,7 @@ import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/services/profile/user_service.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
-import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   final String imageUrl;

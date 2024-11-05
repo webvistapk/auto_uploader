@@ -10,7 +10,7 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/post/component/privacy_option_sheet.dart';
 import 'package:mobile/screens/post/component/tag_option_sheet.dart';
-import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart'; // Add video player package for video handling
 

@@ -7,6 +7,7 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/post/component/content_selection_screen.dart';
 import 'package:mobile/screens/post/widgets/add_post.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';
+import 'package:mobile/screens/post/widgets/custom_screen.dart';
 
 class CreatePostScreen extends StatefulWidget {
   UserProfile? userProfile;
@@ -19,12 +20,30 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
-  Widget build(BuildContext context) {
-    return
-        // AddPostScreen(userProfile: widget.userProfile, mediFiles: []);
-        ContentSelectionScreen(
-      userProfile: widget.userProfile,
-      token: widget.token,
+  void initState() {
+    super.initState();
+    // Delay the navigation to allow the initial build process to complete
+    Future.delayed(Duration.zero, () {
+      navigateToScreen(context);
+    });
+  }
+
+  void navigateToScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(builder: (_) => PostAndReels()),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CircularProgressIndicator(), // Display a loader or placeholder
+    );
+    // AddPostScreen(userProfile: widget.userProfile, mediFiles: []);
+    //     ContentSelectionScreen(
+    //   userProfile: widget.userProfile,
+    //   token: widget.token,
+    // );
   }
 }

@@ -9,7 +9,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
-import 'package:mobile/screens/profile/mainscreen/main_screen.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
