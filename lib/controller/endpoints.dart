@@ -22,9 +22,12 @@ class ApiURLs {
   static const String delete_post = "posts/delete/";
   static const String get_single_post = "posts/get/single/";
 <<<<<<< HEAD
+<<<<<<< HEAD
   static const String user_profile_image_endpoint =
       "userprofile/users/profile_image/save/";
   static const String get_reel_post = "posts/reel/get/";
+=======
+>>>>>>> parent of e5915b4 (changes done)
 =======
 >>>>>>> parent of e5915b4 (changes done)
 }

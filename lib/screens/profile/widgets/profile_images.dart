@@ -206,6 +206,7 @@ class _ProfileImagesState extends State<ProfileImages> {
                         posts: allPosts,
                         filterType: "allPost",
 <<<<<<< HEAD
+<<<<<<< HEAD
                         userId: widget.userid,
                       ),
                       PostGrid(
@@ -220,6 +221,8 @@ class _ProfileImagesState extends State<ProfileImages> {
                 },
               ),
 =======
+=======
+>>>>>>> parent of e5915b4 (changes done)
                       userId: widget.userid,
                     ), // Placeholder for Posts
                     PostGrid(
