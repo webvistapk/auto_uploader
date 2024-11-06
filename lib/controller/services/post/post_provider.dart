@@ -65,7 +65,45 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<PostModel>> getPost(BuildContext context ,String id) async {
+  createNewReel(context,
+      {required String postTitle,
+      required List<int> peopleTags,
+      required List<String> keywordsList,
+      required String privacyPost,
+      required List<File> mediaFiles}) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      log("$postTitle, $peopleTags, $keywordsList, $privacyPost, $mediaFiles");
+      final token = await Prefrences.getAuthToken();
+      // debugger();
+      if (token != null) {
+        final response = await PostManager().createReel(
+            postTitle: postTitle,
+            peopleTags: peopleTags,
+            keywordsList: keywordsList,
+            privacyPost: privacyPost,
+            mediaFiles: mediaFiles,
+            token: token);
+
+        if (response != null) {
+          log("Reel: $response");
+
+          return response;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<List<PostModel>> getPost(BuildContext context, String id) async {
     print("Fetching API");
     final String? token = await Prefrences.getAuthToken();
 

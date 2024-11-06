@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/screens/post/component/content_selection_screen.dart';
 import 'package:mobile/screens/post/component/reel_screen.dart';
-import 'package:mobile/screens/post/widgets/custom_screen.dart';
+import 'package:mobile/screens/post/widgets/post_reels.dart';
 import 'package:mobile/screens/profile/ReelScreen.dart';
 
 class CreatePostScreen extends StatefulWidget {
@@ -19,7 +20,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget build(BuildContext context) {
     return
         // ReelsScreenData();
-        PostAndReels();
+        PostAndReels(
+      userProfile: widget.userProfile,
+      token: widget.token,
+    );
     // AddPostScreen(userProfile: widget.userProfile, mediFiles: []);
     //     ContentSelectionScreen(
     //   userProfile: widget.userProfile,

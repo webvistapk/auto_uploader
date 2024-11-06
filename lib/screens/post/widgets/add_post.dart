@@ -17,10 +17,12 @@ import 'package:video_player/video_player.dart'; // Add video player package for
 class AddPostScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final List<File>? mediFiles;
+  final type;
   const AddPostScreen({
     super.key,
     required this.userProfile,
     required this.mediFiles,
+    required this.type,
   });
 
   @override
@@ -114,7 +116,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
           ),
           centerTitle: true,
           title: Text(
-            "Post",
+            widget.type == "post" ? "Post Uploading..." : "Reel Uploading...",
             style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
@@ -133,8 +135,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          height: 100,
-                          width: 100,
+                          height: 120,
+                          width: 120,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             color: Colors.grey[300],
@@ -153,10 +155,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                   cursorColor: Colors.red,
                                   textInputAction: TextInputAction.done,
                                   maxLines: 5,
+                                  style: AppTextStyles.poppinsRegular(),
                                   decoration: InputDecoration(
                                     hintMaxLines: 4,
-                                    hintText:
-                                        "Describe your post here, add hashtags, mention or anything else that compels you.",
+                                    hintText: widget.type == "post"
+                                        ? "Describe your post here, add hashtags, mention or anything else that compels you."
+                                        : "Describe your reel here, add hashtags, mention or anything else that compels you.",
                                     hintStyle:
                                         AppTextStyles.poppinsRegular().copyWith(
                                       color: Colors.black,
@@ -267,35 +271,66 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     log("Keywords: $keywords");
                     log("Tag User id: $selectedTagUsers");
                     log("Privacy Policy: $privacyPolicy");
+                    if (widget.type == "post") {
+                      final response = await pro.createNewPost(context,
+                          postTitle: titleController.text.trim(),
+                          peopleTags: selectedTagUsers,
+                          keywordsList: keywords,
+                          privacyPost: privacyPolicy,
+                          mediaFiles: widget.mediFiles!);
 
-                    final response = await pro.createNewPost(context,
-                        postTitle: titleController.text.trim(),
-                        peopleTags: selectedTagUsers,
-                        keywordsList: keywords,
-                        privacyPost: privacyPolicy,
-                        mediaFiles: widget.mediFiles!);
-
-                    if (response != null) {
-                      ToastNotifier.showSuccessToast(
-                          context, "Post Successfully posted!");
-                      setState(() {
-                        isLoading = false;
-                      });
-                      final token = await Prefrences.getAuthToken();
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          CupertinoDialogRoute(
-                              builder: (_) => MainScreen(
-                                  userProfile: widget.userProfile!,
-                                  authToken: token),
-                              context: context),
-                          (route) => false);
+                      if (response != null) {
+                        ToastNotifier.showSuccessToast(
+                            context, "Post Successfully posted!");
+                        setState(() {
+                          isLoading = false;
+                        });
+                        final token = await Prefrences.getAuthToken();
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => MainScreen(
+                                    userProfile: widget.userProfile!,
+                                    authToken: token),
+                                context: context),
+                            (route) => false);
+                      } else {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ToastNotifier.showErrorToast(
+                            context, "Something went wrong. Try again.");
+                      }
                     } else {
-                      setState(() {
-                        isLoading = false;
-                      });
-                      ToastNotifier.showErrorToast(
-                          context, "Something went wrong. Try again.");
+                      final response = await pro.createNewReel(context,
+                          postTitle: titleController.text.trim(),
+                          peopleTags: selectedTagUsers,
+                          keywordsList: keywords,
+                          privacyPost: privacyPolicy,
+                          mediaFiles: widget.mediFiles!);
+
+                      if (response != null) {
+                        ToastNotifier.showSuccessToast(
+                            context, "Reel Successfully posted!");
+                        setState(() {
+                          isLoading = false;
+                        });
+                        final token = await Prefrences.getAuthToken();
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => MainScreen(
+                                    userProfile: widget.userProfile!,
+                                    authToken: token),
+                                context: context),
+                            (route) => false);
+                      } else {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ToastNotifier.showErrorToast(
+                            context, "Something went wrong. Try again.");
+                      }
                     }
                   },
             child: Container(
@@ -305,7 +340,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   Icon(Icons.arrow_upward, size: 20, color: Colors.white),
                   SizedBox(width: 5),
                   Text(
-                    "Post",
+                    widget.type == "post" ? "Post" : "Reel",
                     style: AppTextStyles.poppinsMedium().copyWith(
                       fontSize: 16,
                       color: Colors.white,
