@@ -13,6 +13,7 @@ import 'package:mobile/models/UserProfile/SinglePostModel.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import '../../../common/message_toast.dart';
+import '../../../models/ReelPostModel.dart';
 import '../../endpoints.dart';
 import 'package:http/http.dart' as http;
 
@@ -104,18 +105,29 @@ class PostProvider extends ChangeNotifier {
   }
 
   Future<List<PostModel>> getPost(BuildContext context, String id) async {
+  Future<List<PostModel>> getPost(BuildContext context, String id,limit,offset ) async {
     print("Fetching API");
-    final String? token = await Prefrences.getAuthToken();
 
+    final String? token = await Prefrences.getAuthToken();
     int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
+    // Base URL and API path
     String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}${id}";
-    print("Fetching API");
+
+    // Add query parameters for pagination (limit and offpage)
+    Uri uri = Uri.parse(URL).replace(queryParameters: {
+      'limit': limit.toString(),    // How many posts per page
+      'offset': offset.toString() // Offset for pagination
+    });
+
+    print("Fetching API with URI: $uri");
+
     try {
-      final response = await http.get(Uri.parse(URL), headers: {
+      final response = await http.get(uri, headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token"
       });
+
       print(response.body);
 
       if (response.statusCode == 200) {
@@ -123,7 +135,6 @@ class PostProvider extends ChangeNotifier {
 
         print(jsonList);
         log("Post Data: ${jsonList['posts']}");
-        // debugger();
 
         List<PostModel> postList = [];
         for (var postJson in jsonList['posts']) {
@@ -140,6 +151,53 @@ class PostProvider extends ChangeNotifier {
       ToastNotifier.showErrorToast(context, "There is an Error: $e");
       print(e);
       return [];
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  Future<List<ReelPostModel>> fetchReels(BuildContext context, String id, int limit, int offset) async {
+    final String? token = await Prefrences.getAuthToken();
+
+    // Base URL and API path
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id";
+
+    // Add query parameters for pagination (limit and offset)
+    Uri uri = Uri.parse(URL).replace(queryParameters: {
+      'limit': limit.toString(),    // How many posts per page
+      'offset': offset.toString() // Offset for pagination
+    });
+
+    try {
+      final response = await http.get(uri, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      });
+
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        final jsonList = jsonDecode(response.body);
+        print("REEL GETTED SUCCESSFULLY");
+        // print(jsonList);
+        //log("Reel Data: ${jsonList['reels']}"); // Log the correct data
+
+        List<ReelPostModel> reelList = [];
+        for (var reelJson in jsonList['reels']) { // Change 'posts' to 'reels'
+          final reel = ReelPostModel.fromJson(reelJson);
+          reelList.add(reel);
+        }
+        print("PROVIDER REEL :${reelList}");
+
+        notifyListeners();
+        return reelList;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      print(e);
+      return [];  // Return an empty list on exception
     } finally {
       setIsLoading(false);
     }
@@ -203,5 +261,25 @@ class PostProvider extends ChangeNotifier {
     } finally {
       setIsLoading(false);
     }
+  }
+
+
+  List<PostModel> _cachedPosts = [];
+
+  List<PostModel> get cachedPosts => _cachedPosts;
+
+  void setPosts(List<PostModel> posts) {
+    _cachedPosts = posts;
+    notifyListeners();
+  }
+
+  void addPosts(List<PostModel> posts) {
+    _cachedPosts.addAll(posts);
+    notifyListeners();
+  }
+
+  void clearPosts() {
+    _cachedPosts.clear();
+    notifyListeners();
   }
 }
