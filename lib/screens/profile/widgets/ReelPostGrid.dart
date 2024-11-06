@@ -120,8 +120,8 @@ class _ReelPostGridState extends State<ReelPostGrid> {
                   );
                 },
                 child: Hero(
-                  tag: 'profile_images_$index',
-                  child: VideoPlayerWidget(videoUrl: "http://147.79.117.253:8001/api${reels.file[0]}")
+                    tag: 'profile_images_$index',
+                    child: VideoPlayerWidget(videoUrl: "http://147.79.117.253:8001/api${reels.file[0]}")
 
                 ),
               );

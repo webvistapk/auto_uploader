@@ -8,6 +8,7 @@ import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
 import '../../../models/UserProfile/post_model.dart';
+import 'ReelPostGrid.dart';
 
 class ProfileImages extends StatefulWidget {
   String userid;
@@ -42,7 +43,7 @@ class _ProfileImagesState extends State<ProfileImages> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 7,
+      length: 8,
       child: Column(
         children: [
           Theme(
@@ -99,6 +100,12 @@ class _ProfileImagesState extends State<ProfileImages> {
                 Tab(
                   child: Text(
                     "Tagged",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Reel",
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -205,9 +212,6 @@ class _ProfileImagesState extends State<ProfileImages> {
                       PostGrid(
                         posts: allPosts,
                         filterType: "allPost",
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
                         userId: widget.userid,
                       ),
                       PostGrid(
@@ -220,25 +224,9 @@ class _ProfileImagesState extends State<ProfileImages> {
                     ],
                   );
                 },
-              ),
-=======
-=======
->>>>>>> parent of e5915b4 (changes done)
-=======
->>>>>>> parent of e5915b4 (changes done)
-                      userId: widget.userid,
-                    ), // Placeholder for Posts
-                    PostGrid(
-                        posts: allPosts,
-                        filterType: "allPost",
-                      userId: widget.userid,
-                    ), // Placeholder for Tagged
-                    const profile_info(), // Info tab
-                  ],
-                );
-              },
+              ),// Placeholder for Posts
+
             ),
->>>>>>> parent of e5915b4 (changes done)
 
               /*TabBarView(
                 children: [
@@ -252,7 +240,7 @@ class _ProfileImagesState extends State<ProfileImages> {
                 ],
               ),*/
             ),
-          ),
+
         ],
       ),
     );
