@@ -297,51 +297,97 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
 }
 
+
 class StatusView extends StatefulWidget {
   final List<String> statuses; // List of status images/videos
   final int initialIndex; // Initial index of the status to be shown
   final bool isVideo;
+  final Duration statusDuration; // Duration for each status to show
+  final List<String> viewers; // List of viewers' names
 
   StatusView({
     Key? key,
     required this.statuses,
     required this.initialIndex,
     required this.isVideo,
+    this.statusDuration = const Duration(seconds: 5), // Default duration
+    this.viewers = const [], // Default empty list of viewers
   }) : super(key: key);
 
   @override
   _StatusViewState createState() => _StatusViewState();
 }
 
-class _StatusViewState extends State<StatusView> {
+class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   int _currentIndex = 0;
   late Timer _timer;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _animationController = AnimationController(
+      vsync: this,
+      duration: widget.statusDuration,
+    )..forward();
     _startTimer();
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    _animationController.dispose();
     super.dispose();
   }
 
-  // Start a 30-second timer to auto-switch to the next status
+  // Start a timer to auto-switch to the next status
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _timer = Timer.periodic(widget.statusDuration, (timer) {
       if (_currentIndex < widget.statuses.length - 1) {
         setState(() {
           _currentIndex++;
+          _animationController.forward(from: 0);
         });
       } else {
         // If it's the last status, navigate back to the home screen
         Navigator.of(context).pop();
       }
     });
+  }
+
+  // Show viewers in a bottom sheet
+  void _showViewers() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          height: 300,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Viewers',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: widget.viewers.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: Icon(Icons.person),
+                      title: Text(widget.viewers[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -369,6 +415,7 @@ class _StatusViewState extends State<StatusView> {
                   setState(() {
                     if (_currentIndex > 0) {
                       _currentIndex--;
+                      _animationController.forward(from: 0);
                     }
                   });
                 } else {
@@ -376,6 +423,7 @@ class _StatusViewState extends State<StatusView> {
                   setState(() {
                     if (_currentIndex < widget.statuses.length - 1) {
                       _currentIndex++;
+                      _animationController.forward(from: 0);
                     } else {
                       Navigator.of(context).pop(); // Close if it's the last status
                     }
@@ -394,7 +442,7 @@ class _StatusViewState extends State<StatusView> {
                 },
               ),
             ),
-            // Progress indicator bar at the top (optional)
+            // Progress indicator bar at the top with animation
             Positioned(
               top: 10,
               left: 10,
@@ -403,12 +451,55 @@ class _StatusViewState extends State<StatusView> {
                 children: List.generate(
                   widget.statuses.length,
                       (index) => Expanded(
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 2),
-                      height: 3,
-                      color: index <= _currentIndex ? Colors.white : Colors.grey,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: Stack(
+                        children: [
+                          // Light grey background bar
+                          Container(
+                            height: 3,
+                            color: Colors.grey.shade400,
+                          ),
+                          // Darker progress bar that animates
+                          index == _currentIndex
+                              ? AnimatedBuilder(
+                            animation: _animationController,
+                            builder: (context, child) {
+                              return Container(
+                                height: 3,
+                                width: MediaQuery.of(context).size.width *
+                                    _animationController.value,
+                                color: Colors.white,
+                              );
+                            },
+                          )
+                              : Container(
+                            height: 3,
+                            color: index < _currentIndex
+                                ? Colors.white
+                                : Colors.transparent,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                ),
+              ),
+            ),
+            // Eye icon and view count at the bottom
+            Positioned(
+              bottom: 40,
+              child: GestureDetector(
+                onTap: _showViewers,
+                child: Row(
+                  children: [
+                    Icon(Icons.remove_red_eye, color: Colors.white),
+                    SizedBox(width: 5),
+                    Text(
+                      '${widget.viewers.length}', // Display view count
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ],
                 ),
               ),
             ),

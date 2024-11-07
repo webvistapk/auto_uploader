@@ -104,7 +104,6 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<PostModel>> getPost(BuildContext context, String id) async {
   Future<List<PostModel>> getPost(BuildContext context, String id,limit,offset ) async {
     print("Fetching API");
 
