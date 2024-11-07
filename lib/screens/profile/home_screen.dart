@@ -5,19 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
+import 'package:mobile/screens/story/create_story.dart';
+import 'package:mobile/screens/story/create_story_screen.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:mobile/screens/widgets/top_bar.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final UserProfile? userProfile;
+  final String? token;
+
+  const HomeScreen({super.key, this.userProfile, this.token});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   TabController? _tabController;
 
   @override
@@ -39,15 +46,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundImage: AssetImage('assets/tellus.webp'),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (_) => StoryScreen(
+                            userProfile: widget.userProfile,
+                            token: widget.token,
+                          )));
+            },
+            child: CircleAvatar(
+              backgroundImage: AssetImage('assets/tellus.webp'),
+            ),
           ),
         ),
-       /* title: Text('Home Screen', style: TextStyle(color: Colors.black)),*/
+        /* title: Text('Home Screen', style: TextStyle(color: Colors.black)),*/
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.blue,
           labelColor: Colors.black,
+          labelStyle: TextStyle(color: Colors.black),
           unselectedLabelColor: Colors.grey,
           tabs: const [
             Tab(text: 'Content'),
@@ -90,7 +109,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ],
                       ),
                     )
-
                   ],
                 );
               } else {
@@ -110,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-
   Widget _buildStoriesSection() {
     return SizedBox(
       height: 80,
@@ -124,14 +141,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             _buildStoryAvatar('User3', 'assets/tellus.webp'),
             _buildStoryAvatar('User4', 'assets/tellus.webp'),
             _buildStoryAvatar('User4', 'assets/tellus.webp'),
-
           ],
         ),
       ),
     );
   }
-
-
 
   Widget _buildStoryAvatar(String username, String imagePath) {
     return Padding(
@@ -169,7 +183,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-
   Widget _buildPostCard() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,7 +198,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 backgroundImage: AssetImage('assets/tellus.webp'),
                 radius: 20, // Adjust size if needed
               ),
-              const SizedBox(width: 10), // Add some space between the image and text
+              const SizedBox(
+                  width: 10), // Add some space between the image and text
               // Title and subtitle
               Expanded(
                 child: Column(
@@ -193,7 +207,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   children: const [
                     Text(
                       'username1',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 2),
                     Text(
@@ -242,7 +257,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   borderRadius: const BorderRadius.all(Radius.circular(4)),
                 ),
                 child: Center(
-                  child: Text("Text", style: TextStyle(fontSize: 10, color: AppColors.white)),
+                  child: Text("Text",
+                      style: TextStyle(fontSize: 10, color: AppColors.white)),
                 ),
               ),
               const Icon(Icons.more_horiz_outlined),
@@ -286,7 +302,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text("Kashif", style: TextStyle(fontSize: 12)),
-              Text("datawarning: The value of the local variable 'size' isn't used.", style: TextStyle(fontSize: 10)),
+              Text(
+                  "datawarning: The value of the local variable 'size' isn't used.",
+                  style: TextStyle(fontSize: 10)),
               Text("17-Aug-2024", style: TextStyle(fontSize: 8)),
             ],
           ),
@@ -294,9 +312,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ],
     );
   }
-
 }
-
 
 class StatusView extends StatefulWidget {
   final List<String> statuses; // List of status images/videos
@@ -425,7 +441,8 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                       _currentIndex++;
                       _animationController.forward(from: 0);
                     } else {
-                      Navigator.of(context).pop(); // Close if it's the last status
+                      Navigator.of(context)
+                          .pop(); // Close if it's the last status
                     }
                   });
                 }
@@ -450,7 +467,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
               child: Row(
                 children: List.generate(
                   widget.statuses.length,
-                      (index) => Expanded(
+                  (index) => Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Stack(
@@ -463,22 +480,22 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                           // Darker progress bar that animates
                           index == _currentIndex
                               ? AnimatedBuilder(
-                            animation: _animationController,
-                            builder: (context, child) {
-                              return Container(
-                                height: 3,
-                                width: MediaQuery.of(context).size.width *
-                                    _animationController.value,
-                                color: Colors.white,
-                              );
-                            },
-                          )
+                                  animation: _animationController,
+                                  builder: (context, child) {
+                                    return Container(
+                                      height: 3,
+                                      width: MediaQuery.of(context).size.width *
+                                          _animationController.value,
+                                      color: Colors.white,
+                                    );
+                                  },
+                                )
                               : Container(
-                            height: 3,
-                            color: index < _currentIndex
-                                ? Colors.white
-                                : Colors.transparent,
-                          ),
+                                  height: 3,
+                                  color: index < _currentIndex
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                ),
                         ],
                       ),
                     ),
@@ -509,4 +526,3 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     );
   }
 }
-

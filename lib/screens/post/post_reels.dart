@@ -9,7 +9,7 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/post/reels/reels_video_player.dart';
-import 'package:mobile/screens/post/widgets/add_post.dart';
+import 'package:mobile/screens/post/add_post.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';

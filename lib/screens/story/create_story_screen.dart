@@ -15,18 +15,17 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 import 'package:shimmer/shimmer.dart'; // Import the shimmer package
 
-class ContentSelectionScreen extends StatefulWidget {
+class StoryScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final token;
-  const ContentSelectionScreen(
-      {Key? key, required this.userProfile, this.token})
+  const StoryScreen({Key? key, required this.userProfile, this.token})
       : super(key: key);
 
   @override
-  State<ContentSelectionScreen> createState() => _ContentSelectionScreenState();
+  State<StoryScreen> createState() => _StoryScreenState();
 }
 
-class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
+class _StoryScreenState extends State<StoryScreen> {
   List<AssetPathEntity> _albums = [];
   List<AssetEntity> _mediaList = [];
   AssetEntity? _selectedMedia;
@@ -330,22 +329,22 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
             ],
           ),
           appBar: AppBar(
-            title: const Text('Content Selection'),
+            title: const Text('Add Story'),
             actions: [
               TextButton(
                 onPressed: mediaFiles.isNotEmpty
                     ? () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => AddPostScreen(
-                                      mediFiles: mediaFiles,
-                                      userProfile: widget.userProfile,
-                                      type: null,
-                                    )));
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (_) => AddPostScreen(
+                        //               mediFiles: mediaFiles,
+                        //               userProfile: widget.userProfile,
+                        //               type: null,
+                        //             )));
                       }
                     : null,
-                child: const Text('Next', style: TextStyle(color: Colors.blue)),
+                child: const Text('Add', style: TextStyle(color: Colors.blue)),
               ),
             ],
           ),
@@ -366,7 +365,7 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
                       )
                     : mediaFiles.isEmpty
                         ? Text(
-                            "No Files Selected",
+                            "No Story Selected",
                             style:
                                 AppTextStyles.poppinsBold(color: Colors.white),
                           )

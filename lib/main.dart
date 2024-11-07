@@ -36,8 +36,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
           title: 'Fillet Social Media App',
           theme: ThemeData(
-              primarySwatch: Colors.green,
-              fontFamily: GoogleFonts.poppins().toString()),
+            primarySwatch: Colors.green,
+            // textTheme: GoogleFonts.poppinsTextTheme(),
+          ),
           home: SplashScreen()),
     );
   }
