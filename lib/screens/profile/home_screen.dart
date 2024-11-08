@@ -4,11 +4,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_size.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
-import 'package:mobile/screens/widgets/top_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
+
+import '../../controller/services/StatusProvider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,10 +30,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Fetch user status on initialization
+    final mediaProvider = Provider.of<MediaProvider>(context, listen: false);
+    final storyService = StoryService(mediaProvider);
+    storyService.getUserStatus();
+    storyService.getFollowersStatus();
+  }
+  Future<void> _loadImage(String url) async {
+    try {
+      await NetworkImage('${ApiURLs.baseUrl}$url').evict();
+    } catch (e) {
+      print("Error loading image: $e");
+    }
   }
 
   @override
   void dispose() {
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -39,11 +59,86 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundImage: AssetImage('assets/tellus.webp'),
+          child: Consumer<MediaProvider>(
+            builder: (context, mediaProvider, child) {
+              // Use user stories if available, otherwise fallback to follower stories
+              final stories = mediaProvider.userStatus?.stories ?? mediaProvider.followersStatus?.stories;
+
+              if (stories != null && stories.isNotEmpty) {
+                final latestStory = stories.first;
+                final mediaFile = latestStory.media != null && latestStory.media!.isNotEmpty
+                    ? latestStory.media!.first.file
+                    : null;
+                final isVideo = latestStory.media != null &&
+                    latestStory.media!.isNotEmpty &&
+                    latestStory.media!.first.mediaType == 'video';
+
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StatusView(
+                          statuses: [mediaFile ?? 'assets/logo.webp'],
+                          initialIndex: 0,
+                          isVideo: isVideo,
+                          viewers: [],
+                        ),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 20,
+                    child: ClipOval(
+                      child: mediaFile != null
+                          ? isVideo
+                          ? Image.asset(
+                        'assets/logo.webp',
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                      )
+                          : FutureBuilder(
+                        future: _loadImage(mediaFile),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return CircularProgressIndicator(); // Show loader while image is loading
+                          } else if (snapshot.hasError) {
+                            return Icon(Icons.error); // Error fallback
+                          } else {
+                            return Image.network(
+                              '${ApiURLs.baseUrl}$mediaFile',
+                              fit: BoxFit.cover,
+                              width: 40,
+                              height: 40,
+                            );
+                          }
+                        },
+                      )
+                          : Image.asset(
+                        'assets/logo.webp', // Default placeholder
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                // Default image if no stories are available
+                return InkWell(
+                  onTap: () {
+                    // Optionally display a message or navigate somewhere
+                    print("No stories available");
+                  },
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage('assets/logo.webp'),
+                  ),
+                );
+              }
+            },
           ),
         ),
-       /* title: Text('Home Screen', style: TextStyle(color: Colors.black)),*/
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.blue,
@@ -77,10 +172,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               if (searchQuery == null || searchQuery.isEmpty) {
                 return ListView(
                   children: [
-                    // Stories Section
                     Center(child: _buildStoriesSection()),
                     const Divider(thickness: 1),
-                    // Post Cards
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -90,7 +183,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ],
                       ),
                     )
-
                   ],
                 );
               } else {
@@ -101,39 +193,43 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               }
             },
           ),
-          // Disclosure Tab
-          Center(
-            child: Text('Disclosure Content Goes Here'),
-          ),
+          Center(child: Text('Disclosure Content Goes Here')),
         ],
       ),
     );
   }
 
-
   Widget _buildStoriesSection() {
+    final mediaProvider = Provider.of<MediaProvider>(context);
+
+    // Check if there are follower stories, otherwise fallback to user stories
+    final stories = mediaProvider.followersStatus?.stories ?? mediaProvider.userStatus?.stories;
+
+    if (stories == null || stories.isEmpty) {
+      return Center(
+        child: Text('No stories available'),
+      );
+    }
+
     return SizedBox(
       height: 80,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center, // Center the content
-          children: [
-            _buildStoryAvatar('User1', 'assets/tellus.webp'),
-            _buildStoryAvatar('User2', 'assets/tellus.webp'),
-            _buildStoryAvatar('User3', 'assets/tellus.webp'),
-            _buildStoryAvatar('User4', 'assets/tellus.webp'),
-            _buildStoryAvatar('User4', 'assets/tellus.webp'),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: stories.map((story) {
+            final mediaFile = story.media != null && story.media!.isNotEmpty ? story.media![0].file : null;
+            final isVideo = story.media != null && story.media!.isNotEmpty && story.media![0].mediaType == 'video';
+            final username = story.user?.username ?? 'Unknown';
 
-          ],
+            return _buildStoryAvatar(username, mediaFile, isVideo);
+          }).toList(),
         ),
       ),
     );
   }
 
-
-
-  Widget _buildStoryAvatar(String username, String imagePath) {
+  Widget _buildStoryAvatar(String username, String? mediaFile, bool isVideo) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -146,20 +242,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 context,
                 MaterialPageRoute(
                   builder: (context) => StatusView(
-                    statuses: [
-                      'assets/tellus.webp',
-                      'assets/tellus.webp',
-                      // Add more statuses if you have more images or videos
-                    ],
+                    statuses: [mediaFile ?? 'assets/logo.webp'], // Use a default value if mediaFile is null
                     initialIndex: 0,
-                    isVideo: false,
+                    isVideo: isVideo,
+                    viewers: [],
                   ),
                 ),
               );
             },
             child: CircleAvatar(
               radius: 20,
-              backgroundImage: AssetImage(imagePath),
+              backgroundImage: mediaFile != null
+                  ? isVideo
+                  ? AssetImage('assets/video_placeholder.png') as ImageProvider // Video placeholder
+                  : NetworkImage('${ApiURLs.baseUrl}$mediaFile') // Image URL
+                  : AssetImage('assets/logo.webp'), // Default placeholder if mediaFile is null
             ),
           ),
           const SizedBox(height: 5),
@@ -168,7 +265,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
-
 
   Widget _buildPostCard() {
     return Column(
@@ -294,24 +390,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ],
     );
   }
-
 }
 
-
 class StatusView extends StatefulWidget {
-  final List<String> statuses; // List of status images/videos
-  final int initialIndex; // Initial index of the status to be shown
+  final List<String> statuses;
+  final int initialIndex;
   final bool isVideo;
-  final Duration statusDuration; // Duration for each status to show
-  final List<String> viewers; // List of viewers' names
+  final Duration statusDuration;
+  final List<String> viewers;
 
   StatusView({
     Key? key,
     required this.statuses,
     required this.initialIndex,
     required this.isVideo,
-    this.statusDuration = const Duration(seconds: 5), // Default duration
-    this.viewers = const [], // Default empty list of viewers
+    this.statusDuration = const Duration(seconds: 5),
+    this.viewers = const [],
   }) : super(key: key);
 
   @override
@@ -320,43 +414,234 @@ class StatusView extends StatefulWidget {
 
 class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   int _currentIndex = 0;
-  late Timer _timer;
+  Timer? _timer;
   late AnimationController _animationController;
+  VideoPlayerController? _videoController;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _animationController = AnimationController(
-      vsync: this,
-      duration: widget.statusDuration,
-    )..forward();
-    _startTimer();
+    _animationController = AnimationController(vsync: this);
+    _initializeStatus();
+  }
+
+  void _initializeStatus() {
+    _animationController.stop();
+    _timer?.cancel();
+
+    setState(() => _isLoading = true); // Show loading state
+
+    if (widget.isVideo) {
+      _initializeVideo();
+    } else {
+      _initializeImage();
+    }
+  }
+
+  Future<void> _initializeVideo() async {
+    _videoController = VideoPlayerController.network('${ApiURLs.baseUrl}${widget.statuses[_currentIndex]}');
+
+    _videoController!.addListener(() {
+      if (_videoController!.value.isBuffering) {
+        setState(() {
+          _isLoading = true;
+        });
+      } else if (_videoController!.value.isInitialized) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+
+    try {
+      await _videoController!.initialize();
+      final videoDuration = _videoController!.value.duration;
+      final cappedDuration = videoDuration <= Duration(seconds: 15) ? videoDuration : Duration(seconds: 15);
+
+      _animationController.duration = cappedDuration;
+      _videoController!.play();
+      _animationController.forward(from: 0);
+      _timer = Timer(cappedDuration, _onNextStatus);
+    } catch (e) {
+      print("Error loading video: $e");
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _initializeImage() {
+    _animationController.stop();
+    _timer?.cancel();
+
+    setState(() => _isLoading = true);
+
+    Image.network(
+      '${ApiURLs.baseUrl}${widget.statuses[_currentIndex]}',
+      fit: BoxFit.cover,
+    ).image
+        .resolve(ImageConfiguration())
+        .addListener(
+      ImageStreamListener(
+            (ImageInfo info, bool _) {
+          setState(() {
+            _isLoading = false;
+            _animationController.duration = Duration(seconds: 15);
+            _animationController.forward(from: 0);
+          });
+          _timer = Timer(Duration(seconds: 15), _onNextStatus);
+        },
+        onError: (error, stackTrace) {
+          print("Error loading image: $error");
+          setState(() => _isLoading = false);
+        },
+      ),
+    );
+  }
+
+  void _onNextStatus() {
+    _animationController.stop();
+    _timer?.cancel();
+
+    if (_currentIndex < widget.statuses.length - 1) {
+      setState(() {
+        _currentIndex++;
+      });
+      _initializeStatus();
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
+  // Define the `_switchStatus` method to navigate between statuses
+  void _switchStatus(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    _initializeStatus();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     _animationController.dispose();
+    _videoController?.dispose();
     super.dispose();
   }
 
-  // Start a timer to auto-switch to the next status
-  void _startTimer() {
-    _timer = Timer.periodic(widget.statusDuration, (timer) {
-      if (_currentIndex < widget.statuses.length - 1) {
-        setState(() {
-          _currentIndex++;
-          _animationController.forward(from: 0);
-        });
-      } else {
-        // If it's the last status, navigate back to the home screen
-        Navigator.of(context).pop();
-      }
-    });
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Center(
+              child: _isLoading
+                  ? CircularProgressIndicator()
+                  : widget.isVideo && _videoController != null && _videoController!.value.isInitialized
+                  ? AspectRatio(
+                aspectRatio: _videoController!.value.aspectRatio,
+                child: VideoPlayer(_videoController!),
+              )
+                  : Image.network(
+                '${ApiURLs.baseUrl}${widget.statuses[_currentIndex]}',
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: Colors.white),
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+              ),
+            ),
+            GestureDetector(
+              onTapUp: (details) {
+                final screenWidth = MediaQuery.of(context).size.width;
+                if (details.globalPosition.dx < screenWidth / 2) {
+                  if (_currentIndex > 0) _switchStatus(_currentIndex - 1);
+                } else {
+                  if (_currentIndex < widget.statuses.length - 1) {
+                    _switchStatus(_currentIndex + 1);
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                }
+              },
+            ),
+            Positioned(
+              top: 40,
+              left: 20,
+              child: IconButton(
+                icon: Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+            Positioned(
+              top: 10,
+              left: 10,
+              right: 10,
+              child: Row(
+                children: List.generate(
+                  widget.statuses.length,
+                      (index) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 3,
+                            color: Colors.grey.shade400,
+                          ),
+                          index == _currentIndex
+                              ? AnimatedBuilder(
+                            animation: _animationController,
+                            builder: (context, child) {
+                              return Container(
+                                height: 3,
+                                width: MediaQuery.of(context).size.width *
+                                    _animationController.value,
+                                color: Colors.white,
+                              );
+                            },
+                          )
+                              : Container(
+                            height: 3,
+                            color: index < _currentIndex ? Colors.white : Colors.transparent,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: _showViewers,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.remove_red_eye, color: Colors.white),
+                      SizedBox(width: 5),
+                      Text(
+                        '${widget.viewers.length}',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  // Show viewers in a bottom sheet
   void _showViewers() {
     showModalBottomSheet(
       context: context,
@@ -389,124 +674,4 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
       },
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Display image or video
-            Center(
-              child: Image.asset(
-                widget.statuses[_currentIndex],
-                fit: BoxFit.contain,
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-              ),
-            ),
-            // Gesture detection for next/previous status
-            GestureDetector(
-              onTapUp: (details) {
-                final screenWidth = MediaQuery.of(context).size.width;
-                if (details.globalPosition.dx < screenWidth / 2) {
-                  // Tap on left side for previous status
-                  setState(() {
-                    if (_currentIndex > 0) {
-                      _currentIndex--;
-                      _animationController.forward(from: 0);
-                    }
-                  });
-                } else {
-                  // Tap on right side for next status
-                  setState(() {
-                    if (_currentIndex < widget.statuses.length - 1) {
-                      _currentIndex++;
-                      _animationController.forward(from: 0);
-                    } else {
-                      Navigator.of(context).pop(); // Close if it's the last status
-                    }
-                  });
-                }
-              },
-            ),
-            // Close button on top-left
-            Positioned(
-              top: 40,
-              left: 20,
-              child: IconButton(
-                icon: Icon(Icons.close, color: Colors.white, size: 30),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-            // Progress indicator bar at the top with animation
-            Positioned(
-              top: 10,
-              left: 10,
-              right: 10,
-              child: Row(
-                children: List.generate(
-                  widget.statuses.length,
-                      (index) => Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      child: Stack(
-                        children: [
-                          // Light grey background bar
-                          Container(
-                            height: 3,
-                            color: Colors.grey.shade400,
-                          ),
-                          // Darker progress bar that animates
-                          index == _currentIndex
-                              ? AnimatedBuilder(
-                            animation: _animationController,
-                            builder: (context, child) {
-                              return Container(
-                                height: 3,
-                                width: MediaQuery.of(context).size.width *
-                                    _animationController.value,
-                                color: Colors.white,
-                              );
-                            },
-                          )
-                              : Container(
-                            height: 3,
-                            color: index < _currentIndex
-                                ? Colors.white
-                                : Colors.transparent,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Eye icon and view count at the bottom
-            Positioned(
-              bottom: 40,
-              child: GestureDetector(
-                onTap: _showViewers,
-                child: Row(
-                  children: [
-                    Icon(Icons.remove_red_eye, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text(
-                      '${widget.viewers.length}', // Display view count
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
-

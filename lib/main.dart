@@ -14,6 +14,8 @@ import 'package:mobile/screens/widget/video_player_widget.dart';
 // import 'package:mobile/screens/widget/alert_screen.dart';
 import 'package:provider/provider.dart';
 
+import 'controller/services/StatusProvider.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -32,6 +34,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PostProvider()),
         ChangeNotifierProvider(create: (_) => TagsProvider()),
         ChangeNotifierProvider(create: (_) => FollowerProvider()),
+        ChangeNotifierProvider(create: (_) => MediaProvider()),
       ],
       child: MaterialApp(
           title: 'Fillet Social Media App',
