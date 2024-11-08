@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen>
 
                 return InkWell(
                   onTap: () {
-                    if (mediaFile!.isEmpty) {
+                   if (mediaFile!.isEmpty) {
                       Navigator.push(
                           context,
                           CupertinoPageRoute(

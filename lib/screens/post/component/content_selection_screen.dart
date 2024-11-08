@@ -7,13 +7,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/post/add_post.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
-import 'package:shimmer/shimmer.dart'; // Import the shimmer package
+import 'package:shimmer/shimmer.dart';
+
+import '../add_post_screen.dart'; // Import the shimmer package
 
 class ContentSelectionScreen extends StatefulWidget {
   final UserProfile? userProfile;
