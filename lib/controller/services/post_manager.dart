@@ -167,7 +167,7 @@ class PostManager {
     // Add media files
     for (var file in mediaFiles) {
       request.files.add(await http.MultipartFile.fromPath(
-        'file',
+        'media',
         file.path,
         filename: basename(file.path), // Use path's basename as the filename
       ));
