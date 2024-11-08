@@ -102,6 +102,8 @@ class _HomeScreenState extends State<HomeScreen>
                             initialIndex: 0,
                             isVideo: isVideo,
                             viewers: [],
+                            userProfile: widget.userProfile,
+                            token: widget.token!,
                           ),
                         ),
                       );
@@ -275,7 +277,8 @@ class _HomeScreenState extends State<HomeScreen>
                     ], // Use a default value if mediaFile is null
                     initialIndex: 0,
                     isVideo: isVideo,
-                    viewers: [],
+                    viewers: [], userProfile: widget.userProfile,
+                    token: widget.token!,
                   ),
                 ),
               );
@@ -436,15 +439,19 @@ class StatusView extends StatefulWidget {
   final bool isVideo;
   final Duration statusDuration;
   final List<String> viewers;
+  final UserProfile? userProfile;
+  final String token;
 
-  StatusView({
-    Key? key,
-    required this.statuses,
-    required this.initialIndex,
-    required this.isVideo,
-    this.statusDuration = const Duration(seconds: 5),
-    this.viewers = const [],
-  }) : super(key: key);
+  StatusView(
+      {Key? key,
+      required this.statuses,
+      required this.initialIndex,
+      required this.isVideo,
+      this.statusDuration = const Duration(seconds: 5),
+      this.viewers = const [],
+      required this.userProfile,
+      required this.token})
+      : super(key: key);
 
   @override
   _StatusViewState createState() => _StatusViewState();
@@ -574,6 +581,8 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
       backgroundColor: Colors.black,
       body: SafeArea(
         child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
           children: [
             Center(
               child: _isLoading
@@ -661,22 +670,37 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
             ),
             Positioned(
               bottom: 40,
-              left: 0,
-              right: 0,
               child: GestureDetector(
                 onTap: _showViewers,
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.remove_red_eye, color: Colors.white),
-                      SizedBox(width: 5),
-                      Text(
-                        '${widget.viewers.length}',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ],
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.remove_red_eye, color: Colors.white),
+                    SizedBox(width: 5),
+                    Text(
+                      '${widget.viewers.length}',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              CupertinoDialogRoute(
+                                  builder: (_) => StoryScreen(
+                                        userProfile: widget.userProfile,
+                                        token: widget.token,
+                                      ),
+                                  context: context));
+                        },
+                        child: Icon(
+                          Icons.add_circle_outline,
+                          size: 27,
+                          color: Colors.white,
+                        )),
+                  ],
                 ),
               ),
             ),
