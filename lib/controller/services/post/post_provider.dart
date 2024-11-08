@@ -104,7 +104,42 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<PostModel>> getPost(BuildContext context, String id,limit,offset ) async {
+  createNewStory(context,
+      {required List<int> peopleTags,
+      required String privacyPost,
+      required List<File> mediaFiles}) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      log(" $privacyPost, $mediaFiles");
+      final token = await Prefrences.getAuthToken();
+      // debugger();
+      if (token != null) {
+        final response = await PostManager().createStory(
+            peopleTags: peopleTags,
+            privacyPost: privacyPost,
+            mediaFiles: mediaFiles,
+            token: token);
+
+        if (response != null) {
+          log("Story: $response");
+
+          return response;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<List<PostModel>> getPost(
+      BuildContext context, String id, limit, offset) async {
     print("Fetching API");
 
     final String? token = await Prefrences.getAuthToken();
@@ -115,7 +150,7 @@ class PostProvider extends ChangeNotifier {
 
     // Add query parameters for pagination (limit and offpage)
     Uri uri = Uri.parse(URL).replace(queryParameters: {
-      'limit': limit.toString(),    // How many posts per page
+      'limit': limit.toString(), // How many posts per page
       'offset': offset.toString() // Offset for pagination
     });
 
@@ -155,7 +190,8 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ReelPostModel>> fetchReels(BuildContext context, String id, int limit, int offset) async {
+  Future<List<ReelPostModel>> fetchReels(
+      BuildContext context, String id, int limit, int offset) async {
     final String? token = await Prefrences.getAuthToken();
 
     // Base URL and API path
@@ -163,7 +199,7 @@ class PostProvider extends ChangeNotifier {
 
     // Add query parameters for pagination (limit and offset)
     Uri uri = Uri.parse(URL).replace(queryParameters: {
-      'limit': limit.toString(),    // How many posts per page
+      'limit': limit.toString(), // How many posts per page
       'offset': offset.toString() // Offset for pagination
     });
 
@@ -182,7 +218,8 @@ class PostProvider extends ChangeNotifier {
         //log("Reel Data: ${jsonList['reels']}"); // Log the correct data
 
         List<ReelPostModel> reelList = [];
-        for (var reelJson in jsonList['reels']) { // Change 'posts' to 'reels'
+        for (var reelJson in jsonList['reels']) {
+          // Change 'posts' to 'reels'
           final reel = ReelPostModel.fromJson(reelJson);
           reelList.add(reel);
         }
@@ -196,7 +233,7 @@ class PostProvider extends ChangeNotifier {
     } catch (e) {
       ToastNotifier.showErrorToast(context, "There is an Error: $e");
       print(e);
-      return [];  // Return an empty list on exception
+      return []; // Return an empty list on exception
     } finally {
       setIsLoading(false);
     }
@@ -261,7 +298,6 @@ class PostProvider extends ChangeNotifier {
       setIsLoading(false);
     }
   }
-
 
   List<PostModel> _cachedPosts = [];
 

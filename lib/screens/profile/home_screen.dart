@@ -7,9 +7,12 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
+import 'package:mobile/screens/story/create_story.dart';
+import 'package:mobile/screens/story/create_story_screen.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -17,13 +20,17 @@ import 'package:video_player/video_player.dart';
 import '../../controller/services/StatusProvider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final UserProfile? userProfile;
+  final String? token;
+
+  const HomeScreen({super.key, this.userProfile, this.token});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   TabController? _tabController;
 
   @override
@@ -37,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     storyService.getUserStatus();
     storyService.getFollowersStatus();
   }
+
   Future<void> _loadImage(String url) async {
     try {
       await NetworkImage('${ApiURLs.baseUrl}$url').evict();
@@ -62,65 +70,79 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           child: Consumer<MediaProvider>(
             builder: (context, mediaProvider, child) {
               // Use user stories if available, otherwise fallback to follower stories
-              final stories = mediaProvider.userStatus?.stories ?? mediaProvider.followersStatus?.stories;
+              final stories = mediaProvider.userStatus?.stories ??
+                  mediaProvider.followersStatus?.stories;
 
               if (stories != null && stories.isNotEmpty) {
                 final latestStory = stories.first;
-                final mediaFile = latestStory.media != null && latestStory.media!.isNotEmpty
-                    ? latestStory.media!.first.file
-                    : null;
+                final mediaFile =
+                    latestStory.media != null && latestStory.media!.isNotEmpty
+                        ? latestStory.media!.first.file
+                        : null;
                 final isVideo = latestStory.media != null &&
                     latestStory.media!.isNotEmpty &&
                     latestStory.media!.first.mediaType == 'video';
 
                 return InkWell(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StatusView(
-                          statuses: [mediaFile ?? 'assets/logo.webp'],
-                          initialIndex: 0,
-                          isVideo: isVideo,
-                          viewers: [],
+                    if (mediaFile!.isEmpty) {
+                      Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (_) => StoryScreen(
+                                    userProfile: widget.userProfile,
+                                    token: widget.token,
+                                  )));
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StatusView(
+                            statuses: [mediaFile ?? 'assets/logo.webp'],
+                            initialIndex: 0,
+                            isVideo: isVideo,
+                            viewers: [],
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   },
                   child: CircleAvatar(
                     radius: 20,
                     child: ClipOval(
                       child: mediaFile != null
                           ? isVideo
-                          ? Image.asset(
-                        'assets/logo.webp',
-                        fit: BoxFit.cover,
-                        width: 40,
-                        height: 40,
-                      )
-                          : FutureBuilder(
-                        future: _loadImage(mediaFile),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return CircularProgressIndicator(); // Show loader while image is loading
-                          } else if (snapshot.hasError) {
-                            return Icon(Icons.error); // Error fallback
-                          } else {
-                            return Image.network(
-                              '${ApiURLs.baseUrl}$mediaFile',
+                              ? Image.asset(
+                                  'assets/logo.webp',
+                                  fit: BoxFit.cover,
+                                  width: 40,
+                                  height: 40,
+                                )
+                              : FutureBuilder(
+                                  future: _loadImage(mediaFile),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return CircularProgressIndicator(); // Show loader while image is loading
+                                    } else if (snapshot.hasError) {
+                                      return Icon(
+                                          Icons.error); // Error fallback
+                                    } else {
+                                      return Image.network(
+                                        '${ApiURLs.baseUrl}$mediaFile',
+                                        fit: BoxFit.cover,
+                                        width: 40,
+                                        height: 40,
+                                      );
+                                    }
+                                  },
+                                )
+                          : Image.asset(
+                              'assets/logo.webp', // Default placeholder
                               fit: BoxFit.cover,
                               width: 40,
                               height: 40,
-                            );
-                          }
-                        },
-                      )
-                          : Image.asset(
-                        'assets/logo.webp', // Default placeholder
-                        fit: BoxFit.cover,
-                        width: 40,
-                        height: 40,
-                      ),
+                            ),
                     ),
                   ),
                 );
@@ -143,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           controller: _tabController,
           indicatorColor: Colors.blue,
           labelColor: Colors.black,
+          labelStyle: TextStyle(color: Colors.black),
           unselectedLabelColor: Colors.grey,
           tabs: const [
             Tab(text: 'Content'),
@@ -203,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final mediaProvider = Provider.of<MediaProvider>(context);
 
     // Check if there are follower stories, otherwise fallback to user stories
-    final stories = mediaProvider.followersStatus?.stories ?? mediaProvider.userStatus?.stories;
+    final stories = mediaProvider.followersStatus?.stories ??
+        mediaProvider.userStatus?.stories;
 
     if (stories == null || stories.isEmpty) {
       return Center(
@@ -218,8 +242,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: stories.map((story) {
-            final mediaFile = story.media != null && story.media!.isNotEmpty ? story.media![0].file : null;
-            final isVideo = story.media != null && story.media!.isNotEmpty && story.media![0].mediaType == 'video';
+            final mediaFile = story.media != null && story.media!.isNotEmpty
+                ? story.media![0].file
+                : null;
+            final isVideo = story.media != null &&
+                story.media!.isNotEmpty &&
+                story.media![0].mediaType == 'video';
             final username = story.user?.username ?? 'Unknown';
 
             return _buildStoryAvatar(username, mediaFile, isVideo);
@@ -242,7 +270,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 context,
                 MaterialPageRoute(
                   builder: (context) => StatusView(
-                    statuses: [mediaFile ?? 'assets/logo.webp'], // Use a default value if mediaFile is null
+                    statuses: [
+                      mediaFile ?? 'assets/logo.webp'
+                    ], // Use a default value if mediaFile is null
                     initialIndex: 0,
                     isVideo: isVideo,
                     viewers: [],
@@ -254,9 +284,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               radius: 20,
               backgroundImage: mediaFile != null
                   ? isVideo
-                  ? AssetImage('assets/video_placeholder.png') as ImageProvider // Video placeholder
-                  : NetworkImage('${ApiURLs.baseUrl}$mediaFile') // Image URL
-                  : AssetImage('assets/logo.webp'), // Default placeholder if mediaFile is null
+                      ? AssetImage('assets/video_placeholder.png')
+                          as ImageProvider // Video placeholder
+                      : NetworkImage(
+                          '${ApiURLs.baseUrl}$mediaFile') // Image URL
+                  : AssetImage(
+                      'assets/logo.webp'), // Default placeholder if mediaFile is null
             ),
           ),
           const SizedBox(height: 5),
@@ -281,7 +314,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 backgroundImage: AssetImage('assets/tellus.webp'),
                 radius: 20, // Adjust size if needed
               ),
-              const SizedBox(width: 10), // Add some space between the image and text
+              const SizedBox(
+                  width: 10), // Add some space between the image and text
               // Title and subtitle
               Expanded(
                 child: Column(
@@ -289,7 +323,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   children: const [
                     Text(
                       'username1',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 2),
                     Text(
@@ -338,7 +373,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   borderRadius: const BorderRadius.all(Radius.circular(4)),
                 ),
                 child: Center(
-                  child: Text("Text", style: TextStyle(fontSize: 10, color: AppColors.white)),
+                  child: Text("Text",
+                      style: TextStyle(fontSize: 10, color: AppColors.white)),
                 ),
               ),
               const Icon(Icons.more_horiz_outlined),
@@ -382,7 +418,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text("Kashif", style: TextStyle(fontSize: 12)),
-              Text("datawarning: The value of the local variable 'size' isn't used.", style: TextStyle(fontSize: 10)),
+              Text(
+                  "datawarning: The value of the local variable 'size' isn't used.",
+                  style: TextStyle(fontSize: 10)),
               Text("17-Aug-2024", style: TextStyle(fontSize: 8)),
             ],
           ),
@@ -441,7 +479,8 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   }
 
   Future<void> _initializeVideo() async {
-    _videoController = VideoPlayerController.network('${ApiURLs.baseUrl}${widget.statuses[_currentIndex]}');
+    _videoController = VideoPlayerController.network(
+        '${ApiURLs.baseUrl}${widget.statuses[_currentIndex]}');
 
     _videoController!.addListener(() {
       if (_videoController!.value.isBuffering) {
@@ -458,7 +497,9 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     try {
       await _videoController!.initialize();
       final videoDuration = _videoController!.value.duration;
-      final cappedDuration = videoDuration <= Duration(seconds: 15) ? videoDuration : Duration(seconds: 15);
+      final cappedDuration = videoDuration <= Duration(seconds: 15)
+          ? videoDuration
+          : Duration(seconds: 15);
 
       _animationController.duration = cappedDuration;
       _videoController!.play();
@@ -479,24 +520,22 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     Image.network(
       '${ApiURLs.baseUrl}${widget.statuses[_currentIndex]}',
       fit: BoxFit.cover,
-    ).image
-        .resolve(ImageConfiguration())
-        .addListener(
-      ImageStreamListener(
+    ).image.resolve(ImageConfiguration()).addListener(
+          ImageStreamListener(
             (ImageInfo info, bool _) {
-          setState(() {
-            _isLoading = false;
-            _animationController.duration = Duration(seconds: 15);
-            _animationController.forward(from: 0);
-          });
-          _timer = Timer(Duration(seconds: 15), _onNextStatus);
-        },
-        onError: (error, stackTrace) {
-          print("Error loading image: $error");
-          setState(() => _isLoading = false);
-        },
-      ),
-    );
+              setState(() {
+                _isLoading = false;
+                _animationController.duration = Duration(seconds: 15);
+                _animationController.forward(from: 0);
+              });
+              _timer = Timer(Duration(seconds: 15), _onNextStatus);
+            },
+            onError: (error, stackTrace) {
+              print("Error loading image: $error");
+              setState(() => _isLoading = false);
+            },
+          ),
+        );
   }
 
   void _onNextStatus() {
@@ -539,18 +578,21 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
             Center(
               child: _isLoading
                   ? CircularProgressIndicator()
-                  : widget.isVideo && _videoController != null && _videoController!.value.isInitialized
-                  ? AspectRatio(
-                aspectRatio: _videoController!.value.aspectRatio,
-                child: VideoPlayer(_videoController!),
-              )
-                  : Image.network(
-                '${ApiURLs.baseUrl}${widget.statuses[_currentIndex]}',
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: Colors.white),
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-              ),
+                  : widget.isVideo &&
+                          _videoController != null &&
+                          _videoController!.value.isInitialized
+                      ? AspectRatio(
+                          aspectRatio: _videoController!.value.aspectRatio,
+                          child: VideoPlayer(_videoController!),
+                        )
+                      : Image.network(
+                          '${ApiURLs.baseUrl}${widget.statuses[_currentIndex]}',
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.error, color: Colors.white),
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                        ),
             ),
             GestureDetector(
               onTapUp: (details) {
@@ -583,7 +625,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
               child: Row(
                 children: List.generate(
                   widget.statuses.length,
-                      (index) => Expanded(
+                  (index) => Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Stack(
@@ -594,20 +636,22 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                           ),
                           index == _currentIndex
                               ? AnimatedBuilder(
-                            animation: _animationController,
-                            builder: (context, child) {
-                              return Container(
-                                height: 3,
-                                width: MediaQuery.of(context).size.width *
-                                    _animationController.value,
-                                color: Colors.white,
-                              );
-                            },
-                          )
+                                  animation: _animationController,
+                                  builder: (context, child) {
+                                    return Container(
+                                      height: 3,
+                                      width: MediaQuery.of(context).size.width *
+                                          _animationController.value,
+                                      color: Colors.white,
+                                    );
+                                  },
+                                )
                               : Container(
-                            height: 3,
-                            color: index < _currentIndex ? Colors.white : Colors.transparent,
-                          ),
+                                  height: 3,
+                                  color: index < _currentIndex
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                ),
                         ],
                       ),
                     ),

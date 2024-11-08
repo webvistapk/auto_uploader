@@ -24,6 +24,7 @@ class ApiURLs {
   static const String user_profile_image_endpoint =
       "userprofile/users/profile_image/save/";
   static const String create_new_reel_endpoint = "posts/reel/new/save/";
+  static const String create_new_story_endpoint = "posts/story/new/save/";
   static const String get_reel_post = "posts/reel/get/";
   static const String get_user_status='posts/story/get/';
   static const String get_followers_status='posts/story/get/following/';

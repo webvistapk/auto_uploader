@@ -102,18 +102,23 @@ class _MainScreenState extends State<MainScreen> {
                 body: Center(child: CircularProgressIndicator()),
               )
             : Scaffold(
-                body: widget.selectedIndex == 2
-                    ? CreatePostScreen(
-                        token: widget.authToken,
+                body: widget.selectedIndex == 0
+                    ? HomeScreen(
                         userProfile: widget.userProfile,
+                        token: widget.authToken,
                       )
-                    : widget.selectedIndex == 4
-                        ? ProfileScreen(
-                            id: widget.userProfile.id,
+                    : widget.selectedIndex == 2
+                        ? CreatePostScreen(
+                            token: widget.authToken,
                             userProfile: widget.userProfile,
-                            authToken: widget.authToken,
                           )
-                        : _pages[widget.selectedIndex],
+                        : widget.selectedIndex == 4
+                            ? ProfileScreen(
+                                id: widget.userProfile.id,
+                                userProfile: widget.userProfile,
+                                authToken: widget.authToken,
+                              )
+                            : _pages[widget.selectedIndex],
                 bottomNavigationBar: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
