@@ -14,6 +14,8 @@ class PostScreen extends StatefulWidget {
 
 class _PostScreenState extends State<PostScreen> {
   Future<List<PostModel>>? _posts;
+  int limit = 10;   // Default limit of 10 posts per page
+  int offset = 0;   // Offset for pagination
 
   @override
   void initState() {
@@ -21,63 +23,99 @@ class _PostScreenState extends State<PostScreen> {
     _fetchPost();
   }
 
+  // Fetch posts with pagination (limit and offset)
   _fetchPost() {
     setState(() {
-      _posts =
-          Provider.of<PostProvider>(context, listen: false).getPost(context,"");
+      _posts = Provider.of<PostProvider>(context, listen: false).getPost(context, "", limit, offset);
     });
+  }
+
+  // Function to load the next page
+  void _loadNextPage() {
+    setState(() {
+      offset += limit; // Increase the offset to fetch the next set of posts
+      _fetchPost();
+    });
+  }
+
+  // Function to load the previous page
+  void _loadPreviousPage() {
+    if (offset > 0) {
+      setState(() {
+        offset -= limit; // Decrease the offset to fetch the previous set of posts
+        _fetchPost();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Posts")),
-      body: FutureBuilder<List<PostModel>>(
-        future: _posts,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            print("Post is caalled ${snapshot.data}");
-            print(
-                "FutureBuilder snapshot: ${snapshot.connectionState}, ${snapshot.data}");
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('An error occurred: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            final posts = snapshot.data; // Ensure posts is correctly accessed
-            if (posts!.isNotEmpty) {
-              return ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  return PostWidget(
-                    username: post.user.username.toString(),
-                    location: "Location",
-                    date: post.createdAt.toString(),
-                    caption: post.post.toString(),
-                    mediaUrls: post.media.map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}").toList(), // Use the first media file
-                    isVideo: post.media.isNotEmpty
-                        ? post.media[0].mediaType.toString()
-                        : '', // Use the first media type
-                    // Check for media existence
-                    profileImageUrl:
-                        AppUtils.testImage, // Example profile image
-                    // Check for media existence
-                    likes: '100',
-                    comments: '100',
-                    shares: "100",
-                    saved: '100',
-                    postId: '',
-                    refresh: () {},
-                  );
-                },
-              );
-            } else {
-              return Center(child: Text("No Post Yet"));
-            }
-          } else {
-            return Center(child: Text("No Post Yet"));
-          }
-        },
+      body: Column(
+        children: [
+          Expanded(
+            child: FutureBuilder<List<PostModel>>(
+              future: _posts,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('An error occurred: ${snapshot.error}'));
+                } else if (snapshot.hasData) {
+                  final posts = snapshot.data!;
+                  if (posts.isNotEmpty) {
+                    return ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return PostWidget(
+                          username: post.user.username.toString(),
+                          location: "Location",
+                          date: post.createdAt.toString(),
+                          caption: post.post.toString(),
+                          mediaUrls: post.media
+                              .map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
+                              .toList(),
+                          isVideo: post.media.isNotEmpty
+                              ? post.media[0].mediaType.toString()
+                              : '',
+                          profileImageUrl: AppUtils.testImage,
+                          likes: '100',
+                          comments: '100',
+                          shares: "100",
+                          saved: '100',
+                          postId: '',
+                          refresh: () {},
+                        );
+                      },
+                    );
+                  } else {
+                    return Center(child: Text("No Post Yet"));
+                  }
+                } else {
+                  return Center(child: Text("No Post Yet"));
+                }
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: offset > 0 ? _loadPreviousPage : null, // Disable if on the first page
+                  child: Text("Previous"),
+                ),
+                ElevatedButton(
+                  onPressed: _loadNextPage, // Always allow Next unless there are no more posts
+                  child: Text("Next"),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -6,7 +6,7 @@ import 'package:video_player/video_player.dart';
 class VideoPlayerWidget extends StatefulWidget {
   final String streamUrl;
 
-  const VideoPlayerWidget({Key? key, required this.streamUrl})
+  const VideoPlayerWidget({Key? key, required this.streamUrl, required String videoUrl})
       : super(key: key);
 
   @override

@@ -9,7 +9,7 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/post/reels/reels_video_player.dart';
-import 'package:mobile/screens/post/widgets/add_post.dart';
+import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -177,13 +177,13 @@ class _PostAndReelsState extends State<PostAndReels>
                           leading:
                               Icon(Icons.camera_alt, color: Colors.blueAccent),
                           title: Text('Take Photo'),
-                          onTap: _toggleDropdown,
+                          onTap: () => _openCamera(true),
                         ),
                         ListTile(
                           leading:
                               Icon(Icons.videocam, color: Colors.blueAccent),
                           title: Text('Record Video'),
-                          onTap: _toggleDropdown,
+                          onTap: () => _openCamera(false),
                         ),
                       ],
                     ),
@@ -197,7 +197,7 @@ class _PostAndReelsState extends State<PostAndReels>
               ],
             ),
             appBar: AppBar(
-              title: const Text('Content Selection'),
+              title: const Text('Posting & Reels'),
               actions: [
                 TextButton(
                   onPressed: _tabController.index == 0

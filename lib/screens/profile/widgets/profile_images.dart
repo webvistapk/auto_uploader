@@ -9,6 +9,7 @@ import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
 import '../../../models/UserProfile/post_model.dart';
+import 'ReelPostGrid.dart';
 
 class ProfileImages extends StatefulWidget {
   String userid;
@@ -45,7 +46,7 @@ class _ProfileImagesState extends State<ProfileImages> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 7,
+      length: 8,
       child: Column(
         children: [
           Theme(
@@ -102,6 +103,12 @@ class _ProfileImagesState extends State<ProfileImages> {
                 Tab(
                   child: Text(
                     "Tagged",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    "Reel",
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -212,17 +219,20 @@ class _ProfileImagesState extends State<ProfileImages> {
                         posts: allPosts,
                         filterType: "allPost",
                         userId: widget.userid,
-                      ), // Placeholder for Posts
+                      ),
                       PostGrid(
                         posts: allPosts,
                         filterType: "allPost",
                         userId: widget.userid,
-                      ), // Placeholder for Tagged
+                      ), // Placeholder for Posts
+                      ReelPostGrid(userId: widget.userid),
                       const profile_info(), // Info tab
                     ],
                   );
                 },
-              ),
+              ),// Placeholder for Posts
+
+            ),
 
               /*TabBarView(
                 children: [
@@ -236,7 +246,7 @@ class _ProfileImagesState extends State<ProfileImages> {
                 ],
               ),*/
             ),
-          ),
+
         ],
       ),
     );

@@ -7,27 +7,26 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
+import 'package:mobile/screens/story/add_story_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shimmer/shimmer.dart'; // Import the shimmer package
 
-import '../add_post_screen.dart'; // Import the shimmer package
-
-class ContentSelectionScreen extends StatefulWidget {
+class StoryScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final token;
-  const ContentSelectionScreen(
-      {Key? key, required this.userProfile, this.token})
+  const StoryScreen({Key? key, required this.userProfile, this.token})
       : super(key: key);
 
   @override
-  State<ContentSelectionScreen> createState() => _ContentSelectionScreenState();
+  State<StoryScreen> createState() => _StoryScreenState();
 }
 
-class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
+class _StoryScreenState extends State<StoryScreen> {
   List<AssetPathEntity> _albums = [];
   List<AssetEntity> _mediaList = [];
   AssetEntity? _selectedMedia;
@@ -331,7 +330,7 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
             ],
           ),
           appBar: AppBar(
-            title: const Text('Content Selection'),
+            title: const Text('Add Story'),
             actions: [
               TextButton(
                 onPressed: mediaFiles.isNotEmpty
@@ -339,14 +338,14 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => AddPostScreen(
+                                builder: (_) => AddStoryScreen(
                                       mediFiles: mediaFiles,
                                       userProfile: widget.userProfile,
-                                      type: null,
                                     )));
                       }
                     : null,
-                child: const Text('Next', style: TextStyle(color: Colors.blue)),
+                child:
+                    const Text('Share', style: TextStyle(color: Colors.blue)),
               ),
             ],
           ),
@@ -367,7 +366,7 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
                       )
                     : mediaFiles.isEmpty
                         ? Text(
-                            "No Files Selected",
+                            "No Story Selected",
                             style:
                                 AppTextStyles.poppinsBold(color: Colors.white),
                           )

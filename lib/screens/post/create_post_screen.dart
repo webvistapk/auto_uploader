@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/post/component/content_selection_screen.dart';
 import 'package:mobile/screens/post/component/reel_screen.dart';
-import 'package:mobile/screens/post/widgets/post_reels.dart';
+import 'package:mobile/screens/post/post_reels.dart';
 import 'package:mobile/screens/profile/ReelScreen.dart';
 
 class CreatePostScreen extends StatefulWidget {
