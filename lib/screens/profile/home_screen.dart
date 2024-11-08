@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -18,6 +19,8 @@ import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../controller/services/StatusProvider.dart';
+import '../../controller/services/post/post_provider.dart';
+import '../../models/UserProfile/post_model.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserProfile? userProfile;
@@ -43,6 +46,8 @@ class _HomeScreenState extends State<HomeScreen>
     final storyService = StoryService(mediaProvider);
     storyService.getUserStatus();
     storyService.getFollowersStatus();
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    postProvider.fetchFollowerPost(context);
   }
 
   Future<void> _loadImage(String url) async {
@@ -91,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen>
                           viewers: [],
                           userProfile: widget.userProfile,
                           token: widget.token!,
+                          isUser: true,
                         ),
                       ),
                     );
@@ -160,6 +166,8 @@ class _HomeScreenState extends State<HomeScreen>
           ValueListenableBuilder<String?>(
             valueListenable: SearchStore.searchQuery,
             builder: (context, searchQuery, child) {
+              final postProvider = Provider.of<PostProvider>(context);
+
               if (searchQuery == null || searchQuery.isEmpty) {
                 return ListView(
                   children: [
@@ -168,12 +176,9 @@ class _HomeScreenState extends State<HomeScreen>
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
-                        children: [
-                          _buildPostCard(),
-                          _buildPostCard(),
-                        ],
+                        children: postProvider.cachedPosts.map((post) => _buildPostCard(post)).toList(),
                       ),
-                    )
+                    ),
                   ],
                 );
               } else {
@@ -184,6 +189,7 @@ class _HomeScreenState extends State<HomeScreen>
               }
             },
           ),
+
           Center(child: Text('Disclosure Content Goes Here')),
         ],
       ),
@@ -202,6 +208,30 @@ class _HomeScreenState extends State<HomeScreen>
       );
     }
 
+    // Group stories by user ID
+    final Map<int, List<String>> userStoriesMap = {};
+    for (var story in stories) {
+      if (story.media == null || story.media!.isEmpty) continue;
+      final userId = story.user?.id?.toInt(); // Ensure userId is int
+      if (userId != null) {
+        if (userStoriesMap.containsKey(userId)) {
+          userStoriesMap[userId]!.addAll(
+            story.media!
+                .map((media) => media.file)
+                .where((file) => file != null)
+                .map((file) => file as String)
+                .toList(),
+          );
+        } else {
+          userStoriesMap[userId] = story.media!
+              .map((media) => media.file)
+              .where((file) => file != null)
+              .map((file) => file as String)
+              .toList();
+        }
+      }
+    }
+
     return SizedBox(
       height: 80,
       child: SingleChildScrollView(
@@ -213,87 +243,69 @@ class _HomeScreenState extends State<HomeScreen>
             if (story.media == null || story.media!.isEmpty) return SizedBox();
 
             // Get the first media file in the story as a thumbnail
-            final mediaFile = story.media!.first.file;
-            final isVideo = story.media!.first.mediaType == 'video';
-            final username = story.user?.username ?? 'Unknown';
-
-            // Collect all media files from this story, ensuring no null values
+            final firstMediaFile = story.media!.first.file;
             final List<String> storyMediaFiles = story.media!
                 .map((media) => media.file)
                 .where((file) => file != null)
                 .cast<String>()
                 .toList();
 
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StatusView(
-                      statuses: storyMediaFiles,  // Pass media files from this story
-                      initialIndex: 0,
-                      isVideo: isVideo,
-                      viewers: [],
-                      userProfile: widget.userProfile,
-                      token: widget.token!,
+            // Access the username from the story's user property
+            final username = story.user!.username;
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StatusView(
+                          statuses: storyMediaFiles, // Pass all media files for this user
+                          initialIndex: 0,
+                          isVideo: false, // Adjust based on your video handling logic
+                          viewers: [],
+                          userProfile: widget.userProfile,
+                          token: widget.token!,
+                          isUser: false,
+                        ),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 20,
+                    child: ClipOval(
+                      child: firstMediaFile != null
+                          ? Image.network(
+                        '${ApiURLs.baseUrl2}$firstMediaFile',
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                      )
+                          : Image.asset(
+                        'assets/logo.webp', // Default placeholder if no media
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                      ),
                     ),
                   ),
-                );
-              },
-              child: _buildStoryAvatar(username, mediaFile, isVideo),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  story.user!.username.toString(), // Display the username here
+                  style: const TextStyle(fontSize: 10),
+                ),
+              ],
             );
           }).toList(),
         ),
       ),
     );
   }
-
-
-
-  Widget _buildStoryAvatar(String username, String? mediaFile, bool isVideo) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => StatusView(
-                    statuses: [
-                      mediaFile ?? 'assets/logo.webp'
-                    ], // Use a default value if mediaFile is null
-                    initialIndex: 0,
-                    isVideo: isVideo,
-                    viewers: [], userProfile: widget.userProfile,
-                    token: widget.token!,
-                  ),
-                ),
-              );
-            },
-            child: CircleAvatar(
-              radius: 20,
-              backgroundImage: mediaFile != null
-                  ? isVideo
-                      ? AssetImage('assets/video_placeholder.png')
-                          as ImageProvider // Video placeholder
-                      : NetworkImage(
-                          '${ApiURLs.baseUrl2}$mediaFile') // Image URL
-                  : AssetImage(
-                      'assets/logo.webp'), // Default placeholder if mediaFile is null
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(username, style: const TextStyle(fontSize: 10)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPostCard() {
+  
+  Widget _buildPostCard(PostModel post) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -303,32 +315,26 @@ class _HomeScreenState extends State<HomeScreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Leading image
               CircleAvatar(
-                backgroundImage: AssetImage('assets/tellus.webp'),
-                radius: 20, // Adjust size if needed
+                backgroundImage: AssetImage("assets/tellus.webp"), /*NetworkImage('${ApiURLs.baseUrl2}${post.user.profileImageUrl}'),*/
+                radius: 20,
               ),
-              const SizedBox(
-                  width: 10), // Add some space between the image and text
-              // Title and subtitle
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'username1',
-                      style:
-                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      post.user.username,
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 2),
                     Text(
-                      'Location',
+                      'Location', // Update if location data is available
                       style: TextStyle(fontSize: 10, color: Colors.grey),
                     ),
                   ],
                 ),
               ),
-              // Trailing button
               TextButton(
                 onPressed: () {},
                 child: const Text(
@@ -341,12 +347,40 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         Stack(
           children: [
-            Container(
+            // Use CarouselSlider if there's more than one media item
+            post.media.length > 1
+                ? CarouselSlider.builder(
+              itemCount: post.media.length,
+              itemBuilder: (context, index, realIndex) {
+                final media = post.media[index];
+                final mediaUrl = '${ApiURLs.baseUrl2}${media.file}';
+                final isVideo = media.mediaType == 'video';
+
+                return isVideo
+                    ? _buildVideoPlayer(mediaUrl)
+                    : Image.network(
+                  mediaUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                );
+              },
+              options: CarouselOptions(
+                height: 350,
+                viewportFraction: 1.0,
+                enableInfiniteScroll: false,
+              ),
+            )
+                : Container(
               width: double.infinity,
               height: 350,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/tellus.webp'),
+              decoration: BoxDecoration(
+                image: post.media.isNotEmpty // Check if media is available
+                    ? DecorationImage(
+                  image: NetworkImage('${ApiURLs.baseUrl2}${post.media.first.file}'),
+                  fit: BoxFit.cover,
+                )
+                    : DecorationImage(
+                  image: AssetImage('assets/logo.webp'), // Placeholder image
                   fit: BoxFit.cover,
                 ),
               ),
@@ -410,18 +444,63 @@ class _HomeScreenState extends State<HomeScreen>
           padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text("Kashif", style: TextStyle(fontSize: 12)),
-              Text(
-                  "datawarning: The value of the local variable 'size' isn't used.",
-                  style: TextStyle(fontSize: 10)),
-              Text("17-Aug-2024", style: TextStyle(fontSize: 8)),
+            children: [
+              Text(post.user.firstName, style: TextStyle(fontSize: 12)),
+              Text(post.createdAt, style: TextStyle(fontSize: 8)),
             ],
           ),
         ),
       ],
     );
   }
+
+
+  Widget _buildMediaCarousel(List<dynamic> mediaList) {
+    return CarouselSlider.builder(
+      itemCount: mediaList.length,
+      itemBuilder: (context, index, realIndex) {
+        final media = mediaList[index];
+        final isVideo = media['media_type'] == 'video';
+        final mediaUrl = '${ApiURLs.baseUrl2}${media['file']}';
+
+        return isVideo
+            ? _buildVideoPlayer(mediaUrl)
+            : Image.network(
+          mediaUrl,
+          fit: BoxFit.cover,
+          width: double.infinity,
+        );
+      },
+      options: CarouselOptions(
+        height: 200,
+        enableInfiniteScroll: false,
+        enlargeCenterPage: true,
+        viewportFraction: 1.0,
+        autoPlay: false,
+      ),
+    );
+  }
+
+  Widget _buildInteractionIcon(IconData icon, String count) {
+    return Column(
+      children: [
+        Icon(icon, size: 20),
+        Text(count, style: TextStyle(fontSize: 9)),
+      ],
+    );
+  }
+
+  Widget _buildVideoPlayer(String videoUrl) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        width: double.infinity,
+        height: 200,
+        child: VideoPlayerWidget(videoUrl: videoUrl),
+      ),
+    );
+  }
+
 }
 
 class StatusView extends StatefulWidget {
@@ -432,6 +511,7 @@ class StatusView extends StatefulWidget {
   final List<String> viewers;
   final UserProfile? userProfile;
   final String token;
+  final bool isUser;
 
   StatusView({
     Key? key,
@@ -442,6 +522,7 @@ class StatusView extends StatefulWidget {
     this.viewers = const [],
     required this.userProfile,
     required this.token,
+    required this.isUser,
   }) : super(key: key);
 
   @override
@@ -651,6 +732,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                 ),
               ),
             ),
+            widget.isUser?
             Positioned(
               bottom: 40,
               child: GestureDetector(
@@ -686,7 +768,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                   ],
                 ),
               ),
-            ),
+            ):Container(),
           ],
         ),
       ),

@@ -28,6 +28,48 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<List<PostModel>> fetchFollowerPost(BuildContext context, {int limit = 10, int offset = 0}) async {
+    final String? token = await Prefrences.getAuthToken();
+    int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
+
+    // API endpoint for fetching follower posts
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_follower_posts}$_loggedInUserId/";
+
+    // Construct the URI with pagination parameters
+    Uri uri = Uri.parse(URL).replace(queryParameters: {
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+    });
+
+    setIsLoading(true);
+
+    try {
+      final response = await http.get(uri, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        List<PostModel> followerPosts = (data['posts'] as List).map((postJson) => PostModel.fromJson(postJson)).toList();
+
+        // Cache or update the follower posts
+        setPosts(followerPosts);
+
+        return followerPosts;
+      } else {
+        throw Exception("Failed to fetch follower posts");
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error: $e");
+      print("Error fetching follower posts: $e");
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+
   createNewPost(context,
       {required String postTitle,
       required List<int> peopleTags,
@@ -143,7 +185,6 @@ class PostProvider extends ChangeNotifier {
     print("Fetching API");
 
     final String? token = await Prefrences.getAuthToken();
-    int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     // Base URL and API path
     String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}${id}";

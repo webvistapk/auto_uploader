@@ -27,6 +27,8 @@ class UserPostScreen extends StatefulWidget {
 class _UserPostScreenState extends State<UserPostScreen> {
   late PageController _pageController;
   Future<List<PostModel>>? _newposts;
+  int limit = 10;   // Default limit of 10 posts per page
+  int offset = 0;
 
   @override
   void initState() {
@@ -38,7 +40,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
   Future<void> _fetchPosts() async {
     setState(() {
       _newposts = Provider.of<PostProvider>(context, listen: false)
-          .getPost(context, widget.userId);
+          .getPost(context, widget.userId,limit,offset);
     });
   }
 
