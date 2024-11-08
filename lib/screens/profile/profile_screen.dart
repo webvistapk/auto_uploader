@@ -46,8 +46,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     // _getUserIdFromToken();
     _initializeData();
-    super.initState();
     _fetchPosts();
+    super.initState();
   }
 
   void _fetchPosts() async {

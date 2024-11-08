@@ -50,38 +50,44 @@ class PostGrid extends StatelessWidget {
           },
           child: Hero(
               tag: 'profile_images_$index',
-              child: post.media[0].mediaType == 'video'
-                  ? Container(
-                      width: double.infinity,
-                      height: 400,
-                      child: VideoPlayerWidget(
-                          videoUrl:
-                              "http://147.79.117.253:8001/api${post.media[0].file}"))
-                  : Image.network(
-                      post.media.isNotEmpty
-                          ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
-                          : '', // Display the media URL
-                      fit: BoxFit.cover,
-                      loadingBuilder: (BuildContext context, Widget child,
-                          ImageChunkEvent? loadingProgress) {
-                        if (loadingProgress == null) {
-                          // Image has fully loaded
-                          return child;
-                        } else {
-                          // Image is still loading, show CircularProgressIndicator
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      (loadingProgress.expectedTotalBytes ?? 1)
-                                  : null,
-                            ),
-                          );
-                        }
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          Icon(Icons.broken_image),
-                    )),
+              child: post.media.isEmpty
+                  ? Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    )
+                  : post.media[0].mediaType == 'video'
+                      ? Container(
+                          width: double.infinity,
+                          height: 400,
+                          child: VideoPlayerWidget(
+                              videoUrl:
+                                  "http://147.79.117.253:8001/api${post.media[0].file}"))
+                      : Image.network(
+                          post.media.isNotEmpty
+                              ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
+                              : '', // Display the media URL
+                          fit: BoxFit.cover,
+                          loadingBuilder: (BuildContext context, Widget child,
+                              ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) {
+                              // Image has fully loaded
+                              return child;
+                            } else {
+                              // Image is still loading, show CircularProgressIndicator
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          (loadingProgress.expectedTotalBytes ??
+                                              1)
+                                      : null,
+                                ),
+                              );
+                            }
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.broken_image),
+                        )),
         );
       },
     );

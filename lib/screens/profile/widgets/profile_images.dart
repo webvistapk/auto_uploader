@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -26,16 +27,18 @@ class ProfileImages extends StatefulWidget {
 }
 
 class _ProfileImagesState extends State<ProfileImages> {
+  // Filter Image Posts
   List<PostModel> getImagePosts(List<PostModel> posts) {
     return posts.where((post) {
-      return post.media[0].mediaType == 'image';
+      return post.media.isNotEmpty &&
+          post.media.any((element) => element.mediaType == 'image');
     }).toList();
   }
 
-  // Filter Video Posts
+// Filter Video Posts
   List<PostModel> getVideoPosts(List<PostModel> posts) {
     return posts.where((post) {
-      return post.media[0].mediaType == 'video';
+      return post.media.isNotEmpty && post.media[0].mediaType == 'video';
     }).toList();
   }
 
@@ -161,6 +164,7 @@ class _ProfileImagesState extends State<ProfileImages> {
               child: FutureBuilder<List<PostModel>>(
                 future: widget.posts,
                 builder: (context, snapshot) {
+                  // debugger();
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                         child: CircularProgressIndicator()); // Loading state
@@ -171,12 +175,14 @@ class _ProfileImagesState extends State<ProfileImages> {
                     return const Center(
                         child: Text("No posts available")); // Empty state
                   }
-
+                  // debugger();
                   // Data is ready
                   List<PostModel> allPosts = snapshot.data!;
                   List<PostModel> imagePosts = getImagePosts(allPosts);
                   List<PostModel> videoPosts = getVideoPosts(allPosts);
                   print("Video List: $videoPosts");
+
+                  // debugger();
                   return TabBarView(
                     // physics: NeverScrollableScrollPhysics(),
 

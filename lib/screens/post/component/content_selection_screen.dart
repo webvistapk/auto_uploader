@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/post/widgets/add_post.dart';
+// import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -335,14 +335,14 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
               TextButton(
                 onPressed: mediaFiles.isNotEmpty
                     ? () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => AddPostScreen(
-                                      mediFiles: mediaFiles,
-                                      userProfile: widget.userProfile,
-                                      type: null,
-                                    )));
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (_) => AddPostScreen(
+                        //               mediFiles: mediaFiles,
+                        //               userProfile: widget.userProfile,
+                        //               type: null,
+                        //             )));
                       }
                     : null,
                 child: const Text('Next', style: TextStyle(color: Colors.blue)),

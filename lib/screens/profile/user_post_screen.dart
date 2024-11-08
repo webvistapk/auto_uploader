@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:provider/provider.dart';
-
-import '../../controller/services/post/post_provider.dart';
 
 class UserPostScreen extends StatefulWidget {
   final List<PostModel> posts;
@@ -27,47 +26,39 @@ class UserPostScreen extends StatefulWidget {
 
 class _UserPostScreenState extends State<UserPostScreen> {
   late PageController _pageController;
-  late List<PostModel> _posts;
-  bool _isFirstLoad = true; // Track if it's the first time loading the screen
-
   Future<List<PostModel>>? _newposts;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
     _fetchPosts();
-
   }
 
- Future<void> _fetchPosts() async {
-    // images and videos fetch and simulated from an API
+  Future<void> _fetchPosts() async {
     setState(() {
-      _newposts=Provider.of<PostProvider>(context,listen: false).getPost(context,widget.userId);
+      _newposts = Provider.of<PostProvider>(context, listen: false)
+          .getPost(context, widget.userId);
     });
   }
 
-
-
   List<PostModel> getImagePosts(List<PostModel> posts) {
-  return posts.where((post) {
-  return post.media[0].mediaType == 'image';
-  }).toList();
-
+    return posts.where((post) {
+      return post.media.isNotEmpty && post.media[0].mediaType == 'image';
+    }).toList();
   }
 
-  // Filter Video Posts
   List<PostModel> getVideoPosts(List<PostModel> posts) {
-  return posts.where((post) {
-  return post.media[0].mediaType == 'video';
-  }).toList();
+    return posts.where((post) {
+      return post.media.isNotEmpty && post.media[0].mediaType == 'video';
+    }).toList();
   }
 
-  Future<void> DeletePost(String postID)async{
-    Provider.of<PostProvider>(context,listen: false).deletePost(postID, context);
+  Future<void> DeletePost(String postID) async {
+    Provider.of<PostProvider>(context, listen: false)
+        .deletePost(postID, context);
     _fetchPosts();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -75,33 +66,32 @@ class _UserPostScreenState extends State<UserPostScreen> {
       appBar: AppBar(
         title: Text("Post Details"),
       ),
-      body:
-      FutureBuilder<List<PostModel>>(
+      body: FutureBuilder<List<PostModel>>(
         future: _newposts,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator()); // Loading state
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return const Center(child: Text("Error loading posts")); // Error state
+            return const Center(child: Text("Error loading posts"));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No posts available")); // Empty state
+            return const Center(child: Text("No posts available"));
           }
 
-          // Data is ready
           List<PostModel> allPosts = snapshot.data!;
+          List<PostModel> filteredPosts;
 
           // Apply filtering based on the filterType
-          List<PostModel> filteredPosts;
           if (widget.filterType == 'image') {
-            filteredPosts = getImagePosts(allPosts); // Filter for image posts
+            filteredPosts = getImagePosts(allPosts);
           } else if (widget.filterType == 'video') {
-            filteredPosts = getVideoPosts(allPosts); // Filter for video posts
+            filteredPosts = getVideoPosts(allPosts);
           } else {
-            filteredPosts = allPosts; // Show all posts if no specific filter
+            filteredPosts = allPosts;
           }
 
           if (filteredPosts.isEmpty) {
-            return const Center(child: Text("No posts available for this filter"));
+            return const Center(
+                child: Text("No posts available for this filter"));
           }
 
           return ListView.builder(
@@ -109,6 +99,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
             itemCount: filteredPosts.length,
             itemBuilder: (context, index) {
               final post = filteredPosts[index];
+
               return SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,16 +110,23 @@ class _UserPostScreenState extends State<UserPostScreen> {
                       location: "Location",
                       date: post.createdAt.toString(),
                       caption: post.post.toString(),
-                      mediaUrls: post.media.map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}").toList(),
+                      mediaUrls: post.media.isNotEmpty
+                          ? post.media
+                              .map((media) =>
+                                  "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
+                              .toList()
+                          : [], // Ensure empty list if no media
                       profileImageUrl: AppUtils.testImage,
-                      isVideo: post.media[0].mediaType,
-                      likes: post.likes_count.toString(),
-                      comments: post.commnets_count.toString(),
+                      isVideo: post.media.isNotEmpty
+                          ? post.media[0].mediaType
+                          : "image", // Check media availability
+                      likes: post.likesCount.toString(),
+                      comments: post.commentsCount.toString(),
                       shares: "100",
                       saved: '100',
-                      refresh: (){
+                      refresh: () {
                         DeletePost(post.id.toString());
-                      }, // Use the refresh function
+                      },
                     ),
                   ],
                 ),
