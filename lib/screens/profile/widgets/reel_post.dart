@@ -57,6 +57,7 @@ class _ReelPostState extends State<ReelPost> {
 
   @override
   Widget build(BuildContext context) {
+    print("Reel page");
     return Stack(
       fit: StackFit.expand,
       children: [

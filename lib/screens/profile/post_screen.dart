@@ -14,8 +14,8 @@ class PostScreen extends StatefulWidget {
 
 class _PostScreenState extends State<PostScreen> {
   Future<List<PostModel>>? _posts;
-  int limit = 10;   // Default limit of 10 posts per page
-  int offset = 0;   // Offset for pagination
+  int limit = 10; // Default limit of 10 posts per page
+  int offset = 0; // Offset for pagination
 
   @override
   void initState() {
@@ -77,9 +77,7 @@ class _PostScreenState extends State<PostScreen> {
                           mediaUrls: post.media
                               .map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
                               .toList(),
-                          isVideo: post.media.isNotEmpty
-                              ? post.media[0].mediaType.toString()
-                              : '',
+                          isVideo: post.media.isNotEmpty && post.media[0].mediaType == 'video', // Fix here
                           profileImageUrl: AppUtils.testImage,
                           likes: '100',
                           comments: '100',

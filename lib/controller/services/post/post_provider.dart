@@ -231,6 +231,53 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<ReelPostModel>> fetchFollowersReels(
+      BuildContext context) async {
+    final String? token = await Prefrences.getAuthToken();
+    int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
+
+    // Base URL and API path
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_follower_reel_post}$_loggedInUserId";
+
+    // Add query parameters for pagination (limit and offset)
+    Uri uri = Uri.parse(URL);
+
+    try {
+      final response = await http.get(uri, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      });
+
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        final jsonList = jsonDecode(response.body);
+        print("REEL GETTED SUCCESSFULLY");
+        // print(jsonList);
+        //log("Reel Data: ${jsonList['reels']}"); // Log the correct data
+
+        List<ReelPostModel> reelList = [];
+        for (var reelJson in jsonList['reels']) {
+          // Change 'posts' to 'reels'
+          final reel = ReelPostModel.fromJson(reelJson);
+          reelList.add(reel);
+        }
+        print("PROVIDER REEL :${reelList}");
+
+        notifyListeners();
+        return reelList;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      print(e);
+      return []; // Return an empty list on exception
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   Future<List<ReelPostModel>> fetchReels(
       BuildContext context, String id, int limit, int offset) async {
     final String? token = await Prefrences.getAuthToken();

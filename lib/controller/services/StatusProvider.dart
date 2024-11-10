@@ -9,6 +9,10 @@ import '../endpoints.dart';
 import 'package:http/http.dart' as http; // Import http package
 
 class MediaProvider with ChangeNotifier {
+  bool _isLoading = true;
+
+  bool get isLoading => _isLoading;
+
   Userstatus? _userStatus;
   Userstatus? _followersStatus;
 
@@ -18,13 +22,17 @@ class MediaProvider with ChangeNotifier {
 
   // Method to fetch and update user status internally
   void fetchUserStatus(Userstatus userStatus) {
+    _isLoading = true;
     _userStatus = userStatus;
+    _isLoading = false;
     notifyListeners();
   }
 
   // Method to fetch and update followers' stories internally
   void fetchFollowersStatus(Userstatus followersStatus) {
+    _isLoading = true;
     _followersStatus = followersStatus;
+    _isLoading = false;
     notifyListeners();
   }
 }
@@ -49,6 +57,7 @@ class StoryService {
         if (data['status'] == 'success') {
           final userStatus = Userstatus.fromJson(data);
           mediaProvider.fetchUserStatus(userStatus);
+
         } else {
           print("Failed to fetch user stories: ${data['message']}");
         }

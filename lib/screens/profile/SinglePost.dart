@@ -1,70 +1,55 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:provider/provider.dart';
-
 import '../../common/utils.dart';
 import '../../controller/endpoints.dart';
 
-class SinglePost extends StatefulWidget {
-  String postId;
-   SinglePost({
-     super.key,
-    required this.postId
-   });
+class SinglePost extends StatelessWidget {
+  final String postId;
 
-  @override
-  State<SinglePost> createState() => _SinglePostState();
-}
-
-class _SinglePostState extends State<SinglePost> {
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    fetchPost();
-  }
-
-  void fetchPost(){
-    Provider.of<PostProvider>(context, listen: false).getSinglePost(widget.postId);
-  }
+  const SinglePost({Key? key, required this.postId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Column(
-        children: [
-          Consumer<PostProvider>(
-            builder: (context, postProvider, child) {
-              if (postProvider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (postProvider.post == null) {
-                return const Center(child: Text('Post not found'));
-              } else {
-                final post = postProvider.post!;
+      body: FutureBuilder(
+        future: Provider.of<PostProvider>(context, listen: false).getSinglePost(postId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(child: Text('Failed to load post.'));
+          } else {
+            return Consumer<PostProvider>(
+              builder: (context, postProvider, child) {
+                final post = postProvider.post;
+                if (post == null) {
+                  return const Center(child: Text('Post not found'));
+                }
+
                 return PostWidget(
-                  isTrue: false,
                   postId: post.id.toString(),
-                  username: post.user.username.toString(),
+                  username: post.user.username,
                   location: "Location",
                   date: post.createdAt.toString(),
-                  caption: post.post.toString(),
-                  mediaUrls:post.media.map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}").toList(),
+                  caption: post.post,
+                  mediaUrls: post.media
+                      .map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
+                      .toList(),
                   profileImageUrl: AppUtils.testImage,
-                  isVideo: post.media[0].mediaType,
+                  isVideo: post.media[0].mediaType == 'video',
                   likes: post.likesCount.toString(),
                   comments: post.commentsCount.toString(),
                   shares: "100",
                   saved: '100',
-                  refresh: (){}, // Use the refresh function
+                  refresh: () => postProvider.getSinglePost(postId),
                 );
-              }
-            },
-          ),
-        ],
+              },
+            );
+          }
+        },
       ),
     );
   }
