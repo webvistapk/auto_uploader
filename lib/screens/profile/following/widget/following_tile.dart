@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/models/follower_following/following_model.dart';
 
 class FollowingTile extends StatelessWidget {
-  final String username;
-  final String fullName;
-  final bool isFollowing;
+  final Following following;
 
   const FollowingTile({
     Key? key,
-    required this.username,
-    required this.fullName,
-    required this.isFollowing,
+    required this.following,
   }) : super(key: key);
 
   @override
@@ -22,10 +19,38 @@ class FollowingTile extends StatelessWidget {
           CircleAvatar(
             backgroundColor: Colors.grey[300],
             radius: 25,
-            child: Icon(
-              Icons.person,
-              color: Colors.grey[700],
-            ),
+            child: following.profileImage != null &&
+                    following.profileImage!.isNotEmpty
+                ? ClipOval(
+                    child: Image.network(
+                      following.profileImage!,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.person,
+                        color: Colors.grey[700],
+                        size: 30,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.person,
+                    color: Colors.grey[700],
+                    size: 30,
+                  ),
           ),
           SizedBox(width: 10),
           Column(
@@ -34,13 +59,13 @@ class FollowingTile extends StatelessWidget {
               Container(
                 width: MediaQuery.of(context).size.width * .30,
                 child: Text(
-                  fullName,
+                  "${following.firstName}  ${following.lastName}",
                   style: AppTextStyles.poppinsMedium(),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
-                username,
+                following.username ?? "",
                 style: AppTextStyles.poppinsRegular(),
               ),
             ],
@@ -55,7 +80,7 @@ class FollowingTile extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                isFollowing ? "Message" : "Remove",
+                following.isFollowing ?? false ? "Message" : "Remove",
                 style: AppTextStyles.poppinsRegular(),
               ),
             ),

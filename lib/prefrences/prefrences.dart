@@ -12,6 +12,7 @@ class Prefrences {
   static const String userID = "id";
   static const String followerKey = 'followers';
   static const String followingKey = 'followings';
+  static const String statusPermissionKey = "statusKey";
 
   static SetAuthToken(String accessToken) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -56,6 +57,16 @@ class Prefrences {
   static getMediaPermission() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool(mediaPermission) ?? false;
+  }
+
+  static setStoryPermission(bool permission) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(statusPermissionKey, permission);
+  }
+
+  static getStoryPermission() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(statusPermissionKey) ?? false;
   }
 
   static Future<void> saveFollowers(List<dynamic> followersData) async {

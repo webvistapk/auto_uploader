@@ -15,6 +15,7 @@ class SideBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      width: MediaQuery.of(context).size.width * .6,
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
@@ -57,8 +58,10 @@ class SideBar extends StatelessWidget {
             leading: const Icon(Icons.post_add),
             title: const Text('Reel'),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => FollowerReelScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => FollowerReelScreen()));
             },
           ),
           ListTile(

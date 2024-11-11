@@ -130,7 +130,15 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 children: [
                   Divider(),
                   widget.type == 'reel'
-                      ? _buildMediaWidget()
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                                height: 250,
+                                width: 300,
+                                child: _buildMediaWidget()),
+                          ],
+                        )
                       : Padding(
                           padding: const EdgeInsets.only(left: 20, right: 20),
                           child: Row(

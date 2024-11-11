@@ -150,16 +150,24 @@ class _HomeScreenState extends State<HomeScreen>
             },
           ),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.blue,
-          labelColor: Colors.black,
-          labelStyle: TextStyle(color: Colors.black),
-          unselectedLabelColor: Colors.grey,
-          tabs: const [
-            Tab(text: 'Content'),
-            Tab(text: 'Disclosure'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(50),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              tabBarTheme: TabBarTheme(
+                labelColor: Colors.black,
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: Colors.blue,
+              ),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(child: Text('Content')),
+                Tab(child: Text('Disclosure')),
+              ],
+            ),
+          ),
         ),
         actions: [
           IconButton(

@@ -88,8 +88,8 @@ class _StoryScreenState extends State<StoryScreen> {
 
 // Function to request appropriate permissions for Android 11 and above
   Future<bool> _requestPermissions() async {
-    bool permissions = await Prefrences.getMediaPermission();
-
+    bool permissions = await Prefrences.getStoryPermission() ?? false;
+    // debugger();
     if (permissions) {
       return true;
     } else {
@@ -116,8 +116,8 @@ class _StoryScreenState extends State<StoryScreen> {
       }
 
       // Android 11+ specific permission for managing external storage
-      if (await Permission.manageExternalStorage.isDenied) {
-        final result = await Permission.manageExternalStorage.request();
+      if (await Permission.photos.isDenied) {
+        final result = await Permission.photos.request();
         if (result == PermissionStatus.granted) {
           await Prefrences.setMediaPermission(true);
           return true;

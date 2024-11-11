@@ -4,6 +4,7 @@ class Following {
   final String? firstName;
   final String? lastName;
   final bool? isFollowing;
+  final String? profileImage; // New profile image variable
 
   Following({
     this.id,
@@ -11,6 +12,7 @@ class Following {
     this.firstName,
     this.lastName,
     this.isFollowing,
+    this.profileImage,
   });
 
   // Factory method to create a Following object from JSON
@@ -21,6 +23,7 @@ class Following {
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,
       isFollowing: json['isFollowing'] as bool?,
+      profileImage: json['profile_image'] as String? ?? '', // Handle null
     );
   }
 
@@ -32,6 +35,7 @@ class Following {
       'first_name': firstName,
       'last_name': lastName,
       'isFollowing': isFollowing,
+      'profile_image': profileImage ?? '', // Handle null
     };
   }
 }

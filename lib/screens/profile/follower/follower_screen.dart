@@ -137,12 +137,9 @@ class _FollowersScreenState extends State<FollowersScreen> {
                       : ListView.builder(
                           itemCount: followers.length,
                           itemBuilder: (context, index) {
-                            var follower = followers[index];
+                            Follower follower = followers[index];
                             return FollowerTile(
-                              username: follower.username ?? 'Unknown',
-                              fullName:
-                                  "${follower.firstName ?? ''} ${follower.lastName ?? ''}",
-                              isFollowing: follower.isFollowing ?? false,
+                              follower: follower,
                             );
                           },
                         ),

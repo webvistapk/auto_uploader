@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // images and videos fetch and simulated from an API
     setState(() {
       _posts = Provider.of<PostProvider>(context, listen: false)
-          .getPost(context, widget.id.toString(),limit,offset);
+          .getPost(context, widget.id.toString(), limit, offset);
     });
   }
 
@@ -173,67 +173,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   centerTitle: true,
                 )
-              : PreferredSize(
-                  preferredSize: Size.fromHeight(50.0),
-                  child: TopBar(
-                    onSearch: (query) => SearchStore.updateSearchQuery(query),
-                  ),
-                ),
+              : AppBar(),
           // PreferredSize(
-          //     preferredSize: Size.fromHeight(50), child: AppBar()),
-          endDrawer: const SideBar(),
-
+          //     preferredSize: Size.fromHeight(50.0),
+          //     child: TopBar(
+          //       onSearch: (query) => SearchStore.updateSearchQuery(query),
+          //     ),
+          //   ),
+          drawer: const SideBar(),
+          drawerEnableOpenDragGesture: true,
           backgroundColor: AppColors.mainBgColor,
           body: RefreshIndicator(
-            onRefresh: _refresh,
-            child: ValueListenableBuilder<String?>(
-              valueListenable: SearchStore.searchQuery,
-              builder: (context, searchQuery, child) {
-                if (searchQuery == null || searchQuery.isEmpty) {
-                  return FutureBuilder<UserProfile?>(
-                    future: _userProfile,
-                    builder: (context, profileSnapshot) {
-                      if (profileSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (profileSnapshot.hasError) {
-                        return Center(
-                            child: Text('Error: ${profileSnapshot.error}'));
-                      } else if (!profileSnapshot.hasData ||
-                          profileSnapshot.data == null) {
-                        return const Center(
-                            child: Text('No user profile found.'));
-                      } else {
-                        final UserProfile user = profileSnapshot.data!;
-                        // debugger();
-                        return FutureBuilder<bool>(
-                          future: _isFollowing,
-                          builder: (context, followSnapshot) {
-                            if (followSnapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            } else if (followSnapshot.hasError) {
-                              return const Center(
-                                  child: Text('Error checking follow status.'));
-                            } else {
-                              final bool isFollowing =
-                                  followSnapshot.data ?? false;
-                              final bool isOwner = _loggedInUserId == user.id;
-                              final bool canViewProfile = isOwner ||
-                                  isFollowing ||
-                                  user.privacy == AppUtils.privacy_public;
-                              // debugger();
+              onRefresh: _refresh,
+              child: FutureBuilder<UserProfile?>(
+                future: _userProfile,
+                builder: (context, profileSnapshot) {
+                  if (profileSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (profileSnapshot.hasError) {
+                    return Center(
+                        child: Text('Error: ${profileSnapshot.error}'));
+                  } else if (!profileSnapshot.hasData ||
+                      profileSnapshot.data == null) {
+                    return const Center(child: Text('No user profile found.'));
+                  } else {
+                    final UserProfile user = profileSnapshot.data!;
+                    // debugger();
+                    return FutureBuilder<bool>(
+                      future: _isFollowing,
+                      builder: (context, followSnapshot) {
+                        if (followSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (followSnapshot.hasError) {
+                          return const Center(
+                              child: Text('Error checking follow status.'));
+                        } else {
+                          final bool isFollowing = followSnapshot.data ?? false;
+                          final bool isOwner = _loggedInUserId == user.id;
+                          final bool canViewProfile = isOwner ||
+                              isFollowing ||
+                              user.privacy == AppUtils.privacy_public;
+                          // debugger();
 
-                              return SingleChildScrollView(
-                                scrollDirection: Axis.vertical,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    /* if (_loggedInUserId != widget.id)
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                /* if (_loggedInUserId != widget.id)
                                       GestureDetector(
                                         onTap: () {
                                           Navigator.pop(context);
@@ -243,13 +236,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           child: Icon(Icons.arrow_back),
                                         ),
                                       ),*/
-                                    ProfileHeader(
-                                        token: widget.authToken,
-                                        user: user,
-                                        canViewProfile: canViewProfile,
-                                        isFollowing: isFollowing),
-                                    if (canViewProfile) ...[
-                                      /* const CategoryIcons(images: [
+                                ProfileHeader(
+                                    token: widget.authToken,
+                                    user: user,
+                                    canViewProfile: canViewProfile,
+                                    isFollowing: isFollowing),
+                                if (canViewProfile) ...[
+                                  /* const CategoryIcons(images: [
                                         AppUtils.testImage,
                                         AppUtils.testImage,
                                         AppUtils.testImage,
@@ -257,36 +250,132 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         AppUtils.testImage,
                                         AppUtils.testImage,
                                       ]),*/
-                                      ProfileImages(
-                                        posts: _posts,
-                                        refresh: (String postID) {
-                                          _fetchPosts();
-                                        },
-                                        userid: widget.id.toString(),
-                                      ),
-                                    ] else ...[
-                                      const Center(
-                                        child: Text("This profile is private."),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              );
-                            }
-                          },
-                        );
-                      }
-                    },
-                  );
-                } else {
-                  return SearchWidget(
-                    query: searchQuery,
-                    authToken: token!,
-                  );
-                }
-              },
-            ),
-          ),
+                                  ProfileImages(
+                                    posts: _posts,
+                                    refresh: (String postID) {
+                                      _fetchPosts();
+                                    },
+                                    userid: widget.id.toString(),
+                                  ),
+                                ] else ...[
+                                  const Center(
+                                    child: Text("This profile is private."),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  }
+                },
+              )
+
+              //  ValueListenableBuilder<String?>(
+              //   valueListenable: SearchStore.searchQuery,
+              //   builder: (context, searchQuery, child) {
+              //     if (searchQuery == null || searchQuery.isEmpty) {
+              //       return
+              //       FutureBuilder<UserProfile?>(
+              //         future: _userProfile,
+              //         builder: (context, profileSnapshot) {
+              //           if (profileSnapshot.connectionState ==
+              //               ConnectionState.waiting) {
+              //             return const Center(child: CircularProgressIndicator());
+              //           } else if (profileSnapshot.hasError) {
+              //             return Center(
+              //                 child: Text('Error: ${profileSnapshot.error}'));
+              //           } else if (!profileSnapshot.hasData ||
+              //               profileSnapshot.data == null) {
+              //             return const Center(
+              //                 child: Text('No user profile found.'));
+              //           } else {
+              //             final UserProfile user = profileSnapshot.data!;
+              //             // debugger();
+              //             return FutureBuilder<bool>(
+              //               future: _isFollowing,
+              //               builder: (context, followSnapshot) {
+              //                 if (followSnapshot.connectionState ==
+              //                     ConnectionState.waiting) {
+              //                   return const Center(
+              //                       child: CircularProgressIndicator());
+              //                 } else if (followSnapshot.hasError) {
+              //                   return const Center(
+              //                       child: Text('Error checking follow status.'));
+              //                 } else {
+              //                   final bool isFollowing =
+              //                       followSnapshot.data ?? false;
+              //                   final bool isOwner = _loggedInUserId == user.id;
+              //                   final bool canViewProfile = isOwner ||
+              //                       isFollowing ||
+              //                       user.privacy == AppUtils.privacy_public;
+              //                   // debugger();
+
+              //                   return SingleChildScrollView(
+              //                     scrollDirection: Axis.vertical,
+              //                     child: Column(
+              //                       crossAxisAlignment: CrossAxisAlignment.start,
+              //                       children: [
+              //                         SizedBox(
+              //                           height: 10,
+              //                         ),
+              //                         /* if (_loggedInUserId != widget.id)
+              //                           GestureDetector(
+              //                             onTap: () {
+              //                               Navigator.pop(context);
+              //                             },
+              //                             child: Padding(
+              //                               padding: const EdgeInsets.all(8.0),
+              //                               child: Icon(Icons.arrow_back),
+              //                             ),
+              //                           ),*/
+              //                         ProfileHeader(
+              //                             token: widget.authToken,
+              //                             user: user,
+              //                             canViewProfile: canViewProfile,
+              //                             isFollowing: isFollowing),
+              //                         if (canViewProfile) ...[
+              //                           /* const CategoryIcons(images: [
+              //                             AppUtils.testImage,
+              //                             AppUtils.testImage,
+              //                             AppUtils.testImage,
+              //                             AppUtils.testImage,
+              //                             AppUtils.testImage,
+              //                             AppUtils.testImage,
+              //                           ]),*/
+              //                           ProfileImages(
+              //                             posts: _posts,
+              //                             refresh: (String postID) {
+              //                               _fetchPosts();
+              //                             },
+              //                             userid: widget.id.toString(),
+              //                           ),
+              //                         ] else ...[
+              //                           const Center(
+              //                             child: Text("This profile is private."),
+              //                           ),
+              //                         ],
+              //                       ],
+              //                     ),
+              //                   );
+              //                 }
+              //               },
+              //             );
+              //           }
+              //         },
+              //       );
+              //     } else {
+              //       return Container();
+              //       // SearchWidget(
+              //       //   query: searchQuery,
+              //       //   authToken: token!,
+              //       // );
+              //     }
+              //   },
+              // ),
+
+              ),
           // bottomNavigationBar: BottomBar(
           //   selectedIndex: 1,
           // ),

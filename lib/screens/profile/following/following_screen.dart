@@ -3,6 +3,7 @@ import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/models/follower_following/follower_model.dart';
+import 'package:mobile/models/follower_following/following_model.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/following/widget/following_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +26,7 @@ class FollowingScreen extends StatefulWidget {
 }
 
 class _FollowingScreenState extends State<FollowingScreen> {
-  List<Follower> followings = [];
+  List<Following> followings = [];
   bool isLoading = true;
   bool isAscending = true; // Default sorting order
 
@@ -44,7 +45,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
       List<dynamic> followingsJson = json.decode(followingsData);
       setState(() {
         followings = followingsJson
-            .map((followingJson) => Follower.fromJson(followingJson))
+            .map((followingJson) => Following.fromJson(followingJson))
             .toList();
         sortFollowings(); // Sort initially based on the selected order
         isLoading = false;
@@ -71,7 +72,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
 
         List<dynamic> followingsData = data["followings"] ?? [];
         followings = followingsData
-            .map((followingJson) => Follower.fromJson(followingJson))
+            .map((followingJson) => Following.fromJson(followingJson))
             .toList();
 
         await Prefrences.saveFollowings(followingsData);
@@ -156,13 +157,8 @@ class _FollowingScreenState extends State<FollowingScreen> {
                       : ListView.builder(
                           itemCount: followings.length,
                           itemBuilder: (context, index) {
-                            var following = followings[index];
-                            return FollowingTile(
-                              username: following.username ?? 'Unknown',
-                              fullName:
-                                  "${following.firstName ?? ''} ${following.lastName ?? ''}",
-                              isFollowing: following.isFollowing ?? false,
-                            );
+                            Following following = followings[index];
+                            return FollowingTile(following: following);
                           },
                         ),
             ),
