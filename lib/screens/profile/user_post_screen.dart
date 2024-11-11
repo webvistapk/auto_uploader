@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
@@ -26,21 +27,30 @@ class UserPostScreen extends StatefulWidget {
 
 class _UserPostScreenState extends State<UserPostScreen> {
   late PageController _pageController;
-  Future<List<PostModel>>? _newposts;
-  int limit = 10;   // Default limit of 10 posts per page
+  List<PostModel> _allPosts = [];
+  bool _isLoadingMore = false;
+  int limit = 10; // Default limit of 10 posts per page
   int offset = 0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
+    _allPosts = widget.posts; // Initialize with the provided posts
     _fetchPosts();
   }
 
   Future<void> _fetchPosts() async {
     setState(() {
-      _newposts = Provider.of<PostProvider>(context, listen: false)
-          .getPost(context, widget.userId,limit,offset);
+      _isLoadingMore = true;
+    });
+    List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
+        .getPost(context, widget.userId, limit, offset);
+
+    setState(() {
+      _allPosts.addAll(newPosts);
+      offset += limit; // Increment offset for the next page of posts
+      _isLoadingMore = false;
     });
   }
 
@@ -57,85 +67,80 @@ class _UserPostScreenState extends State<UserPostScreen> {
   }
 
   Future<void> DeletePost(String postID) async {
-    Provider.of<PostProvider>(context, listen: false)
-        .deletePost(postID, context);
+    Provider.of<PostProvider>(context, listen: false).deletePost(postID, context);
     _fetchPosts();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.mainBgColor,
       appBar: AppBar(
-        title: Text("Post Details"),
+          backgroundColor: AppColors.mainBgColor
       ),
-      body: FutureBuilder<List<PostModel>>(
-        future: _newposts,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text("Error loading posts"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No posts available"));
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification scrollInfo) {
+          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent && !_isLoadingMore) {
+            _fetchPosts(); // Load more posts when the user reaches the bottom
           }
-
-          List<PostModel> allPosts = snapshot.data!;
-          List<PostModel> filteredPosts;
-
-          // Apply filtering based on the filterType
-          if (widget.filterType == 'image') {
-            filteredPosts = getImagePosts(allPosts);
-          } else if (widget.filterType == 'video') {
-            filteredPosts = getVideoPosts(allPosts);
-          } else {
-            filteredPosts = allPosts;
-          }
-
-          if (filteredPosts.isEmpty) {
-            return const Center(
-                child: Text("No posts available for this filter"));
-          }
-
-          return ListView.builder(
-            controller: _pageController,
-            itemCount: filteredPosts.length,
-            itemBuilder: (context, index) {
-              final post = filteredPosts[index];
-
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PostWidget(
-                      postId: post.id.toString(),
-                      username: post.user.username.toString(),
-                      location: "Location",
-                      date: post.createdAt.toString(),
-                      caption: post.post.toString(),
-                      mediaUrls: post.media.isNotEmpty
-                          ? post.media
-                              .map((media) =>
-                                  "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
-                              .toList()
-                          : [], // Ensure empty list if no media
-                      profileImageUrl: AppUtils.testImage,
-                      isVideo: post.media.isNotEmpty
-                          ? post.media[0].mediaType
-                          : "image", // Check media availability
-                      likes: post.likesCount.toString(),
-                      comments: post.commentsCount.toString(),
-                      shares: "100",
-                      saved: '100',
-                      refresh: () {
-                        DeletePost(post.id.toString());
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
+          return false;
         },
+        child: ListView.builder(
+          controller: _pageController,
+          itemCount: _allPosts.length + (_isLoadingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == _allPosts.length) {
+              // Show loading indicator at the bottom if loading more posts
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final post = _allPosts[index];
+
+            // Filter posts based on the filterType
+            List<PostModel> filteredPosts;
+            if (widget.filterType == 'image') {
+              filteredPosts = getImagePosts(_allPosts);
+            } else if (widget.filterType == 'video') {
+              filteredPosts = getVideoPosts(_allPosts);
+            } else {
+              filteredPosts = _allPosts;
+            }
+
+            if (filteredPosts.isEmpty) {
+              return const Center(child: Text("No posts available for this filter"));
+            }
+
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PostWidget(
+                    postId: post.id.toString(),
+                    username: post.user.username.toString(),
+                    location: "Location",
+                    date: post.createdAt.toString(),
+                    caption: post.post.toString(),
+                    mediaUrls: post.media.isNotEmpty
+                        ? post.media
+                        .map((media) =>
+                    "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
+                        .toList()
+                        : [], // Ensure empty list if no media
+                    profileImageUrl: AppUtils.testImage,
+                    isVideo: post.media.isNotEmpty && post.media[0].mediaType == 'video',
+                    likes: post.likesCount.toString(),
+                    comments: post.commentsCount.toString(),
+                    shares: "100",
+                    saved: '100',
+                    refresh: () {
+                      DeletePost(post.id.toString());
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

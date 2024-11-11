@@ -40,7 +40,6 @@ class _ReelPostGridState extends State<ReelPostGrid> {
   }
 
   Future<void> _fetchReelPosts() async {
-
     // Check if already loading more or if there's no more data to load
     if (_isLoadingMore || !_hasMore) return;
 
@@ -93,6 +92,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
   @override
   Widget build(BuildContext context) {
+    print("this is Reel Post Grid");
     return Column(
       children: [
         Expanded(
@@ -113,8 +113,9 @@ class _ReelPostGridState extends State<ReelPostGrid> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ReelScreen(
-                        posts: _reel.map((reel) => reel.file).toList(), // List of URLs
-                        initialIndex: index, // Start at the tapped index
+                        reels:  _reel,
+                        initialIndex: index,
+                        showEditDeleteOptions: true,// Start at the tapped index
                       ),
                     ),
                   );

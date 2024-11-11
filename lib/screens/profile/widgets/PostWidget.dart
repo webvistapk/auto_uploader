@@ -1,36 +1,42 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../widgets/full_screen_image.dart';
 
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+
 class PostWidget extends StatefulWidget {
-  final bool isTrue;
   final String postId;
   final String username;
   final String location;
   final String date;
   final String caption;
-  final List<String> mediaUrls; // List of media URLs (multiple images or video)
+  final List<String> mediaUrls;
   final String profileImageUrl;
-  final String isVideo; // To determine if the post contains a video
+  final bool isVideo;
   final String likes;
   final String comments;
   final String shares;
   final String saved;
   final VoidCallback refresh;
+  final bool showFollowButton; // New parameter to show/hide follow button
+  final bool isInteractive; // New parameter for tap-to-navigate
 
   const PostWidget({
     Key? key,
-    this.isTrue=true,
     required this.postId,
     required this.username,
     required this.location,
     required this.date,
     required this.caption,
-    required this.mediaUrls, // Updated to accept a list of URLs
+    required this.mediaUrls,
     required this.profileImageUrl,
     required this.isVideo,
     required this.likes,
@@ -38,6 +44,8 @@ class PostWidget extends StatefulWidget {
     required this.shares,
     required this.saved,
     required this.refresh,
+    this.showFollowButton = false,
+    this.isInteractive = true,
   }) : super(key: key);
 
   @override
@@ -45,7 +53,7 @@ class PostWidget extends StatefulWidget {
 }
 
 class _PostWidgetState extends State<PostWidget> {
-  int _currentImageIndex = 0; // Track the current image index in the slider
+  int _currentImageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -54,137 +62,74 @@ class _PostWidgetState extends State<PostWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // User Info Row
           Row(
             children: [
               CircleAvatar(
                 radius: 20,
                 backgroundImage: NetworkImage(widget.profileImageUrl),
               ),
-              SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.username,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    widget.location,
-                    style: TextStyle(color: Colors.grey, fontSize: 9),
-                  ),
-                ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.username,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      widget.location,
+                      style: TextStyle(color: Colors.grey, fontSize: 9),
+                    ),
+                  ],
+                ),
               ),
-              Spacer(),
-              // More options icon with dropdown menu
-              PopupMenuButton<int>(
-                icon: Icon(Icons.more_horiz),
-                onSelected: (value) {
-                  if (value == 1) {
-                    // Handle edit action
-                    print('Edit Post');
-                  } else if (value == 2) {
-                    setState(() {
-                      widget.refresh();
-                    });
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem<int>(
-                    value: 1,
-                    child: Text('Edit'),
+              if (widget.showFollowButton)
+                TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'Follow',
+                    style: TextStyle(fontSize: 12),
                   ),
-                  PopupMenuItem<int>(
-                    value: 2,
-                    child: Text('Delete'),
-                  ),
-                ],
-              ),
+                ),
             ],
           ),
-          SizedBox(height: 10),
-
-          // Post Media (Image Carousel or Video)
+          const SizedBox(height: 10),
           InkWell(
-            onTap:widget.isTrue?() {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SinglePost(postId: widget.postId)));
-            }:(){
-              // Navigate to a new fullscreen image screen
+            onTap: widget.isInteractive
+                ? () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => postFullScreen(
-                      mediaUrls: widget.mediaUrls,
-                      initialIndex: _currentImageIndex
-                  )
+                  builder: (context) => SinglePost(postId: widget.postId),
                 ),
               );
-            },
-            child: widget.isVideo == 'video'
-                ? _buildVideoPlayer(widget.mediaUrls.first) // If it's a video, show video player
+            }
+                : null,
+            child: widget.isVideo
+                ? _buildVideoPlayer(widget.mediaUrls.first)
                 : Column(
               children: [
-                _buildImageCarousel(widget.mediaUrls), // Handle multiple images with a carousel
+                _buildImageCarousel(widget.mediaUrls),
                 SizedBox(height: 8),
-                _buildImageIndicator(widget.mediaUrls.length), // Dots indicator below the carousel
+                _buildImageIndicator(widget.mediaUrls.length),
               ],
             ),
           ),
-          SizedBox(height: 10),
-
-          // Date and Interaction icons
+          const SizedBox(height: 10),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.location,
-                    style: TextStyle(color: Colors.black54, fontSize: 9),
-                  ),
-                  Text(
-                    widget.date,
-                    style: TextStyle(color: Colors.black54, fontSize: 9),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Column(
-                    children: [
-                      Icon(Icons.bookmark_border, size: 20),
-                      Text(widget.saved, style: TextStyle(fontSize: 9)),
-                    ],
-                  ),
-                  SizedBox(width: 10),
-                  Column(
-                    children: [
-                      Icon(Icons.favorite_border, size: 20),
-                      Text(widget.likes, style: TextStyle(fontSize: 9)),
-                    ],
-                  ),
-                  SizedBox(width: 10),
-                  Column(
-                    children: [
-                      Icon(Icons.comment, size: 20),
-                      Text(widget.comments, style: TextStyle(fontSize: 9)),
-                    ],
-                  ),
-                  SizedBox(width: 10),
-                  Column(
-                    children: [
-                      Icon(Icons.share, size: 20),
-                      Text(widget.shares, style: TextStyle(fontSize: 9)),
-                    ],
-                  ),
-                ],
-              ),
+              _buildInteractionIcon(FontAwesomeIcons.share, widget.shares),
+              SizedBox(width: 10),
+              _buildInteractionIcon(CupertinoIcons.bookmark, widget.saved),
+              SizedBox(width: 10),
+              _buildInteractionIcon(Icons.favorite_border, widget.likes),
+              SizedBox(width: 10),
+              _buildInteractionIcon(CupertinoIcons.chat_bubble_fill, widget.shares),
             ],
           ),
-          SizedBox(height: 8),
-
-          // Caption and Comments
+          const SizedBox(height: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -200,7 +145,7 @@ class _PostWidgetState extends State<PostWidget> {
                   ],
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'View all ${widget.comments} comments',
                 style: TextStyle(color: Colors.grey, fontSize: 11),
@@ -212,7 +157,15 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
-  // Method to build video player for video posts
+  Widget _buildInteractionIcon(IconData icon, String count) {
+    return Column(
+      children: [
+        Icon(icon, size: 20),
+        Text(count, style: TextStyle(fontSize: 9)),
+      ],
+    );
+  }
+
   Widget _buildVideoPlayer(String videoUrl) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -224,7 +177,6 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
-  // Method to build an image carousel for multiple images
   Widget _buildImageCarousel(List<String> imageUrls) {
     return CarouselSlider.builder(
       itemCount: imageUrls.length,
@@ -239,7 +191,7 @@ class _PostWidgetState extends State<PostWidget> {
         );
       },
       options: CarouselOptions(
-        height: 200,
+        height: 350,
         enableInfiniteScroll: false,
         enlargeCenterPage: true,
         viewportFraction: 1.0,
@@ -253,9 +205,10 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
-  // Dots indicator widget
   Widget _buildImageIndicator(int itemCount) {
-    return itemCount<2?Container():Row(
+    return itemCount < 2
+        ? Container()
+        : Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(itemCount, (index) {
         return Container(
@@ -272,8 +225,6 @@ class _PostWidgetState extends State<PostWidget> {
   }
 }
 
-
-// Widget for Video Player
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
 
@@ -292,7 +243,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
         setState(() {});
-        _controller.play(); // Auto-play the video
+        _controller.play();
       });
   }
 
@@ -312,3 +263,4 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         : Center(child: CircularProgressIndicator());
   }
 }
+
