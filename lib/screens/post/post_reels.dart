@@ -171,22 +171,33 @@ class _PostAndReelsState extends State<PostAndReels>
                         ),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading:
-                              Icon(Icons.camera_alt, color: Colors.blueAccent),
-                          title: Text('Take Photo'),
-                          onTap: () => _openCamera(true),
-                        ),
-                        ListTile(
-                          leading:
-                              Icon(Icons.videocam, color: Colors.blueAccent),
-                          title: Text('Record Video'),
-                          onTap: () => _openCamera(false),
-                        ),
-                      ],
-                    ),
+                    child: isReel
+                        ? Column(
+                            children: [
+                              ListTile(
+                                leading: Icon(Icons.videocam,
+                                    color: Colors.blueAccent),
+                                title: Text('Record Video'),
+                                onTap: () => _openCamera(false),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            children: [
+                              ListTile(
+                                leading: Icon(Icons.camera_alt,
+                                    color: Colors.blueAccent),
+                                title: Text('Take Photo'),
+                                onTap: () => _openCamera(true),
+                              ),
+                              ListTile(
+                                leading: Icon(Icons.videocam,
+                                    color: Colors.blueAccent),
+                                title: Text('Record Video'),
+                                onTap: () => _openCamera(false),
+                              ),
+                            ],
+                          ),
                   ),
                 FloatingActionButton(
                   onPressed: _toggleDropdown,
@@ -217,8 +228,9 @@ class _PostAndReelsState extends State<PostAndReels>
                                           )));
                             }
                           : null
-                      : selectedReel.isNotEmpty
-                          ? () {
+                      : selectedReel.isEmpty
+                          ? null
+                          : () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -231,8 +243,7 @@ class _PostAndReelsState extends State<PostAndReels>
                                                 ? "post"
                                                 : "reel",
                                           )));
-                            }
-                          : null,
+                            },
                   child:
                       const Text('Next', style: TextStyle(color: Colors.blue)),
                 ),
@@ -605,9 +616,23 @@ class _PostAndReelsState extends State<PostAndReels>
 
       if (file != null) {
         File data = File(file.path);
-        mediaFiles.add(data);
-        print('File path: ${file.path}');
-        setState(() {});
+        if (isReel) {
+          setState(() {
+            selectedReel.clear(); // Clear the previous selection
+            selectedReel.add(data); // Add the newly selected file
+            _selectedReelIndex = 0; // Set the selected index
+            isReel = true; // Set view mode to "Reel"
+            isPost = false; // Disable "Post" view mode
+          });
+
+          log("File Path : ${selectedReel[0]}");
+        } else {
+          mediaFiles.add(data);
+          isReel = false; // Set view mode to "Reel"
+          isPost = true;
+          print('File path: ${file.path}');
+          setState(() {});
+        }
       }
     } else if (permissionStatus.isDenied) {
       ScaffoldMessenger.of(context).showSnackBar(

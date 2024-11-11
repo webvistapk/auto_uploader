@@ -11,6 +11,7 @@ import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
+import 'package:mobile/screens/search/widget/search_screen.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
 import 'package:mobile/screens/story/create_story.dart';
 import 'package:mobile/screens/story/create_story_screen.dart';
@@ -75,13 +76,16 @@ class _HomeScreenState extends State<HomeScreen>
           child: Consumer<MediaProvider>(
             builder: (context, mediaProvider, child) {
               // Use user stories if available, otherwise fallback to follower stories
-              final stories = mediaProvider.userStatus?.stories ?? mediaProvider.followersStatus?.stories;
+              final stories = mediaProvider.userStatus?.stories ??
+                  mediaProvider.followersStatus?.stories;
 
               if (stories != null && stories.isNotEmpty) {
                 // Collect all media files from all stories, ensuring it's a List<String>
                 final List<Object?> allMediaFiles = stories.expand((story) {
                   // Map each media file to String, filter out nulls, and ensure List<String>
-                  return story.media?.map((media) => media.file).whereType<String>() ?? [];
+                  return story.media!
+                      .map((media) => media.file)
+                      .whereType<String>();
                 }).toList();
 
                 return InkWell(
@@ -90,9 +94,11 @@ class _HomeScreenState extends State<HomeScreen>
                       context,
                       MaterialPageRoute(
                         builder: (context) => StatusView(
-                          statuses: allMediaFiles, // Pass all media files in sequence
+                          statuses:
+                              allMediaFiles, // Pass all media files in sequence
                           initialIndex: 0,
-                          isVideo: false, // Adjust based on your video handling logic
+                          isVideo:
+                              false, // Adjust based on your video handling logic
                           viewers: [],
                           userProfile: widget.userProfile,
                           token: widget.token!,
@@ -153,11 +159,13 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           IconButton(
             icon: Icon(Icons.search, color: Colors.grey),
-            onPressed: () {},
+            onPressed: () {
+              showSearch(context: context, delegate: CustomSearchDelegate());
+            },
           ),
         ],
       ),
-        drawer: const SideBar(),
+      drawer: const SideBar(),
       backgroundColor: AppColors.mainBgColor,
       body: TabBarView(
         controller: _tabController,
@@ -176,7 +184,9 @@ class _HomeScreenState extends State<HomeScreen>
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
-                        children: postProvider.cachedPosts.map((post) => _buildPostCard(post)).toList(),
+                        children: postProvider.cachedPosts
+                            .map((post) => _buildPostCard(post))
+                            .toList(),
                       ),
                     ),
                   ],
@@ -200,7 +210,8 @@ class _HomeScreenState extends State<HomeScreen>
     final mediaProvider = Provider.of<MediaProvider>(context);
 
     // Check if there are follower stories, otherwise fallback to user stories
-    final stories = mediaProvider.followersStatus?.stories ?? mediaProvider.userStatus?.stories;
+    final stories = mediaProvider.followersStatus?.stories ??
+        mediaProvider.userStatus?.stories;
 
     if (stories == null || stories.isEmpty) {
       return Center(
@@ -262,9 +273,11 @@ class _HomeScreenState extends State<HomeScreen>
                       context,
                       MaterialPageRoute(
                         builder: (context) => StatusView(
-                          statuses: storyMediaFiles, // Pass all media files for this user
+                          statuses:
+                              storyMediaFiles, // Pass all media files for this user
                           initialIndex: 0,
-                          isVideo: false, // Adjust based on your video handling logic
+                          isVideo:
+                              false, // Adjust based on your video handling logic
                           viewers: [],
                           userProfile: widget.userProfile,
                           token: widget.token!,
@@ -278,17 +291,17 @@ class _HomeScreenState extends State<HomeScreen>
                     child: ClipOval(
                       child: firstMediaFile != null
                           ? Image.network(
-                        '${ApiURLs.baseUrl2}$firstMediaFile',
-                        fit: BoxFit.cover,
-                        width: 40,
-                        height: 40,
-                      )
+                              '${ApiURLs.baseUrl2}$firstMediaFile',
+                              fit: BoxFit.cover,
+                              width: 40,
+                              height: 40,
+                            )
                           : Image.asset(
-                        'assets/logo.webp', // Default placeholder if no media
-                        fit: BoxFit.cover,
-                        width: 40,
-                        height: 40,
-                      ),
+                              'assets/logo.webp', // Default placeholder if no media
+                              fit: BoxFit.cover,
+                              width: 40,
+                              height: 40,
+                            ),
                     ),
                   ),
                 ),
@@ -304,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-  
+
   Widget _buildPostCard(PostModel post) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,7 +329,8 @@ class _HomeScreenState extends State<HomeScreen>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CircleAvatar(
-                backgroundImage: AssetImage("assets/tellus.webp"), /*NetworkImage('${ApiURLs.baseUrl2}${post.user.profileImageUrl}'),*/
+                backgroundImage: AssetImage("assets/tellus.webp"),
+                /*NetworkImage('${ApiURLs.baseUrl2}${post.user.profileImageUrl}'),*/
                 radius: 20,
               ),
               const SizedBox(width: 10),
@@ -326,7 +340,8 @@ class _HomeScreenState extends State<HomeScreen>
                   children: [
                     Text(
                       post.user.username,
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Location', // Update if location data is available
@@ -350,41 +365,44 @@ class _HomeScreenState extends State<HomeScreen>
             // Use CarouselSlider if there's more than one media item
             post.media.length > 1
                 ? CarouselSlider.builder(
-              itemCount: post.media.length,
-              itemBuilder: (context, index, realIndex) {
-                final media = post.media[index];
-                final mediaUrl = '${ApiURLs.baseUrl2}${media.file}';
-                final isVideo = media.mediaType == 'video';
+                    itemCount: post.media.length,
+                    itemBuilder: (context, index, realIndex) {
+                      final media = post.media[index];
+                      final mediaUrl = '${ApiURLs.baseUrl2}${media.file}';
+                      final isVideo = media.mediaType == 'video';
 
-                return isVideo
-                    ? _buildVideoPlayer(mediaUrl)
-                    : Image.network(
-                  mediaUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                );
-              },
-              options: CarouselOptions(
-                height: 350,
-                viewportFraction: 1.0,
-                enableInfiniteScroll: false,
-              ),
-            )
+                      return isVideo
+                          ? _buildVideoPlayer(mediaUrl)
+                          : Image.network(
+                              mediaUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            );
+                    },
+                    options: CarouselOptions(
+                      height: 350,
+                      viewportFraction: 1.0,
+                      enableInfiniteScroll: false,
+                    ),
+                  )
                 : Container(
-              width: double.infinity,
-              height: 350,
-              decoration: BoxDecoration(
-                image: post.media.isNotEmpty // Check if media is available
-                    ? DecorationImage(
-                  image: NetworkImage('${ApiURLs.baseUrl2}${post.media.first.file}'),
-                  fit: BoxFit.cover,
-                )
-                    : DecorationImage(
-                  image: AssetImage('assets/logo.webp'), // Placeholder image
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+                    width: double.infinity,
+                    height: 350,
+                    decoration: BoxDecoration(
+                      image:
+                          post.media.isNotEmpty // Check if media is available
+                              ? DecorationImage(
+                                  image: NetworkImage(
+                                      '${ApiURLs.baseUrl2}${post.media.first.file}'),
+                                  fit: BoxFit.cover,
+                                )
+                              : DecorationImage(
+                                  image: AssetImage(
+                                      'assets/logo.webp'), // Placeholder image
+                                  fit: BoxFit.cover,
+                                ),
+                    ),
+                  ),
           ],
         ),
         const SizedBox(height: 10),
@@ -454,7 +472,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-
   Widget _buildMediaCarousel(List<dynamic> mediaList) {
     return CarouselSlider.builder(
       itemCount: mediaList.length,
@@ -466,10 +483,10 @@ class _HomeScreenState extends State<HomeScreen>
         return isVideo
             ? _buildVideoPlayer(mediaUrl)
             : Image.network(
-          mediaUrl,
-          fit: BoxFit.cover,
-          width: double.infinity,
-        );
+                mediaUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+              );
       },
       options: CarouselOptions(
         height: 200,
@@ -500,7 +517,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
 }
 
 class StatusView extends StatefulWidget {
@@ -600,21 +616,21 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
       '${ApiURLs.baseUrl2}${widget.statuses[_currentIndex]}',
       fit: BoxFit.cover,
     ).image.resolve(ImageConfiguration()).addListener(
-      ImageStreamListener(
+          ImageStreamListener(
             (ImageInfo info, bool _) {
-          setState(() {
-            _isLoading = false;
-            _animationController.duration = Duration(seconds: 5);
-            _animationController.forward(from: 0);
-          });
-          _timer = Timer(Duration(seconds: 5), _onNextStatus);
-        },
-        onError: (error, stackTrace) {
-          print("Error loading image: $error");
-          setState(() => _isLoading = false);
-        },
-      ),
-    );
+              setState(() {
+                _isLoading = false;
+                _animationController.duration = Duration(seconds: 5);
+                _animationController.forward(from: 0);
+              });
+              _timer = Timer(Duration(seconds: 5), _onNextStatus);
+            },
+            onError: (error, stackTrace) {
+              print("Error loading image: $error");
+              setState(() => _isLoading = false);
+            },
+          ),
+        );
   }
 
   void _onNextStatus() {
@@ -652,20 +668,20 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
               child: _isLoading
                   ? CircularProgressIndicator()
                   : widget.isVideo &&
-                  _videoController != null &&
-                  _videoController!.value.isInitialized
-                  ? AspectRatio(
-                aspectRatio: _videoController!.value.aspectRatio,
-                child: VideoPlayer(_videoController!),
-              )
-                  : Image.network(
-                '${ApiURLs.baseUrl2}${widget.statuses[_currentIndex]}',
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    Icon(Icons.error, color: Colors.white),
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-              ),
+                          _videoController != null &&
+                          _videoController!.value.isInitialized
+                      ? AspectRatio(
+                          aspectRatio: _videoController!.value.aspectRatio,
+                          child: VideoPlayer(_videoController!),
+                        )
+                      : Image.network(
+                          '${ApiURLs.baseUrl2}${widget.statuses[_currentIndex]}',
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.error, color: Colors.white),
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                        ),
             ),
             GestureDetector(
               onTapUp: (details) {
@@ -698,7 +714,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
               child: Row(
                 children: List.generate(
                   widget.statuses.length,
-                      (index) => Expanded(
+                  (index) => Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Stack(
@@ -709,22 +725,22 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                           ),
                           index == _currentIndex
                               ? AnimatedBuilder(
-                            animation: _animationController,
-                            builder: (context, child) {
-                              return Container(
-                                height: 3,
-                                width: MediaQuery.of(context).size.width *
-                                    _animationController.value,
-                                color: Colors.white,
-                              );
-                            },
-                          )
+                                  animation: _animationController,
+                                  builder: (context, child) {
+                                    return Container(
+                                      height: 3,
+                                      width: MediaQuery.of(context).size.width *
+                                          _animationController.value,
+                                      color: Colors.white,
+                                    );
+                                  },
+                                )
                               : Container(
-                            height: 3,
-                            color: index < _currentIndex
-                                ? Colors.white
-                                : Colors.transparent,
-                          ),
+                                  height: 3,
+                                  color: index < _currentIndex
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                ),
                         ],
                       ),
                     ),
@@ -732,43 +748,44 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            widget.isUser?
-            Positioned(
-              bottom: 40,
-              child: GestureDetector(
-                onTap: _showViewers,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.remove_red_eye, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text(
-                      '${widget.viewers.length}',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+            widget.isUser
+                ? Positioned(
+                    bottom: 40,
+                    child: GestureDetector(
+                      onTap: _showViewers,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.remove_red_eye, color: Colors.white),
+                          SizedBox(width: 5),
+                          Text(
+                            '${widget.viewers.length}',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    CupertinoDialogRoute(
+                                        builder: (_) => StoryScreen(
+                                              userProfile: widget.userProfile,
+                                              token: widget.token,
+                                            ),
+                                        context: context));
+                              },
+                              child: Icon(
+                                Icons.add_circle_outline,
+                                size: 27,
+                                color: Colors.white,
+                              )),
+                        ],
+                      ),
                     ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              CupertinoDialogRoute(
-                                  builder: (_) => StoryScreen(
-                                    userProfile: widget.userProfile,
-                                    token: widget.token,
-                                  ),
-                                  context: context));
-                        },
-                        child: Icon(
-                          Icons.add_circle_outline,
-                          size: 27,
-                          color: Colors.white,
-                        )),
-                  ],
-                ),
-              ),
-            ):Container(),
+                  )
+                : Container(),
           ],
         ),
       ),

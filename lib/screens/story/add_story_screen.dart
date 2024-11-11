@@ -216,7 +216,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
 
                       if (response != null) {
                         ToastNotifier.showSuccessToast(
-                            context, "Reel Successfully posted!");
+                            context, "Story Successfully Shared!");
                         setState(() {
                           isLoading = false;
                         });

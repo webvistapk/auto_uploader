@@ -12,8 +12,8 @@ import 'package:mobile/controller/services/search/search_service.dart';
 
 class SearchWidget extends StatefulWidget {
   final String query;
-  final String authToken;
-  const SearchWidget({super.key, required this.query, required this.authToken});
+  final authToken;
+  const SearchWidget({super.key, required this.query, this.authToken});
 
   @override
   _SearchWidgetState createState() => _SearchWidgetState();
@@ -33,6 +33,13 @@ class _SearchWidgetState extends State<SearchWidget>
     'Videos': [],
     'Slides': [],
   };
+  String? token;
+  getAuthToken() async {
+    if (widget.authToken == null) {
+      token = await Prefrences.getAuthToken();
+      setState(() {});
+    }
+  }
 
   @override
   void initState() {
@@ -43,8 +50,12 @@ class _SearchWidgetState extends State<SearchWidget>
         selectedCategory = _getCategoryName(_tabController.index);
       });
     });
-
-    _fetchSearchResults(context, widget.query, widget.authToken);
+    if (widget.authToken == null) {
+      getAuthToken();
+      _fetchSearchResults(context, widget.query, token!);
+    } else {
+      _fetchSearchResults(context, widget.query, widget.authToken);
+    }
   }
 
   @override
@@ -63,19 +74,20 @@ class _SearchWidgetState extends State<SearchWidget>
     authToken = await Prefrences.getAuthToken();
     // debugger();
     try {
-      final userResults =
-          await SearchService.fetchSearchResults(query, authToken);
-
-      print("Auth Token ${authToken}");
-      print("User Results ${userResults}");
-      // debugger();
-      setState(() {
-        data['All'] = userResults;
-        data['Accounts'] = userResults;
-      });
+      if (query.isNotEmpty) {
+        final userResults =
+            await SearchService.fetchSearchResults(query, authToken);
+        print("Auth Token ${authToken}");
+        print("User Results ${userResults}");
+        // debugger();
+        setState(() {
+          data['All'] = userResults;
+          data['Accounts'] = userResults;
+        });
+      }
     } catch (e) {
-      ToastNotifier.showErrorToast(
-          context, "Error fetching search results: $e");
+      // ToastNotifier.showErrorToast(
+      //     context, "Error fetching search results: $e");
     } finally {
       setState(() {
         isLoading = false;

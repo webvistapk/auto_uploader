@@ -129,60 +129,70 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Divider(),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20, right: 20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 120,
-                          width: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.grey[300],
-                          ),
-                          child:
-                              _buildMediaWidget(), // Replace with media preview (image or video)
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: Stack(
-                              children: [
-                                TextField(
-                                  controller: titleController,
-                                  cursorColor: Colors.red,
-                                  textInputAction: TextInputAction.done,
-                                  maxLines: 5,
-                                  style: AppTextStyles.poppinsRegular(),
-                                  decoration: InputDecoration(
-                                    hintMaxLines: 4,
-                                    hintText: widget.type == "post"
-                                        ? "Describe your post here, add hashtags, mention or anything else that compels you."
-                                        : "Describe your reel here, add hashtags, mention or anything else that compels you.",
-                                    hintStyle:
-                                        AppTextStyles.poppinsRegular().copyWith(
-                                      color: Colors.black,
-                                      fontSize: 13,
-                                    ),
-                                    focusedBorder: UnderlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                    enabledBorder: UnderlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.white),
-                                    ),
-                                  ),
+                  widget.type == 'reel'
+                      ? _buildMediaWidget()
+                      : Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 120,
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.grey[300],
                                 ),
-                              ],
-                            ),
+                                child:
+                                    _buildMediaWidget(), // Replace with media preview (image or video)
+                              ),
+                              SizedBox(width: 15),
+                              widget.type == "reel"
+                                  ? SizedBox()
+                                  : Expanded(
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 10),
+                                        child: Stack(
+                                          children: [
+                                            TextField(
+                                              controller: titleController,
+                                              cursorColor: Colors.red,
+                                              textInputAction:
+                                                  TextInputAction.done,
+                                              maxLines: 5,
+                                              style: AppTextStyles
+                                                  .poppinsRegular(),
+                                              decoration: InputDecoration(
+                                                hintMaxLines: 4,
+                                                hintText: widget.type == "post"
+                                                    ? "Describe your post here, add hashtags, mention or anything else that compels you."
+                                                    : "Describe your reel here, add hashtags, mention or anything else that compels you.",
+                                                hintStyle: AppTextStyles
+                                                        .poppinsRegular()
+                                                    .copyWith(
+                                                  color: Colors.black,
+                                                  fontSize: 13,
+                                                ),
+                                                focusedBorder:
+                                                    UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Colors.white),
+                                                ),
+                                                enabledBorder:
+                                                    UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
                   Divider(color: Color(0xffD3D3D3)),
                   ListTile(
                     leading: Icon(Icons.location_on_rounded, size: 25),
