@@ -41,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? userName;
   List<Map<String, dynamic>> posts = [];
   Future<List<PostModel>>? _posts;
-  int limit = 9;
+  int limit = 10;
   int offset = 0;
 
   @override

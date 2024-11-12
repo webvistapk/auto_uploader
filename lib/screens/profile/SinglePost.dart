@@ -45,6 +45,7 @@ class SinglePost extends StatelessWidget {
                   shares: "100",
                   saved: '100',
                   refresh: () => postProvider.getSinglePost(postId),
+
                 );
               },
             );

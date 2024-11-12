@@ -28,7 +28,6 @@ class PostWidget extends StatefulWidget {
   final VoidCallback refresh;
   final bool showFollowButton; // New parameter to show/hide follow button
   final bool isInteractive; // New parameter for tap-to-navigate
-
   const PostWidget({
     Key? key,
     required this.postId,
@@ -45,7 +44,8 @@ class PostWidget extends StatefulWidget {
     required this.saved,
     required this.refresh,
     this.showFollowButton = false,
-    this.isInteractive = true,
+    this.isInteractive = false,
+
   }) : super(key: key);
 
   @override
@@ -84,14 +84,14 @@ class _PostWidgetState extends State<PostWidget> {
                   ],
                 ),
               ),
-              if (widget.showFollowButton)
+             /* if (widget.showFollowButton)
                 TextButton(
                   onPressed: () {},
                   child: const Text(
                     'Follow',
                     style: TextStyle(fontSize: 12),
                   ),
-                ),
+                ),*/
             ],
           ),
           const SizedBox(height: 10),
@@ -102,10 +102,19 @@ class _PostWidgetState extends State<PostWidget> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => SinglePost(postId: widget.postId),
+                )
+              );
+            } : (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => postFullScreen(
+                        mediaUrls: widget.mediaUrls,
+                        initialIndex: _currentImageIndex
+                    )
                 ),
               );
-            }
-                : null,
+            },
             child: widget.isVideo
                 ? _buildVideoPlayer(widget.mediaUrls.first)
                 : Column(
