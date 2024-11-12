@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -442,7 +443,18 @@ class _PostAndReelsState extends State<PostAndReels>
                   ),
                 );
               } else {
-                return CircularProgressIndicator();
+                return Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    height: 200,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                );
               }
             },
           );
@@ -531,47 +543,62 @@ class _PostAndReelsState extends State<PostAndReels>
   }
 
 // Function to request appropriate permissions for Android 11 and above
-  Future<bool> _requestPermissions() async {
-    bool permissions = await Prefrences.getMediaPermission();
 
-    if (permissions) {
+  Future<bool> _requestPermissions() async {
+    bool permissionsGranted = await Prefrences.getMediaPermission();
+
+    if (permissionsGranted) {
       return true;
     } else {
-      final ps = await PhotoManager.requestPermissionExtend();
-      if (ps.isAuth) {
-        await Prefrences.setMediaPermission(true);
-        return true; // Permission is granted
-      }
+      // Determine Android version
+      String? androidVersion = await getAndroidVersion();
 
-      // Special handling for Android 11 and above
-      if (await Permission.storage.isDenied ||
-          await Permission.photos.isDenied) {
-        // Request storage and media permissions
-        final result = await [
-          Permission.storage,
-          Permission.photos, // This handles the photo access permission
+      if (androidVersion != null && int.parse(androidVersion) >= 11) {
+        // For Android 11 and above, request photos and manage external storage permissions
+        final photoPermissionStatus =
+            await PhotoManager.requestPermissionExtend();
+
+        if (photoPermissionStatus.isAuth) {
+          await Prefrences.setMediaPermission(true);
+          return true;
+        }
+
+        // Request both `photos` and `manageExternalStorage` if not granted
+        final permissionResults = await [
+          Permission.photos,
+          Permission.manageExternalStorage,
         ].request();
 
-        if (result[Permission.storage] == PermissionStatus.granted &&
-            result[Permission.photos] == PermissionStatus.granted) {
+        if (permissionResults[Permission.photos] == PermissionStatus.granted &&
+            permissionResults[Permission.manageExternalStorage] ==
+                PermissionStatus.granted) {
+          await Prefrences.setMediaPermission(true);
+          return true;
+        }
+      } else {
+        // For Android 10 and below, request only storage permission
+        final storagePermissionStatus = await Permission.storage.request();
+
+        if (storagePermissionStatus == PermissionStatus.granted) {
           await Prefrences.setMediaPermission(true);
           return true;
         }
       }
 
-      // Android 11+ specific permission for managing external storage
-      if (await Permission.manageExternalStorage.isDenied) {
-        final result = await Permission.manageExternalStorage.request();
-        if (result == PermissionStatus.granted) {
-          await Prefrences.setMediaPermission(true);
-          return true;
-        }
-      }
-
+      // If permissions are denied
       await Prefrences.setMediaPermission(false);
-
-      return false; // Permissions denied
+      return false;
     }
+  }
+
+// Helper function to get Android version
+  Future<String?> getAndroidVersion() async {
+    if (Platform.isAndroid) {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.version.release; // e.g., "11", "12"
+    }
+    return null;
   }
 
   // Fetch media for a selected album with pagination
