@@ -44,8 +44,9 @@ class _UserPostScreenState extends State<UserPostScreen> {
     setState(() {
       _isLoadingMore = true;
     });
-    List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
-        .getPost(context, widget.userId, limit, offset);
+    List<PostModel> newPosts =
+        await Provider.of<PostProvider>(context, listen: false)
+            .getPost(context, widget.userId, limit, offset);
 
     setState(() {
       _allPosts.addAll(newPosts);
@@ -67,7 +68,8 @@ class _UserPostScreenState extends State<UserPostScreen> {
   }
 
   Future<void> DeletePost(String postID) async {
-    Provider.of<PostProvider>(context, listen: false).deletePost(postID, context);
+    Provider.of<PostProvider>(context, listen: false)
+        .deletePost(postID, context);
     _fetchPosts();
   }
 
@@ -75,12 +77,11 @@ class _UserPostScreenState extends State<UserPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.mainBgColor,
-      appBar: AppBar(
-          backgroundColor: AppColors.mainBgColor
-      ),
+      appBar: AppBar(backgroundColor: AppColors.mainBgColor),
       body: NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent && !_isLoadingMore) {
+          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+              !_isLoadingMore) {
             _fetchPosts(); // Load more posts when the user reaches the bottom
           }
           return false;
@@ -107,7 +108,8 @@ class _UserPostScreenState extends State<UserPostScreen> {
             }
 
             if (filteredPosts.isEmpty) {
-              return const Center(child: Text("No posts available for this filter"));
+              return const Center(
+                  child: Text("No posts available for this filter"));
             }
 
             return SingleChildScrollView(
@@ -115,6 +117,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   PostWidget(
+                    isInteractive: true,
                     postId: post.id.toString(),
                     username: post.user.username.toString(),
                     location: "Location",
@@ -122,12 +125,13 @@ class _UserPostScreenState extends State<UserPostScreen> {
                     caption: post.post.toString(),
                     mediaUrls: post.media.isNotEmpty
                         ? post.media
-                        .map((media) =>
-                    "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
-                        .toList()
+                            .map((media) =>
+                                "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
+                            .toList()
                         : [], // Ensure empty list if no media
                     profileImageUrl: AppUtils.testImage,
-                    isVideo: post.media.isNotEmpty && post.media[0].mediaType == 'video',
+                    isVideo: post.media.isNotEmpty &&
+                        post.media[0].mediaType == 'video',
                     likes: post.likesCount.toString(),
                     comments: post.commentsCount.toString(),
                     shares: "100",

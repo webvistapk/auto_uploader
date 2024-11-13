@@ -7,6 +7,7 @@ import 'package:mobile/controller/services/followers/follower_provider.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
+import 'package:mobile/screens/messaging/message_screen.dart';
 import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/profile/follower/follower_screen.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';

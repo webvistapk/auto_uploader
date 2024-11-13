@@ -595,6 +595,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                           ),
                           GestureDetector(
                               onTap: () {
+                                Navigator.of(context).pop();
                                 Navigator.push(
                                     context,
                                     CupertinoDialogRoute(
