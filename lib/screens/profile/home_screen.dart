@@ -393,22 +393,8 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 10),
-    )..addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _onNextStatus();
-      }
-    });
-=======
-    _animationController = AnimationController(vsync: this);
->>>>>>> parent of 51a5820 (push the updated work)
-=======
-    _animationController = AnimationController(vsync: this);
->>>>>>> parent of 51a5820 (push the updated work)
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 15));
     _initializeStatus();
   }
 
@@ -474,22 +460,9 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     ).image.resolve(ImageConfiguration()).addListener(
       ImageStreamListener(
             (ImageInfo info, bool _) {
-<<<<<<< HEAD
-          setState(() {
-            _isLoading = false;
-            _animationController.forward(from: 0); // Start animation when image is ready
-          });
-        },
-        onError: (error, stackTrace) {
-          print("Error loading image: $error");
-          setState(() => _isLoading = false);
-        },
-      ),
-    );
-=======
               setState(() {
                 _isLoading = false;
-                _animationController.duration = Duration(seconds: 5);
+                _animationController.duration = Duration(seconds: 10);
                 _animationController.forward(from: 0);
               });
               _timer = Timer(Duration(seconds: 5), _onNextStatus);
@@ -625,37 +598,6 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
             ),
             widget.isUser
                 ? Positioned(
-<<<<<<< HEAD
-              bottom: 40,
-              child: GestureDetector(
-                onTap: _showViewers,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.remove_red_eye, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text(
-                      '${widget.viewers.length}',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => StoryScreen(
-                                  userProfile: widget.userProfile,
-                                  token: widget.token,
-                                ),
-                                context: context));
-                      },
-                      child: Icon(
-                        Icons.add_circle_outline,
-                        size: 27,
-                        color: Colors.white,
-=======
                     bottom: 40,
                     child: GestureDetector(
                       onTap: _showViewers,
@@ -668,9 +610,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                             '${widget.viewers.length}',
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
-                          SizedBox(
-                            width: 10,
-                          ),
+                          SizedBox(width: 10),
                           GestureDetector(
                               onTap: () {
                                 Navigator.of(context).pop();
