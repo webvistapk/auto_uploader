@@ -317,7 +317,7 @@ class ProviderManager {
         final followers = followersData
             .map((followerJson) => Follower.fromJson(followerJson))
             .toList();
-
+        log("Followers: $followersData");
         await Prefrences.saveFollowers(followersData);
         return followers;
       } else {

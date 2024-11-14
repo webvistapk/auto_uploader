@@ -13,6 +13,7 @@ import 'package:mobile/screens/profile/follower/follower_screen.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
 import 'package:mobile/screens/widget/video_player_widget.dart';
+import 'package:mobile/video_stream_screen.dart';
 // import 'package:mobile/screens/widget/alert_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.green,
             textTheme: GoogleFonts.poppinsTextTheme(),
           ),
-          home: SplashScreen()),
+          home: SplashScreen())
     );
   }
 }
