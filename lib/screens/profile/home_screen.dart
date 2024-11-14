@@ -20,6 +20,7 @@ import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../common/app_text_styles.dart';
 import '../../common/utils.dart';
 import '../../controller/services/StatusProvider.dart';
 import '../../controller/services/post/post_provider.dart';
@@ -204,6 +205,21 @@ class _HomeScreenState extends State<HomeScreen>
                     children: [
                       Center(child: _buildStoriesSection()),
                       const Divider(thickness: 1),
+                      _posts.isEmpty
+                          ? Center(
+                              child: Text(
+                                "No Post Available Right Now",
+                                style: AppTextStyles.poppinsBold(),
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: _posts
+                                    .map((post) => _buildPostCard(post))
+                                    .toList(),
+                              ),
+                            ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -238,7 +254,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildStoriesSection() {
     final mediaProvider = Provider.of<MediaProvider>(context);
-    final stories = mediaProvider.followersStatus?.stories ?? mediaProvider.userStatus?.stories;
+    final stories = mediaProvider.followersStatus?.stories ??
+        mediaProvider.userStatus?.stories;
 
     if (stories == null || stories.isEmpty) {
       return Center(child: Text('No stories available'));
@@ -247,7 +264,8 @@ class _HomeScreenState extends State<HomeScreen>
     // Log each story's details to ensure unique users and their media are correctly structured
     print('Total followers with stories: ${stories.length}');
     for (var story in stories) {
-      print('Username: ${story.user?.username}, Media Count: ${story.media?.length}');
+      print(
+          'Username: ${story.user?.username}, Media Count: ${story.media?.length}');
     }
 
     return SizedBox(
@@ -278,13 +296,16 @@ class _HomeScreenState extends State<HomeScreen>
                   onTap: () {
                     // Debug output on tap
                     print('Tapped on follower: $username');
-                    print('Statuses for this follower: ${followerStatuses.length} items');
+                    print(
+                        'Statuses for this follower: ${followerStatuses.length} items');
 
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => FollowerStatusView(
-                          followersStatuses: [followerStatuses], // Pass only current follower's statuses
+                          followersStatuses: [
+                            followerStatuses
+                          ], // Pass only current follower's statuses
                           initialFollowerIndex: 0,
                           initialStatusIndex: 0,
                           userProfile: widget.userProfile,
@@ -299,22 +320,23 @@ class _HomeScreenState extends State<HomeScreen>
                     child: ClipOval(
                       child: firstMediaFile != null
                           ? Image.network(
-                        '${ApiURLs.baseUrl2}$firstMediaFile',
-                        fit: BoxFit.cover,
-                        width: 40,
-                        height: 40,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return CircularProgressIndicator(
-                              color: AppColors.blue, strokeWidth: 6);
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return CircularProgressIndicator(
-                            color: AppColors.blue,
-                            strokeWidth: 6,
-                          );
-                        },
-                      )
+                              '${ApiURLs.baseUrl2}$firstMediaFile',
+                              fit: BoxFit.cover,
+                              width: 40,
+                              height: 40,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return CircularProgressIndicator(
+                                    color: AppColors.blue, strokeWidth: 6);
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return CircularProgressIndicator(
+                                  color: AppColors.blue,
+                                  strokeWidth: 6,
+                                );
+                              },
+                            )
                           : CircularProgressIndicator(strokeWidth: 6),
                     ),
                   ),
@@ -328,8 +350,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
-
 
   Widget _buildPostCard(PostModel post) {
     _currentIndexMap[post.id] ??= 0;
@@ -362,6 +382,7 @@ class StatusView extends StatefulWidget {
   final List<Object?> statuses;
   final int initialIndex;
   final bool isVideo;
+  final Duration statusDuration;
   final List<String> viewers;
   final UserProfile? userProfile;
   final String token;
@@ -372,6 +393,7 @@ class StatusView extends StatefulWidget {
     required this.statuses,
     required this.initialIndex,
     required this.isVideo,
+    this.statusDuration = const Duration(seconds: 5),
     this.viewers = const [],
     required this.userProfile,
     required this.token,
@@ -384,23 +406,23 @@ class StatusView extends StatefulWidget {
 
 class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   int _currentIndex = 0;
+  Timer? _timer;
   late AnimationController _animationController;
   VideoPlayerController? _videoController;
   bool _isLoading = true;
-  int time=10;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _animationController = AnimationController(vsync: this);
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 15));
     _initializeStatus();
   }
 
   void _initializeStatus() {
-    // Stop and reset animation only when initializing a new status
     _animationController.stop();
-    _animationController.reset();
+    _timer?.cancel();
 
     setState(() => _isLoading = true);
 
@@ -417,30 +439,27 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
 
     _videoController!.addListener(() {
       if (_videoController!.value.isBuffering) {
-        setState(() => _isLoading = true);
+        setState(() {
+          _isLoading = true;
+        });
       } else if (_videoController!.value.isInitialized) {
         setState(() {
           _isLoading = false;
-          _videoController!.play();
-          _animationController.forward(from: 0); // Start animation when video is ready
         });
       }
     });
 
     try {
       await _videoController!.initialize();
-<<<<<<< HEAD
-=======
       final videoDuration = _videoController!.value.duration;
-      final cappedDuration = videoDuration <= Duration(seconds: 15)
+      final cappedDuration = videoDuration <= Duration(seconds: 10)
           ? videoDuration
-          : Duration(seconds: 15);
+          : Duration(seconds: 10);
 
       _animationController.duration = cappedDuration;
       _videoController!.play();
       _animationController.forward(from: 0);
       _timer = Timer(cappedDuration, _onNextStatus);
->>>>>>> parent of 51a5820 (push the updated work)
     } catch (e) {
       print("Error loading video: $e");
       setState(() => _isLoading = false);
@@ -449,7 +468,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
 
   void _initializeImage() {
     _animationController.stop();
-    _animationController.reset();
+    _timer?.cancel();
 
     setState(() => _isLoading = true);
 
@@ -457,14 +476,14 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
       '${ApiURLs.baseUrl2}${widget.statuses[_currentIndex]}',
       fit: BoxFit.cover,
     ).image.resolve(ImageConfiguration()).addListener(
-      ImageStreamListener(
+          ImageStreamListener(
             (ImageInfo info, bool _) {
               setState(() {
                 _isLoading = false;
-                _animationController.duration = Duration(seconds: 5);
+                _animationController.duration = Duration(seconds: 10);
                 _animationController.forward(from: 0);
               });
-              _timer = Timer(Duration(seconds: 5), _onNextStatus);
+              _timer = Timer(Duration(seconds: 10), _onNextStatus);
             },
             onError: (error, stackTrace) {
               print("Error loading image: $error");
@@ -472,10 +491,12 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
             },
           ),
         );
->>>>>>> parent of 51a5820 (push the updated work)
   }
 
   void _onNextStatus() {
+    _animationController.stop();
+    _timer?.cancel();
+
     if (_currentIndex < widget.statuses.length - 1) {
       setState(() {
         _currentIndex++;
@@ -486,17 +507,9 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     }
   }
 
-  void _onPreviousStatus() {
-    if (_currentIndex > 0) {
-      setState(() {
-        _currentIndex--;
-      });
-      _initializeStatus();
-    }
-  }
-
   @override
   void dispose() {
+    _timer?.cancel();
     _animationController.dispose();
     _videoController?.dispose();
     super.dispose();
@@ -515,20 +528,20 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
               child: _isLoading
                   ? CircularProgressIndicator()
                   : widget.isVideo &&
-                  _videoController != null &&
-                  _videoController!.value.isInitialized
-                  ? AspectRatio(
-                aspectRatio: _videoController!.value.aspectRatio,
-                child: VideoPlayer(_videoController!),
-              )
-                  : Image.network(
-                '${ApiURLs.baseUrl2}${widget.statuses[_currentIndex]}',
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    Icon(Icons.error, color: Colors.white),
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-              ),
+                          _videoController != null &&
+                          _videoController!.value.isInitialized
+                      ? AspectRatio(
+                          aspectRatio: _videoController!.value.aspectRatio,
+                          child: VideoPlayer(_videoController!),
+                        )
+                      : Image.network(
+                          '${ApiURLs.baseUrl2}${widget.statuses[_currentIndex]}',
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.error, color: Colors.white),
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                        ),
             ),
             GestureDetector(
               onTapUp: (details) {
@@ -542,6 +555,19 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                     Navigator.of(context).pop();
                   }
                 }
+              },
+              onLongPressStart: (_) {
+                _animationController.stop();
+                _timer?.cancel();
+                _videoController?.pause();
+              },
+              onLongPressEnd: (_) {
+                _animationController.forward();
+                _timer = Timer(
+                    _animationController.duration! *
+                        (1.0 - _animationController.value),
+                    _onNextStatus);
+                _videoController?.play();
               },
             ),
             Positioned(
@@ -561,7 +587,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
               child: Row(
                 children: List.generate(
                   widget.statuses.length,
-                      (index) => Expanded(
+                  (index) => Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Stack(
@@ -572,22 +598,22 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                           ),
                           index == _currentIndex
                               ? AnimatedBuilder(
-                            animation: _animationController,
-                            builder: (context, child) {
-                              return Container(
-                                height: 3,
-                                width: MediaQuery.of(context).size.width *
-                                    _animationController.value,
-                                color: Colors.white,
-                              );
-                            },
-                          )
+                                  animation: _animationController,
+                                  builder: (context, child) {
+                                    return Container(
+                                      height: 3,
+                                      width: MediaQuery.of(context).size.width *
+                                          _animationController.value,
+                                      color: Colors.white,
+                                    );
+                                  },
+                                )
                               : Container(
-                            height: 3,
-                            color: index < _currentIndex
-                                ? Colors.white
-                                : Colors.transparent,
-                          ),
+                                  height: 3,
+                                  color: index < _currentIndex
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                ),
                         ],
                       ),
                     ),
@@ -609,9 +635,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                             '${widget.viewers.length}',
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
-                          SizedBox(
-                            width: 10,
-                          ),
+                          SizedBox(width: 10),
                           GestureDetector(
                               onTap: () {
                                 Navigator.of(context).pop();
@@ -630,18 +654,23 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                                 color: Colors.white,
                               )),
                         ],
->>>>>>> parent of 51a5820 (push the updated work)
                       ),
                     ),
-                  ],
-                ),
-              ),
-            )
+                  )
                 : Container(),
           ],
         ),
       ),
     );
+  }
+
+  void _onPreviousStatus() {
+    if (_currentIndex > 0) {
+      setState(() {
+        _currentIndex--;
+      });
+      _initializeStatus();
+    }
   }
 
   void _showViewers() {
@@ -682,7 +711,8 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
 class FollowerStatusView extends StatefulWidget {
   final List<List<String>> followersStatuses; // List of statuses per follower
   final int initialFollowerIndex; // Start with a specific follower's statuses
-  final int initialStatusIndex; // Start at a specific status within that follower
+  final int
+      initialStatusIndex; // Start at a specific status within that follower
   final UserProfile? userProfile;
   final String token;
 
@@ -699,7 +729,8 @@ class FollowerStatusView extends StatefulWidget {
   _FollowerStatusViewState createState() => _FollowerStatusViewState();
 }
 
-class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProviderStateMixin {
+class _FollowerStatusViewState extends State<FollowerStatusView>
+    with TickerProviderStateMixin {
   late int _currentFollowerIndex;
   late int _currentStatusIndex;
   Timer? _timer;
@@ -712,7 +743,9 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
     super.initState();
     _currentFollowerIndex = widget.initialFollowerIndex;
     _currentStatusIndex = widget.initialStatusIndex;
-    _animationController = AnimationController(vsync: this);
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 15));
+
     _initializeStatus();
   }
 
@@ -721,7 +754,8 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
     _timer?.cancel();
     setState(() => _isLoading = true);
 
-    if (_isVideo(widget.followersStatuses[_currentFollowerIndex][_currentStatusIndex])) {
+    if (_isVideo(
+        widget.followersStatuses[_currentFollowerIndex][_currentStatusIndex])) {
       _initializeVideo();
     } else {
       _initializeImage();
@@ -729,7 +763,8 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
   }
 
   bool _isVideo(String url) {
-    return url.endsWith(".mp4") || url.endsWith(".mov"); // Simple check for video files
+    return url.endsWith(".mp4") ||
+        url.endsWith(".mov"); // Simple check for video files
   }
 
   Future<void> _initializeVideo() async {
@@ -756,7 +791,9 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
     try {
       await _videoController!.initialize();
       final videoDuration = _videoController!.value.duration;
-      final cappedDuration = videoDuration <= Duration(seconds: 15) ? videoDuration : Duration(seconds: 15);
+      final cappedDuration = videoDuration <= Duration(seconds: 10)
+          ? videoDuration
+          : Duration(seconds: 10);
 
       if (mounted) {
         setState(() {
@@ -785,32 +822,33 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
       widget.followersStatuses[_currentFollowerIndex][_currentStatusIndex],
       fit: BoxFit.cover,
     ).image.resolve(ImageConfiguration()).addListener(
-      ImageStreamListener(
+          ImageStreamListener(
             (ImageInfo info, bool _) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-              _animationController.duration = Duration(seconds: 5);
-              _animationController.forward(from: 0);
-            });
-            _timer = Timer(Duration(seconds: 5), _onNextStatus);
-          }
-        },
-        onError: (error, stackTrace) {
-          print("Error loading image: $error");
-          if (mounted) {
-            setState(() => _isLoading = false);
-          }
-        },
-      ),
-    );
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                  _animationController.duration = Duration(seconds: 10);
+                  _animationController.forward(from: 0);
+                });
+                _timer = Timer(Duration(seconds: 10), _onNextStatus);
+              }
+            },
+            onError: (error, stackTrace) {
+              print("Error loading image: $error");
+              if (mounted) {
+                setState(() => _isLoading = false);
+              }
+            },
+          ),
+        );
   }
 
   void _onNextStatus() {
     _animationController.stop();
     _timer?.cancel();
 
-    if (_currentStatusIndex < widget.followersStatuses[_currentFollowerIndex].length - 1) {
+    if (_currentStatusIndex <
+        widget.followersStatuses[_currentFollowerIndex].length - 1) {
       setState(() {
         _currentStatusIndex++;
       });
@@ -835,7 +873,8 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
     } else if (_currentFollowerIndex > 0) {
       setState(() {
         _currentFollowerIndex--;
-        _currentStatusIndex = widget.followersStatuses[_currentFollowerIndex].length - 1;
+        _currentStatusIndex =
+            widget.followersStatuses[_currentFollowerIndex].length - 1;
       });
       _initializeStatus();
     }
@@ -860,21 +899,23 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
             Center(
               child: _isLoading
                   ? CircularProgressIndicator()
-                  : _isVideo(widget.followersStatuses[_currentFollowerIndex][_currentStatusIndex]) &&
-                  _videoController != null &&
-                  _videoController!.value.isInitialized
-                  ? AspectRatio(
-                aspectRatio: _videoController!.value.aspectRatio,
-                child: VideoPlayer(_videoController!),
-              )
-                  : Image.network(
-                widget.followersStatuses[_currentFollowerIndex][_currentStatusIndex],
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    Icon(Icons.error, color: Colors.white),
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-              ),
+                  : _isVideo(widget.followersStatuses[_currentFollowerIndex]
+                              [_currentStatusIndex]) &&
+                          _videoController != null &&
+                          _videoController!.value.isInitialized
+                      ? AspectRatio(
+                          aspectRatio: _videoController!.value.aspectRatio,
+                          child: VideoPlayer(_videoController!),
+                        )
+                      : Image.network(
+                          widget.followersStatuses[_currentFollowerIndex]
+                              [_currentStatusIndex],
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.error, color: Colors.white),
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                        ),
             ),
             GestureDetector(
               onTapUp: (details) {
@@ -903,7 +944,7 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
               child: Row(
                 children: List.generate(
                   widget.followersStatuses[_currentFollowerIndex].length,
-                      (index) => Expanded(
+                  (index) => Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Stack(
@@ -914,20 +955,22 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
                           ),
                           index == _currentStatusIndex
                               ? AnimatedBuilder(
-                            animation: _animationController,
-                            builder: (context, child) {
-                              return Container(
-                                height: 3,
-                                width: MediaQuery.of(context).size.width *
-                                    _animationController.value,
-                                color: Colors.white,
-                              );
-                            },
-                          )
+                                  animation: _animationController,
+                                  builder: (context, child) {
+                                    return Container(
+                                      height: 3,
+                                      width: MediaQuery.of(context).size.width *
+                                          _animationController.value,
+                                      color: Colors.white,
+                                    );
+                                  },
+                                )
                               : Container(
-                            height: 3,
-                            color: index < _currentStatusIndex ? Colors.white : Colors.transparent,
-                          ),
+                                  height: 3,
+                                  color: index < _currentStatusIndex
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                ),
                         ],
                       ),
                     ),
@@ -941,5 +984,3 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
     );
   }
 }
-
-
