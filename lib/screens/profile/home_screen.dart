@@ -366,7 +366,8 @@ class _HomeScreenState extends State<HomeScreen>
       caption: '',
       mediaUrls: fullMediaUrls,
       profileImageUrl: AppUtils.testImage,
-      isVideo: post.media.any((media) => media.mediaType == 'video'),
+      isVideo:
+          post.media.any((media) => media.mediaType == 'video') ? true : false,
       likes: post.likesCount.toString(),
       comments: post.commentsCount.toString(),
       shares: "50",
