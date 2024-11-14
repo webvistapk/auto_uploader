@@ -394,6 +394,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     super.initState();
     _currentIndex = widget.initialIndex;
 <<<<<<< HEAD
+<<<<<<< HEAD
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 10),
@@ -402,6 +403,9 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
         _onNextStatus();
       }
     });
+=======
+    _animationController = AnimationController(vsync: this);
+>>>>>>> parent of 51a5820 (push the updated work)
 =======
     _animationController = AnimationController(vsync: this);
 >>>>>>> parent of 51a5820 (push the updated work)
