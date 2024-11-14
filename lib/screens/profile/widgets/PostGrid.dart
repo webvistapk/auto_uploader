@@ -1,22 +1,24 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/endpoints.dart';
+import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:video_player/video_player.dart';
 import '../../../models/UserProfile/post_model.dart';
-import '../post_screen.dart';
 import '../user_post_screen.dart';
 
 class PostGrid extends StatelessWidget {
-  final List<PostModel> posts; // Future that fetches posts
+  final List<PostModel> posts;
   final bool isVideo;
   String filterType;
   String userId;
 
-  PostGrid(
-      {super.key,
-      required this.posts,
-      this.isVideo = false,
-      required this.filterType,
-      required this.userId});
+  PostGrid({
+    super.key,
+    required this.posts,
+    this.isVideo = false,
+    required this.filterType,
+    required this.userId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,65 +31,77 @@ class PostGrid extends StatelessWidget {
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
-      itemCount: posts.length, // Use the length of the post list
+      itemCount: posts.length,
       itemBuilder: (context, index) {
-        final post = posts[index]; // Access the specific post
+        final post = posts[index];
+
+        // Debugging: Check media type
+        print('Post media type: ${post.media[0].mediaType}');
 
         return GestureDetector(
-          onTap: () {
-            // Navigate to PostScreen on tap
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => UserPostScreen(
-                  posts: posts,
-                  initialIndex: index,
-                  filterType: filterType,
-                  userId: userId,
-                ),
-              ),
-            );
-          },
+          onTap: post.media[0].mediaType == 'video'
+              ? () {
+                  print('Navigating to FullscreenVideoPlayer');
+                  Navigator.push(
+                    context,
+                    CupertinoDialogRoute(
+                      builder: (_) => FullscreenVideoPlayer(
+                        videoUrl:
+                            "http://147.79.117.253:8001${post.media[0].file}",
+                      ),
+                      context: context,
+                    ),
+                  );
+                }
+              : () {
+                  // Navigate to PostScreen on tap
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserPostScreen(
+                        posts: posts,
+                        initialIndex: index,
+                        filterType: filterType,
+                        userId: userId,
+                      ),
+                    ),
+                  );
+                },
           child: Hero(
-              tag: 'profile_images_$index',
-              child: post.media.isEmpty
-                  ? Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    )
-                  : post.media[0].mediaType == 'video'
-                      ? Container(
-                          width: double.infinity,
-                          height: 400,
-                          child: VideoPlayerWidget(
-                              videoUrl:
-                                  "http://147.79.117.253:8001/api${post.media[0].file}"))
-                      : Image.network(
-                          post.media.isNotEmpty
-                              ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
-                              : '', // Display the media URL
-                          fit: BoxFit.cover,
-                          loadingBuilder: (BuildContext context, Widget child,
-                              ImageChunkEvent? loadingProgress) {
-                            if (loadingProgress == null) {
-                              // Image has fully loaded
-                              return child;
-                            } else {
-                              // Image is still loading, show CircularProgressIndicator
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          (loadingProgress.expectedTotalBytes ??
-                                              1)
-                                      : null,
-                                ),
-                              );
-                            }
-                          },
-                          errorBuilder: (context, error, stackTrace) =>
-                              Icon(Icons.broken_image),
-                        )),
+            tag: 'profile_images_$index',
+            child: post.media.isEmpty
+                ? Center(child: CircularProgressIndicator.adaptive())
+                : post.media[0].mediaType == 'video'
+                    ? VideoPlayerWidget(
+                        videoUrl:
+                            "http://147.79.117.253:8001${post.media[0].file}",
+                      )
+                    : Image.network(
+                        post.media.isNotEmpty
+                            ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
+                            : '',
+                        fit: BoxFit.cover,
+                        loadingBuilder: (BuildContext context, Widget child,
+                            ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          } else {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        (loadingProgress.expectedTotalBytes ??
+                                            1)
+                                    : null,
+                              ),
+                            );
+                          }
+                        },
+                        errorBuilder: (context, error, stackTrace) =>
+                            Icon(Icons.broken_image),
+                      ),
+          ),
         );
       },
     );
@@ -125,12 +139,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      alignment: Alignment.center, // Center the CircularProgressIndicator
+      alignment: Alignment.center,
       children: [
         AspectRatio(
           aspectRatio: _controller.value.isInitialized
               ? _controller.value.aspectRatio
-              : 16 / 9, // Placeholder aspect ratio while loading
+              : 16 / 9,
           child: VideoPlayer(_controller),
         ),
         if (!_controller.value.isInitialized)
