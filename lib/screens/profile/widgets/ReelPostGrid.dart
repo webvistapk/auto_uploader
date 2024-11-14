@@ -147,8 +147,6 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
-
-
   VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
 
   @override
@@ -165,6 +163,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       ..addListener(() {
         setState(() {
           // Check if the video is buffering
+          print("Video URL: ${widget.videoUrl}");
           _isBuffering = _controller.value.isBuffering;
         });
       })

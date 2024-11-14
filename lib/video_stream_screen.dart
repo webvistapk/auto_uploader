@@ -17,6 +17,7 @@ class _VideoStreamScreenState extends State<VideoStreamScreen> {
 
   @override
   void initState() {
+    print("REEL URL: ${widget.videoUrl}");
     super.initState();
     _initializeVideo();
   }

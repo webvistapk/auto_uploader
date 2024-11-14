@@ -176,6 +176,7 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   Widget _buildVideoPlayer(String videoUrl) {
+    print("VIDEO URL : ${videoUrl}");
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Container(

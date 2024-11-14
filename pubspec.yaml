@@ -55,7 +55,7 @@ dependencies:
   chewie:
   card_swiper: ^3.0.1
  
-  image_picker: ^1.0.8
+  image_picker:
   permission_handler: ^11.0.1
 
   
