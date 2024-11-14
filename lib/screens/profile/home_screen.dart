@@ -735,7 +735,8 @@ class _FollowerStatusViewState extends State<FollowerStatusView> with TickerProv
     super.initState();
     _currentFollowerIndex = widget.initialFollowerIndex;
     _currentStatusIndex = widget.initialStatusIndex;
-    AnimationController(vsync: this, duration: Duration(seconds: 15));
+    _animationController = AnimationController(vsync: this, duration: Duration(seconds: 15));
+
     _initializeStatus();
   }
 
