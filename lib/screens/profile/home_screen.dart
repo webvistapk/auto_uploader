@@ -393,6 +393,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+<<<<<<< HEAD
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 10),
@@ -401,6 +402,9 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
         _onNextStatus();
       }
     });
+=======
+    _animationController = AnimationController(vsync: this);
+>>>>>>> parent of 51a5820 (push the updated work)
     _initializeStatus();
   }
 
@@ -436,6 +440,18 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
 
     try {
       await _videoController!.initialize();
+<<<<<<< HEAD
+=======
+      final videoDuration = _videoController!.value.duration;
+      final cappedDuration = videoDuration <= Duration(seconds: 15)
+          ? videoDuration
+          : Duration(seconds: 15);
+
+      _animationController.duration = cappedDuration;
+      _videoController!.play();
+      _animationController.forward(from: 0);
+      _timer = Timer(cappedDuration, _onNextStatus);
+>>>>>>> parent of 51a5820 (push the updated work)
     } catch (e) {
       print("Error loading video: $e");
       setState(() => _isLoading = false);
@@ -454,6 +470,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     ).image.resolve(ImageConfiguration()).addListener(
       ImageStreamListener(
             (ImageInfo info, bool _) {
+<<<<<<< HEAD
           setState(() {
             _isLoading = false;
             _animationController.forward(from: 0); // Start animation when image is ready
@@ -465,6 +482,21 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
         },
       ),
     );
+=======
+              setState(() {
+                _isLoading = false;
+                _animationController.duration = Duration(seconds: 5);
+                _animationController.forward(from: 0);
+              });
+              _timer = Timer(Duration(seconds: 5), _onNextStatus);
+            },
+            onError: (error, stackTrace) {
+              print("Error loading image: $error");
+              setState(() => _isLoading = false);
+            },
+          ),
+        );
+>>>>>>> parent of 51a5820 (push the updated work)
   }
 
   void _onNextStatus() {
@@ -589,6 +621,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
             ),
             widget.isUser
                 ? Positioned(
+<<<<<<< HEAD
               bottom: 40,
               child: GestureDetector(
                 onTap: _showViewers,
@@ -618,6 +651,41 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                         Icons.add_circle_outline,
                         size: 27,
                         color: Colors.white,
+=======
+                    bottom: 40,
+                    child: GestureDetector(
+                      onTap: _showViewers,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.remove_red_eye, color: Colors.white),
+                          SizedBox(width: 5),
+                          Text(
+                            '${widget.viewers.length}',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                Navigator.push(
+                                    context,
+                                    CupertinoDialogRoute(
+                                        builder: (_) => StoryScreen(
+                                              userProfile: widget.userProfile,
+                                              token: widget.token,
+                                            ),
+                                        context: context));
+                              },
+                              child: Icon(
+                                Icons.add_circle_outline,
+                                size: 27,
+                                color: Colors.white,
+                              )),
+                        ],
+>>>>>>> parent of 51a5820 (push the updated work)
                       ),
                     ),
                   ],
