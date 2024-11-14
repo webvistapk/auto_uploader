@@ -393,8 +393,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 15));
+    _animationController = AnimationController(vsync: this);
     _initializeStatus();
   }
 
@@ -462,7 +461,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
             (ImageInfo info, bool _) {
               setState(() {
                 _isLoading = false;
-                _animationController.duration = Duration(seconds: 10);
+                _animationController.duration = Duration(seconds: 5);
                 _animationController.forward(from: 0);
               });
               _timer = Timer(Duration(seconds: 5), _onNextStatus);
@@ -610,7 +609,9 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                             '${widget.viewers.length}',
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
-                          SizedBox(width: 10),
+                          SizedBox(
+                            width: 10,
+                          ),
                           GestureDetector(
                               onTap: () {
                                 Navigator.of(context).pop();
