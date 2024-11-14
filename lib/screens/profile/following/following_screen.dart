@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/controller/endpoints.dart';
@@ -39,10 +41,10 @@ class _FollowingScreenState extends State<FollowingScreen> {
   Future<void> loadFollowings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? followingsData = prefs.getString(Prefrences.followingKey) ?? null;
-
+    // debugger();
     if (followingsData != null) {
       // Load followings from shared preferences if available
-      List<dynamic> followingsJson = json.decode(followingsData);
+      List<dynamic> followingsJson = json.decode(followingsData!);
       setState(() {
         followings = followingsJson
             .map((followingJson) => Following.fromJson(followingJson))
@@ -69,7 +71,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
+        // debugger();
         List<dynamic> followingsData = data["followings"] ?? [];
         followings = followingsData
             .map((followingJson) => Following.fromJson(followingJson))

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
+import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
@@ -204,14 +205,21 @@ class _HomeScreenState extends State<HomeScreen>
                     children: [
                       Center(child: _buildStoriesSection()),
                       const Divider(thickness: 1),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: _posts
-                              .map((post) => _buildPostCard(post))
-                              .toList(),
-                        ),
-                      ),
+                      _posts.isEmpty
+                          ? Center(
+                              child: Text(
+                                "No Post Available Right Now",
+                                style: AppTextStyles.poppinsBold(),
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: _posts
+                                    .map((post) => _buildPostCard(post))
+                                    .toList(),
+                              ),
+                            ),
                       if (_isLoadingMore)
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -384,7 +392,8 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _animationController = AnimationController(vsync: this);
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 15));
     _initializeStatus();
   }
 
@@ -420,9 +429,9 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     try {
       await _videoController!.initialize();
       final videoDuration = _videoController!.value.duration;
-      final cappedDuration = videoDuration <= Duration(seconds: 15)
+      final cappedDuration = videoDuration <= Duration(seconds: 10)
           ? videoDuration
-          : Duration(seconds: 15);
+          : Duration(seconds: 10);
 
       _animationController.duration = cappedDuration;
       _videoController!.play();
@@ -448,10 +457,10 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
             (ImageInfo info, bool _) {
               setState(() {
                 _isLoading = false;
-                _animationController.duration = Duration(seconds: 5);
+                _animationController.duration = Duration(seconds: 10);
                 _animationController.forward(from: 0);
               });
-              _timer = Timer(Duration(seconds: 5), _onNextStatus);
+              _timer = Timer(Duration(seconds: 10), _onNextStatus);
             },
             onError: (error, stackTrace) {
               print("Error loading image: $error");
@@ -524,6 +533,19 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                   }
                 }
               },
+              onLongPressStart: (_) {
+                _animationController.stop();
+                _timer?.cancel();
+                _videoController?.pause();
+              },
+              onLongPressEnd: (_) {
+                _animationController.forward();
+                _timer = Timer(
+                    _animationController.duration! *
+                        (1.0 - _animationController.value),
+                    _onNextStatus);
+                _videoController?.play();
+              },
             ),
             Positioned(
               top: 40,
@@ -590,9 +612,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                             '${widget.viewers.length}',
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
-                          SizedBox(
-                            width: 10,
-                          ),
+                          SizedBox(width: 10),
                           GestureDetector(
                               onTap: () {
                                 Navigator.of(context).pop();

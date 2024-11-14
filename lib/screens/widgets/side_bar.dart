@@ -77,12 +77,15 @@ class SideBar extends StatelessWidget {
             title: const Text('Logout'),
             onTap: () async {
               // Navigate to settings
+
               SharedPreferences removeUser =
                   await SharedPreferences.getInstance();
+
               await Prefrences.removeAuthToken();
-              removeUser.remove(Prefrences.authToken);
+              await removeUser.remove(Prefrences.authToken);
               await UserPreferences().clearCurrentUser();
               await removeUser.remove(UserPreferences.userKey);
+              await removeUser.clear();
               ToastNotifier.showSuccessToast(
                   context, "Logout user Successfully");
               Navigator.pushAndRemoveUntil(

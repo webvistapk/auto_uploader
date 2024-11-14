@@ -38,10 +38,10 @@ class _FollowersScreenState extends State<FollowersScreen> {
   Future<void> loadFollowers() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? followersData = prefs.getString(Prefrences.followerKey) ?? null;
-
+    // debugger();
     if (followersData != null) {
       // Load followers from shared preferences if available
-      List<dynamic> followersJson = json.decode(followersData);
+      List<dynamic> followersJson = json.decode(followersData!);
       setState(() {
         followers = followersJson
             .map((followerJson) => Follower.fromJson(followerJson))
@@ -73,7 +73,7 @@ class _FollowersScreenState extends State<FollowersScreen> {
         followers = followersData
             .map((followerJson) => Follower.fromJson(followerJson))
             .toList();
-
+        log("followersData: $followersData");
         await Prefrences.saveFollowers(followersData);
 
         setState(() {

@@ -23,7 +23,7 @@ class FollowerTile extends StatelessWidget {
                     follower.profileImage!.isNotEmpty
                 ? ClipOval(
                     child: Image.network(
-                      follower.profileImage!,
+                      'http://147.79.117.253:8001${follower.profileImage}',
                       width: 50,
                       height: 50,
                       fit: BoxFit.cover,
