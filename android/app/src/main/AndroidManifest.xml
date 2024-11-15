@@ -11,6 +11,7 @@
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+    android:networkSecurityConfig="@xml/network_security_config"
         android:label="mobile"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -41,6 +42,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+            
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility?hl=en and
