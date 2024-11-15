@@ -40,8 +40,8 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
     try {
       List<ReelPostModel> newReel =
-          await Provider.of<PostProvider>(context, listen: false)
-              .fetchReels(context, widget.userId, limit, offset);
+      await Provider.of<PostProvider>(context, listen: false)
+          .fetchReels(context, widget.userId, limit, offset);
 
       setState(() {
         _fileUrls.addAll(
@@ -62,7 +62,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 300 &&
+        _scrollController.position.maxScrollExtent - 300 &&
         !_isLoadingMore &&
         _hasMore) {
       _fetchReelPosts();
@@ -82,7 +82,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
         Expanded(
           child: _fileUrls.isNotEmpty
               ? VideoGrid(
-                  videoUrls: _fileUrls, scrollController: _scrollController)
+              videoUrls: _fileUrls, scrollController: _scrollController)
               : const Center(child: Text("No reels available")),
         ),
         if (_isLoadingMore)
@@ -189,26 +189,20 @@ class _VideoGridState extends State<VideoGrid> {
             child: Stack(
               children: [
                 AspectRatio(
-                  aspectRatio: _controllers[index].value.isInitialized
-                      ? _controllers[index].value.aspectRatio
-                      : 16 / 9,
+                  aspectRatio: 16 / 9, // Fixed 16:9 aspect ratio
                   child: _controllers[index].value.isInitialized
                       ? VideoPlayer(_controllers[index])
                       : Shimmer.fromColors(
-                          baseColor: Colors.grey[300]!,
-                          highlightColor: Colors.grey[100]!,
-                          child: Container(color: Colors.grey),
-                        ),
-                ),
-                if (_currentlyPlayingIndex != index ||
-                    !_controllers[index].value.isPlaying)
-                  Center(
-                    child: Icon(
-                      Icons.play_circle,
-                      color: Colors.black,
-                      size: 40,
-                    ),
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(color: Colors.grey),
                   ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    _togglePlayPause(index);
+                  },
+                ),
               ],
             ),
           ),
@@ -237,27 +231,13 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
       ..initialize().then((_) {
         setState(() {}); // Rebuild to show video once initialized
         _controller.play();
-      })
-      ..addListener(_videoProgressListener); // Listen to video progress
-
-    // Auto navigate back when video completes
-    _controller.addListener(() {
-      if (_controller.value.position == _controller.value.duration) {
-        Navigator.of(context).pop();
-      }
-    });
+      });
   }
 
   @override
   void dispose() {
-    _controller.removeListener(
-        _videoProgressListener); // Remove listener to avoid memory leaks
     _controller.dispose();
     super.dispose();
-  }
-
-  void _videoProgressListener() {
-    setState(() {}); // Rebuild widget to update the progress bar
   }
 
   @override
@@ -266,7 +246,6 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Video player with tap-to-play/pause functionality
           GestureDetector(
             onTap: () {
               setState(() {
@@ -280,13 +259,12 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
             child: Center(
               child: _controller.value.isInitialized
                   ? AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    )
-                  : const CircularProgressIndicator(), // Show loader while initializing
+                aspectRatio: 16 / 9, // Fixed 16:9 aspect ratio
+                child: VideoPlayer(_controller),
+              )
+                  : const CircularProgressIndicator(),
             ),
           ),
-          // Top back button
           Positioned(
             top: 20,
             left: 10,
@@ -297,19 +275,6 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
               },
             ),
           ),
-          // Top progress bar
-          if (_controller.value.isInitialized)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: LinearProgressIndicator(
-                value: _controller.value.position.inSeconds /
-                    _controller.value.duration.inSeconds,
-                backgroundColor: Colors.grey.withOpacity(0.5),
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-              ),
-            ),
         ],
       ),
     );

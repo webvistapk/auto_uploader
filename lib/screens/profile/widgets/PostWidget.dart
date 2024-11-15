@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
 
 class PostWidget extends StatefulWidget {
@@ -264,6 +265,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             aspectRatio: _controller.value.aspectRatio,
             child: VideoPlayer(_controller),
           )
-        : Center(child: CircularProgressIndicator());
+        : Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(color: Colors.grey),
+    );
   }
 }

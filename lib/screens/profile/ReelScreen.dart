@@ -81,34 +81,34 @@ class _ReelScreenState extends State<ReelScreen> {
                   onTap: () {
                     // Handle Like Action
                   },
-                  child: Icon(Icons.favorite_outline, color: AppColors.grey, size: 30),
+                  child: Icon(Icons.favorite_outline, color: AppColors.white, size: 30),
                 ),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
                     // Handle Comment Action
                   },
-                  child: Icon(Icons.messenger, color: AppColors.grey, size: 30),
+                  child: Icon(Icons.messenger, color: AppColors.white, size: 30),
                 ),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
                     // Handle Share Action
                   },
-                  child: Icon(FontAwesomeIcons.share, color: AppColors.grey, size: 30),
+                  child: Icon(FontAwesomeIcons.share, color: AppColors.white, size: 30),
                 ),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
                     // Handle Bookmark Action
                   },
-                  child: Icon(Icons.bookmark_outline, color: AppColors.grey, size: 30),
+                  child: Icon(Icons.bookmark_outline, color: AppColors.white, size: 30),
                 ),
                 SizedBox(height: 20),
                 // Conditionally show edit/delete options
                 widget.showEditDeleteOptions
                     ? PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: AppColors.grey, size: 30),
+                  icon: Icon(Icons.more_vert, color: AppColors.white, size: 30),
                   onSelected: (value) {
                     if (value == 'delete') {
                       // Call delete function
