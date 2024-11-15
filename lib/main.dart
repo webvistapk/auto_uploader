@@ -30,22 +30,21 @@ class MyApp extends StatelessWidget {
     screenWidth = MediaQuery.of(context).size.width;
     screenWidth = MediaQuery.of(context).size.height;
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => FollowerRequestProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),
-        ChangeNotifierProvider(create: (_) => PostProvider()),
-        ChangeNotifierProvider(create: (_) => TagsProvider()),
-        ChangeNotifierProvider(create: (_) => FollowerProvider()),
-        ChangeNotifierProvider(create: (_) => MediaProvider()),
-      ],
-      child: MaterialApp(
-          title: 'Fillet Social Media App',
-          theme: ThemeData(
-            primarySwatch: Colors.green,
-            textTheme: GoogleFonts.poppinsTextTheme(),
-          ),
-          home: SplashScreen())
-    );
+        providers: [
+          ChangeNotifierProvider(create: (_) => FollowerRequestProvider()),
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => ProfileProvider()),
+          ChangeNotifierProvider(create: (_) => PostProvider()),
+          ChangeNotifierProvider(create: (_) => TagsProvider()),
+          ChangeNotifierProvider(create: (_) => FollowerProvider()),
+          ChangeNotifierProvider(create: (_) => MediaProvider()),
+        ],
+        child: MaterialApp(
+            title: 'Fillet Social Media App',
+            theme: ThemeData(
+              primarySwatch: Colors.green,
+              textTheme: GoogleFonts.poppinsTextTheme(),
+            ),
+            home: SplashScreen()));
   }
 }
