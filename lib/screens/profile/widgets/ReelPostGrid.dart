@@ -6,6 +6,7 @@ import 'package:video_player/video_player.dart';
 import '../../../controller/endpoints.dart';
 import '../../../controller/services/post/post_provider.dart';
 import '../../../models/ReelPostModel.dart';
+import '../ReelScreen.dart';
 
 class ReelPostGrid extends StatefulWidget {
   final String userId;
@@ -17,6 +18,7 @@ class ReelPostGrid extends StatefulWidget {
 }
 
 class _ReelPostGridState extends State<ReelPostGrid> {
+  List<ReelPostModel> _reels = [];
   List<String> _fileUrls = [];
   bool _isLoadingMore = false;
   bool _hasMore = true;
@@ -44,6 +46,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
           .fetchReels(context, widget.userId, limit, offset);
 
       setState(() {
+        _reels.addAll(newReel); // Add newReel to _reels
         _fileUrls.addAll(
             newReel.map((reel) => '${ApiURLs.baseUrl2}${reel.file}').toList());
         offset += limit;
@@ -69,6 +72,16 @@ class _ReelPostGridState extends State<ReelPostGrid> {
     }
   }
 
+  void _navigateToReelScreen(int index) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => ReelScreen(
+        reels: _reels,
+        initialIndex: index,
+        showEditDeleteOptions: true, // Set this based on your requirement
+      ),
+    ));
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -82,7 +95,10 @@ class _ReelPostGridState extends State<ReelPostGrid> {
         Expanded(
           child: _fileUrls.isNotEmpty
               ? VideoGrid(
-              videoUrls: _fileUrls, scrollController: _scrollController)
+            videoUrls: _fileUrls,
+            scrollController: _scrollController,
+            onVideoTap: _navigateToReelScreen, // Pass function to VideoGrid
+          )
               : const Center(child: Text("No reels available")),
         ),
         if (_isLoadingMore)
@@ -106,8 +122,13 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 class VideoGrid extends StatefulWidget {
   final List<String> videoUrls;
   final ScrollController scrollController;
+  final Function(int) onVideoTap;
 
-  const VideoGrid({required this.videoUrls, required this.scrollController});
+  const VideoGrid({
+    required this.videoUrls,
+    required this.scrollController,
+    required this.onVideoTap,
+  });
 
   @override
   _VideoGridState createState() => _VideoGridState();
@@ -152,12 +173,6 @@ class _VideoGridState extends State<VideoGrid> {
     });
   }
 
-  void _openFullscreenVideo(String videoUrl) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => FullscreenVideoPlayer(videoUrl: videoUrl),
-    ));
-  }
-
   @override
   void dispose() {
     for (var controller in _controllers) {
@@ -181,15 +196,13 @@ class _VideoGridState extends State<VideoGrid> {
       itemCount: widget.videoUrls.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () {
-            _openFullscreenVideo(widget.videoUrls[index]);
-          },
+          onTap: () => widget.onVideoTap(index), // Trigger navigation on tap
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.0),
             child: Stack(
               children: [
                 AspectRatio(
-                  aspectRatio: 16 / 9, // Fixed 16:9 aspect ratio
+                  aspectRatio: 16 / 9,
                   child: _controllers[index].value.isInitialized
                       ? VideoPlayer(_controllers[index])
                       : Shimmer.fromColors(
@@ -199,9 +212,7 @@ class _VideoGridState extends State<VideoGrid> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {
-                    _togglePlayPause(index);
-                  },
+                  onTap: ()=>widget.onVideoTap(index),
                 ),
               ],
             ),
