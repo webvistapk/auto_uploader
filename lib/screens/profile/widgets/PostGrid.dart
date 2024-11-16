@@ -35,13 +35,10 @@ class PostGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final post = posts[index];
 
-        // Debugging: Check media type
-        print('Post media type: ${post.media[0].mediaType}');
-
         return GestureDetector(
-          onTap: post.media[0].mediaType == 'video'
+          onTap: post.media.isNotEmpty && post.media[0].mediaType == 'video'
               ? () {
-                  print('Navigating to FullscreenVideoPlayer');
+                  // Navigate to full-screen video player
                   Navigator.push(
                     context,
                     CupertinoDialogRoute(
@@ -61,46 +58,57 @@ class PostGrid extends StatelessWidget {
                       builder: (context) => UserPostScreen(
                         posts: posts,
                         initialIndex: index,
-                        filterType: filterType,
-                        userId: userId,
+                        filterType: "all", // Update based on your context
+                        userId: "userId", // Replace with actual userId
                       ),
                     ),
                   );
                 },
           child: Hero(
             tag: 'profile_images_$index',
-            child: post.media.isEmpty
-                ? Center(child: CircularProgressIndicator.adaptive())
-                : post.media[0].mediaType == 'video'
-                    ? VideoPlayerWidget(
-                        videoUrl:
-                            "http://147.79.117.253:8001${post.media[0].file}",
-                      )
-                    : Image.network(
-                        post.media.isNotEmpty
-                            ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}"
-                            : '',
-                        fit: BoxFit.cover,
-                        loadingBuilder: (BuildContext context, Widget child,
-                            ImageChunkEvent? loadingProgress) {
-                          if (loadingProgress == null) {
-                            return child;
-                          } else {
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        (loadingProgress.expectedTotalBytes ??
-                                            1)
-                                    : null,
-                              ),
-                            );
-                          }
-                        },
-                        errorBuilder: (context, error, stackTrace) =>
-                            Icon(Icons.broken_image),
-                      ),
+            child: Container(
+              color: Colors.grey[300], // Grey background for shimmer effect
+              child: post.media.isEmpty
+                  ? Center(child: CircularProgressIndicator.adaptive())
+                  : post.media[0].mediaType == 'video'
+                      ? Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            VideoPlayerWidget(
+                              videoUrl:
+                                  "http://147.79.117.253:8001${post.media[0].file}",
+                            ),
+                            Icon(
+                              Icons.play_circle_fill,
+                              color: Colors.white,
+                              size: 50,
+                            ), // Play button overlay
+                          ],
+                        )
+                      : Image.network(
+                          "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
+                          fit: BoxFit.cover,
+                          loadingBuilder: (BuildContext context, Widget child,
+                              ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            } else {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          (loadingProgress.expectedTotalBytes ??
+                                              1)
+                                      : null,
+                                ),
+                              );
+                            }
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.broken_image),
+                        ),
+            ),
           ),
         );
       },

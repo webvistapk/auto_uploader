@@ -42,8 +42,8 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
     try {
       List<ReelPostModel> newReel =
-      await Provider.of<PostProvider>(context, listen: false)
-          .fetchReels(context, widget.userId, limit, offset);
+          await Provider.of<PostProvider>(context, listen: false)
+              .fetchReels(context, widget.userId, limit, offset);
 
       setState(() {
         _reels.addAll(newReel); // Add newReel to _reels
@@ -65,7 +65,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300 &&
+            _scrollController.position.maxScrollExtent - 300 &&
         !_isLoadingMore &&
         _hasMore) {
       _fetchReelPosts();
@@ -95,10 +95,10 @@ class _ReelPostGridState extends State<ReelPostGrid> {
         Expanded(
           child: _fileUrls.isNotEmpty
               ? VideoGrid(
-            videoUrls: _fileUrls,
-            scrollController: _scrollController,
-            onVideoTap: _navigateToReelScreen, // Pass function to VideoGrid
-          )
+                  videoUrls: _fileUrls,
+                  scrollController: _scrollController,
+                  // onVideoTap: _navigateToReelScreen, // Pass function to VideoGrid
+                )
               : const Center(child: Text("No reels available")),
         ),
         if (_isLoadingMore)
@@ -119,67 +119,116 @@ class _ReelPostGridState extends State<ReelPostGrid> {
   }
 }
 
-class VideoGrid extends StatefulWidget {
-  final List<String> videoUrls;
-  final ScrollController scrollController;
-  final Function(int) onVideoTap;
+class AdvancedReelPostGrid extends StatefulWidget {
+  final String userId;
 
-  const VideoGrid({
-    required this.videoUrls,
-    required this.scrollController,
-    required this.onVideoTap,
-  });
+  const AdvancedReelPostGrid({Key? key, required this.userId})
+      : super(key: key);
 
   @override
-  _VideoGridState createState() => _VideoGridState();
+  _AdvancedReelPostGridState createState() => _AdvancedReelPostGridState();
 }
 
-class _VideoGridState extends State<VideoGrid> {
-  late List<VideoPlayerController> _controllers;
-  int? _currentlyPlayingIndex;
+class _AdvancedReelPostGridState extends State<AdvancedReelPostGrid> {
+  final ScrollController _scrollController = ScrollController();
+  List<String> _videoUrls = [];
+  bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int limit = 9;
+  int offset = 0;
 
   @override
   void initState() {
     super.initState();
-    _initializeControllers();
+    _scrollController.addListener(_onScroll);
+    _fetchVideos();
   }
 
-  void _initializeControllers() {
-    _controllers = widget.videoUrls
-        .map((url) => VideoPlayerController.network(url))
-        .toList();
-    for (var controller in _controllers) {
-      controller.initialize().then((_) {
-        setState(() {});
-      }).catchError((error) {
-        print("Error loading video: $error");
+  Future<void> _fetchVideos() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      // Fetch data from Provider (assumed to be implemented).
+      final newVideos = await Provider.of<PostProvider>(context, listen: false)
+          .fetchReels(context, widget.userId, limit, offset);
+
+      setState(() {
+        _videoUrls.addAll(newVideos.map((video) => video.file).toList());
+        offset += limit;
+        if (newVideos.length < limit) _hasMore = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load videos: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoadingMore = false;
+        _isLoading = false;
       });
     }
   }
 
-  void _togglePlayPause(int index) {
-    setState(() {
-      if (_currentlyPlayingIndex == index &&
-          _controllers[index].value.isPlaying) {
-        _controllers[index].pause();
-        _currentlyPlayingIndex = null;
-      } else {
-        if (_currentlyPlayingIndex != null) {
-          _controllers[_currentlyPlayingIndex!].pause();
-        }
-        _controllers[index].play();
-        _currentlyPlayingIndex = index;
-      }
-    });
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 300 &&
+        !_isLoadingMore &&
+        _hasMore) {
+      _fetchVideos();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Column(
+            children: [
+              Expanded(
+                child: _videoUrls.isNotEmpty
+                    ? VideoGrid(
+                        videoUrls: _videoUrls,
+                        scrollController: _scrollController,
+                      )
+                    : const Center(child: Text("No videos available")),
+              ),
+              if (_isLoadingMore)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: 40,
+                      width: double.infinity,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+            ],
+          );
   }
 
   @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
+    _scrollController.dispose();
     super.dispose();
   }
+}
+
+class VideoGrid extends StatelessWidget {
+  final List<String> videoUrls;
+  final ScrollController scrollController;
+
+  const VideoGrid({
+    required this.videoUrls,
+    required this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -187,39 +236,76 @@ class _VideoGridState extends State<VideoGrid> {
     final crossAxisCount = screenWidth > 600 ? 3 : 2;
 
     return GridView.builder(
-      controller: widget.scrollController,
+      controller: scrollController,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
       ),
-      itemCount: widget.videoUrls.length,
+      itemCount: videoUrls.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () => widget.onVideoTap(index), // Trigger navigation on tap
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    FullscreenVideoPlayer(videoUrl: videoUrls[index]),
+              ),
+            );
+          },
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: _controllers[index].value.isInitialized
-                      ? VideoPlayer(_controllers[index])
-                      : Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: Container(color: Colors.grey),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: ()=>widget.onVideoTap(index),
-                ),
-              ],
-            ),
+            borderRadius: BorderRadius.circular(12),
+            child: VideoThumbnail(url: videoUrls[index]),
           ),
         );
       },
     );
+  }
+}
+
+class VideoThumbnail extends StatefulWidget {
+  final String url;
+
+  const VideoThumbnail({required this.url});
+
+  @override
+  _VideoThumbnailState createState() => _VideoThumbnailState();
+}
+
+class _VideoThumbnailState extends State<VideoThumbnail> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.network(widget.url)
+      ..initialize().then((_) {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _controller.value.isInitialized
+        ? Stack(
+            children: [
+              VideoPlayer(_controller),
+              const Positioned.fill(
+                child: Icon(Icons.play_circle, color: Colors.white, size: 50),
+              ),
+            ],
+          )
+        : Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(color: Colors.grey),
+          );
   }
 }
 
@@ -240,7 +326,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
     super.initState();
     _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
-        setState(() {}); // Rebuild to show video once initialized
+        setState(() {});
         _controller.play();
       });
   }
@@ -257,33 +343,20 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                if (_controller.value.isPlaying) {
-                  _controller.pause();
-                } else {
-                  _controller.play();
-                }
-              });
-            },
-            child: Center(
-              child: _controller.value.isInitialized
-                  ? AspectRatio(
-                aspectRatio: 16 / 9, // Fixed 16:9 aspect ratio
-                child: VideoPlayer(_controller),
-              )
-                  : const CircularProgressIndicator(),
-            ),
+          Center(
+            child: _controller.value.isInitialized
+                ? AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: VideoPlayer(_controller),
+                  )
+                : const CircularProgressIndicator(),
           ),
           Positioned(
             top: 20,
             left: 10,
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
         ],
