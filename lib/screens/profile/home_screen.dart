@@ -212,7 +212,16 @@ class _HomeScreenState extends State<HomeScreen>
                                 style: AppTextStyles.poppinsBold(),
                               ),
                             )
-                          : Padding(
+                          :
+                          // Padding(
+                          //     padding: const EdgeInsets.all(8.0),
+                          //     child: Column(
+                          //       children: _posts
+                          //           .map((post) => _buildPostCard(post))
+                          //           .toList(),
+                          //     ),
+                          //   ),
+                          Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
                                 children: _posts
@@ -220,14 +229,6 @@ class _HomeScreenState extends State<HomeScreen>
                                     .toList(),
                               ),
                             ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: _posts
-                              .map((post) => _buildPostCard(post))
-                              .toList(),
-                        ),
-                      ),
                       if (_isLoadingMore)
                         Padding(
                           padding: const EdgeInsets.all(8.0),

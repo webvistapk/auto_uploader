@@ -33,13 +33,14 @@ class _VideoStreamScreenState extends State<VideoStreamScreen> {
 
   void _initializeVideo() {
     _videoController = VideoPlayerController.network(widget.videoUrl)
-      ..initialize().then((_) {
+      ..initialize().then((_) async {
         setState(() {
           _isLoading = false;
         });
         if (widget.onVideoPlayed != null) {
           widget.onVideoPlayed!(); // Notify that video is played
         }
+        await _videoController.setLooping(true);
       }).catchError((error) {
         print("Error loading video: $error");
         setState(() => _isLoading = false);

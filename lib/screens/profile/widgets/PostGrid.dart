@@ -36,34 +36,36 @@ class PostGrid extends StatelessWidget {
         final post = posts[index];
 
         return GestureDetector(
-          onTap: post.media.isNotEmpty && post.media[0].mediaType == 'video'
-              ? () {
-                  // Navigate to full-screen video player
-                  Navigator.push(
-                    context,
-                    CupertinoDialogRoute(
-                      builder: (_) => FullscreenVideoPlayer(
-                        videoUrl:
-                            "http://147.79.117.253:8001${post.media[0].file}",
-                      ),
-                      context: context,
-                    ),
-                  );
-                }
-              : () {
-                  // Navigate to PostScreen on tap
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UserPostScreen(
-                        posts: posts,
-                        initialIndex: index,
-                        filterType: "all", // Update based on your context
-                        userId: "userId", // Replace with actual userId
-                      ),
-                    ),
-                  );
-                },
+          onTap:
+              // post.media.isNotEmpty && post.media[0].mediaType == 'video'
+              //     ? () {
+              //         // Navigate to full-screen video player
+              // Navigator.push(
+              //   context,
+              //   CupertinoDialogRoute(
+              //     builder: (_) => FullscreenVideoPlayer(
+              //       videoUrl:
+              //           "http://147.79.117.253:8001${post.media[0].file}",
+              //     ),
+              //     context: context,
+              //   ),
+              // );
+              //       }
+              //     :
+              () {
+            // Navigate to PostScreen on tap
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserPostScreen(
+                  posts: posts,
+                  initialIndex: index,
+                  filterType: "all", // Update based on your context
+                  userId: "userId", // Replace with actual userId
+                ),
+              ),
+            );
+          },
           child: Hero(
             tag: 'profile_images_$index',
             child: Container(
@@ -134,7 +136,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
         setState(() {});
-        _controller.play(); // Auto-play the video
+        // _controller.play(); // Auto-play the video
       });
   }
 

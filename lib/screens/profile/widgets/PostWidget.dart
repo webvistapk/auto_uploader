@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
+import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
 
@@ -100,13 +103,25 @@ class _PostWidgetState extends State<PostWidget> {
                         ));
                   }
                 : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => postFullScreen(
-                              mediaUrls: widget.mediaUrls,
-                              initialIndex: _currentImageIndex)),
-                    );
+                    if (widget.isVideo) {
+                      Navigator.push(
+                        context,
+                        CupertinoDialogRoute(
+                          builder: (_) => FullscreenVideoPlayer(
+                            videoUrl: "${widget.mediaUrls[0]}",
+                          ),
+                          context: context,
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => postFullScreen(
+                                mediaUrls: widget.mediaUrls,
+                                initialIndex: _currentImageIndex)),
+                      );
+                    }
                   },
             child: widget.isVideo
                 ? _buildVideoPlayer(widget.mediaUrls.first)
@@ -248,7 +263,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
         setState(() {});
-        _controller.play();
+        // _controller.play();
       });
   }
 
@@ -266,9 +281,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             child: VideoPlayer(_controller),
           )
         : Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: Container(color: Colors.grey),
-    );
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(color: Colors.grey),
+          );
   }
 }
