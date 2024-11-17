@@ -42,11 +42,11 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
     try {
       List<ReelPostModel> newReel =
-          await Provider.of<PostProvider>(context, listen: false)
-              .fetchReels(context, widget.userId, limit, offset);
+      await Provider.of<PostProvider>(context, listen: false)
+          .fetchReels(context, widget.userId, limit, offset);
 
       setState(() {
-        _reels.addAll(newReel); // Add newReel to _reels
+        _reels.addAll(newReel);
         _fileUrls.addAll(
             newReel.map((reel) => '${ApiURLs.baseUrl2}${reel.file}').toList());
         offset += limit;
@@ -65,7 +65,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 300 &&
+        _scrollController.position.maxScrollExtent - 300 &&
         !_isLoadingMore &&
         _hasMore) {
       _fetchReelPosts();
@@ -76,8 +76,8 @@ class _ReelPostGridState extends State<ReelPostGrid> {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => ReelScreen(
         reels: _reels,
-        initialIndex: index,
-        showEditDeleteOptions: true, // Set this based on your requirement
+        initialIndex: index, // Pass the index of the selected video
+        showEditDeleteOptions: true,
       ),
     ));
   }
@@ -95,10 +95,10 @@ class _ReelPostGridState extends State<ReelPostGrid> {
         Expanded(
           child: _fileUrls.isNotEmpty
               ? VideoGrid(
-                  videoUrls: _fileUrls,
-                  scrollController: _scrollController,
-                  // onVideoTap: _navigateToReelScreen, // Pass function to VideoGrid
-                )
+            videoUrls: _fileUrls,
+            scrollController: _scrollController,
+            onVideoTap: _navigateToReelScreen, // Pass function to VideoGrid
+          )
               : const Center(child: Text("No reels available")),
         ),
         if (_isLoadingMore)
@@ -119,116 +119,66 @@ class _ReelPostGridState extends State<ReelPostGrid> {
   }
 }
 
-class AdvancedReelPostGrid extends StatefulWidget {
-  final String userId;
-
-  const AdvancedReelPostGrid({Key? key, required this.userId})
-      : super(key: key);
-
-  @override
-  _AdvancedReelPostGridState createState() => _AdvancedReelPostGridState();
-}
-
-class _AdvancedReelPostGridState extends State<AdvancedReelPostGrid> {
-  final ScrollController _scrollController = ScrollController();
-  List<String> _videoUrls = [];
-  bool _isLoading = true;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
-  int limit = 9;
-  int offset = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-    _fetchVideos();
-  }
-
-  Future<void> _fetchVideos() async {
-    if (_isLoadingMore || !_hasMore) return;
-
-    setState(() {
-      _isLoadingMore = true;
-    });
-
-    try {
-      // Fetch data from Provider (assumed to be implemented).
-      final newVideos = await Provider.of<PostProvider>(context, listen: false)
-          .fetchReels(context, widget.userId, limit, offset);
-
-      setState(() {
-        _videoUrls.addAll(newVideos.map((video) => video.file).toList());
-        offset += limit;
-        if (newVideos.length < limit) _hasMore = false;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load videos: $e')),
-      );
-    } finally {
-      setState(() {
-        _isLoadingMore = false;
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 300 &&
-        !_isLoadingMore &&
-        _hasMore) {
-      _fetchVideos();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : Column(
-            children: [
-              Expanded(
-                child: _videoUrls.isNotEmpty
-                    ? VideoGrid(
-                        videoUrls: _videoUrls,
-                        scrollController: _scrollController,
-                      )
-                    : const Center(child: Text("No videos available")),
-              ),
-              if (_isLoadingMore)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: Container(
-                      height: 40,
-                      width: double.infinity,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-            ],
-          );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-}
-
-class VideoGrid extends StatelessWidget {
+class VideoGrid extends StatefulWidget {
   final List<String> videoUrls;
   final ScrollController scrollController;
+  final Function(int) onVideoTap;
 
   const VideoGrid({
     required this.videoUrls,
     required this.scrollController,
+    required this.onVideoTap,
   });
+
+  @override
+  _VideoGridState createState() => _VideoGridState();
+}
+
+class _VideoGridState extends State<VideoGrid> {
+  late List<VideoPlayerController> _controllers;
+  int? _currentlyPlayingIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    _controllers = widget.videoUrls
+        .map((url) => VideoPlayerController.network(url))
+        .toList();
+    for (var controller in _controllers) {
+      controller.initialize().then((_) {
+        setState(() {});
+      }).catchError((error) {
+        print("Error loading video: $error");
+      });
+    }
+  }
+
+  void _togglePlayPause(int index) {
+    setState(() {
+      if (_currentlyPlayingIndex == index && _controllers[index].value.isPlaying) {
+        _controllers[index].pause();
+        _currentlyPlayingIndex = null;
+      } else {
+        if (_currentlyPlayingIndex != null) {
+          _controllers[_currentlyPlayingIndex!].pause();
+        }
+        _controllers[index].play();
+        _currentlyPlayingIndex = index;
+      }
+    });
+  }
+
+    @override
+    void dispose() {
+      for (var controller in _controllers) {
+        controller.dispose();
+      }
+      super.dispose();
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -236,32 +186,71 @@ class VideoGrid extends StatelessWidget {
     final crossAxisCount = screenWidth > 600 ? 3 : 2;
 
     return GridView.builder(
-      controller: scrollController,
+      controller: widget.scrollController,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
       ),
-      itemCount: videoUrls.length,
+      itemCount: widget.videoUrls.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) =>
-                    FullscreenVideoPlayer(videoUrl: videoUrls[index]),
-              ),
-            );
-          },
+          onTap: () => widget.onVideoTap(index),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: VideoThumbnail(url: videoUrls[index]),
+            borderRadius: BorderRadius.circular(12.0),
+            child: VideoThumbnail(url: widget.videoUrls[index]),
           ),
         );
       },
     );
   }
 }
+
+
+/*class VideoGrid extends StatefulWidget {
+  final List<String> videoUrls;
+  final ScrollController scrollController;
+  final Function(int) onVideoTap;
+
+  const VideoGrid({
+    required this.videoUrls,
+    required this.scrollController,
+    required this.onVideoTap,
+  });
+
+  @override
+  State<VideoGrid> createState() => _VideoGridState();
+}
+
+class _VideoGridState extends State<VideoGrid> {
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = screenWidth > 600 ? 3 : 2;
+
+    return GridView.builder(
+      controller: widget.scrollController,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+      ),
+      itemCount: widget.videoUrls.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: (){
+            print("On Tapped");
+            widget.onVideoTap;
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: VideoThumbnail(url: widget.videoUrls[index]),
+          ),
+        );
+      },
+    );
+  }
+}*/
 
 class VideoThumbnail extends StatefulWidget {
   final String url;

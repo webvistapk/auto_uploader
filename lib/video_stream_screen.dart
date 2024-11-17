@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+
 class VideoStreamScreen extends StatefulWidget {
   final String videoUrl;
+  final VoidCallback? onVideoPlayed; // Callback to notify that video is played
 
-  const VideoStreamScreen({Key? key, required this.videoUrl}) : super(key: key);
+  const VideoStreamScreen({
+    Key? key,
+    required this.videoUrl,
+    this.onVideoPlayed,
+  }) : super(key: key);
 
   @override
   _VideoStreamScreenState createState() => _VideoStreamScreenState();
@@ -28,6 +37,9 @@ class _VideoStreamScreenState extends State<VideoStreamScreen> {
         setState(() {
           _isLoading = false;
         });
+        if (widget.onVideoPlayed != null) {
+          widget.onVideoPlayed!(); // Notify that video is played
+        }
       }).catchError((error) {
         print("Error loading video: $error");
         setState(() => _isLoading = false);
