@@ -52,7 +52,7 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         List<PostModel> followerPosts = (data['posts'] as List).map((postJson) => PostModel.fromJson(postJson)).toList();
-
+        print("Response ${response.body}");
         // Cache or update the follower posts
         setPosts(followerPosts);
 
@@ -185,9 +185,10 @@ class PostProvider extends ChangeNotifier {
     print("Fetching API");
 
     final String? token = await Prefrences.getAuthToken();
+    int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     // Base URL and API path
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}${id}";
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}${_loggedInUserId}";
 
     // Add query parameters for pagination (limit and offpage)
     Uri uri = Uri.parse(URL).replace(queryParameters: {
@@ -203,7 +204,7 @@ class PostProvider extends ChangeNotifier {
         "Authorization": "Bearer $token"
       });
 
-      print(response.body);
+      print("Response Data of UserPost ${response.body}");
 
       if (response.statusCode == 200) {
         final jsonList = jsonDecode(response.body);
@@ -375,6 +376,7 @@ class PostProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print("RESPONSE OF POST: ${response.body}");
         _post = PostDetails.fromJson(data['posts']);
         print(_post);
       } else {

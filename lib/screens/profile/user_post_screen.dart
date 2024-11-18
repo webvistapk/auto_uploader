@@ -129,7 +129,9 @@ class _UserPostScreenState extends State<UserPostScreen> {
                                 "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
                             .toList()
                         : [], // Ensure empty list if no media
-                    profileImageUrl: AppUtils.testImage,
+                    profileImageUrl: post.user.profileImage != null
+                        ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+                        : AppUtils.userImage,
                     isVideo: post.media.isNotEmpty &&
                         post.media[0].mediaType == 'video',
                     likes: post.likesCount.toString(),
