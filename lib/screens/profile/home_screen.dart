@@ -10,6 +10,7 @@ import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/messaging/chat_screen.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:mobile/screens/search/widget/search_screen.dart';
@@ -172,8 +173,16 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications, color: Colors.grey),
-            onPressed: () {},
+            icon: Icon(Icons.message_outlined, color: Colors.grey),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  CupertinoDialogRoute(
+                      builder: (_) => ChatScreen(
+                            userProfile: widget.userProfile!,
+                          ),
+                      context: context));
+            },
           ),
           IconButton(
             icon: Icon(Icons.search, color: Colors.grey),
