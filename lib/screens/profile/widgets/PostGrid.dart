@@ -31,7 +31,7 @@ class _PostGridState extends State<PostGrid> {
   @override
   void initState() {
     super.initState();
-    _fetchPosts(); // Fetch initial posts
+    _fetchPosts();
     _scrollController.addListener(_onScroll);
   }
 
@@ -43,14 +43,14 @@ class _PostGridState extends State<PostGrid> {
 
   void _onScroll() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent &&
-        !_isLoadingMore && _hasMorePosts) {
-      _fetchPosts(); // Fetch more posts on reaching the end
+        !_isLoadingMore &&
+        _hasMorePosts) {
+      _fetchPosts();
     }
   }
 
   Future<void> _fetchPosts() async {
     setState(() => _isLoadingMore = true);
-
     try {
       List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
           .getPost(context, widget.userId, _limit, _offset);
@@ -59,9 +59,7 @@ class _PostGridState extends State<PostGrid> {
         _allPosts.addAll(newPosts);
         _offset += newPosts.length;
         _isLoadingMore = false;
-        if (newPosts.isEmpty) {
-          _hasMorePosts = false;
-        }
+        if (newPosts.isEmpty) _hasMorePosts = false;
       });
     } catch (error) {
       setState(() => _isLoadingMore = false);
@@ -102,8 +100,8 @@ class _PostGridState extends State<PostGrid> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => UserPostScreen(
-                        posts: filteredPosts, // Pass all filtered posts
-                        initialIndex: index, // Set the selected post index
+                        posts: filteredPosts,
+                        initialIndex: index,
                         filterType: widget.filterType,
                         userId: widget.userId,
                       ),
@@ -121,7 +119,8 @@ class _PostGridState extends State<PostGrid> {
                       alignment: Alignment.center,
                       children: [
                         VideoPlayerWidget(
-                          videoUrl: "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
+                          videoUrl:
+                          "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
                         ),
                         Icon(
                           Icons.play_circle_fill,
@@ -138,12 +137,14 @@ class _PostGridState extends State<PostGrid> {
                         return Center(
                           child: CircularProgressIndicator(
                             value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                (loadingProgress.expectedTotalBytes ?? 1)
                                 : null,
                           ),
                         );
                       },
-                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
+                      errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.broken_image),
                     ),
                   ),
                 ),

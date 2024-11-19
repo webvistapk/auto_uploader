@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
 import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
@@ -51,6 +52,17 @@ class PostWidget extends StatefulWidget {
 
 class _PostWidgetState extends State<PostWidget> {
   int _currentImageIndex = 0;
+  bool isLiked = false;
+
+
+  void _likePost() {
+    setState(() {
+      isLiked = !isLiked;
+    });
+
+    // Call the newLike method from PostProvider to update the like status on the server
+    PostProvider().newLike(int.parse(widget.postId), context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,57 +93,49 @@ class _PostWidgetState extends State<PostWidget> {
                   ],
                 ),
               ),
-              /* if (widget.showFollowButton)
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Follow',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),*/
             ],
           ),
           const SizedBox(height: 10),
           InkWell(
             onTap: widget.isInteractive
                 ? () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              SinglePost(postId: widget.postId),
-                        ));
-                  }
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        SinglePost(postId: widget.postId),
+                  ));
+            }
                 : () {
-                    if (widget.isVideo) {
-                      Navigator.push(
-                        context,
-                        CupertinoDialogRoute(
-                          builder: (_) => FullscreenVideoPlayer(
-                            videoUrl: "${widget.mediaUrls[0]}",
-                          ),
-                          context: context,
-                        ),
-                      );
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => postFullScreen(
-                                mediaUrls: widget.mediaUrls,
-                                initialIndex: _currentImageIndex)),
-                      );
-                    }
-                  },
+              if (widget.isVideo) {
+                Navigator.push(
+                  context,
+                  CupertinoDialogRoute(
+                    builder: (_) => FullscreenVideoPlayer(
+                      videoUrl: "${widget.mediaUrls[0]}",
+                    ),
+                    context: context,
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => postFullScreen(
+                          mediaUrls: widget.mediaUrls,
+                          initialIndex: _currentImageIndex)),
+                );
+              }
+            },
             child: widget.isVideo
                 ? _buildVideoPlayer(widget.mediaUrls.first)
                 : Column(
-                    children: [
-                      _buildImageCarousel(widget.mediaUrls),
-                      SizedBox(height: 8),
-                      _buildImageIndicator(widget.mediaUrls.length),
-                    ],
-                  ),
+              children: [
+                _buildImageCarousel(widget.mediaUrls),
+                SizedBox(height: 8),
+                _buildImageIndicator(widget.mediaUrls.length),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
           Row(
@@ -141,7 +145,13 @@ class _PostWidgetState extends State<PostWidget> {
               SizedBox(width: 10),
               _buildInteractionIcon(CupertinoIcons.bookmark, widget.saved),
               SizedBox(width: 10),
-              _buildInteractionIcon(Icons.favorite_border, widget.likes),
+              GestureDetector(
+                onTap: _likePost, // Call _likePost when the like icon is clicked
+                child: _buildInteractionIcon(
+                  isLiked ? Icons.favorite : Icons.favorite_border,
+                  widget.likes,
+                ),
+              ),
               SizedBox(width: 10),
               _buildInteractionIcon(
                   CupertinoIcons.chat_bubble_fill, widget.shares),
@@ -185,7 +195,6 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   Widget _buildVideoPlayer(String videoUrl) {
-    print("VIDEO URL : ${videoUrl}");
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Container(
@@ -228,22 +237,23 @@ class _PostWidgetState extends State<PostWidget> {
     return itemCount < 2
         ? Container()
         : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(itemCount, (index) {
-              return Container(
-                width: 8,
-                height: 8,
-                margin: EdgeInsets.symmetric(horizontal: 3),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color:
-                      _currentImageIndex == index ? Colors.black : Colors.grey,
-                ),
-              );
-            }),
-          );
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(itemCount, (index) {
+        return Container(
+          width: 8,
+          height: 8,
+          margin: EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color:
+            _currentImageIndex == index ? Colors.black : Colors.grey,
+          ),
+        );
+      }),
+    );
   }
 }
+
 
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;

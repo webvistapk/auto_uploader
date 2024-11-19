@@ -13,13 +13,8 @@ import 'ReelPostGrid.dart';
 
 class ProfileImages extends StatefulWidget {
   String userid;
-  final Future<List<PostModel>>? posts;
-  final Function(String postID) refresh;
   ProfileImages({
     super.key,
-    //required this.images,
-    required this.posts,
-    required this.refresh,
     required this.userid,
   });
 
@@ -28,7 +23,7 @@ class ProfileImages extends StatefulWidget {
 }
 
 class _ProfileImagesState extends State<ProfileImages> {
-  // Filter Image Posts
+  /*// Filter Image Posts
   List<PostModel> getImagePosts(List<PostModel> posts) {
     return posts.where((post) {
       return post.media.isNotEmpty &&
@@ -41,7 +36,7 @@ class _ProfileImagesState extends State<ProfileImages> {
     return posts.where((post) {
       return post.media.isNotEmpty && post.media[0].mediaType == 'video';
     }).toList();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -168,62 +163,38 @@ class _ProfileImagesState extends State<ProfileImages> {
           SingleChildScrollView(
             child: SizedBox(
               height: 500, // Adjust height as needed
-              child: FutureBuilder<List<PostModel>>(
-                future: widget.posts,
-                builder: (context, snapshot) {
-                  // debugger();
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                        child: CircularProgressIndicator()); // Loading state
-                  } else if (snapshot.hasError) {
-                    return const Center(
-                        child: Text("Error loading posts")); // Error state
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                        child: Text("No posts available")); // Empty state
-                  }
-                  // debugger();
-                  // Data is ready
-                  List<PostModel> allPosts = snapshot.data!;
-                  List<PostModel> imagePosts = getImagePosts(allPosts);
-                  List<PostModel> videoPosts = getVideoPosts(allPosts);
-                  print("Video List: $videoPosts");
+              child: TabBarView(
+                // physics: NeverScrollableScrollPhysics(),
 
-                  // debugger();
-                  return TabBarView(
-                    // physics: NeverScrollableScrollPhysics(),
-
-                    children: [
-                      PostGrid(
-                        filterType: "allPost",
-                        userId: widget.userid,
-                      ), // All Posts
-                      PostGrid(
-                        filterType: "image",
-                        userId: widget.userid,
-                      ), // Filtered Image Posts
-                      PostGrid(
-                        filterType: "video",
-                        userId: widget.userid,
-                      ), // Filtered Video Posts
-                      PostGrid(
-                        filterType: "allPost",
-                        userId: widget.userid,
-                      ), // Placeholder for Pages
-                      PostGrid(
-                        filterType: "allPost",
-                        userId: widget.userid,
-                      ),
-                      PostGrid(
-                        filterType: "allPost",
-                        userId: widget.userid,
-                      ), // Placeholder for Posts
-                      ReelPostGrid(userId: widget.userid),
-                      const profile_info(), // Info tab
-                    ],
-                  );
-                },
-              ),// Placeholder for Posts
+                children: [
+                  PostGrid(
+                    filterType: "allPost",
+                    userId: widget.userid,
+                  ), // All Posts
+                  PostGrid(
+                    filterType: "image",
+                    userId: widget.userid,
+                  ), // Filtered Image Posts
+                  PostGrid(
+                    filterType: "video",
+                    userId: widget.userid,
+                  ), // Filtered Video Posts
+                  PostGrid(
+                    filterType: "allPost",
+                    userId: widget.userid,
+                  ), // Placeholder for Pages
+                  PostGrid(
+                    filterType: "allPost",
+                    userId: widget.userid,
+                  ),
+                  PostGrid(
+                    filterType: "allPost",
+                    userId: widget.userid,
+                  ), // Placeholder for Posts
+                  ReelPostGrid(userId: widget.userid),
+                  const profile_info(), // Info tab
+                ],
+              )// Placeholder for Posts
 
             ),
 

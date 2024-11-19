@@ -279,8 +279,7 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ReelPostModel>> fetchReels(
-      BuildContext context, String id, int limit, int offset) async {
+  Future<List<ReelPostModel>> fetchReels(BuildContext context, String id, int limit, int offset) async {
     final String? token = await Prefrences.getAuthToken();
 
     // Base URL and API path
@@ -388,6 +387,39 @@ class PostProvider extends ChangeNotifier {
       setIsLoading(false);
     }
   }
+
+  Future<void> newLike(int postID, BuildContext context) async {
+    final String? token = await Prefrences.getAuthToken();
+    if (token == null) return;
+
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}$postID/";
+
+    try {
+      final response = await http.post(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+       // ToastNotifier.showSuccessToast(context, "Post liked successfully!");
+        print("Post liked successfully");
+        // Refresh or update the UI based on your business logic
+        // If needed, you can fetch the updated like count or status here
+        notifyListeners()
+      } else {
+        throw Exception('Failed to like post');
+        notifyListeners()
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error liking the post: $e");
+      notifyListeners()
+      print(e);
+    }
+  }
+
 
   List<PostModel> _cachedPosts = [];
 
