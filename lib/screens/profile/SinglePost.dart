@@ -38,7 +38,9 @@ class SinglePost extends StatelessWidget {
                   mediaUrls: post.media
                       .map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
                       .toList(),
-                  profileImageUrl: AppUtils.testImage,
+                  profileImageUrl: post.user.profileImage != null
+                      ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+                      : AppUtils.userImage,
                   isVideo: post.media[0].mediaType == 'video',
                   likes: post.likesCount.toString(),
                   comments: post.commentsCount.toString(),

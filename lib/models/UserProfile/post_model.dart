@@ -31,8 +31,7 @@ class PostModel {
       id: json['id'],
       post: json['post'],
       tags: (json['tags'] as List).map((tag) => Tag.fromJson(tag)).toList(),
-      keywords:
-          (json['keywords'] as List).map((kw) => Keyword.fromJson(kw)).toList(),
+      keywords: (json['keywords'] as List).map((kw) => Keyword.fromJson(kw)).toList(),
       media: (json['media'] as List).map((m) => Media.fromJson(m)).toList(),
       user: User.fromJson(json['user']),
       privacy: json['privacy'],
@@ -109,12 +108,14 @@ class User {
   final String username;
   final String firstName;
   final String lastName;
+  final String? profileImage; // Add this field
 
   User({
     required this.id,
     required this.username,
     required this.firstName,
     required this.lastName,
+    this.profileImage, // Make profileImage optional
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -123,6 +124,7 @@ class User {
       username: json['username'],
       firstName: json['first_name'],
       lastName: json['last_name'],
+      profileImage: json['profile_image'], // Parse the profileImage field
     );
   }
 }

@@ -94,6 +94,12 @@ class _HomeScreenState extends State<HomeScreen>
             builder: (context, mediaProvider, child) {
               final stories = mediaProvider.userStatus?.stories ??
                   mediaProvider.followersStatus?.stories;
+
+              // Define profileImageUrl to be accessible in both the if and else blocks
+              final profileImageUrl = (stories != null && stories.isNotEmpty && stories.first.user?.profileImage != null)
+                  ? '${ApiURLs.baseUrl2}${stories.first.user!.profileImage}'
+                  : AppUtils.userImage; // Fallback URL for profile image
+
               if (stories != null && stories.isNotEmpty) {
                 final List<Object?> allMediaFiles = stories.expand((story) {
                   return story.media!
@@ -120,14 +126,7 @@ class _HomeScreenState extends State<HomeScreen>
                   },
                   child: CircleAvatar(
                     radius: 20,
-                    child: ClipOval(
-                      child: Image.network(
-                        '${ApiURLs.baseUrl2}${stories.first.media?.first.file ?? 'assets/logo.webp'}',
-                        fit: BoxFit.cover,
-                        width: 40,
-                        height: 40,
-                      ),
-                    ),
+                    backgroundImage: NetworkImage(profileImageUrl),
                   ),
                 );
               } else {
@@ -144,14 +143,15 @@ class _HomeScreenState extends State<HomeScreen>
                     );
                   },
                   child: CircleAvatar(
-                    backgroundImage: AssetImage('assets/logo.webp'),
+                    radius: 20,
+                    backgroundImage: NetworkImage(profileImageUrl),
                   ),
                 );
               }
             },
           ),
         ),
-        bottom: PreferredSize(
+          bottom: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: Theme(
             data: Theme.of(context).copyWith(
@@ -366,7 +366,9 @@ class _HomeScreenState extends State<HomeScreen>
       date: post.createdAt,
       caption: '',
       mediaUrls: fullMediaUrls,
-      profileImageUrl: AppUtils.testImage,
+      profileImageUrl: post.user.profileImage != null
+          ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+          : AppUtils.userImage,
       isVideo:
           post.media.any((media) => media.mediaType == 'video') ? true : false,
       likes: post.likesCount.toString(),

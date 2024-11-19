@@ -78,7 +78,9 @@ class _PostScreenState extends State<PostScreen> {
                               .map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
                               .toList(),
                           isVideo: post.media.isNotEmpty && post.media[0].mediaType == 'video', // Fix here
-                          profileImageUrl: AppUtils.testImage,
+                          profileImageUrl: post.user.profileImage != null
+                              ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+                              : AppUtils.userImage,
                           likes: '100',
                           comments: '100',
                           shares: "100",

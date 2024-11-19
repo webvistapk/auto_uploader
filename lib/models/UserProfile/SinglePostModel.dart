@@ -118,12 +118,14 @@ class User {
   final String username;
   final String firstName;
   final String lastName;
+  final String? profileImage; // Added profile image field
 
   User({
     required this.id,
     required this.username,
     required this.firstName,
     required this.lastName,
+    this.profileImage,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -132,6 +134,7 @@ class User {
       username: json['username'],
       firstName: json['first_name'],
       lastName: json['last_name'],
+      profileImage: json['profile_image'], // Parse the profileImage field
     );
   }
 }

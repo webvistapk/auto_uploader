@@ -32,4 +32,5 @@ class ApiURLs {
   static const String get_follower_posts="posts/get/following/";
   static const String delete_reel="posts/reel/delete/";
   static const String get_follower_reel_post = "posts/reel/get/following/";
+  static const String new_like="posts/like/new/";
 }
