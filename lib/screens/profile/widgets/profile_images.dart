@@ -195,33 +195,26 @@ class _ProfileImagesState extends State<ProfileImages> {
 
                     children: [
                       PostGrid(
-                        posts: allPosts,
                         filterType: "allPost",
                         userId: widget.userid,
                       ), // All Posts
                       PostGrid(
-                        posts: imagePosts,
                         filterType: "image",
                         userId: widget.userid,
                       ), // Filtered Image Posts
                       PostGrid(
-                        posts: videoPosts,
-                        isVideo: true,
                         filterType: "video",
                         userId: widget.userid,
                       ), // Filtered Video Posts
                       PostGrid(
-                        posts: allPosts,
                         filterType: "allPost",
                         userId: widget.userid,
                       ), // Placeholder for Pages
                       PostGrid(
-                        posts: allPosts,
                         filterType: "allPost",
                         userId: widget.userid,
                       ),
                       PostGrid(
-                        posts: allPosts,
                         filterType: "allPost",
                         userId: widget.userid,
                       ), // Placeholder for Posts

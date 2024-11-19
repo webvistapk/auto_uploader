@@ -1,164 +1,161 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile/controller/endpoints.dart';
-import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
-import 'package:video_player/video_player.dart';
+import 'package:provider/provider.dart';
+import '../../../controller/endpoints.dart';
 import '../../../models/UserProfile/post_model.dart';
+import '../../advance_video_player.dart';
 import '../user_post_screen.dart';
+import '../../../controller/services/post/post_provider.dart';
 
-class PostGrid extends StatelessWidget {
-  final List<PostModel> posts;
-  final bool isVideo;
-  String filterType;
-  String userId;
+class PostGrid extends StatefulWidget {
+  final String filterType;
+  final String userId;
 
   PostGrid({
     super.key,
-    required this.posts,
-    this.isVideo = false,
     required this.filterType,
     required this.userId,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      scrollDirection: Axis.vertical,
-      physics: NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(8.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
-      itemCount: posts.length,
-      itemBuilder: (context, index) {
-        final post = posts[index];
-
-        return GestureDetector(
-          onTap:
-              // post.media.isNotEmpty && post.media[0].mediaType == 'video'
-              //     ? () {
-              //         // Navigate to full-screen video player
-              // Navigator.push(
-              //   context,
-              //   CupertinoDialogRoute(
-              //     builder: (_) => FullscreenVideoPlayer(
-              //       videoUrl:
-              //           "http://147.79.117.253:8001${post.media[0].file}",
-              //     ),
-              //     context: context,
-              //   ),
-              // );
-              //       }
-              //     :
-              () {
-            // Navigate to PostScreen on tap
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => UserPostScreen(
-                  posts: posts,
-                  initialIndex: index,
-                  filterType: "all", // Update based on your context
-                  userId: "userId", // Replace with actual userId
-                ),
-              ),
-            );
-          },
-          child: Hero(
-            tag: 'profile_images_$index',
-            child: Container(
-              color: Colors.grey[300], // Grey background for shimmer effect
-              child: post.media.isEmpty
-                  ? Center(child: CircularProgressIndicator.adaptive())
-                  : post.media[0].mediaType == 'video'
-                      ? Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            VideoPlayerWidget(
-                              videoUrl:
-                                  "http://147.79.117.253:8001${post.media[0].file}",
-                            ),
-                            Icon(
-                              Icons.play_circle_fill,
-                              color: Colors.white,
-                              size: 50,
-                            ), // Play button overlay
-                          ],
-                        )
-                      : Image.network(
-                          "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
-                          fit: BoxFit.cover,
-                          loadingBuilder: (BuildContext context, Widget child,
-                              ImageChunkEvent? loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            } else {
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          (loadingProgress.expectedTotalBytes ??
-                                              1)
-                                      : null,
-                                ),
-                              );
-                            }
-                          },
-                          errorBuilder: (context, error, stackTrace) =>
-                              Icon(Icons.broken_image),
-                        ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+  _PostGridState createState() => _PostGridState();
 }
 
-class VideoPlayerWidget extends StatefulWidget {
-  final String videoUrl;
-
-  const VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
-
-  @override
-  _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
-}
-
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  late VideoPlayerController _controller;
+class _PostGridState extends State<PostGrid> {
+  final ScrollController _scrollController = ScrollController();
+  List<PostModel> _allPosts = [];
+  int _offset = 0;
+  final int _limit = 10;
+  bool _isLoadingMore = false;
+  bool _hasMorePosts = true;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.videoUrl)
-      ..initialize().then((_) {
-        setState(() {});
-        // _controller.play(); // Auto-play the video
-      });
+    _fetchPosts(); // Fetch initial posts
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent &&
+        !_isLoadingMore && _hasMorePosts) {
+      _fetchPosts(); // Fetch more posts on reaching the end
+    }
+  }
+
+  Future<void> _fetchPosts() async {
+    setState(() => _isLoadingMore = true);
+
+    try {
+      List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
+          .getPost(context, widget.userId, _limit, _offset);
+
+      setState(() {
+        _allPosts.addAll(newPosts);
+        _offset += newPosts.length;
+        _isLoadingMore = false;
+        if (newPosts.isEmpty) {
+          _hasMorePosts = false;
+        }
+      });
+    } catch (error) {
+      setState(() => _isLoadingMore = false);
+      print("Error fetching posts: $error");
+    }
+  }
+
+  List<PostModel> _getFilteredPosts() {
+    if (widget.filterType == "image") {
+      return _allPosts.where((post) => post.media.any((media) => media.mediaType == 'image')).toList();
+    } else if (widget.filterType == "video") {
+      return _allPosts.where((post) => post.media.any((media) => media.mediaType == 'video')).toList();
+    }
+    return _allPosts;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
+    final filteredPosts = _getFilteredPosts();
+
+    return Column(
       children: [
-        AspectRatio(
-          aspectRatio: _controller.value.isInitialized
-              ? _controller.value.aspectRatio
-              : 16 / 9,
-          child: VideoPlayer(_controller),
+        Expanded(
+          child: GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(8.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: filteredPosts.length,
+            itemBuilder: (context, index) {
+              final post = filteredPosts[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserPostScreen(
+                        posts: filteredPosts, // Pass all filtered posts
+                        initialIndex: index, // Set the selected post index
+                        filterType: widget.filterType,
+                        userId: widget.userId,
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: 'profile_images_$index',
+                  child: Container(
+                    color: Colors.grey[300],
+                    child: post.media.isEmpty
+                        ? const Center(child: CircularProgressIndicator.adaptive())
+                        : post.media[0].mediaType == 'video'
+                        ? Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        VideoPlayerWidget(
+                          videoUrl: "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
+                        ),
+                        Icon(
+                          Icons.play_circle_fill,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                      ],
+                    )
+                        : Image.network(
+                      "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-        if (!_controller.value.isInitialized)
-          const CircularProgressIndicator(), // Show loading indicator
+        if (_isLoadingMore)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircularProgressIndicator(),
+          ),
       ],
     );
   }
