@@ -408,14 +408,14 @@ class PostProvider extends ChangeNotifier {
         print("Post liked successfully");
         // Refresh or update the UI based on your business logic
         // If needed, you can fetch the updated like count or status here
-        notifyListeners()
+        notifyListeners();
       } else {
         throw Exception('Failed to like post');
-        notifyListeners()
+        notifyListeners();
       }
     } catch (e) {
       ToastNotifier.showErrorToast(context, "Error liking the post: $e");
-      notifyListeners()
+      notifyListeners();
       print(e);
     }
   }
