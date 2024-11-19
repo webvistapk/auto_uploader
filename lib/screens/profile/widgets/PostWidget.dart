@@ -1,15 +1,13 @@
+import 'dart:developer';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
-import 'package:video_player/video_player.dart';
-
-import '../../widgets/full_screen_image.dart';
-
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/material.dart';
+import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
 
 class PostWidget extends StatefulWidget {
@@ -45,7 +43,6 @@ class PostWidget extends StatefulWidget {
     required this.refresh,
     this.showFollowButton = false,
     this.isInteractive = false,
-
   }) : super(key: key);
 
   @override
@@ -84,7 +81,7 @@ class _PostWidgetState extends State<PostWidget> {
                   ],
                 ),
               ),
-             /* if (widget.showFollowButton)
+              /* if (widget.showFollowButton)
                 TextButton(
                   onPressed: () {},
                   child: const Text(
@@ -98,32 +95,43 @@ class _PostWidgetState extends State<PostWidget> {
           InkWell(
             onTap: widget.isInteractive
                 ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SinglePost(postId: widget.postId),
-                )
-              );
-            } : (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => postFullScreen(
-                        mediaUrls: widget.mediaUrls,
-                        initialIndex: _currentImageIndex
-                    )
-                ),
-              );
-            },
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              SinglePost(postId: widget.postId),
+                        ));
+                  }
+                : () {
+                    if (widget.isVideo) {
+                      Navigator.push(
+                        context,
+                        CupertinoDialogRoute(
+                          builder: (_) => FullscreenVideoPlayer(
+                            videoUrl: "${widget.mediaUrls[0]}",
+                          ),
+                          context: context,
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => postFullScreen(
+                                mediaUrls: widget.mediaUrls,
+                                initialIndex: _currentImageIndex)),
+                      );
+                    }
+                  },
             child: widget.isVideo
                 ? _buildVideoPlayer(widget.mediaUrls.first)
                 : Column(
-              children: [
-                _buildImageCarousel(widget.mediaUrls),
-                SizedBox(height: 8),
-                _buildImageIndicator(widget.mediaUrls.length),
-              ],
-            ),
+                    children: [
+                      _buildImageCarousel(widget.mediaUrls),
+                      SizedBox(height: 8),
+                      _buildImageIndicator(widget.mediaUrls.length),
+                    ],
+                  ),
           ),
           const SizedBox(height: 10),
           Row(
@@ -135,7 +143,8 @@ class _PostWidgetState extends State<PostWidget> {
               SizedBox(width: 10),
               _buildInteractionIcon(Icons.favorite_border, widget.likes),
               SizedBox(width: 10),
-              _buildInteractionIcon(CupertinoIcons.chat_bubble_fill, widget.shares),
+              _buildInteractionIcon(
+                  CupertinoIcons.chat_bubble_fill, widget.shares),
             ],
           ),
           const SizedBox(height: 8),
@@ -176,6 +185,7 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   Widget _buildVideoPlayer(String videoUrl) {
+    print("VIDEO URL : ${videoUrl}");
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Container(
@@ -218,19 +228,20 @@ class _PostWidgetState extends State<PostWidget> {
     return itemCount < 2
         ? Container()
         : Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(itemCount, (index) {
-        return Container(
-          width: 8,
-          height: 8,
-          margin: EdgeInsets.symmetric(horizontal: 3),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _currentImageIndex == index ? Colors.black : Colors.grey,
-          ),
-        );
-      }),
-    );
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(itemCount, (index) {
+              return Container(
+                width: 8,
+                height: 8,
+                margin: EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      _currentImageIndex == index ? Colors.black : Colors.grey,
+                ),
+              );
+            }),
+          );
   }
 }
 
@@ -252,7 +263,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
         setState(() {});
-        _controller.play();
+        // _controller.play();
       });
   }
 
@@ -266,10 +277,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: VideoPlayer(_controller),
-    )
-        : Center(child: CircularProgressIndicator());
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
+          )
+        : Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(color: Colors.grey),
+          );
   }
 }
-

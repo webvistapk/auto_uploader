@@ -41,7 +41,7 @@ class _FollowersScreenState extends State<FollowersScreen> {
 
     if (followersData != null) {
       // Load followers from shared preferences if available
-      List<dynamic> followersJson = json.decode(followersData);
+      List<dynamic> followersJson = json.decode(followersData!);
       setState(() {
         followers = followersJson
             .map((followerJson) => Follower.fromJson(followerJson))
@@ -49,6 +49,7 @@ class _FollowersScreenState extends State<FollowersScreen> {
         isLoading = false;
       });
     } else {
+      log("followersData: $followersData");
       // If no data in shared preferences, fetch from API
       await fetchFollowers(widget.token, widget.userProfile!.id);
     }

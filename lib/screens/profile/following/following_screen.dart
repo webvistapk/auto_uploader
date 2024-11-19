@@ -42,7 +42,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
 
     if (followingsData != null) {
       // Load followings from shared preferences if available
-      List<dynamic> followingsJson = json.decode(followingsData);
+      List<dynamic> followingsJson = json.decode(followingsData!);
       setState(() {
         followings = followingsJson
             .map((followingJson) => Following.fromJson(followingJson))

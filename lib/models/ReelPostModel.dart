@@ -25,21 +25,23 @@ class ReelPostModel {
 
   factory ReelPostModel.fromJson(Map<String, dynamic> json) {
     return ReelPostModel(
-      id: json['id'] ?? 0,  // Default value if null
-      file: json['file'] ?? '',  // Default value if null
+      id: json['id'] ?? 0, // Default value if null
+      file: json['file'] ?? '', // Default value if null
       tags: List<String>.from(json['tags'] ?? []), // Empty list if null
       keywords: (json['keywords'] as List?)
-          ?.map((keywordJson) => Keyword.fromJson(keywordJson))
-          .toList() ?? [], // Empty list if null
+              ?.map((keywordJson) => Keyword.fromJson(keywordJson))
+              .toList() ??
+          [], // Empty list if null
       user: User.fromJson(json['user'] ?? {}), // Handle user field
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()), // Default to now if null
-      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()), // Default to now if null
+      createdAt: DateTime.parse(json['created_at'] ??
+          DateTime.now().toIso8601String()), // Default to now if null
+      updatedAt: DateTime.parse(json['updated_at'] ??
+          DateTime.now().toIso8601String()), // Default to now if null
       likesCount: json['likes_count'] ?? 0, // Default value if null
       commentsCount: json['comments_count'] ?? 0, // Default value if null
     );
   }
 }
-
 
 class Reel {
   final int id;

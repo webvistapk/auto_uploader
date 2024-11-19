@@ -20,6 +20,7 @@ import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../common/app_text_styles.dart';
 import '../../common/utils.dart';
 import '../../controller/services/StatusProvider.dart';
 import '../../controller/services/post/post_provider.dart';
@@ -204,14 +205,30 @@ class _HomeScreenState extends State<HomeScreen>
                     children: [
                       Center(child: _buildStoriesSection()),
                       const Divider(thickness: 1),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: _posts
-                              .map((post) => _buildPostCard(post))
-                              .toList(),
-                        ),
-                      ),
+                      _posts.isEmpty
+                          ? Center(
+                              child: Text(
+                                "No Post Available Right Now",
+                                style: AppTextStyles.poppinsBold(),
+                              ),
+                            )
+                          :
+                          // Padding(
+                          //     padding: const EdgeInsets.all(8.0),
+                          //     child: Column(
+                          //       children: _posts
+                          //           .map((post) => _buildPostCard(post))
+                          //           .toList(),
+                          //     ),
+                          //   ),
+                          Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: _posts
+                                    .map((post) => _buildPostCard(post))
+                                    .toList(),
+                              ),
+                            ),
                       if (_isLoadingMore)
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -245,12 +262,12 @@ class _HomeScreenState extends State<HomeScreen>
       return Center(child: Text('No stories available'));
     }
 
-    final List<List<String>> followersStatuses = stories.map((story) {
-      return story.media!
-          .map((media) => '${ApiURLs.baseUrl2}${media.file}')
-          .whereType<String>()
-          .toList();
-    }).toList();
+    // Log each story's details to ensure unique users and their media are correctly structured
+    print('Total followers with stories: ${stories.length}');
+    for (var story in stories) {
+      print(
+          'Username: ${story.user?.username}, Media Count: ${story.media?.length}');
+    }
 
     return SizedBox(
       height: 80,
@@ -260,22 +277,37 @@ class _HomeScreenState extends State<HomeScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(stories.length, (followerIndex) {
             final story = stories[followerIndex];
+
+            // Skip if no media
             if (story.media == null || story.media!.isEmpty) return SizedBox();
 
+            // Extract only the current follower's media URLs
+            final List<String> followerStatuses = story.media!
+                .map((media) => '${ApiURLs.baseUrl2}${media.file}')
+                .toList();
+
+            // Use the first media file as the thumbnail for the story
             final firstMediaFile = story.media!.first.file;
-            final username = story.user!.username;
+            final username = story.user?.username ?? 'Unknown';
 
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 InkWell(
                   onTap: () {
+                    // Debug output on tap
+                    print('Tapped on follower: $username');
+                    print(
+                        'Statuses for this follower: ${followerStatuses.length} items');
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => FollowerStatusView(
-                          followersStatuses: followersStatuses,
-                          initialFollowerIndex: followerIndex,
+                          followersStatuses: [
+                            followerStatuses
+                          ], // Pass only current follower's statuses
+                          initialFollowerIndex: 0,
                           initialStatusIndex: 0,
                           userProfile: widget.userProfile,
                           token: widget.token!,
@@ -311,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
                 const SizedBox(height: 5),
-                Text(username.toString(), style: const TextStyle(fontSize: 10)),
+                Text(username, style: const TextStyle(fontSize: 10)),
               ],
             );
           }),
@@ -335,7 +367,8 @@ class _HomeScreenState extends State<HomeScreen>
       caption: '',
       mediaUrls: fullMediaUrls,
       profileImageUrl: AppUtils.testImage,
-      isVideo: post.media.any((media) => media.mediaType == 'video'),
+      isVideo:
+          post.media.any((media) => media.mediaType == 'video') ? true : false,
       likes: post.likesCount.toString(),
       comments: post.commentsCount.toString(),
       shares: "50",
@@ -384,7 +417,8 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _animationController = AnimationController(vsync: this);
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 15));
     _initializeStatus();
   }
 
@@ -420,9 +454,9 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     try {
       await _videoController!.initialize();
       final videoDuration = _videoController!.value.duration;
-      final cappedDuration = videoDuration <= Duration(seconds: 15)
+      final cappedDuration = videoDuration <= Duration(seconds: 10)
           ? videoDuration
-          : Duration(seconds: 15);
+          : Duration(seconds: 10);
 
       _animationController.duration = cappedDuration;
       _videoController!.play();
@@ -448,10 +482,10 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
             (ImageInfo info, bool _) {
               setState(() {
                 _isLoading = false;
-                _animationController.duration = Duration(seconds: 5);
+                _animationController.duration = Duration(seconds: 10);
                 _animationController.forward(from: 0);
               });
-              _timer = Timer(Duration(seconds: 5), _onNextStatus);
+              _timer = Timer(Duration(seconds: 10), _onNextStatus);
             },
             onError: (error, stackTrace) {
               print("Error loading image: $error");
@@ -524,6 +558,19 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                   }
                 }
               },
+              onLongPressStart: (_) {
+                _animationController.stop();
+                _timer?.cancel();
+                _videoController?.pause();
+              },
+              onLongPressEnd: (_) {
+                _animationController.forward();
+                _timer = Timer(
+                    _animationController.duration! *
+                        (1.0 - _animationController.value),
+                    _onNextStatus);
+                _videoController?.play();
+              },
             ),
             Positioned(
               top: 40,
@@ -590,11 +637,10 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                             '${widget.viewers.length}',
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
-                          SizedBox(
-                            width: 10,
-                          ),
+                          SizedBox(width: 10),
                           GestureDetector(
                               onTap: () {
+                                Navigator.of(context).pop();
                                 Navigator.push(
                                     context,
                                     CupertinoDialogRoute(
@@ -699,7 +745,9 @@ class _FollowerStatusViewState extends State<FollowerStatusView>
     super.initState();
     _currentFollowerIndex = widget.initialFollowerIndex;
     _currentStatusIndex = widget.initialStatusIndex;
-    _animationController = AnimationController(vsync: this);
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 15));
+
     _initializeStatus();
   }
 
@@ -745,9 +793,9 @@ class _FollowerStatusViewState extends State<FollowerStatusView>
     try {
       await _videoController!.initialize();
       final videoDuration = _videoController!.value.duration;
-      final cappedDuration = videoDuration <= Duration(seconds: 15)
+      final cappedDuration = videoDuration <= Duration(seconds: 10)
           ? videoDuration
-          : Duration(seconds: 15);
+          : Duration(seconds: 10);
 
       if (mounted) {
         setState(() {
@@ -781,10 +829,10 @@ class _FollowerStatusViewState extends State<FollowerStatusView>
               if (mounted) {
                 setState(() {
                   _isLoading = false;
-                  _animationController.duration = Duration(seconds: 5);
+                  _animationController.duration = Duration(seconds: 10);
                   _animationController.forward(from: 0);
                 });
-                _timer = Timer(Duration(seconds: 5), _onNextStatus);
+                _timer = Timer(Duration(seconds: 10), _onNextStatus);
               }
             },
             onError: (error, stackTrace) {

@@ -550,30 +550,37 @@ class _PostAndReelsState extends State<PostAndReels>
     if (permissions) {
       return true;
     } else {
-      final ps = await PhotoManager.requestPermissionExtend();
-      if (ps.isAuth) {
-        await Prefrences.setMediaPermission(true);
-        return true; // Permission is granted
-      }
-
-      // Special handling for Android 11 and above
-      if (await Permission.storage.isDenied ||
-          await Permission.photos.isDenied) {
-        // Request storage and media permissions
+      String version = await getAndroidVersion() ?? "";
+      // final PermissionState state = await PhotoManager.getPermissionState(
+      //     requestOption: const PermissionRequestOption(
+      //   androidPermission:
+      //       AndroidPermission(type: RequestType.common, mediaLocation: true),
+      // ));
+      // if (state == PermissionState.authorized) {
+      //   print('The application has full access permission');
+      // } else {
+      //   print('The application does not have full access permission');
+      // }
+      // For Android 13+ (API level 33+), request specific media permissions
+      if (Platform.isAndroid && int.parse(version) >= 13) {
         final result = await [
-          Permission.storage,
-          Permission.photos, // This handles the photo access permission
+          Permission.photos,
+          Permission.videos,
+          // Permission.audio,
         ].request();
 
-        if (result[Permission.storage] == PermissionStatus.granted &&
-            result[Permission.photos] == PermissionStatus.granted) {
+        if (result[Permission.photos] == PermissionStatus.granted ||
+                result[Permission.videos] == PermissionStatus.granted
+            // ||
+            // result[Permission.audio] == PermissionStatus.granted
+            ) {
           await Prefrences.setMediaPermission(true);
           return true;
         }
       }
 
-      // Android 11+ specific permission for managing external storage
-      if (await Permission.manageExternalStorage.isDenied) {
+      // For Android 11 and 12 (API level 30 and 31), request manageExternalStorage
+      if (Platform.isAndroid && int.parse(version) >= 11) {
         final result = await Permission.manageExternalStorage.request();
         if (result == PermissionStatus.granted) {
           await Prefrences.setMediaPermission(true);
@@ -581,9 +588,18 @@ class _PostAndReelsState extends State<PostAndReels>
         }
       }
 
-      await Prefrences.setMediaPermission(false);
+      // For Android 10 and below (API level < 30), request storage permission only
+      if (Platform.isAndroid && int.parse(version) < 11) {
+        final result = await Permission.storage.request();
+        if (result == PermissionStatus.granted) {
+          await Prefrences.setMediaPermission(true);
+          return true;
+        }
+      }
 
-      return false; // Permissions denied
+      // If all checks fail, permissions are denied
+      await Prefrences.setMediaPermission(false);
+      return false;
     }
   }
 
