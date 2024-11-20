@@ -46,6 +46,7 @@ class SinglePost extends StatelessWidget {
                   comments: post.commentsCount.toString(),
                   shares: "100",
                   saved: '100',
+                  showCommentSection: true,
                   refresh: () => postProvider.getSinglePost(postId),
 
                 );

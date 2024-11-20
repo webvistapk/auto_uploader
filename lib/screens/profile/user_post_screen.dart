@@ -111,7 +111,6 @@ class _UserPostScreenState extends State<UserPostScreen> {
               return const Center(
                   child: Text("No posts available for this filter"));
             }
-
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,6 +137,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
                     comments: post.commentsCount.toString(),
                     shares: "100",
                     saved: '100',
+                    showCommentSection: false,
                     refresh: () {
                       DeletePost(post.id.toString());
                     },
@@ -149,11 +149,5 @@ class _UserPostScreenState extends State<UserPostScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 }

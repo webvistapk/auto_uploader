@@ -376,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen>
       shares: "50",
       saved: "50",
       refresh: () {},
-      showFollowButton: true,
+      showCommentSection: false,
       isInteractive: true,
     );
   }
