@@ -2,14 +2,30 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ChatInputField extends StatefulWidget {
-  const ChatInputField({Key? key}) : super(key: key);
+  final TextEditingController messageController;
+  final onPressedSend;
+  ChatInputField(
+      {super.key, required this.messageController, this.onPressedSend});
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();
 }
 
 class _ChatInputFieldState extends State<ChatInputField> {
-  TextEditingController messageController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    widget.messageController.addListener(() {
+      setState(() {}); // Rebuild the widget when text changes
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.messageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,14 +52,15 @@ class _ChatInputFieldState extends State<ChatInputField> {
               color: Colors.grey,
             ),
             onPressed: () {
-              // Handle emoji selection
+              // Handle emoji selection (Use a package like emoji_picker_flutter)
+              showEmojiPicker(context);
             },
           ),
 
           // TextField
           Expanded(
             child: TextField(
-              controller: messageController,
+              controller: widget.messageController,
               decoration: InputDecoration(
                 hintText: 'Type a message',
                 hintStyle: TextStyle(color: Colors.grey.shade500),
@@ -61,7 +78,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
               color: Colors.grey,
             ),
             onPressed: () {
-              // Handle attachment
+              // Handle attachment (file picker or gallery)
             },
           ),
 
@@ -72,44 +89,80 @@ class _ChatInputFieldState extends State<ChatInputField> {
               color: Colors.grey,
             ),
             onPressed: () {
-              // Handle camera action
+              // Handle camera action (open camera or photo picker)
             },
           ),
 
-          // Send Button
-          messageController.text.isNotEmpty
-              ? Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.send,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      // Handle send message
-                    },
-                  ),
-                )
-              : Container(
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.keyboard_voice_sharp,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      // Handle send message
-                    },
-                  ),
-                ),
+          // Send Button or Voice Button
+          widget.messageController.text.isNotEmpty
+              ? buildSendButton(widget.onPressedSend)
+              : buildVoiceButton(),
         ],
       ),
+    );
+  }
+
+  // Send Button
+  Widget buildSendButton(onPressed) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.blue,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+          icon: const Icon(Icons.send, color: Colors.white),
+          onPressed: onPressed),
+    );
+  }
+
+  // Voice Input Button
+  Widget buildVoiceButton() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.green,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.keyboard_voice_sharp, color: Colors.white),
+        onPressed: () {
+          // Handle voice input (start recording)
+        },
+      ),
+    );
+  }
+
+  // Emoji Picker (can be enhanced with a package)
+  void showEmojiPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SizedBox(
+          height: 250,
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
+            ),
+            itemCount: 100, // A basic example, can be replaced with emojis
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  // Add the emoji to the text input field
+                  widget.messageController.text += '😊'; // Example emoji
+                  Navigator.pop(context);
+                },
+                child: Center(
+                  child: Text(
+                    '😊',
+                    style: TextStyle(fontSize: 28),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

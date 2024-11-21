@@ -8,6 +8,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart'; // Import the login screen
+import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/app_logo.dart';
@@ -33,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final data = await Prefrences.getAuthToken();
     // debugger();
     if (data != null) {
+      ChatProvider().setAccessToken(data);
       final email = await Prefrences.getUserEmail();
       UserPreferences userPreferences = UserPreferences();
 
