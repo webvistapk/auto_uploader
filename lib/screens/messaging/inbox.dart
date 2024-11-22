@@ -24,11 +24,14 @@ class InboxScreen extends StatefulWidget {
 class _InboxScreenState extends State<InboxScreen> {
   TextEditingController messageController = TextEditingController();
   ScrollController _scrollController = ScrollController();
+  late ChatController chatController;
 
   @override
   void initState() {
     super.initState();
-    final chatController = Provider.of<ChatController>(context, listen: false);
+
+    // Initialize the chatController
+    chatController = Provider.of<ChatController>(context, listen: false);
 
     // Fetch previous messages and set up WebSocket
     fetching(widget.chatModel.id);
@@ -41,16 +44,18 @@ class _InboxScreenState extends State<InboxScreen> {
     });
   }
 
-  fetching(chatID) async {
-    final chatController = Provider.of<ChatController>(context, listen: false);
-
-    chatController.connectWebSocket(chatID);
-    await chatController.loadMessages(chatID);
+  Future<void> fetching(int chatID) async {
+    try {
+      await chatController.loadMessages(chatID);
+      chatController.connectWebSocket(chatID);
+    } catch (error) {
+      ToastNotifier.showErrorToast(context, 'Error loading messages: $error');
+    }
   }
 
   @override
   void dispose() {
-    final chatController = Provider.of<ChatController>(context, listen: false);
+    // Use the chatController reference instead of accessing Provider
     chatController.disconnect(); // Close WebSocket connection
     _scrollController.dispose();
     super.dispose();
@@ -119,11 +124,6 @@ class _InboxScreenState extends State<InboxScreen> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                // Text(
-                                //   'user_name',
-                                //   style: TextStyle(
-                                //       color: Colors.grey, fontSize: 12),
-                                // ),
                               ],
                             ),
                             const Spacer(),
@@ -168,8 +168,8 @@ class _InboxScreenState extends State<InboxScreen> {
                             itemCount: chatController.messages.length,
                             itemBuilder: (context, index) {
                               final message = chatController.messages[index];
-                              bool isOwnMessage =
-                                  message.sender == widget.userProfile.id;
+                              bool isOwnMessage = message.senderUsername ==
+                                  widget.userProfile.username;
 
                               final formatDate =
                                   formatDateString(message.createdAt);
@@ -192,15 +192,12 @@ class _InboxScreenState extends State<InboxScreen> {
                   ChatInputField(
                     messageController: messageController,
                     onPressedSend: () async {
-                      final chatController =
-                          Provider.of<ChatController>(context, listen: false);
-
                       try {
                         // Send the message via the API and then add it to the UI
                         await chatController.sendMessage(
                             messageController.text.trim(),
                             widget.chatModel.id,
-                            widget.userProfile.username);
+                            widget.userProfile.username!);
 
                         // Add the new message to the messages list manually
                         chatController.messages.add(
@@ -212,6 +209,9 @@ class _InboxScreenState extends State<InboxScreen> {
                             senderUsername: widget.userProfile.username!,
                           ),
                         );
+                        if (mounted) {
+                          setState(() {});
+                        }
                         _scrollToBottom();
                       } catch (e) {
                         ToastNotifier.showErrorToast(context, e.toString());
@@ -234,13 +234,8 @@ class _InboxScreenState extends State<InboxScreen> {
 
   String formatDateString(String dateString) {
     try {
-      // Parse the input string into a DateTime object
       DateTime dateTime = DateTime.parse(dateString);
-
-      // Define the format you want (e.g., "yyyy-MM-dd HH:mm:ss")
       final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
-
-      // Format the DateTime object to the specified format
       return formatter.format(dateTime);
     } catch (e) {
       print('Error parsing date: $e');

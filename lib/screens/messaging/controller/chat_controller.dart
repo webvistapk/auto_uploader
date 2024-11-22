@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/prefrences/prefrences.dart';
@@ -46,42 +47,60 @@ class ChatController extends ChangeNotifier {
       Uri.parse('ws://147.79.117.253:8001/ws/chat/$chatId/'),
     );
 
-    // Listen for messages from the server
     _channel?.stream.listen((message) {
-      final data = json.decode(message);
-      print(data);
-      // Handle incoming message (e.g., add to message list)
-      loadMessages(chatId);
-      // _messages.add(MessageModel(content: ));
-      print(_messages);
+      try {
+        // Decode the incoming WebSocket message
+        final data = json.decode(message);
+        MessageModel lastMessage = _messages.last;
+        // Add new message to the list
+        _messages.add(
+          MessageModel(
+            id: lastMessage.id, // Ensure the ID is consistent with the backend
+            sender: lastMessage.sender,
+            senderUsername: data['username'],
+            content: data['message'],
+            createdAt: DateTime.now().toIso8601String(),
+          ),
+        );
 
-      notifyListeners();
+        // Notify listeners about new messages
+        notifyListeners();
+      } catch (e) {
+        print('Error parsing WebSocket message: $e');
+      }
     }, onError: (error) {
-      print("WebSocket error: $error");
-      // Attempt to reconnect
+      print('WebSocket error: $error');
       _reconnectWebSocket(chatId);
     }, onDone: () {
-      print("WebSocket closed. Reconnecting...");
+      print('WebSocket closed. Attempting to reconnect...');
       _reconnectWebSocket(chatId);
     });
   }
 
   // Reconnect WebSocket if connection is lost
   void _reconnectWebSocket(int chatId) {
-    connectWebSocket(chatId);
+    Future.delayed(const Duration(seconds: 5), () {
+      if (_channel == null || _channel?.closeCode != null) {
+        connectWebSocket(chatId);
+      }
+    });
   }
 
   // Send a message via WebSocket and HTTP
-  Future<void> sendMessage(String content, int chatId, username) async {
+  Future<void> sendMessage(String content, int chatId, String username) async {
     try {
-      // Send the message to WebSocket
-      _channel?.sink.add(json.encode({
-        'sender': username, // Replace with actual sender info
+      // Construct the message data
+      final messageData = json.encode({
+        'sender': username,
         'content': content,
         'created_at': DateTime.now().toIso8601String(),
-      }));
+      });
+
+      // Send the message via WebSocket
+      _channel?.sink.add(messageData);
+
+      // Optionally send the message via HTTP for persistence
       String? accessToken = await Prefrences.getAuthToken();
-      // Optionally send the message to the server using HTTP (for message persistence)
       final response = await http.post(
         Uri.parse('http://147.79.117.253:8001/api/chat/$chatId/messages/send/'),
         headers: {
@@ -90,15 +109,18 @@ class ChatController extends ChangeNotifier {
         },
         body: json.encode({'content': content}),
       );
-      if (response.statusCode == 201) {
-        print("Successfully Done All");
-        connectWebSocket(chatId);
-      } else {
-        throw Exception(["Error Sending Message Check Network"]);
+
+      if (response.statusCode != 201) {
+        throw Exception("Failed to send message. Check network.");
       }
     } catch (e) {
       print('Error sending message: $e');
     }
+  }
+
+  void addMessage(MessageModel message) {
+    _messages.add(message);
+    notifyListeners();
   }
 
   // Disconnect WebSocket connection
