@@ -31,9 +31,8 @@ class AppUtils {
     if (kIsWeb) {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       return prefs.getString(key);
-    } else {
-      // return await _secureStorage.read(key: key);
     }
+    return null;
   }
 
   static void launchUrl(String url) async {

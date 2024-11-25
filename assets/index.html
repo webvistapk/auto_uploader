@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Chat App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #loginForm, #chatInterface {
+            display: none;
+        }
+
+        #chatList, #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        #chatList div, #messages div {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #newMessage {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        #newMessage input {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #newMessage button {
+            padding: 5px 10px;
+        }
+
+        .active-chat {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat App</h1>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username or Email" value="testuser1" />
+        <input type="password" id="password" placeholder="Password" value="Testpass1" />
+        <button id="loginButton">Login</button>
+        <div id="loginError" style="color: red;"></div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div id="chatInterface">
+        <div>
+            <label for="chatList">Chats:</label>
+            <div id="chatList">Loading chats...</div>
+        </div>
+
+        <div>
+            <label for="messages">Messages:</label>
+            <div id="messages">Select a chat to load messages...</div>
+        </div>
+
+        <div id="newMessage">
+            <input type="text" id="messageInput" placeholder="Type your message..." disabled />
+            <button id="sendMessage" disabled>Send</button>
+        </div>
+    </div>
+
+    <script>
+        // const apiUrl = "http://localhost:8000/api"; // Replace with your Django API base URL http://147.79.117.253:8001/
+        const apiUrl = "http://147.79.117.253:8001/api";
+        let accessToken = null;
+        let currentChatId = null;
+        let websocket = null;
+
+        // Show login form and hide chat interface
+        document.getElementById("loginForm").style.display = "block";
+
+        // Login Functionality
+        document.getElementById("loginButton").onclick = async () => {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!username || !password) {
+                document.getElementById("loginError").textContent = "Please fill in all fields.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/userprofile/users/login/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username_or_email: username, password }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    document.getElementById("loginError").textContent = errorData.detail || "Login failed.";
+                    return;
+                }
+
+                const data = await response.json();
+                accessToken = data.access;
+
+                // Hide login form and show chat interface
+                document.getElementById("loginForm").style.display = "none";
+                document.getElementById("chatInterface").style.display = "block";
+
+                // Load chats
+                loadChats();
+            } catch (error) {
+                console.error("Error logging in:", error);
+                document.getElementById("loginError").textContent = "An error occurred. Please try again.";
+            }
+        };
+
+        // Fetch and display all chats
+        async function loadChats() {
+            try {
+                const response = await fetch(`${apiUrl}/chat/`, {
+                    headers: {
+                        "Authorization": `Bearer ${accessToken}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                const chats = await response.json();
+                renderChats(chats);
+            } catch (error) {
+                console.error("Error fetching chats:", error);
+            }
+        }
+
+        // Render the chat list
+        function renderChats(chats) {
+            const chatList = document.getElementById("chatList");
+            chatList.innerHTML = "";
+            chats.chat.forEach(chat => {
+                const chatDiv = document.createElement("div");
+                chatDiv.textContent = chat.name || `Chat ID: ${chat.id}`;
+                chatDiv.className = "chat-item";
+                chatDiv.style.cursor = "pointer";
+                chatDiv.onclick = () => loadMessages(chat.id);
+                chatList.appendChild(chatDiv);
+            });
+        }
+
+        // Load messages for the selected chat
+        async function loadMessages(chatId) {
+            try {
+                currentChatId = chatId;
+
+                const response = await fetch(`${apiUrl}/chat/${chatId}/messages/`, {
+                    headers: {
+                        "Authorization": `Bearer ${accessToken}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                const messages = await response.json();
+                renderMessages(messages);
+
+                // Enable input and connect WebSocket
+                connectWebSocket(chatId);
+            } catch (error) {
+                console.error("Error fetching messages:", error);
+            }
+        }
+
+        // Render the messages
+        function renderMessages(messages) {
+            const messageList = document.getElementById("messages");
+            messageList.innerHTML = "";
+            messages.messages.forEach(message => {
+                const messageDiv = document.createElement("div");
+                messageDiv.textContent = `${message.sender_username}: ${message.content}`;
+                messageList.appendChild(messageDiv);
+            });
+        }
+
+        // Add a new message to the UI
+        function addMessage(message) {
+            const messageList = document.getElementById("messages");
+            const messageDiv = document.createElement("div");
+            messageDiv.textContent = `${message.sender_username}: ${message.content}`;
+            messageList.appendChild(messageDiv);
+        }
+
+        // WebSocket connection for real-time messages
+        function connectWebSocket(chatId) {
+            if (websocket) {
+                websocket.close(); // Close any existing connection
+            }
+
+            // websocket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${chatId}/`);
+            websocket = new WebSocket(`ws://147.79.117.253:8001/ws/chat/${chatId}/`);
+
+            websocket.onopen = () => {
+                console.log("WebSocket connected.");
+                document.getElementById("messageInput").disabled = false;
+                document.getElementById("sendMessage").disabled = false;
+            };
+
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                addMessage({ sender_username: data.username, content: data.message });
+            };
+
+            websocket.onclose = () => {
+                console.log("WebSocket closed. Reconnecting...");
+                setTimeout(() => connectWebSocket(chatId), 5000);
+            };
+        }
+
+        async function sendMessage(content) {
+            try {
+                const response = await fetch(`${apiUrl}/chat/${currentChatId}/messages/send/`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${accessToken}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ content }),
+                });
+
+                const message = await response.json();
+                // addMessage(message);
+            } catch (error) {
+                console.error("Error sending message:", error);
+            }
+        }
+
+        // Handle sending messages through WebSocket
+        document.getElementById("sendMessage").onclick = () => {
+            const messageInput = document.getElementById("messageInput");
+            const usernameInput = document.getElementById("username");
+            const content = messageInput.value.trim();
+            const username = usernameInput.value.trim();
+
+            if (content) {
+                if (websocket && websocket.readyState === WebSocket.OPEN) {
+                    sendMessage(content)
+                    websocket.send(JSON.stringify({ message: content, username: username })); // Send via WebSocket
+                    messageInput.value = ""; // Clear the input
+                } else {
+                    console.error("WebSocket is not connected. Cannot send message.");
+                }
+            }
+        };
+    </script>
+</body>
+</html>

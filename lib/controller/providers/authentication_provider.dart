@@ -10,6 +10,7 @@ import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
+import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -25,7 +26,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (data != null) {
         final accessToken = data['access'];
-
+        ChatProvider().setAccessToken(accessToken);
         // Save the access token and email
         await Prefrences.SetAuthToken(accessToken);
         await Prefrences.SetUserEmail(email);
