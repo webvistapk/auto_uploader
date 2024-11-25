@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/controller/services/post/comment_provider.dart';
+import 'package:mobile/models/UserProfile/commentBottomSheet.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/utils.dart';
@@ -28,15 +30,22 @@ class CommentWidget extends StatefulWidget {
 class _CommentWidgetState extends State<CommentWidget> {
   final TextEditingController _commentController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final ScrollController _scrollController = ScrollController();
   File? _mediaFile;
-
   @override
   void initState() {
     super.initState();
+    print("init state triggered");
     // Fetch comments when the widget is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<PostProvider>(context, listen: false).fetchComments(widget.postId,widget.isReelScreen);
+      Provider.of<CommentProvider>(context, listen: false).fetchComments(widget.postId,widget.isReelScreen);
     });
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
   }
 
   void _addComment(BuildContext context) {
@@ -47,7 +56,7 @@ class _CommentWidgetState extends State<CommentWidget> {
           .map((match) => match.group(0)!)
           .toList();
 
-      Provider.of<PostProvider>(context, listen: false).addComment(
+      Provider.of<CommentProvider>(context, listen: false).addComment(
         widget.postId,
         content: content,
         keywords: keywords,
@@ -73,6 +82,8 @@ class _CommentWidgetState extends State<CommentWidget> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -94,7 +105,7 @@ class _CommentWidgetState extends State<CommentWidget> {
   }
 
   Widget _buildViewCommentsSection() {
-    return Consumer<PostProvider>(
+    return Consumer<CommentProvider>(
       builder: (context, postProvider, child) {
         if (postProvider.isCommentLoading) {
           return const Center(
@@ -143,7 +154,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: const Icon(CupertinoIcons.xmark, size: 20),
+                      child: const Icon(CupertinoIcons.xmark, size: 20,weight: 25,),
                     ),
                   ],
                 ),
@@ -156,7 +167,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                 itemBuilder: (context, index) {
                   final comment = comments[index];
                   final GlobalKey iconKey = GlobalKey();
-              
+
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -189,6 +200,13 @@ class _CommentWidgetState extends State<CommentWidget> {
                                             comment.commentText,
                                             style: TextStyle(color: Colors.grey[600]),
                                           ),
+                                          Text(
+                                            "Reply",
+                                            style: TextStyle(color: Colors.blue[600],
+                                            fontSize: 12,
+                                              fontWeight: FontWeight.bold
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ],
@@ -200,6 +218,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                   ),
                                 ],
                               ),
+
                               if (comment.replies.isNotEmpty)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 40.0, top: 10),
@@ -235,6 +254,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                           ),
                                         ],
                                       );
+
                                     }).toList(),
                                   ),
                                 ),
@@ -294,6 +314,10 @@ class _CommentWidgetState extends State<CommentWidget> {
                 },
                 decoration: InputDecoration(
                   hintText: "Add a comment...",
+                  hintStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
@@ -356,7 +380,7 @@ class _CommentWidgetState extends State<CommentWidget> {
       ],
     ).then((value) {
       if (value == 'delete') {
-        Provider.of<PostProvider>(context, listen: false)
+        Provider.of<CommentProvider>(context, listen: false)
             .deleteComment(comment.id.toString(), context, widget.postId,widget.isReelScreen);
       } else if (value == 'edit') {
         ScaffoldMessenger.of(context).showSnackBar(

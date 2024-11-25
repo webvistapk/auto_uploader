@@ -17,6 +17,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../models/UserProfile/CommentModel.dart';
+import '../../../models/UserProfile/commentBottomSheet.dart';
 
 class PostWidget extends StatefulWidget {
   final String postId;
@@ -235,6 +236,7 @@ class _PostWidgetState extends State<PostWidget> {
                 InkWell(
                   onTap: () {
                     showComments(widget.postId);
+
                   },
                   child: Text(
                     'View all ${widget.comments} comments',

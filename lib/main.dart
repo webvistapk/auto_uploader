@@ -5,6 +5,7 @@ import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/controller/services/followers/follower_provider.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
+import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
 import 'package:mobile/screens/messaging/message_screen.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => TagsProvider()),
           ChangeNotifierProvider(create: (_) => FollowerProvider()),
           ChangeNotifierProvider(create: (_) => MediaProvider()),
+          ChangeNotifierProvider(create: (_) => CommentProvider()),
         ],
         child: MaterialApp(
             title: 'Fillet Social Media App',
