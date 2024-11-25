@@ -5,17 +5,32 @@ import 'package:provider/provider.dart';
 import '../../common/utils.dart';
 import '../../controller/endpoints.dart';
 
-class SinglePost extends StatelessWidget {
+class SinglePost extends StatefulWidget {
   final String postId;
+  final bool isInteractive;
+  SinglePost({Key? key, required this.postId,this.isInteractive=false}) : super(key: key);
 
-  const SinglePost({Key? key, required this.postId}) : super(key: key);
+  @override
+  State<SinglePost> createState() => _SinglePostState();
+}
+
+class _SinglePostState extends State<SinglePost> {
+  bool isUserPost=false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(widget.isInteractive==true)
+      isUserPost=true;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: FutureBuilder(
-        future: Provider.of<PostProvider>(context, listen: false).getSinglePost(postId),
+        future: Provider.of<PostProvider>(context, listen: false).getSinglePost(widget.postId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -47,8 +62,8 @@ class SinglePost extends StatelessWidget {
                   shares: "100",
                   saved: '100',
                   showCommentSection: true,
-                  refresh: () => postProvider.getSinglePost(postId),
-
+                  refresh: () => postProvider.getSinglePost(widget.postId),
+                  isUserPost: isUserPost,
                 );
               },
             );

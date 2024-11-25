@@ -358,7 +358,6 @@ class _HomeScreenState extends State<HomeScreen>
       final file = media.file;
       return file.startsWith('http') ? file : '${ApiURLs.baseUrl2}$file';
     }).toList();
-
     return PostWidget(
       postId: post.id.toString(),
       username: post.user.username,
@@ -378,6 +377,7 @@ class _HomeScreenState extends State<HomeScreen>
       refresh: () {},
       showCommentSection: false,
       isInteractive: true,
+      isUserPost: false,
     );
   }
 }

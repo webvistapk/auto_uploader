@@ -14,6 +14,7 @@ import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import '../../../common/message_toast.dart';
 import '../../../models/ReelPostModel.dart';
+import '../../../models/UserProfile/CommentModel.dart';
 import '../../endpoints.dart';
 import 'package:http/http.dart' as http;
 
@@ -327,10 +328,10 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  void deletePost(String postId, BuildContext context) async {
+  Future<void> deletePost(String postId, BuildContext context,bool isReelPost) async {
     final String? token = await Prefrences.getAuthToken();
 
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.delete_post}$postId/";
+    String URL = "${ApiURLs.baseUrl}${isReelPost?ApiURLs.delete_reel:ApiURLs.delete_post}$postId/";
     setIsLoading(true);
     try {
       // Make the DELETE request
@@ -390,10 +391,9 @@ class PostProvider extends ChangeNotifier {
 
   Future<void> newLike(int postID, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
-    if (token == null) return;
 
     String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}$postID/";
-
+    print("Post ID in Like ${postID}");
     try {
       final response = await http.post(
         Uri.parse(URL),
@@ -404,7 +404,7 @@ class PostProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-       // ToastNotifier.showSuccessToast(context, "Post liked successfully!");
+        ToastNotifier.showSuccessToast(context, "Post Liked Successfully");
         print("Post liked successfully");
         // Refresh or update the UI based on your business logic
         // If needed, you can fetch the updated like count or status here
@@ -439,4 +439,120 @@ class PostProvider extends ChangeNotifier {
     _cachedPosts.clear();
     notifyListeners();
   }
+
+
+  //Comment Provider starts here
+
+  List<Comment> _comments = [];
+  bool _isCommentLoading = false;
+
+  List<Comment> get comments => _comments;
+  bool get isCommentLoading => _isCommentLoading;
+
+  Future<List<Comment>> fetchComments(String postId,bool isReelScreen) async {
+    _isCommentLoading = true;
+    notifyListeners();
+    print("POst ID: $postId");
+    final String? token = await Prefrences.getAuthToken();
+    final url = "${ApiURLs.baseUrl}${isReelScreen?ApiURLs.reel_comment_fetch:ApiURLs.post_comment_fetch}$postId/";
+    try {
+      final response = await http.get(Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      print("Response ${response.body}");
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        _comments = (data['comments'] as List)
+            .map((comment) => Comment.fromJson(comment))
+            .toList();
+        print("COmmentS ${_comments}");
+        notifyListeners();
+      } else {
+        throw Exception("Failed to load comments");
+      }
+    } catch (error) {
+      print(error);
+      rethrow; // Re-throw the error to handle it in the calling code if needed
+    }
+
+    _isCommentLoading = false;
+    notifyListeners();
+
+    return _comments;
+  }
+
+  Future<void> addComment(String postId, bool isReelScreen,{
+    required String content,
+    required List<String> keywords,
+    File? media,
+    required BuildContext context,
+  }) async {
+    try {
+      print("POST ID : ${postId}");
+      final String? token = await Prefrences.getAuthToken();
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiURLs.baseUrl}${isReelScreen?ApiURLs.reel_comment_add:ApiURLs.post_comment_add}$postId/'),
+      );
+      request.headers['Authorization']='Bearer $token';
+      request.fields['postId'] = postId;
+      request.fields['content'] = content;
+      request.fields['keywords'] = keywords.join(',');
+      request.fields['tags']="2";
+
+      if (media != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('media', media.path),
+        );
+      }
+
+      final response = await request.send();
+      if (response.statusCode == 201) {
+        ToastNotifier.showSuccessToast(context, "Comment added successfully");
+        fetchComments(postId,isReelScreen);
+      } else {
+        ToastNotifier.showErrorToast(context, "Failed to add comment");
+      }
+    } catch (error) {
+      ToastNotifier.showErrorToast(context, "Error: $error");
+    }
+  }
+
+
+  void deleteComment(String commentId, BuildContext context,String postId,bool isReelScreen) async {
+    final String? token = await Prefrences.getAuthToken();
+
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.delete_post_comment}$commentId/";
+    //setIsLoading(true);
+    print("COMMENT ID: ${commentId}");
+    try {
+      // Make the DELETE request
+      final response = await http.delete(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Show success message
+        ToastNotifier.showSuccessToast(context, "comment deleted successfully");
+        fetchComments(postId,isReelScreen);
+       notifyListeners();
+      } else {
+        // Show error message if deletion failed
+        ToastNotifier.showErrorToast(
+            context, "Sorry comment is not deleted. Please Try Again!");
+
+        notifyListeners();
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+    }
+  }
+
 }

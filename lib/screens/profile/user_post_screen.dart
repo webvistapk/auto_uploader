@@ -44,16 +44,26 @@ class _UserPostScreenState extends State<UserPostScreen> {
     setState(() {
       _isLoadingMore = true;
     });
-    List<PostModel> newPosts =
-        await Provider.of<PostProvider>(context, listen: false)
-            .getPost(context, widget.userId, limit, offset);
+    try {
+      List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
+          .getPost(context, widget.userId, limit, offset);
 
-    setState(() {
-      _allPosts.addAll(newPosts);
-      offset += limit; // Increment offset for the next page of posts
-      _isLoadingMore = false;
-    });
+      setState(() {
+        // Add only unique posts
+        final newPostIds = _allPosts.map((post) => post.id).toSet();
+        final uniquePosts = newPosts.where((post) => !newPostIds.contains(post.id)).toList();
+        _allPosts.addAll(uniquePosts);
+        offset += limit; // Increment offset for the next page of posts
+        _isLoadingMore = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingMore = false;
+      });
+      print("Error fetching posts: $e");
+    }
   }
+
 
   List<PostModel> getImagePosts(List<PostModel> posts) {
     return posts.where((post) {
@@ -67,10 +77,11 @@ class _UserPostScreenState extends State<UserPostScreen> {
     }).toList();
   }
 
-  Future<void> DeletePost(String postID) async {
-    Provider.of<PostProvider>(context, listen: false)
-        .deletePost(postID, context);
-    _fetchPosts();
+  void _deletePost(String postId) {
+    setState(() {
+      // Remove the post from the list
+      _allPosts.removeWhere((post) => post.id.toString() == postId);
+    });
   }
 
   @override
@@ -138,9 +149,8 @@ class _UserPostScreenState extends State<UserPostScreen> {
                     shares: "100",
                     saved: '100',
                     showCommentSection: false,
-                    refresh: () {
-                      DeletePost(post.id.toString());
-                    },
+                    refresh: () => _deletePost(post.id.toString()),
+                    isUserPost: true,
                   ),
                 ],
               ),
