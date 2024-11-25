@@ -73,7 +73,7 @@ class ChatController extends ChangeNotifier {
       _reconnectWebSocket(chatId);
     }, onDone: () {
       print('WebSocket closed. Attempting to reconnect...');
-      _reconnectWebSocket(chatId);
+      // _reconnectWebSocket(chatId);
     });
   }
 
@@ -91,9 +91,8 @@ class ChatController extends ChangeNotifier {
     try {
       // Construct the message data
       final messageData = json.encode({
-        'sender': username,
-        'content': content,
-        'created_at': DateTime.now().toIso8601String(),
+        'username': username,
+        'message': content,
       });
 
       // Send the message via WebSocket
