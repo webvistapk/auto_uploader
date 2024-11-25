@@ -87,6 +87,7 @@ class _PostScreenState extends State<PostScreen> {
                           saved: '100',
                           postId: '',
                           refresh: () {},
+                          isUserPost: false,
                         );
                       },
                     );

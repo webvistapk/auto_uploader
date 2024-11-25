@@ -5,32 +5,42 @@ import 'package:provider/provider.dart';
 import '../../common/utils.dart';
 import '../../controller/endpoints.dart';
 
-class SinglePost extends StatelessWidget {
+class SinglePost extends StatefulWidget {
   final String postId;
+  final bool isInteractive;
+  SinglePost({Key? key, required this.postId,this.isInteractive=false}) : super(key: key);
 
-  const SinglePost({Key? key, required this.postId}) : super(key: key);
+  @override
+  State<SinglePost> createState() => _SinglePostState();
+}
+
+class _SinglePostState extends State<SinglePost> {
+  bool isUserPost=false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(widget.isInteractive==true)
+      isUserPost=true;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: FutureBuilder(
-        future: Provider.of<PostProvider>(context, listen: false).getSinglePost(postId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text('Failed to load post.'));
-          } else {
-            return Consumer<PostProvider>(
+      body: Consumer<PostProvider>(
               builder: (context, postProvider, child) {
-                final post = postProvider.post;
-                if (post == null) {
-                  return const Center(child: Text('Post not found'));
+                // Fetch post if not loaded
+                if (postProvider.post == null) {
+                  // Fetch post data from API if not already loaded
+                  postProvider.getSinglePost(widget.postId);
+                  return const Center(child: CircularProgressIndicator());
                 }
 
+                final post = postProvider.post;
                 return PostWidget(
-                  postId: post.id.toString(),
+                  postId: post!.id.toString(),
                   username: post.user.username,
                   location: "Location",
                   date: post.createdAt.toString(),
@@ -46,14 +56,11 @@ class SinglePost extends StatelessWidget {
                   comments: post.commentsCount.toString(),
                   shares: "100",
                   saved: '100',
-                  refresh: () => postProvider.getSinglePost(postId),
-
+                  showCommentSection: true,
+                  refresh: () => postProvider.getSinglePost(widget.postId),
+                  isUserPost: isUserPost,
                 );
               },
-            );
-          }
-        },
-      ),
-    );
+            ));
   }
 }

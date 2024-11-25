@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
 import 'package:mobile/screens/profile/widgets/reel_post.dart';
+import 'package:provider/provider.dart';
+import '../../controller/services/post/post_provider.dart';
 import '../../models/ReelPostModel.dart';
 
 class ReelScreen extends StatefulWidget {
@@ -28,7 +31,7 @@ class _ReelScreenState extends State<ReelScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: _currentIndex);  // Initialize PageController with the initialIndex
+    _pageController = PageController(initialPage: _currentIndex);
   }
 
   @override
@@ -37,14 +40,57 @@ class _ReelScreenState extends State<ReelScreen> {
     super.dispose();
   }
 
+  void showComments(String postId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+            ),
+          ),
+          child: CommentWidget(
+            isUsedSingle: true,
+            postId: postId,
+            isReelScreen: true,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> deleteReel() async {
+    // Call deletePost from the provider
+    await Provider.of<PostProvider>(context, listen: false)
+        .deletePost(widget.reels[_currentIndex].id.toString(), context, true);
+
+    // Update the reel list and current index
+    setState(() {
+      widget.reels.removeAt(_currentIndex);
+
+      if (_currentIndex >= widget.reels.length) {
+        _currentIndex = widget.reels.isEmpty ? 0 : widget.reels.length - 1;
+      }
+    });
+
+    // Navigate to the next reel if available
+    if (widget.reels.isNotEmpty) {
+      _pageController.jumpToPage(_currentIndex);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.black,
-        iconTheme: IconThemeData(
-          color: AppColors.white
-        ),
+        iconTheme: IconThemeData(color: AppColors.white),
       ),
       body: widget.reels.isEmpty
           ? Center(
@@ -56,7 +102,6 @@ class _ReelScreenState extends State<ReelScreen> {
           : Stack(
         fit: StackFit.expand,
         children: [
-          // PageView for managing videos
           PageView.builder(
             controller: _pageController,
             itemCount: widget.reels.length,
@@ -67,9 +112,8 @@ class _ReelScreenState extends State<ReelScreen> {
               });
             },
             itemBuilder: (BuildContext context, int index) {
-              print("Building reel at index: $index");
               return ReelPost(
-                src: widget.reels[index].file, // Access video URL from ReelPostModel
+                src: widget.reels[index].file,
               );
             },
           ),
@@ -91,7 +135,7 @@ class _ReelScreenState extends State<ReelScreen> {
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    // Handle Comment Action
+                    showComments(widget.reels[_currentIndex].id.toString());
                   },
                   child: Icon(
                     Icons.messenger,
@@ -122,31 +166,47 @@ class _ReelScreenState extends State<ReelScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
-                // Conditionally show edit/delete options
-                widget.showEditDeleteOptions
-                    ? PopupMenuButton<String>(
-                  icon: Icon(
-                    Icons.more_vert,
-                    color: AppColors.white,
-                    size: 30,
-                  ),
-                  onSelected: (value) {
-                    if (value == 'delete') {
-                      // Call delete function
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Text('Edit'),
+                if (widget.showEditDeleteOptions)
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: AppColors.white,
+                      size: 30,
                     ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Text('Delete'),
-                    ),
-                  ],
-                )
-                    : SizedBox(height: 30), // Reserve space for hidden options
+                    onSelected: (value) async {
+                      if (value == 'delete') {
+                        await deleteReel();
+                      } else if (value == 'edit') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Edit functionality not implemented.')),
+                        );
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, color: Colors.blue),
+                            SizedBox(width: 8),
+                            Text('Edit'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Delete'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  SizedBox(height: 30),
               ],
             ),
           ),

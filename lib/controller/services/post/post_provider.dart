@@ -14,6 +14,7 @@ import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import '../../../common/message_toast.dart';
 import '../../../models/ReelPostModel.dart';
+import '../../../models/UserProfile/CommentModel.dart';
 import '../../endpoints.dart';
 import 'package:http/http.dart' as http;
 
@@ -327,10 +328,10 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  void deletePost(String postId, BuildContext context) async {
+  Future<void> deletePost(String postId, BuildContext context,bool isReelPost) async {
     final String? token = await Prefrences.getAuthToken();
 
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.delete_post}$postId/";
+    String URL = "${ApiURLs.baseUrl}${isReelPost?ApiURLs.delete_reel:ApiURLs.delete_post}$postId/";
     setIsLoading(true);
     try {
       // Make the DELETE request
@@ -390,10 +391,9 @@ class PostProvider extends ChangeNotifier {
 
   Future<void> newLike(int postID, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
-    if (token == null) return;
 
     String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}$postID/";
-
+    print("Post ID in Like ${postID}");
     try {
       final response = await http.post(
         Uri.parse(URL),
@@ -404,7 +404,7 @@ class PostProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-       // ToastNotifier.showSuccessToast(context, "Post liked successfully!");
+        ToastNotifier.showSuccessToast(context, "Post Liked Successfully");
         print("Post liked successfully");
         // Refresh or update the UI based on your business logic
         // If needed, you can fetch the updated like count or status here
@@ -439,4 +439,5 @@ class PostProvider extends ChangeNotifier {
     _cachedPosts.clear();
     notifyListeners();
   }
+
 }
