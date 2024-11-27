@@ -15,6 +15,8 @@ class AppUtils {
   // static const String authToken = "auth_token";
   static const String testImage =
       "https://static.printler.com/cache/3/a/0/6/1/4/3a0614c4a9deb4f62bf47766860f4ca526debe02.jpg";
+  static const String userImage =
+      "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
 
   static Future<void> storeAuthToken(String key, String value) async {
     if (kIsWeb) {

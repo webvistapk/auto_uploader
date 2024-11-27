@@ -1,22 +1,17 @@
-/// status : "success"
-/// stories : [{"id":4,"tags":[],"media":[{"id":3,"media_type":"video","file":"/media/content/sample_video.mp4"}],"user":{"id":1,"username":"testuser1","first_name":"Test","last_name":"User1"},"privacy":"followers","created_at":"2024-11-07T17:19:36.821640Z","updated_at":"2024-11-07T17:19:36.854090Z","seen_count":0}]
-/// total_count : 1
-/// has_next_page : false
-/// next_offset : null
-
 class Userstatus {
   Userstatus({
-      String? status, 
-      List<Stories>? stories, 
-      num? totalCount, 
-      bool? hasNextPage, 
-      dynamic nextOffset,}){
+    String? status,
+    List<Stories>? stories,
+    num? totalCount,
+    bool? hasNextPage,
+    dynamic nextOffset,
+  }) {
     _status = status;
     _stories = stories;
     _totalCount = totalCount;
     _hasNextPage = hasNextPage;
     _nextOffset = nextOffset;
-}
+  }
 
   Userstatus.fromJson(dynamic json) {
     _status = json['status'];
@@ -30,22 +25,28 @@ class Userstatus {
     _hasNextPage = json['has_next_page'];
     _nextOffset = json['next_offset'];
   }
+
   String? _status;
   List<Stories>? _stories;
   num? _totalCount;
   bool? _hasNextPage;
   dynamic _nextOffset;
-Userstatus copyWith({  String? status,
-  List<Stories>? stories,
-  num? totalCount,
-  bool? hasNextPage,
-  dynamic nextOffset,
-}) => Userstatus(  status: status ?? _status,
-  stories: stories ?? _stories,
-  totalCount: totalCount ?? _totalCount,
-  hasNextPage: hasNextPage ?? _hasNextPage,
-  nextOffset: nextOffset ?? _nextOffset,
-);
+
+  Userstatus copyWith({
+    String? status,
+    List<Stories>? stories,
+    num? totalCount,
+    bool? hasNextPage,
+    dynamic nextOffset,
+  }) =>
+      Userstatus(
+        status: status ?? _status,
+        stories: stories ?? _stories,
+        totalCount: totalCount ?? _totalCount,
+        hasNextPage: hasNextPage ?? _hasNextPage,
+        nextOffset: nextOffset ?? _nextOffset,
+      );
+
   String? get status => _status;
   List<Stories>? get stories => _stories;
   num? get totalCount => _totalCount;
@@ -63,17 +64,7 @@ Userstatus copyWith({  String? status,
     map['next_offset'] = _nextOffset;
     return map;
   }
-
 }
-
-/// id : 4
-/// tags : []
-/// media : [{"id":3,"media_type":"video","file":"/media/content/sample_video.mp4"}]
-/// user : {"id":1,"username":"testuser1","first_name":"Test","last_name":"User1"}
-/// privacy : "followers"
-/// created_at : "2024-11-07T17:19:36.821640Z"
-/// updated_at : "2024-11-07T17:19:36.854090Z"
-/// seen_count : 0
 
 class Stories {
   Stories({
@@ -98,7 +89,7 @@ class Stories {
 
   Stories.fromJson(dynamic json) {
     _id = json['id'];
-    _tags = json['tags'] ?? []; // Directly assign as a list of dynamic
+    _tags = json['tags'] ?? [];
     if (json['media'] != null) {
       _media = [];
       json['media'].forEach((v) {
@@ -130,16 +121,17 @@ class Stories {
     String? createdAt,
     String? updatedAt,
     num? seenCount,
-  }) => Stories(
-    id: id ?? _id,
-    tags: tags ?? _tags,
-    media: media ?? _media,
-    user: user ?? _user,
-    privacy: privacy ?? _privacy,
-    createdAt: createdAt ?? _createdAt,
-    updatedAt: updatedAt ?? _updatedAt,
-    seenCount: seenCount ?? _seenCount,
-  );
+  }) =>
+      Stories(
+        id: id ?? _id,
+        tags: tags ?? _tags,
+        media: media ?? _media,
+        user: user ?? _user,
+        privacy: privacy ?? _privacy,
+        createdAt: createdAt ?? _createdAt,
+        updatedAt: updatedAt ?? _updatedAt,
+        seenCount: seenCount ?? _seenCount,
+      );
 
   num? get id => _id;
   List<dynamic>? get tags => _tags;
@@ -168,47 +160,55 @@ class Stories {
   }
 }
 
-
-/// id : 1
-/// username : "testuser1"
-/// first_name : "Test"
-/// last_name : "User1"
-
 class User {
   User({
-      num? id, 
-      String? username, 
-      String? firstName, 
-      String? lastName,}){
+    num? id,
+    String? username,
+    String? firstName,
+    String? lastName,
+    String? profileImage,
+  }) {
     _id = id;
     _username = username;
     _firstName = firstName;
     _lastName = lastName;
-}
+    _profileImage = profileImage;
+  }
 
   User.fromJson(dynamic json) {
     _id = json['id'];
     _username = json['username'];
     _firstName = json['first_name'];
     _lastName = json['last_name'];
+    _profileImage = json['profile_image'];
   }
+
   num? _id;
   String? _username;
   String? _firstName;
   String? _lastName;
-User copyWith({  num? id,
-  String? username,
-  String? firstName,
-  String? lastName,
-}) => User(  id: id ?? _id,
-  username: username ?? _username,
-  firstName: firstName ?? _firstName,
-  lastName: lastName ?? _lastName,
-);
+  String? _profileImage;
+
+  User copyWith({
+    num? id,
+    String? username,
+    String? firstName,
+    String? lastName,
+    String? profileImage,
+  }) =>
+      User(
+        id: id ?? _id,
+        username: username ?? _username,
+        firstName: firstName ?? _firstName,
+        lastName: lastName ?? _lastName,
+        profileImage: profileImage ?? _profileImage,
+      );
+
   num? get id => _id;
   String? get username => _username;
   String? get firstName => _firstName;
   String? get lastName => _lastName;
+  String? get profileImage => _profileImage;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -216,40 +216,43 @@ User copyWith({  num? id,
     map['username'] = _username;
     map['first_name'] = _firstName;
     map['last_name'] = _lastName;
+    map['profile_image'] = _profileImage;
     return map;
   }
-
 }
-
-/// id : 3
-/// media_type : "video"
-/// file : "/media/content/sample_video.mp4"
 
 class Media {
   Media({
-      num? id, 
-      String? mediaType, 
-      String? file,}){
+    num? id,
+    String? mediaType,
+    String? file,
+  }) {
     _id = id;
     _mediaType = mediaType;
     _file = file;
-}
+  }
 
   Media.fromJson(dynamic json) {
     _id = json['id'];
     _mediaType = json['media_type'];
     _file = json['file'];
   }
+
   num? _id;
   String? _mediaType;
   String? _file;
-Media copyWith({  num? id,
-  String? mediaType,
-  String? file,
-}) => Media(  id: id ?? _id,
-  mediaType: mediaType ?? _mediaType,
-  file: file ?? _file,
-);
+
+  Media copyWith({
+    num? id,
+    String? mediaType,
+    String? file,
+  }) =>
+      Media(
+        id: id ?? _id,
+        mediaType: mediaType ?? _mediaType,
+        file: file ?? _file,
+      );
+
   num? get id => _id;
   String? get mediaType => _mediaType;
   String? get file => _file;
@@ -261,5 +264,4 @@ Media copyWith({  num? id,
     map['file'] = _file;
     return map;
   }
-
 }

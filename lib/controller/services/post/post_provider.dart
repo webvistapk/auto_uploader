@@ -14,6 +14,7 @@ import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import '../../../common/message_toast.dart';
 import '../../../models/ReelPostModel.dart';
+import '../../../models/UserProfile/CommentModel.dart';
 import '../../endpoints.dart';
 import 'package:http/http.dart' as http;
 
@@ -52,7 +53,7 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         List<PostModel> followerPosts = (data['posts'] as List).map((postJson) => PostModel.fromJson(postJson)).toList();
-
+        print("Response ${response.body}");
         // Cache or update the follower posts
         setPosts(followerPosts);
 
@@ -185,9 +186,10 @@ class PostProvider extends ChangeNotifier {
     print("Fetching API");
 
     final String? token = await Prefrences.getAuthToken();
+    int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     // Base URL and API path
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}${id}";
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_post}${_loggedInUserId}";
 
     // Add query parameters for pagination (limit and offpage)
     Uri uri = Uri.parse(URL).replace(queryParameters: {
@@ -203,7 +205,7 @@ class PostProvider extends ChangeNotifier {
         "Authorization": "Bearer $token"
       });
 
-      print(response.body);
+      print("Response Data of UserPost ${response.body}");
 
       if (response.statusCode == 200) {
         final jsonList = jsonDecode(response.body);
@@ -278,8 +280,7 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ReelPostModel>> fetchReels(
-      BuildContext context, String id, int limit, int offset) async {
+  Future<List<ReelPostModel>> fetchReels(BuildContext context, String id, int limit, int offset) async {
     final String? token = await Prefrences.getAuthToken();
 
     // Base URL and API path
@@ -327,10 +328,10 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  void deletePost(String postId, BuildContext context) async {
+  Future<void> deletePost(String postId, BuildContext context,bool isReelPost) async {
     final String? token = await Prefrences.getAuthToken();
 
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.delete_post}$postId/";
+    String URL = "${ApiURLs.baseUrl}${isReelPost?ApiURLs.delete_reel:ApiURLs.delete_post}$postId/";
     setIsLoading(true);
     try {
       // Make the DELETE request
@@ -375,6 +376,7 @@ class PostProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print("RESPONSE OF POST: ${response.body}");
         _post = PostDetails.fromJson(data['posts']);
         print(_post);
       } else {
@@ -386,6 +388,38 @@ class PostProvider extends ChangeNotifier {
       setIsLoading(false);
     }
   }
+
+  Future<void> newLike(int postID, BuildContext context) async {
+    final String? token = await Prefrences.getAuthToken();
+
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}$postID/";
+    print("Post ID in Like ${postID}");
+    try {
+      final response = await http.post(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        ToastNotifier.showSuccessToast(context, "Post Liked Successfully");
+        print("Post liked successfully");
+        // Refresh or update the UI based on your business logic
+        // If needed, you can fetch the updated like count or status here
+        notifyListeners();
+      } else {
+        throw Exception('Failed to like post');
+        notifyListeners();
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error liking the post: $e");
+      notifyListeners();
+      print(e);
+    }
+  }
+
 
   List<PostModel> _cachedPosts = [];
 
@@ -405,4 +439,5 @@ class PostProvider extends ChangeNotifier {
     _cachedPosts.clear();
     notifyListeners();
   }
+
 }
