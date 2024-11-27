@@ -37,6 +37,26 @@ class _ChatListState extends State<ChatList> {
                     itemCount: chatProvider.chats.length,
                     itemBuilder: (context, index) {
                       final chat = chatProvider.chats[index];
+
+                      // Logic to determine chat display details
+                      String chatName;
+                      String? profileImage;
+
+                      if (chat.isGroup) {
+                        chatName = chat.name;
+                        profileImage =
+                            'https://images.pexels.com/photos/940585/pexels-photo-940585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Default group image
+                      } else {
+                        final participant = chat.participants.firstWhere(
+                          (participant) =>
+                              participant.id != widget.userProfile.id,
+                        );
+                        chatName =
+                            '${participant.firstName} ${participant.lastName}';
+                        profileImage = participant.profileImage ??
+                            'https://images.pexels.com/photos/940585/pexels-photo-940585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Default group image
+                      }
+
                       return InkWell(
                         onTap: () {
                           // Navigate to the Inbox screen when a chat is tapped
@@ -51,16 +71,15 @@ class _ChatListState extends State<ChatList> {
                           );
                         },
                         child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundImage: NetworkImage(
-                                'https://images.pexels.com/photos/940585/pexels-photo-940585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'),
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(profileImage),
                             radius: 20,
                           ),
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                chat.name,
+                                chatName,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
                               ),
@@ -68,7 +87,7 @@ class _ChatListState extends State<ChatList> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    chat.time,
+                                    chat.createdAt.toIso8601String(),
                                     style: const TextStyle(
                                         color: Colors.grey, fontSize: 12),
                                   ),
@@ -83,14 +102,21 @@ class _ChatListState extends State<ChatList> {
                           ),
                           subtitle: Row(
                             children: [
-                              Text(
-                                chat.message,
-                                style: const TextStyle(fontSize: 12),
+                              Flexible(
+                                child: Container(
+                                  child: Text(
+                                    "Welcome to the Message Screen List",
+                                    style: const TextStyle(fontSize: 12),
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: true,
+                                  ),
+                                ),
                               ),
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(left: 4),
                                 child: Text(
-                                  "2:17:22", // Replace with the timestamp if available
+                                  chat.updatedAt
+                                      .toIso8601String(), // Replace with the timestamp if available
                                   style: TextStyle(
                                       color: Colors.grey, fontSize: 10),
                                 ),

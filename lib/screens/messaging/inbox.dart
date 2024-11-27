@@ -5,7 +5,6 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/model/message_model.dart';
 import 'package:mobile/screens/messaging/widgets/input_message.dart';
-
 import 'package:provider/provider.dart';
 import 'model/chat_model.dart';
 import 'widgets/build_user_messaging.dart';
@@ -25,37 +24,56 @@ class _InboxScreenState extends State<InboxScreen> {
   TextEditingController messageController = TextEditingController();
   ScrollController _scrollController = ScrollController();
   late ChatController chatController;
+  bool isLoading = false;
+  int offset = 0;
+  final int limit = 10;
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize the chatController
     chatController = Provider.of<ChatController>(context, listen: false);
-
-    // Fetch previous messages and set up WebSocket
     fetching(widget.chatModel.id);
 
-    // Scroll to the bottom once messages are loaded
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      chatController.addListener(() {
-        _scrollToBottom();
-      });
+    // Add scroll listener for pagination
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+              _scrollController.position.minScrollExtent &&
+          !isLoading) {
+        // Trigger loading more messages when scrolled to the top
+        loadMoreMessages();
+      }
     });
   }
 
   Future<void> fetching(int chatID) async {
     try {
-      await chatController.loadMessages(chatID);
-      chatController.connectWebSocket(chatID);
+      setState(() {
+        isLoading = true;
+      });
+      await chatController.loadMessages(chatID, offset: offset, limit: limit);
+      setState(() {
+        isLoading = false;
+      });
     } catch (error) {
       ToastNotifier.showErrorToast(context, 'Error loading messages: $error');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> loadMoreMessages() async {
+    if (!isLoading) {
+      setState(() {
+        isLoading = true;
+        offset += limit; // Increase offset to load next set of messages
+      });
+      await fetching(widget.chatModel.id);
     }
   }
 
   @override
   void dispose() {
-    // Use the chatController reference instead of accessing Provider
     chatController.disconnect(); // Close WebSocket connection
     _scrollController.dispose();
     super.dispose();
@@ -79,153 +97,143 @@ class _InboxScreenState extends State<InboxScreen> {
       child: Scaffold(
         body: Consumer<ChatController>(
           builder: (context, chatController, child) {
-            return Stack(children: [
-              Column(
-                children: [
-                  Material(
-                    elevation: 0.3,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Icon(Icons.arrow_back),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Container(
-                                width: 35,
-                                height: 35,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey),
-                                ),
-                                child: Image(
-                                  width: 28,
-                                  height: 28,
-                                  image: NetworkImage(
-                                    widget.userProfile.profileUrl ??
-                                        "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg",
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    Material(
+                      elevation: 0.3,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Icon(Icons.arrow_back),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  width: 35,
+                                  height: 35,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
                                   ),
-                                  fit: BoxFit.fill,
+                                  child: Image(
+                                    width: 28,
+                                    height: 28,
+                                    image: NetworkImage(
+                                      widget.userProfile.profileUrl ??
+                                          "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg",
+                                    ),
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.chatModel.name,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.chatModel.name,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey)),
-                              child: const Padding(
-                                  padding: EdgeInsets.all(5.0),
-                                  child: Icon(
-                                    Icons.phone,
-                                    size: 18,
-                                  )),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Container(
+                                ],
+                              ),
+                              const Spacer(),
+                              Container(
                                 decoration: BoxDecoration(
                                     border: Border.all(color: Colors.grey)),
                                 child: const Padding(
                                     padding: EdgeInsets.all(5.0),
                                     child: Icon(
-                                      Icons.video_call,
+                                      Icons.phone,
                                       size: 18,
                                     )),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        )
-                      ],
+                              Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey)),
+                                  child: const Padding(
+                                      padding: EdgeInsets.all(5.0),
+                                      child: Icon(
+                                        Icons.video_call,
+                                        size: 18,
+                                      )),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  // Chat List
-                  Expanded(
-                    child: chatController.messages.isEmpty
-                        ? Center(child: CircularProgressIndicator.adaptive())
-                        : ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.all(16),
-                            itemCount: chatController.messages.length,
-                            itemBuilder: (context, index) {
-                              final message = chatController.messages[index];
-                              bool isOwnMessage = message.senderUsername ==
-                                  widget.userProfile.username;
+                    // Chat List
+                    Expanded(
+                      child: chatController.messages.isEmpty
+                          ? Center(child: CircularProgressIndicator.adaptive())
+                          : ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.all(16),
+                              itemCount: chatController.messages.length,
+                              itemBuilder: (context, index) {
+                                final message = chatController.messages[index];
+                                bool isOwnMessage = message.senderUsername ==
+                                    widget.userProfile.username;
 
-                              final formatDate =
-                                  formatDateString(message.createdAt);
-                              if (isOwnMessage) {
-                                return OwnMessage(
-                                  text: message.content,
-                                  timestamp: formatDate,
-                                );
-                              } else {
-                                return buildUserMessage(
-                                  timestamp: formatDate,
-                                  userProfile: widget.userProfile,
-                                  messageModel: message,
-                                );
-                              }
-                            },
-                          ),
-                  ),
-                  // Input Field
-                  ChatInputField(
-                    messageController: messageController,
-                    onPressedSend: () async {
-                      try {
-                        // Send the message via the API and then add it to the UI
-                        await chatController.sendMessage(
-                            messageController.text.trim(),
-                            widget.chatModel.id,
-                            widget.userProfile.username!);
+                                final formatDate =
+                                    formatDateString(message.createdAt);
+                                if (isOwnMessage) {
+                                  return OwnMessage(
+                                    text: message.content,
+                                    timestamp: formatDate,
+                                  );
+                                } else {
+                                  return buildUserMessage(
+                                    timestamp: formatDate,
+                                    userProfile: widget.userProfile,
+                                    messageModel: message,
+                                  );
+                                }
+                              },
+                            ),
+                    ),
+                    // Input Field
+                    ChatInputField(
+                      messageController: messageController,
+                      onPressedSend: () async {
+                        try {
+                          await chatController.sendMessage(
+                              messageController.text.trim(),
+                              widget.chatModel.id,
+                              widget.userProfile.username!, []);
 
-                        // Add the new message to the messages list manually
-                        chatController.messages.add(
-                          MessageModel(
-                            sender: widget.userProfile.id,
-                            content: messageController.text.trim(),
-                            createdAt: DateTime.now().toIso8601String(),
-                            id: widget.userProfile.id,
-                            senderUsername: widget.userProfile.username!,
-                          ),
-                        );
-                        if (mounted) {
-                          setState(() {});
+                          if (mounted) {
+                            setState(() {});
+                          }
+                          _scrollToBottom();
+                        } catch (e) {
+                          ToastNotifier.showErrorToast(context, e.toString());
                         }
-                        _scrollToBottom();
-                      } catch (e) {
-                        ToastNotifier.showErrorToast(context, e.toString());
-                      }
 
-                      // Clear the input field and update the UI
-                      messageController.clear();
-                      setState(() {});
-                      _scrollToBottom();
-                    },
-                  ),
-                ],
-              ),
-            ]);
+                        messageController.clear();
+                        setState(() {});
+                        _scrollToBottom();
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            );
           },
         ),
       ),

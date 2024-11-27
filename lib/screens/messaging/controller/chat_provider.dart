@@ -8,7 +8,7 @@ import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:mobile/screens/messaging/model/message_model.dart';
 
 class ChatProvider with ChangeNotifier {
-  final String baseUrl = "http://147.79.117.253:8001/api";
+  final String baseUrl = "http://147.79.117.253:8001";
   String? accessToken;
   List<ChatModel> _chats = [];
   List<MessageModel> _messages = [];
@@ -29,7 +29,7 @@ class ChatProvider with ChangeNotifier {
     _isLoading = true; // Set loading to true when the fetch starts
     notifyListeners();
 
-    final url = Uri.parse('$baseUrl/chat/');
+    final url = Uri.parse('$baseUrl/api/chat/');
     String? accessToken = await Prefrences.getAuthToken();
 
     try {
