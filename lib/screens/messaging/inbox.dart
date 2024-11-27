@@ -179,33 +179,41 @@ class _InboxScreenState extends State<InboxScreen> {
                     ),
                     // Chat List
                     Expanded(
-                      child: chatController.messages.isEmpty
-                          ? Center(child: CircularProgressIndicator.adaptive())
-                          : ListView.builder(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.all(16),
-                              itemCount: chatController.messages.length,
-                              itemBuilder: (context, index) {
-                                final message = chatController.messages[index];
-                                bool isOwnMessage = message.senderUsername ==
-                                    widget.userProfile.username;
+                      child: chatController.isMessageLoading
+                          ? Center(
+                              child: CircularProgressIndicator.adaptive(),
+                            )
+                          : chatController.messages.isEmpty
+                              ? Center(
+                                  child: Text(
+                                      "Say Hello ${widget.chatModel.name}"))
+                              : ListView.builder(
+                                  controller: _scrollController,
+                                  padding: const EdgeInsets.all(16),
+                                  itemCount: chatController.messages.length,
+                                  itemBuilder: (context, index) {
+                                    final message =
+                                        chatController.messages[index];
+                                    bool isOwnMessage =
+                                        message.senderUsername ==
+                                            widget.userProfile.username;
 
-                                final formatDate =
-                                    formatDateString(message.createdAt);
-                                if (isOwnMessage) {
-                                  return OwnMessage(
-                                    text: message.content,
-                                    timestamp: formatDate,
-                                  );
-                                } else {
-                                  return buildUserMessage(
-                                    timestamp: formatDate,
-                                    userProfile: widget.userProfile,
-                                    messageModel: message,
-                                  );
-                                }
-                              },
-                            ),
+                                    final formatDate =
+                                        formatDateString(message.createdAt);
+                                    if (isOwnMessage) {
+                                      return OwnMessage(
+                                        text: message.content,
+                                        timestamp: formatDate,
+                                      );
+                                    } else {
+                                      return buildUserMessage(
+                                        timestamp: formatDate,
+                                        userProfile: widget.userProfile,
+                                        messageModel: message,
+                                      );
+                                    }
+                                  },
+                                ),
                     ),
                     // Input Field
                     ChatInputField(

@@ -11,14 +11,18 @@ class ChatController extends ChangeNotifier {
   WebSocketChannel? _channel;
   List<MessageModel> _messages = [];
   bool _isConnected = false;
+  bool _isMessageLoading = false;
 
   List<MessageModel> get messages => _messages;
   bool get isConnected => _isConnected;
+  bool get isMessageLoading => _isMessageLoading;
 
   // Fetch messages from the server
   // Updated method to handle pagination and new response structure
   Future<void> loadMessages(int chatId,
       {int offset = 0, int limit = 10}) async {
+    _isMessageLoading = true;
+    notifyListeners();
     try {
       String authToken = await Prefrences.getAuthToken();
       final response = await http.get(
@@ -34,10 +38,11 @@ class ChatController extends ChangeNotifier {
         final data = json.decode(response.body);
 
         if (data['status'] == 'success') {
+          _isMessageLoading = false;
+          notifyListeners();
           final newMessages = List<MessageModel>.from(
             data['messages'].map((message) => MessageModel.fromJson(message)),
           );
-
           // Append new messages to the existing list
           if (offset == 0) {
             // First load or refresh
@@ -57,10 +62,14 @@ class ChatController extends ChangeNotifier {
           }
         }
       } else {
+        _isMessageLoading = false;
+        notifyListeners();
         throw Exception(
             "Failed to load messages. Status code: ${response.statusCode}");
       }
     } catch (e) {
+      _isMessageLoading = false;
+      notifyListeners();
       print('Error loading messages: $e');
     }
   }
