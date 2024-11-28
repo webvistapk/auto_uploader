@@ -35,26 +35,27 @@ class PostWidget extends StatefulWidget {
   final VoidCallback refresh;
   final bool showCommentSection; // New parameter to show/hide follow button
   final bool isInteractive; // New parameter for tap-to-navigate
-  final bool isUserPost; //this parameter is used to check that post is users or followers
-  const PostWidget({
-    Key? key,
-    required this.postId,
-    required this.username,
-    required this.location,
-    required this.date,
-    required this.caption,
-    required this.mediaUrls,
-    required this.profileImageUrl,
-    required this.isVideo,
-    required this.likes,
-    required this.comments,
-    required this.shares,
-    required this.saved,
-    required this.refresh,
-    this.showCommentSection = false,
-    this.isInteractive = false,
-    required this.isUserPost
-  }) : super(key: key);
+  final bool
+      isUserPost; //this parameter is used to check that post is users or followers
+  const PostWidget(
+      {Key? key,
+      required this.postId,
+      required this.username,
+      required this.location,
+      required this.date,
+      required this.caption,
+      required this.mediaUrls,
+      required this.profileImageUrl,
+      required this.isVideo,
+      required this.likes,
+      required this.comments,
+      required this.shares,
+      required this.saved,
+      required this.refresh,
+      this.showCommentSection = false,
+      this.isInteractive = false,
+      required this.isUserPost})
+      : super(key: key);
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
@@ -78,24 +79,27 @@ class _PostWidgetState extends State<PostWidget> {
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return widget.showCommentSection==false?  Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height*0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-            ),
-            child: CommentWidget(
-              isUsedSingle: true,
-              postId: postId,
-              isReelScreen: false,
-            )) :CommentWidget( isUsedSingle: true,
-                      postId: postId,
-          isReelScreen: false,
-        );
+        return widget.showCommentSection == false
+            ? Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.8,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                ),
+                child: CommentWidget(
+                  isUsedSingle: true,
+                  postId: postId,
+                  isReelScreen: false,
+                ))
+            : CommentWidget(
+                isUsedSingle: true,
+                postId: postId,
+                isReelScreen: false,
+              );
       },
     );
   }
@@ -132,17 +136,17 @@ class _PostWidgetState extends State<PostWidget> {
                     ],
                   ),
                 ),
-                if(widget.isUserPost==true)
-                GestureDetector(
-                  key: iconKey, // Unique key for dynamic positioning
-                  onTap: () {
-                    _showOptionsMenu(
-                      context,
-                      iconKey,
-                    );
-                  },
-                  child: Icon(Icons.more_vert, size: 20),
-                ),
+                if (widget.isUserPost == true)
+                  GestureDetector(
+                    key: iconKey, // Unique key for dynamic positioning
+                    onTap: () {
+                      _showOptionsMenu(
+                        context,
+                        iconKey,
+                      );
+                    },
+                    child: Icon(Icons.more_vert, size: 20),
+                  ),
               ],
             ),
             const SizedBox(height: 10),
@@ -231,18 +235,20 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
                 const SizedBox(height: 8),
                 widget.showCommentSection
-                    ? CommentWidget(isUsedSingle: false, postId: widget.postId,isReelScreen: false,)
-                    :
-                InkWell(
-                  onTap: () {
-                    showComments(widget.postId);
-
-                  },
-                  child: Text(
-                    'View all ${widget.comments} comments',
-                    style: TextStyle(color: Colors.grey, fontSize: 11),
-                  ),
-                )
+                    ? CommentWidget(
+                        isUsedSingle: false,
+                        postId: widget.postId,
+                        isReelScreen: false,
+                      )
+                    : InkWell(
+                        onTap: () {
+                          showComments(widget.postId);
+                        },
+                        child: Text(
+                          'View all ${widget.comments} comments',
+                          style: TextStyle(color: Colors.grey, fontSize: 11),
+                        ),
+                      )
               ],
             ),
           ],
@@ -261,6 +267,8 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   Widget _buildVideoPlayer(String videoUrl) {
+    // debugger();
+    print(videoUrl);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Container(
@@ -321,7 +329,8 @@ class _PostWidgetState extends State<PostWidget> {
 
   void _showOptionsMenu(BuildContext context, GlobalKey key) {
     // Find the render box of the widget and calculate its position
-    final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        key.currentContext!.findRenderObject() as RenderBox;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
     final Size size = renderBox.size;
 
@@ -363,7 +372,7 @@ class _PostWidgetState extends State<PostWidget> {
       if (value == 'delete') {
         // Call the deletePost method and wait for its completion
         await Provider.of<PostProvider>(context, listen: false)
-            .deletePost(widget.postId, context,false);
+            .deletePost(widget.postId, context, false);
 
         // Trigger the refresh callback to update the UI
         widget.refresh();
@@ -374,7 +383,6 @@ class _PostWidgetState extends State<PostWidget> {
       }
     });
   }
-
 }
 
 class VideoPlayerWidget extends StatefulWidget {
@@ -419,5 +427,3 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           );
   }
 }
-
-
