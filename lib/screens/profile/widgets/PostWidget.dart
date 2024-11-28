@@ -4,20 +4,13 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mobile/common/app_colors.dart';
-import 'package:mobile/common/app_size.dart';
-import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
 import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
-
-import '../../../models/UserProfile/CommentModel.dart';
-import '../../../models/UserProfile/commentBottomSheet.dart';
 
 class PostWidget extends StatefulWidget {
   final String postId;
@@ -37,25 +30,27 @@ class PostWidget extends StatefulWidget {
   final bool isInteractive; // New parameter for tap-to-navigate
   final bool
       isUserPost; //this parameter is used to check that post is users or followers
-  const PostWidget(
-      {Key? key,
-      required this.postId,
-      required this.username,
-      required this.location,
-      required this.date,
-      required this.caption,
-      required this.mediaUrls,
-      required this.profileImageUrl,
-      required this.isVideo,
-      required this.likes,
-      required this.comments,
-      required this.shares,
-      required this.saved,
-      required this.refresh,
-      this.showCommentSection = false,
-      this.isInteractive = false,
-      required this.isUserPost})
-      : super(key: key);
+  final onPressed;
+  const PostWidget({
+    Key? key,
+    required this.postId,
+    required this.username,
+    required this.location,
+    required this.date,
+    required this.caption,
+    required this.mediaUrls,
+    required this.profileImageUrl,
+    required this.isVideo,
+    required this.likes,
+    required this.comments,
+    required this.shares,
+    required this.saved,
+    required this.refresh,
+    this.showCommentSection = false,
+    this.isInteractive = false,
+    required this.isUserPost,
+    required this.onPressed,
+  }) : super(key: key);
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
@@ -106,7 +101,7 @@ class _PostWidgetState extends State<PostWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print("Post ID is here ${widget.postId}");
+    log("Post ID is here ${widget.postId}");
     final GlobalKey iconKey = GlobalKey();
     if (widget.profileImageUrl
         .contains('http://147.79.117.253:8001http://147.79.117.253:8001')) {
@@ -160,36 +155,7 @@ class _PostWidgetState extends State<PostWidget> {
             ),
             const SizedBox(height: 10),
             GestureDetector(
-              onTap: widget.isInteractive
-                  ? () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                SinglePost(postId: widget.postId),
-                          ));
-                    }
-                  : () {
-                      if (widget.isVideo) {
-                        Navigator.push(
-                          context,
-                          CupertinoDialogRoute(
-                            builder: (_) => FullscreenVideoPlayer(
-                              videoUrl: "${widget.mediaUrls[0]}",
-                            ),
-                            context: context,
-                          ),
-                        );
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => postFullScreen(
-                                  mediaUrls: widget.mediaUrls,
-                                  initialIndex: _currentImageIndex)),
-                        );
-                      }
-                    },
+              onTap: widget.onPressed,
               child: widget.isVideo
                   ? _buildVideoPlayer(widget.mediaUrls[0])
                   : Column(
@@ -286,19 +252,7 @@ class _PostWidgetState extends State<PostWidget> {
             child: VideoPlayerWidget(videoUrl: videoUrl),
           ),
           Positioned.fill(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  CupertinoDialogRoute(
-                    builder: (_) => FullscreenVideoPlayer(
-                      videoUrl: videoUrl,
-                    ),
-                    context: context,
-                  ),
-                );
-              },
-            ),
+            child: GestureDetector(onTap: widget.onPressed),
           ),
         ],
       ),
@@ -438,8 +392,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         _isError = false;
       });
     } catch (e) {
-      debugPrint(widget.videoUrl);
-      debugPrint("Video initialization error: $e");
+      log(widget.videoUrl);
+      log("Video initialization error: $e");
       setState(() {
         _isError = true;
       });

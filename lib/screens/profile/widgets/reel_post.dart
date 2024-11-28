@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../video_stream_screen.dart';
- // Import the VideoStreamScreen
+// Import the VideoStreamScreen
 
 class ReelPost extends StatefulWidget {
   final String? src;
@@ -25,20 +25,20 @@ class _ReelPostState extends State<ReelPost> {
       backgroundColor: Colors.black,
       body: Center(
         child: widget.src != null && widget.src!.isNotEmpty
-            ? VideoStreamScreen(videoUrl: "http://147.79.117.253:8001${widget.src.toString()}") // Use VideoStreamScreen
+            ? VideoStreamScreen(
+                videoUrl: "${widget.src.toString()}") // Use VideoStreamScreen
             : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 10),
-            Text('Loading...'),
-          ],
-        ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 10),
+                  Text('Loading...'),
+                ],
+              ),
       ),
     );
   }
 }
-
 
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
@@ -72,11 +72,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: VideoPlayer(_controller),
-    )
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
+          )
         : Center(child: CircularProgressIndicator());
   }
 }
-
-

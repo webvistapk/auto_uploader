@@ -82,7 +82,7 @@ class _PostAndReelsState extends State<PostAndReels>
         setState(() {});
       }
     } else {
-      PhotoManager.openSetting();
+      _fetchReelAlbums();
     }
   }
 
@@ -546,7 +546,7 @@ class _PostAndReelsState extends State<PostAndReels>
 
   Future<bool> _requestPermissions() async {
     bool permissions = await Prefrences.getMediaPermission();
-
+    // debugger();
     if (permissions) {
       return true;
     } else {

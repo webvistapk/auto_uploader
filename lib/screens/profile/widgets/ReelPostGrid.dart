@@ -42,13 +42,12 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
     try {
       List<ReelPostModel> newReel =
-      await Provider.of<PostProvider>(context, listen: false)
-          .fetchReels(context, widget.userId, limit, offset);
+          await Provider.of<PostProvider>(context, listen: false)
+              .fetchReels(context, widget.userId, limit, offset);
 
       setState(() {
         _reels.addAll(newReel);
-        _fileUrls.addAll(
-            newReel.map((reel) => '${ApiURLs.baseUrl2}${reel.file}').toList());
+        _fileUrls.addAll(newReel.map((reel) => '${reel.file}').toList());
         offset += limit;
         if (newReel.length < limit) _hasMore = false;
       });
@@ -65,7 +64,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300 &&
+            _scrollController.position.maxScrollExtent - 300 &&
         !_isLoadingMore &&
         _hasMore) {
       _fetchReelPosts();
@@ -95,10 +94,11 @@ class _ReelPostGridState extends State<ReelPostGrid> {
         Expanded(
           child: _fileUrls.isNotEmpty
               ? VideoGrid(
-            videoUrls: _fileUrls,
-            scrollController: _scrollController,
-            onVideoTap: _navigateToReelScreen, // Pass function to VideoGrid
-          )
+                  videoUrls: _fileUrls,
+                  scrollController: _scrollController,
+                  onVideoTap:
+                      _navigateToReelScreen, // Pass function to VideoGrid
+                )
               : const Center(child: Text("No reels available")),
         ),
         if (_isLoadingMore)
@@ -159,7 +159,8 @@ class _VideoGridState extends State<VideoGrid> {
 
   void _togglePlayPause(int index) {
     setState(() {
-      if (_currentlyPlayingIndex == index && _controllers[index].value.isPlaying) {
+      if (_currentlyPlayingIndex == index &&
+          _controllers[index].value.isPlaying) {
         _controllers[index].pause();
         _currentlyPlayingIndex = null;
       } else {
@@ -172,13 +173,13 @@ class _VideoGridState extends State<VideoGrid> {
     });
   }
 
-    @override
-    void dispose() {
-      for (var controller in _controllers) {
-        controller.dispose();
-      }
-      super.dispose();
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
     }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +206,6 @@ class _VideoGridState extends State<VideoGrid> {
     );
   }
 }
-
 
 /*class VideoGrid extends StatefulWidget {
   final List<String> videoUrls;

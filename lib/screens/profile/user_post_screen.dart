@@ -1,10 +1,15 @@
+import 'dart:developer';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
+import 'package:mobile/screens/profile/imageFullScreen.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
+import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:provider/provider.dart';
 
 class UserPostScreen extends StatefulWidget {
@@ -123,6 +128,10 @@ class _UserPostScreenState extends State<UserPostScreen> {
               return const Center(
                   child: Text("No posts available for this filter"));
             }
+            var mediaList = post.media.isNotEmpty
+                ? post.media.map((media) => "${media.file}").toList()
+                : [""];
+            // debugger();
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,6 +158,27 @@ class _UserPostScreenState extends State<UserPostScreen> {
                     showCommentSection: false,
                     refresh: () => _deletePost(post.id.toString()),
                     isUserPost: true,
+                    onPressed: () {
+                      // debugger();
+                      if (post.media[0].mediaType == 'video') {
+                        Navigator.push(
+                          context,
+                          CupertinoDialogRoute(
+                            builder: (_) => FullscreenVideoPlayer(
+                              videoUrl: "${mediaList[0]}",
+                            ),
+                            context: context,
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => postFullScreen(
+                                  mediaUrls: mediaList, initialIndex: 0)),
+                        );
+                      }
+                    },
                   ),
                 ],
               ),

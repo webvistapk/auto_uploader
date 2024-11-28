@@ -1,9 +1,11 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
+import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:provider/provider.dart';
 
@@ -76,7 +78,7 @@ class _PostScreenState extends State<PostScreen> {
                         final post = posts[index];
 
                         print(post);
-                        debugger();
+                        // debugger();
                         return PostWidget(
                           username: post.user.username.toString(),
                           location: "Location",
@@ -100,6 +102,22 @@ class _PostScreenState extends State<PostScreen> {
                           refresh: () {},
                           isUserPost: false,
                           isInteractive: true,
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                                context,
+                                CupertinoDialogRoute(
+                                    builder: (_) =>
+                                        SinglePost(postId: post.id.toString()),
+                                    context: context));
+
+                            // Check if the result indicates a need to refresh
+                            if (result == true) {
+                              setState(() {
+                                // Call the method to refresh the data
+                                // _refreshData();
+                              });
+                            }
+                          },
                         );
                       },
                     );

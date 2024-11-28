@@ -235,10 +235,24 @@ class _HomeScreenState extends State<HomeScreen>
                           //   ),
                           Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: _posts
-                                    .map((post) => _buildPostCard(post))
-                                    .toList(),
+                              child: ListView.builder(
+                                itemCount: _posts.length,
+                                shrinkWrap: true, // Prevents unbounded height
+                                physics:
+                                    NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                                itemBuilder: (context, index) {
+                                  final post = _posts[index];
+                                  return _buildPostCard(post, () {
+                                    Navigator.push(
+                                        context,
+                                        CupertinoDialogRoute(
+                                            builder: (_) => SinglePost(
+                                                postId: post.id.toString()),
+                                            context: context));
+
+                                    // Check if the result indicates a need to refresh
+                                  });
+                                },
                               ),
                             ),
                       if (_isLoadingMore)
@@ -364,15 +378,17 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildPostCard(PostModel post) {
-    _currentIndexMap[post.id] ??= 0;
+  Widget _buildPostCard(PostModel post, onPressed) {
+    log('Hello $_currentIndexMap');
     List<String> fullMediaUrls = post.media.map((media) {
       print(media);
       // debugger();
       final file = media.file;
       return file;
     }).toList();
-    print(fullMediaUrls);
+    log(fullMediaUrls.toString());
+    // debugger();
+
     return PostWidget(
       postId: post.id.toString(),
       username: post.user.username,
@@ -393,6 +409,30 @@ class _HomeScreenState extends State<HomeScreen>
       showCommentSection: false,
       isInteractive: true,
       isUserPost: false,
+      onPressed: onPressed,
+      // isInteractive
+      //             ?
+      //             : () {
+      // if (widget.isVideo) {
+      //   Navigator.push(
+      //     context,
+      //     CupertinoDialogRoute(
+      //       builder: (_) => FullscreenVideoPlayer(
+      //         videoUrl: "${widget.mediaUrls[0]}",
+      //       ),
+      //       context: context,
+      //     ),
+      //   );
+      // } else {
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => postFullScreen(
+      //             mediaUrls: widget.mediaUrls,
+      //             initialIndex: _currentImageIndex)),
+      //   );
+      // }
+      //               },
     );
   }
 }
