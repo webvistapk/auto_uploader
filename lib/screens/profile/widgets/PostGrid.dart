@@ -42,7 +42,8 @@ class _PostGridState extends State<PostGrid> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent &&
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
         !_isLoadingMore &&
         _hasMorePosts) {
       _fetchPosts();
@@ -52,8 +53,9 @@ class _PostGridState extends State<PostGrid> {
   Future<void> _fetchPosts() async {
     setState(() => _isLoadingMore = true);
     try {
-      List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
-          .getPost(context, widget.userId, _limit, _offset);
+      List<PostModel> newPosts =
+          await Provider.of<PostProvider>(context, listen: false)
+              .getPost(context, widget.userId, _limit, _offset);
 
       setState(() {
         _allPosts.addAll(newPosts);
@@ -69,9 +71,15 @@ class _PostGridState extends State<PostGrid> {
 
   List<PostModel> _getFilteredPosts() {
     if (widget.filterType == "image") {
-      return _allPosts.where((post) => post.media.any((media) => media.mediaType == 'image')).toList();
+      return _allPosts
+          .where(
+              (post) => post.media.any((media) => media.mediaType == 'image'))
+          .toList();
     } else if (widget.filterType == "video") {
-      return _allPosts.where((post) => post.media.any((media) => media.mediaType == 'video')).toList();
+      return _allPosts
+          .where(
+              (post) => post.media.any((media) => media.mediaType == 'video'))
+          .toList();
     }
     return _allPosts;
   }
@@ -113,39 +121,45 @@ class _PostGridState extends State<PostGrid> {
                   child: Container(
                     color: Colors.grey[300],
                     child: post.media.isEmpty
-                        ? const Center(child: CircularProgressIndicator.adaptive())
+                        ? const Center(
+                            child: CircularProgressIndicator.adaptive())
                         : post.media[0].mediaType == 'video'
-                        ? Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        VideoPlayerWidget(
-                          videoUrl:
-                          "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
-                        ),
-                        Icon(
-                          Icons.play_circle_fill,
-                          color: Colors.white,
-                          size: 50,
-                        ),
-                      ],
-                    )
-                        : Image.network(
-                      "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                (loadingProgress.expectedTotalBytes ?? 1)
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image),
-                    ),
+                            ? Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  VideoPlayerWidget(
+                                    videoUrl: "${post.media[0].file}",
+                                  ),
+                                  const Icon(
+                                    Icons.play_circle_fill,
+                                    color: Colors.white,
+                                    size: 50,
+                                  ),
+                                ],
+                              )
+                            : Image.network(
+                                "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
+                                fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  (loadingProgress
+                                                          .expectedTotalBytes ??
+                                                      1)
+                                              : null,
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.broken_image),
+                              ),
                   ),
                 ),
               );

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
@@ -97,7 +98,9 @@ class _HomeScreenState extends State<HomeScreen>
                   mediaProvider.followersStatus?.stories;
 
               // Define profileImageUrl to be accessible in both the if and else blocks
-              final profileImageUrl = (stories != null && stories.isNotEmpty && stories.first.user?.profileImage != null)
+              final profileImageUrl = (stories != null &&
+                      stories.isNotEmpty &&
+                      stories.first.user?.profileImage != null)
                   ? '${ApiURLs.baseUrl2}${stories.first.user!.profileImage}'
                   : AppUtils.userImage; // Fallback URL for profile image
 
@@ -152,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen>
             },
           ),
         ),
-          bottom: PreferredSize(
+        bottom: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: Theme(
             data: Theme.of(context).copyWith(
@@ -364,9 +367,12 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildPostCard(PostModel post) {
     _currentIndexMap[post.id] ??= 0;
     List<String> fullMediaUrls = post.media.map((media) {
+      print(media);
+      // debugger();
       final file = media.file;
-      return file.startsWith('http') ? file : '${ApiURLs.baseUrl2}$file';
+      return file;
     }).toList();
+    print(fullMediaUrls);
     return PostWidget(
       postId: post.id.toString(),
       username: post.user.username,

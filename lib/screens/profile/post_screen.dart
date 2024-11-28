@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
@@ -26,7 +28,8 @@ class _PostScreenState extends State<PostScreen> {
   // Fetch posts with pagination (limit and offset)
   _fetchPost() {
     setState(() {
-      _posts = Provider.of<PostProvider>(context, listen: false).getPost(context, "", limit, offset);
+      _posts = Provider.of<PostProvider>(context, listen: false)
+          .getPost(context, "", limit, offset);
     });
   }
 
@@ -42,7 +45,8 @@ class _PostScreenState extends State<PostScreen> {
   void _loadPreviousPage() {
     if (offset > 0) {
       setState(() {
-        offset -= limit; // Decrease the offset to fetch the previous set of posts
+        offset -=
+            limit; // Decrease the offset to fetch the previous set of posts
         _fetchPost();
       });
     }
@@ -61,7 +65,8 @@ class _PostScreenState extends State<PostScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('An error occurred: ${snapshot.error}'));
+                  return Center(
+                      child: Text('An error occurred: ${snapshot.error}'));
                 } else if (snapshot.hasData) {
                   final posts = snapshot.data!;
                   if (posts.isNotEmpty) {
@@ -69,17 +74,23 @@ class _PostScreenState extends State<PostScreen> {
                       itemCount: posts.length,
                       itemBuilder: (context, index) {
                         final post = posts[index];
+
+                        print(post);
+                        debugger();
                         return PostWidget(
                           username: post.user.username.toString(),
                           location: "Location",
                           date: post.createdAt.toString(),
                           caption: post.post.toString(),
-                          mediaUrls: post.media
-                              .map((media) => "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
-                              .toList(),
-                          isVideo: post.media.isNotEmpty && post.media[0].mediaType == 'video', // Fix here
+                          mediaUrls:
+                              post.media.map((media) => media.file).toList(),
+                          isVideo: post.media.isNotEmpty &&
+                              post.media[0].mediaType == 'video', // Fix here
                           profileImageUrl: post.user.profileImage != null
-                              ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+                              ? post.user.profileImage!
+                                      .contains('http://147.79.117.253:8001')
+                                  ? post.user.profileImage!
+                                  : "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
                               : AppUtils.userImage,
                           likes: '100',
                           comments: '100',
@@ -88,6 +99,7 @@ class _PostScreenState extends State<PostScreen> {
                           postId: '',
                           refresh: () {},
                           isUserPost: false,
+                          isInteractive: true,
                         );
                       },
                     );
@@ -106,11 +118,14 @@ class _PostScreenState extends State<PostScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: offset > 0 ? _loadPreviousPage : null, // Disable if on the first page
+                  onPressed: offset > 0
+                      ? _loadPreviousPage
+                      : null, // Disable if on the first page
                   child: Text("Previous"),
                 ),
                 ElevatedButton(
-                  onPressed: _loadNextPage, // Always allow Next unless there are no more posts
+                  onPressed:
+                      _loadNextPage, // Always allow Next unless there are no more posts
                   child: Text("Next"),
                 ),
               ],

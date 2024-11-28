@@ -45,13 +45,15 @@ class _UserPostScreenState extends State<UserPostScreen> {
       _isLoadingMore = true;
     });
     try {
-      List<PostModel> newPosts = await Provider.of<PostProvider>(context, listen: false)
-          .getPost(context, widget.userId, limit, offset);
+      List<PostModel> newPosts =
+          await Provider.of<PostProvider>(context, listen: false)
+              .getPost(context, widget.userId, limit, offset);
 
       setState(() {
         // Add only unique posts
         final newPostIds = _allPosts.map((post) => post.id).toSet();
-        final uniquePosts = newPosts.where((post) => !newPostIds.contains(post.id)).toList();
+        final uniquePosts =
+            newPosts.where((post) => !newPostIds.contains(post.id)).toList();
         _allPosts.addAll(uniquePosts);
         offset += limit; // Increment offset for the next page of posts
         _isLoadingMore = false;
@@ -63,7 +65,6 @@ class _UserPostScreenState extends State<UserPostScreen> {
       print("Error fetching posts: $e");
     }
   }
-
 
   List<PostModel> getImagePosts(List<PostModel> posts) {
     return posts.where((post) {
@@ -134,10 +135,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
                     date: post.createdAt.toString(),
                     caption: post.post.toString(),
                     mediaUrls: post.media.isNotEmpty
-                        ? post.media
-                            .map((media) =>
-                                "${ApiURLs.baseUrl.replaceAll("/api/", '')}${media.file}")
-                            .toList()
+                        ? post.media.map((media) => "${media.file}").toList()
                         : [], // Ensure empty list if no media
                     profileImageUrl: post.user.profileImage != null
                         ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"

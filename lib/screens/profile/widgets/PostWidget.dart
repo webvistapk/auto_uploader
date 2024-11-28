@@ -108,6 +108,11 @@ class _PostWidgetState extends State<PostWidget> {
   Widget build(BuildContext context) {
     print("Post ID is here ${widget.postId}");
     final GlobalKey iconKey = GlobalKey();
+    if (widget.profileImageUrl
+        .contains('http://147.79.117.253:8001http://147.79.117.253:8001')) {
+      var image =
+          'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg';
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -118,7 +123,11 @@ class _PostWidgetState extends State<PostWidget> {
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundImage: NetworkImage(widget.profileImageUrl),
+                  backgroundImage: widget.profileImageUrl.contains(
+                          'http://147.79.117.253:8001http://147.79.117.253:8001')
+                      ? NetworkImage(
+                          'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg')
+                      : NetworkImage(widget.profileImageUrl),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -150,7 +159,7 @@ class _PostWidgetState extends State<PostWidget> {
               ],
             ),
             const SizedBox(height: 10),
-            InkWell(
+            GestureDetector(
               onTap: widget.isInteractive
                   ? () {
                       Navigator.push(
@@ -182,7 +191,7 @@ class _PostWidgetState extends State<PostWidget> {
                       }
                     },
               child: widget.isVideo
-                  ? _buildVideoPlayer(widget.mediaUrls.first)
+                  ? _buildVideoPlayer(widget.mediaUrls[0])
                   : Column(
                       children: [
                         _buildImageCarousel(widget.mediaUrls),
@@ -267,14 +276,31 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   Widget _buildVideoPlayer(String videoUrl) {
-    // debugger();
-    print(videoUrl);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: Container(
-        width: double.infinity,
-        height: 400,
-        child: VideoPlayerWidget(videoUrl: videoUrl),
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 400,
+            child: VideoPlayerWidget(videoUrl: videoUrl),
+          ),
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  CupertinoDialogRoute(
+                    builder: (_) => FullscreenVideoPlayer(
+                      videoUrl: videoUrl,
+                    ),
+                    context: context,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -396,15 +422,28 @@ class VideoPlayerWidget extends StatefulWidget {
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
+  bool _isError = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.videoUrl)
-      ..initialize().then((_) {
-        setState(() {});
-        // _controller.play();
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      _controller = VideoPlayerController.network(widget.videoUrl);
+      await _controller.initialize();
+      setState(() {
+        _isError = false;
       });
+    } catch (e) {
+      debugPrint(widget.videoUrl);
+      debugPrint("Video initialization error: $e");
+      setState(() {
+        _isError = true;
+      });
+    }
   }
 
   @override
@@ -415,15 +454,19 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isError) {
+      return Center(
+        child: Text("Failed to load video."),
+      );
+    }
+
     return _controller.value.isInitialized
         ? AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
+            aspectRatio: 16 / 9,
             child: VideoPlayer(_controller),
           )
-        : Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(color: Colors.grey),
+        : Center(
+            child: CircularProgressIndicator(),
           );
   }
 }
