@@ -410,6 +410,8 @@ class _HomeScreenState extends State<HomeScreen>
       isInteractive: true,
       isUserPost: false,
       onPressed: onPressed,
+      onPressLiked: (){},
+      isLiked: false,
       // isInteractive
       //             ?
       //             : () {

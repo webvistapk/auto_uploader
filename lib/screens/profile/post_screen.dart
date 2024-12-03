@@ -118,6 +118,8 @@ class _PostScreenState extends State<PostScreen> {
                               });
                             }
                           },
+                          onPressLiked: (){},
+                          isLiked: false,
                         );
                       },
                     );

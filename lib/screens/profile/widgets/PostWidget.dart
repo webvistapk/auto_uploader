@@ -31,6 +31,9 @@ class PostWidget extends StatefulWidget {
   final bool
       isUserPost; //this parameter is used to check that post is users or followers
   final onPressed;
+  final onPressLiked;
+  final bool isLiked;
+
   const PostWidget({
     Key? key,
     required this.postId,
@@ -50,6 +53,9 @@ class PostWidget extends StatefulWidget {
     this.isInteractive = false,
     required this.isUserPost,
     required this.onPressed,
+    required this.onPressLiked,
+    required this.isLiked
+    
   }) : super(key: key);
 
   @override
@@ -61,12 +67,11 @@ class _PostWidgetState extends State<PostWidget> {
   bool isLiked = false;
 
   void _likePost() {
+    isLiked=widget.isLiked;
     setState(() {
       isLiked = !isLiked;
     });
-
-    // Call the newLike method from PostProvider to update the like status on the server
-    PostProvider().newLike(int.parse(widget.postId), context);
+    widget.onPressLiked;
   }
 
   void showComments(String postId) {
@@ -176,10 +181,10 @@ class _PostWidgetState extends State<PostWidget> {
                 SizedBox(width: 10),
                 GestureDetector(
                   onTap:
-                      _likePost, // Call _likePost when the like icon is clicked
+                      widget.onPressLiked, // Call _likePost when the like icon is clicked
                   child: _buildInteractionIcon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    widget.likes,
+                    widget.isLiked ? Icons.favorite : Icons.favorite_border,
+                    widget.likes,   //show Count of likes
                   ),
                 ),
                 SizedBox(width: 10),

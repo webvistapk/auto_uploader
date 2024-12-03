@@ -40,5 +40,7 @@ class ApiURLs {
 
   static const String reel_comment_fetch="posts/comment/get/reel/";
   static const String reel_comment_add="posts/comment/new/reel/";
+  
   //static const String delete_post_comment="posts/comment/delete/";
+  static const String post_comment_reply_fetch="posts/reply/get/";
 }

@@ -92,6 +92,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
 
   @override
   Widget build(BuildContext context) {
+      print("UI Rebuild");
     return Scaffold(
       backgroundColor: AppColors.mainBgColor,
       appBar: AppBar(backgroundColor: AppColors.mainBgColor),
@@ -179,6 +180,19 @@ class _UserPostScreenState extends State<UserPostScreen> {
                         );
                       }
                     },
+                    onPressLiked: (){
+                      //if post is already liked
+                      if(post.is_liked==true){
+                        print("post Disliked");
+                      }
+                      //is post is not liked yet
+                      else{
+                        Provider.of<PostProvider>(context,listen:false).newLike(post.id, context);
+                        setState(() {
+                        });
+                      }
+                    },
+                    isLiked: post.is_liked,
                   ),
                 ],
               ),

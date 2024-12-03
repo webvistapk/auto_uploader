@@ -15,7 +15,7 @@ class CommentProvider extends ChangeNotifier{
 
   List<Comment> _comments = [];
   bool _isCommentLoading = false;
-
+  List<Reply> _replies=[];
   List<Comment> get comments => _comments;
   bool get isCommentLoading => _isCommentLoading;
   setCommentLoadin(bool value){
@@ -42,9 +42,14 @@ class CommentProvider extends ChangeNotifier{
         _comments = (data['comments'] as List)
             .map((comment) => Comment.fromJson(comment))
             .toList();
-        //print("COmmentS ${_comments}");
 
-        print("fetch Comments triggered");
+            // After fetching comments, fetch replies for each comment
+      for (var comment in _comments) {
+        await fetchReplies(comment.id);  // Ensure commentId is passed as a string
+      }
+        print("COmmentS ${_comments}");
+
+        //print("fetch Comments triggered");
 
       } else {
         setCommentLoadin(false);
@@ -58,14 +63,68 @@ class CommentProvider extends ChangeNotifier{
     return _comments;
   }
 
+
+ Future<void> fetchReplies(int commentId) async {
+  setCommentLoadin(true);
+  print("Comment ID: ${commentId}");
+  final String? token = await Prefrences.getAuthToken();
+  final url = "${ApiURLs.baseUrl}${ApiURLs.post_comment_reply_fetch}${commentId.toString()}/";
+
+  try {
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    print("API HITTED SUCCESSFULLY");
+    if (response.statusCode == 200) {
+
+      final data = json.decode(response.body);
+       print("Replies List1: ${response.body}");
+
+      _replies = (data['reply'] as List)
+          .map((reply) => Reply.fromJson(reply))
+          .toList();
+
+        print("Replies List: ${response.body}");
+
+      // Find the target comment and update its replies
+      final index = _comments.indexWhere((comment) => comment.id == commentId);
+
+      if (index != -1) {
+        final currentComment = _comments[index];
+        _comments[index] = Comment(
+        id: currentComment.id,
+        username: currentComment.username,
+        avatarUrl: currentComment.avatarUrl,
+        commentText: currentComment.commentText,
+        replies: _replies,  // Update the replies
+        timeAgo: currentComment.timeAgo,
+  );
+        notifyListeners(); // Notify listeners for UI update
+      }
+    } else {
+      throw Exception("Failed to fetch replies");
+    }
+  } catch (error) {
+    print("Error fetching replies: $error");
+    rethrow;
+  } finally {
+    setCommentLoadin(false);
+  }
+}
+
+
   Future<void> addComment(String postId, bool isReelScreen,{
     required String content,
-    required List<String> keywords,
+    //required List<String> keywords,
     File? media,
     required BuildContext context,
   }) async {
     try {
-      print("POST ID : ${postId}");
+     // print("POST ID : ${postId}");
       final String? token = await Prefrences.getAuthToken();
       final request = http.MultipartRequest(
         'POST',
@@ -74,8 +133,8 @@ class CommentProvider extends ChangeNotifier{
       request.headers['Authorization']='Bearer $token';
       request.fields['postId'] = postId;
       request.fields['content'] = content;
-      request.fields['keywords'] = keywords.join(',');
-      request.fields['tags']="2";
+      //request.fields['keywords'] = keywords.join(',');
+      //request.fields['tags']="2";
 
       if (media != null) {
         request.files.add(

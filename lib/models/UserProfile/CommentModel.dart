@@ -28,24 +28,24 @@ class Comment {
 }
 
 class Reply {
-  final String username;
-  final String avatarUrl;
-  final String replyText;
-  final String timeAgo;
+ final int id;
+  final String content;
+  final String replierName;
+  final String replierImage;
 
   Reply({
-    required this.username,
-    required this.avatarUrl,
-    required this.replyText,
-    required this.timeAgo,
+    required this.id,
+    required this.content,
+    required this.replierName,
+    required this.replierImage
   });
 
   factory Reply.fromJson(Map<String, dynamic> json) {
     return Reply(
-      username: json['username'],
-      avatarUrl: json['profile_image'] ?? '',
-      replyText: json['content'],
-      timeAgo: json['created_at'],
+      id: json['id'],
+      content: json['content'],
+      replierName: json['user']['username'],
+      replierImage: json['user']['profile_image']??'',
     );
   }
 }

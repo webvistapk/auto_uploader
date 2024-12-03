@@ -392,7 +392,7 @@ class PostProvider extends ChangeNotifier {
   Future<void> newLike(int postID, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
 
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}$postID/";
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}post/$postID/";
     print("Post ID in Like ${postID}");
     try {
       final response = await http.post(
@@ -406,6 +406,7 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         ToastNotifier.showSuccessToast(context, "Post Liked Successfully");
         print("Post liked successfully");
+        getSinglePost(postID.toString());
         // Refresh or update the UI based on your business logic
         // If needed, you can fetch the updated like count or status here
         notifyListeners();

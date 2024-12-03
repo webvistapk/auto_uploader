@@ -88,7 +88,10 @@ class _SinglePostState extends State<SinglePost> {
                               mediaUrls: medaiList, initialIndex: 0)),
                     );
                   }
-                });
+                },
+                onPressLiked: (){},
+                isLiked: false,
+                );
           },
         ));
   }

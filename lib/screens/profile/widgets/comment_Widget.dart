@@ -16,12 +16,12 @@ class CommentWidget extends StatefulWidget {
   final bool isReelScreen;
   final String postId;
 
-  CommentWidget({
-    Key? key,
-    required this.isUsedSingle,
-    required this.postId,
-    required this.isReelScreen
-  }) : super(key: key);
+  CommentWidget(
+      {Key? key,
+      required this.isUsedSingle,
+      required this.postId,
+      required this.isReelScreen})
+      : super(key: key);
 
   @override
   State<CommentWidget> createState() => _CommentWidgetState();
@@ -38,7 +38,8 @@ class _CommentWidgetState extends State<CommentWidget> {
     print("init state triggered");
     // Fetch comments when the widget is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<CommentProvider>(context, listen: false).fetchComments(widget.postId,widget.isReelScreen);
+      Provider.of<CommentProvider>(context, listen: false)
+          .fetchComments(widget.postId, widget.isReelScreen);
     });
   }
 
@@ -48,22 +49,29 @@ class _CommentWidgetState extends State<CommentWidget> {
     super.dispose();
   }
 
+// void loadReplies(String commentId) async {
+//   try {
+//     await Provider.of<CommentProvider>(context,listen: false).fetchReplies(commentId);
+//     print("Replies fetched successfully!");
+//   } catch (e) {
+//     print("Error loading replies: $e");
+//   }
+// }
+
   void _addComment(BuildContext context) {
     if (_formKey.currentState?.validate() ?? false) {
       final content = _commentController.text;
-      final keywords = RegExp(r"#\w+")
-          .allMatches(content)
-          .map((match) => match.group(0)!)
-          .toList();
-
+      // final keywords = RegExp(r"#\w+")
+      //     .allMatches(content)
+      //     .map((match) => match.group(0)!)
+      //     .toList();
       Provider.of<CommentProvider>(context, listen: false).addComment(
-        widget.postId,
-        content: content,
-        keywords: keywords,
-        media: _mediaFile,
-        context: context,
-        widget.isReelScreen
-      );
+          widget.postId,
+          content: content,
+          //keywords:keywords,
+          media: _mediaFile,
+          context: context,
+          widget.isReelScreen);
 
       // Clear input after adding the comment
       _commentController.clear();
@@ -74,15 +82,14 @@ class _CommentWidgetState extends State<CommentWidget> {
   }
 
   void _selectMedia() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _mediaFile = File(pickedFile.path);
       });
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -91,9 +98,9 @@ class _CommentWidgetState extends State<CommentWidget> {
         widget.isUsedSingle
             ? _buildViewCommentsSection()
             : SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
-          child: _buildViewCommentsSection(),
-        ),
+                height: MediaQuery.of(context).size.height * 0.5,
+                child: _buildViewCommentsSection(),
+              ),
         Positioned(
           bottom: 0,
           left: 0,
@@ -106,15 +113,14 @@ class _CommentWidgetState extends State<CommentWidget> {
 
   Widget _buildViewCommentsSection() {
     return Consumer<CommentProvider>(
-      builder: (context, postProvider, child) {
-        if (postProvider.isCommentLoading) {
+      builder: (context, commentProvider, child) {
+        if (commentProvider.isCommentLoading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
 
-        final comments = postProvider.comments;
-
+        final comments = commentProvider.comments;
         if (comments.isEmpty) {
           return const Center(
             child: Text("No comments available."),
@@ -154,13 +160,16 @@ class _CommentWidgetState extends State<CommentWidget> {
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: const Icon(CupertinoIcons.xmark, size: 20,weight: 25,),
+                      child: const Icon(
+                        CupertinoIcons.xmark,
+                        size: 20,
+                        weight: 25,
+                      ),
                     ),
                   ],
                 ),
               ),
             const Divider(thickness: 1, color: Colors.grey),
-
             Expanded(
               child: ListView.builder(
                 itemCount: comments.length,
@@ -177,17 +186,22 @@ class _CommentWidgetState extends State<CommentWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
                                       CircleAvatar(
                                         radius: 20,
-                                        backgroundImage: NetworkImage(comment.avatarUrl==null?comment.avatarUrl:AppUtils.userImage),
+                                        backgroundImage: NetworkImage(
+                                            comment.avatarUrl == null
+                                                ? comment.avatarUrl
+                                                : AppUtils.userImage),
                                       ),
                                       const SizedBox(width: 10),
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             comment.username,
@@ -198,84 +212,104 @@ class _CommentWidgetState extends State<CommentWidget> {
                                           const SizedBox(height: 5),
                                           Text(
                                             comment.commentText,
-                                            style: TextStyle(color: Colors.grey[600]),
+                                            style: TextStyle(
+                                                color: Colors.grey[600]),
                                           ),
                                           Text(
                                             "Reply",
-                                            style: TextStyle(color: Colors.blue[600],
-                                            fontSize: 12,
-                                              fontWeight: FontWeight.bold
-                                            ),
+                                            style: TextStyle(
+                                                color: Colors.blue[600],
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
                                     ],
                                   ),
-                                  const Icon(
-                                    Icons.favorite_border,
-                                    size: 20,
-                                    color: Colors.grey,
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.favorite_border,
+                                        size: 20,
+                                        color: Colors.grey,
+                                      ),
+                                      GestureDetector(
+                                        key:
+                                            iconKey, // Unique key for dynamic positioning
+                                        onTap: () {
+                                          _showOptionsMenu(
+                                            context,
+                                            iconKey,
+                                            comment,
+                                          );
+                                        },
+                                        child: Icon(Icons.more_vert, size: 20),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-
                               if (comment.replies.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 40.0, top: 10),
-                                  child: Column(
-                                    children: comment.replies.map((reply) {
-                                      return Row(
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: comment.replies.length,
+                                  itemBuilder: (context, replyIndex) {
+                                    final reply = comment.replies[replyIndex];
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 40.0, top: 10),
+                                      child: Row(
                                         children: [
                                           CircleAvatar(
-                                            radius: 15,
-                                            backgroundImage: NetworkImage(reply.avatarUrl),
+                                            radius: 20,
+                                            backgroundImage: NetworkImage(
+                                                reply.replierImage == null
+                                                    ? reply.replierImage
+                                                    : AppUtils.userImage),
                                           ),
                                           const SizedBox(width: 10),
                                           Expanded(
                                             child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  reply.username,
+                                                  reply.replierName.toString(),
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 12,
                                                   ),
                                                 ),
                                                 Text(
-                                                  reply.replyText,
+                                                  reply.content.toString(),
                                                   style: TextStyle(
                                                     color: Colors.grey[600],
                                                     fontSize: 12,
                                                   ),
                                                 ),
+                                                Text(
+                                                  "Reply",
+                                                  style: TextStyle(
+                                                      color: Colors.blue[600],
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
                                               ],
                                             ),
                                           ),
                                         ],
-                                      );
-
-                                    }).toList(),
-                                  ),
+                                      ),
+                                    );
+                                  },
                                 ),
                             ],
                           ),
                         ),
-                        GestureDetector(
-                          key: iconKey, // Unique key for dynamic positioning
-                          onTap: () {
-                            _showOptionsMenu(
-                              context,
-                              iconKey,
-                              comment,
-                            );
-                          },
-                          child: Icon(Icons.more_vert, size: 20),
-                        ),
                       ],
                     ),
                   );
-
                 },
               ),
             ),
@@ -314,10 +348,8 @@ class _CommentWidgetState extends State<CommentWidget> {
                 },
                 decoration: InputDecoration(
                   hintText: "Add a comment...",
-                  hintStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold
-                  ),
+                  hintStyle:
+                      TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
@@ -343,7 +375,7 @@ class _CommentWidgetState extends State<CommentWidget> {
 
   void _showOptionsMenu(BuildContext context, GlobalKey key, Comment comment) {
     final RenderBox renderBox =
-    key.currentContext!.findRenderObject() as RenderBox;
+        key.currentContext!.findRenderObject() as RenderBox;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
 
     final RelativeRect position = RelativeRect.fromLTRB(
@@ -380,8 +412,8 @@ class _CommentWidgetState extends State<CommentWidget> {
       ],
     ).then((value) {
       if (value == 'delete') {
-        Provider.of<CommentProvider>(context, listen: false)
-            .deleteComment(comment.id.toString(), context, widget.postId,widget.isReelScreen);
+        Provider.of<CommentProvider>(context, listen: false).deleteComment(
+            comment.id.toString(), context, widget.postId, widget.isReelScreen);
       } else if (value == 'edit') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Edit functionality not implemented.")),
