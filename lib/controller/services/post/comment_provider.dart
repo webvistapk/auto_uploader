@@ -154,6 +154,42 @@ class CommentProvider extends ChangeNotifier{
     }
   }
 
+Future<void> replyComment(int commentId, bool isReelScreen,{
+    required String content,
+    //required List<String> keywords,
+    File? media,
+    required BuildContext context,
+  }) async {
+    try {
+     // print("POST ID : ${postId}");
+      final String? token = await Prefrences.getAuthToken();
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiURLs.baseUrl}${ApiURLs.new_post_comment_reply}${commentId.toString()}/'),
+      );
+      request.headers['Authorization']='Bearer $token';
+     //request.fields['postId'] = commentId.toString();
+      request.fields['content'] = content;
+      //request.fields['keywords'] = keywords.join(',');
+      //request.fields['tags']="2";
+
+      if (media != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('media', media.path),
+        );
+      }
+
+      final response = await request.send();
+      if (response.statusCode == 201) {
+        ToastNotifier.showSuccessToast(context, "Comment reply added successfully");
+        fetchReplies(commentId);
+      } else {
+        ToastNotifier.showErrorToast(context, "Failed to add comment reply");
+      }
+    } catch (error) {
+      ToastNotifier.showErrorToast(context, "Error: $error");
+    }
+  }
 
   void deleteComment(String commentId, BuildContext context,String postId,bool isReelScreen) async {
     final String? token = await Prefrences.getAuthToken();

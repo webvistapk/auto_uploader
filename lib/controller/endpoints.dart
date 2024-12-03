@@ -43,4 +43,5 @@ class ApiURLs {
   
   //static const String delete_post_comment="posts/comment/delete/";
   static const String post_comment_reply_fetch="posts/reply/get/";
+  static const String new_post_comment_reply="posts/reply/new/";
 }
