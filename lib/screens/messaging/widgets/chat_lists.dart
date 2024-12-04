@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/inbox.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
+import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:provider/provider.dart'; // Import the provider
 
 class ChatList extends StatefulWidget {
@@ -43,7 +45,7 @@ class _ChatListState extends State<ChatList> {
                       String? profileImage;
 
                       if (chat.isGroup) {
-                        chatName = chat.name;
+                        chatName = chat.name ?? 'Unknown';
                         profileImage =
                             'https://images.pexels.com/photos/940585/pexels-photo-940585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Default group image
                       } else {
@@ -56,7 +58,7 @@ class _ChatListState extends State<ChatList> {
                         profileImage = participant.profileImage ??
                             'https://images.pexels.com/photos/940585/pexels-photo-940585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Default group image
                       }
-
+                      final String updateAt = formatMessageDate(chat.updatedAt);
                       return InkWell(
                         onTap: () {
                           // Navigate to the Inbox screen when a chat is tapped
@@ -86,11 +88,11 @@ class _ChatListState extends State<ChatList> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text(
-                                    chat.createdAt.toIso8601String(),
-                                    style: const TextStyle(
-                                        color: Colors.grey, fontSize: 12),
-                                  ),
+                                  // Text(
+                                  //   chat.createdAt.toIso8601String(),
+                                  //   style: const TextStyle(
+                                  //       color: Colors.grey, fontSize: 12),
+                                  // ),
                                   const Icon(
                                     Icons.circle,
                                     color: Colors.blue,
@@ -131,5 +133,25 @@ class _ChatListState extends State<ChatList> {
         }
       },
     );
+  }
+
+  String formatMessageDate(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    if (dateTime.isAfter(today)) {
+      // Today: Show time (HH:mm)
+      return DateFormat('HH:mm').format(dateTime);
+    } else if (dateTime.isAfter(yesterday)) {
+      // Yesterday
+      return "Yesterday";
+    } else if (now.difference(dateTime).inDays < 7) {
+      // This week: Show day name
+      return DateFormat('EEEE').format(dateTime); // e.g., "Monday"
+    } else {
+      // Older: Show date (MM/dd/yyyy or dd/MM/yyyy based on locale)
+      return DateFormat.yMd().format(dateTime); // e.g., "12/3/2024"
+    }
   }
 }

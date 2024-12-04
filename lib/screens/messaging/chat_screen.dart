@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
+import 'package:mobile/screens/messaging/create_message/new_message_screen.dart';
 import 'package:mobile/screens/messaging/message_request_screen.dart';
 import 'package:mobile/screens/messaging/widgets/chat_lists.dart';
 import 'package:provider/provider.dart';
@@ -107,11 +109,21 @@ class _ChatScreenState extends State<ChatScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 25),
-                                  const Image(
-                                      width: 28,
-                                      height: 28,
-                                      image: AssetImage(
-                                          'assets/images/edit-button.png'))
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          CupertinoDialogRoute(
+                                              builder: (_) => NewMessageScreen(
+                                                  showCheckbox: false),
+                                              context: context));
+                                    },
+                                    child: const Image(
+                                        width: 28,
+                                        height: 28,
+                                        image: AssetImage(
+                                            'assets/images/edit-button.png')),
+                                  )
                                 ],
                               ),
                             ),

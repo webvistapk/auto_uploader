@@ -1,9 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
+import 'package:mobile/screens/messaging/controller/chat_provider.dart';
+import 'package:mobile/screens/messaging/inbox.dart';
+import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:mobile/screens/messaging/model/message_model.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -12,13 +19,51 @@ class ChatController extends ChangeNotifier {
   List<MessageModel> _messages = [];
   bool _isConnected = false;
   bool _isMessageLoading = false;
+  bool _isLoading = false;
 
   List<MessageModel> get messages => _messages;
   bool get isConnected => _isConnected;
   bool get isMessageLoading => _isMessageLoading;
+  bool get isLoading => _isLoading;
 
   // Fetch messages from the server
   // Updated method to handle pagination and new response structure
+
+  Future createNewChat(
+    context, {
+    required String name,
+    required List<int> participants,
+    required bool isGroup,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await ChatProvider.createNewChat(
+          name: name, participants: participants, isGroup: isGroup);
+
+      if (response != null) {
+        final chat = response['chat'];
+        ChatModel userNewChat = ChatModel.fromJson(chat);
+        _isLoading = false;
+        notifyListeners();
+        UserProfile? userProfile = await UserPreferences().getCurrentUser();
+        ToastNotifier.showSuccessToast(context, "Successfully Created Chat");
+        Navigator.push(
+            context,
+            CupertinoDialogRoute(
+                builder: (_) => InboxScreen(
+                    userProfile: userProfile!, chatModel: userNewChat),
+                context: context));
+      }
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, e.toString());
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> loadMessages(int chatId,
       {int offset = 0, int limit = 10}) async {
     _isMessageLoading = true;

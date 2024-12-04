@@ -1,6 +1,6 @@
 class ChatModel {
   final int id;
-  final String name;
+  final String? name;
   final List<Participant> participants; // List of participant details
   final bool isGroup;
   final DateTime createdAt;

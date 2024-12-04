@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/screens/messaging/widgets/media_preview/camera.dart';
 
 class ChatInputField extends StatefulWidget {
   final TextEditingController messageController;
@@ -89,6 +90,10 @@ class _ChatInputFieldState extends State<ChatInputField> {
               color: Colors.grey,
             ),
             onPressed: () {
+              Navigator.push(
+                  context,
+                  CupertinoDialogRoute(
+                      builder: (_) => CameraScreen(), context: context));
               // Handle camera action (open camera or photo picker)
             },
           ),

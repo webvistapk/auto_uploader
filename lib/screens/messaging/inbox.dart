@@ -136,7 +136,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.chatModel.name,
+                                    widget.chatModel.name ?? 'Unknown',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
