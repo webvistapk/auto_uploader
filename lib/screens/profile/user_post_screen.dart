@@ -7,6 +7,7 @@ import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
+import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
@@ -92,7 +93,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
 
   @override
   Widget build(BuildContext context) {
-      print("UI Rebuild");
+    print("UI Rebuild");
     return Scaffold(
       backgroundColor: AppColors.mainBgColor,
       appBar: AppBar(backgroundColor: AppColors.mainBgColor),
@@ -173,23 +174,23 @@ class _UserPostScreenState extends State<UserPostScreen> {
                         );
                       } else {
                         Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => postFullScreen(
-                                  mediaUrls: mediaList, initialIndex: 0)),
-                        );
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  SinglePost(postId: post.id.toString()),
+                            ));
                       }
                     },
-                    onPressLiked: (){
+                    onPressLiked: () {
                       //if post is already liked
-                      if(post.is_liked==true){
+                      if (post.is_liked == true) {
                         print("post Disliked");
                       }
                       //is post is not liked yet
-                      else{
-                        Provider.of<PostProvider>(context,listen:false).newLike(post.id, context);
-                        setState(() {
-                        });
+                      else {
+                        Provider.of<PostProvider>(context, listen: false)
+                            .newLike(post.id, context, false);
+                        setState(() {});
                       }
                     },
                     isLiked: post.is_liked,

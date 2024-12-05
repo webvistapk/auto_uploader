@@ -52,46 +52,52 @@ class _SinglePostState extends State<SinglePost> {
             var medaiList =
                 post!.media.map((media) => "${media.file}").toList();
             return PostWidget(
-                postId: post.id.toString(),
-                username: post.user.username,
-                location: "Location",
-                date: post.createdAt.toString(),
-                caption: post.post,
-                mediaUrls: post.media.map((media) => "${media.file}").toList(),
-                profileImageUrl: post.user.profileImage != null
-                    ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
-                    : AppUtils.userImage,
-                isVideo: post.media[0].mediaType == 'video',
-                likes: post.likesCount.toString(),
-                comments: post.commentsCount.toString(),
-                shares: "100",
-                saved: '100',
-                showCommentSection: true,
-                refresh: () => postProvider.getSinglePost(widget.postId),
-                isUserPost: isUserPost,
-                onPressed: () {
-                  if (post.media[0].mediaType == 'video') {
-                    Navigator.push(
-                      context,
-                      CupertinoDialogRoute(
-                        builder: (_) => FullscreenVideoPlayer(
-                          videoUrl: "${medaiList[0]}",
-                        ),
-                        context: context,
+              postId: post.id.toString(),
+              username: post.user.username,
+              location: "Location",
+              date: post.createdAt.toString(),
+              caption: post.post,
+              mediaUrls: post.media.map((media) => "${media.file}").toList(),
+              profileImageUrl: post.user.profileImage != null
+                  ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+                  : AppUtils.userImage,
+              isVideo: post.media[0].mediaType == 'video',
+              likes: post.likesCount.toString(),
+              comments: post.commentsCount.toString(),
+              shares: "100",
+              saved: '100',
+              showCommentSection: true,
+              refresh: () => postProvider.getSinglePost(widget.postId),
+              isUserPost: isUserPost,
+              onPressed: () {
+                if (post.media[0].mediaType == 'video') {
+                  Navigator.push(
+                    context,
+                    CupertinoDialogRoute(
+                      builder: (_) => FullscreenVideoPlayer(
+                        videoUrl: "${medaiList[0]}",
                       ),
-                    );
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => postFullScreen(
-                              mediaUrls: medaiList, initialIndex: 0)),
-                    );
-                  }
-                },
-                onPressLiked: (){},
-                isLiked: false,
-                );
+                      context: context,
+                    ),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => postFullScreen(
+                            mediaUrls: medaiList, initialIndex: 0)),
+                  );
+                }
+              },
+              onPressLiked: () {
+                if (post.isLiked == false) {
+                  Provider.of<PostProvider>(context, listen: false)
+                      .newLike(post.id, context, false);
+                  setState(() {});
+                }
+              },
+              isLiked: false,
+            );
           },
         ));
   }

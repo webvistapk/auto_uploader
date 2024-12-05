@@ -35,6 +35,8 @@ class _CommentWidgetState extends State<CommentWidget> {
   File? _mediaFile;
   int? _replyingCommentId;
   String? _replyingToUsername;
+  bool isLiked = false;
+  bool showReply=false;
 
   @override
   void initState() {
@@ -70,25 +72,24 @@ class _CommentWidgetState extends State<CommentWidget> {
       //     .allMatches(content)
       //     .map((match) => match.group(0)!)
       //     .toList();
-      if(_replyingCommentId!=null){
+      if (_replyingCommentId != null) {
         //its a reply comment
         Provider.of<CommentProvider>(context, listen: false).replyComment(
-          _replyingCommentId!,
-          content: content,
-          //keywords:keywords,
-          media: _mediaFile,
-          context: context,
-          widget.isReelScreen);
-      }
-      else{
+            _replyingCommentId!,
+            content: content,
+            //keywords:keywords,
+            media: _mediaFile,
+            context: context,
+            widget.isReelScreen);
+      } else {
         // Its a new comment
-      Provider.of<CommentProvider>(context, listen: false).addComment(
-          widget.postId,
-          content: content,
-          //keywords:keywords,
-          media: _mediaFile,
-          context: context,
-          widget.isReelScreen);
+        Provider.of<CommentProvider>(context, listen: false).addComment(
+            widget.postId,
+            content: content,
+            //keywords:keywords,
+            media: _mediaFile,
+            context: context,
+            widget.isReelScreen);
       }
 
       // Clear input after adding the comment
@@ -96,7 +97,7 @@ class _CommentWidgetState extends State<CommentWidget> {
       setState(() {
         _mediaFile = null;
         _replyingCommentId = null;
-        _replyingToUsername=null;
+        _replyingToUsername = null;
       });
     }
   }
@@ -164,27 +165,27 @@ class _CommentWidgetState extends State<CommentWidget> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text(
-                          "Person Name",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Wrap(
+                    //   crossAxisAlignment: WrapCrossAlignment.center,
+                    //   children: [
+                    //     Container(
+                    //       height: 50,
+                    //       width: 50,
+                    //       decoration: BoxDecoration(
+                    //         color: Colors.green,
+                    //         borderRadius: BorderRadius.circular(25),
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: 10),
+                    //     const Text(
+                    //       "Person Name",
+                    //       style: TextStyle(
+                    //         fontWeight: FontWeight.bold,
+                    //         fontSize: 16,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
@@ -213,20 +214,24 @@ class _CommentWidgetState extends State<CommentWidget> {
                         itemBuilder: (context, index) {
                           final comment = comments[index];
                           final GlobalKey iconKey = GlobalKey();
-                                    
+
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               CircleAvatar(
                                                 radius: 20,
@@ -243,24 +248,52 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                   Text(
                                                     comment.username,
                                                     style: const TextStyle(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
-                                                  const SizedBox(height: 5),
+                                                  //const SizedBox(height: 5),
                                                   Text(
                                                     comment.commentText,
                                                     style: TextStyle(
-                                                        color: Colors.grey[600]),
+                                                      fontSize: 12,
+                                                        color:
+                                                            Colors.grey[600]),
+                                                            
                                                   ),
-                                                  GestureDetector(
-                                                    onTap: () => _replyToComment(comment.id, comment.username),
-                                                    child: Text(
-                                                      "Reply",
-                                                      style: TextStyle(
-                                                          color: Colors.blue[600],
-                                                          fontSize: 12,
-                                                          fontWeight: FontWeight.bold),
-                                                    ),
+                                                  Row(
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () =>
+                                                            _replyToComment(
+                                                                comment.id,
+                                                                comment.username),
+                                                        child: Text(
+                                                          "Reply",
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue[600],
+                                                              fontSize:9,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                       SizedBox(width: 20,),
+                                                       comment.replyCount>0? GestureDetector(
+                                                        onTap: (){
+                                                          setState(() {
+                                                            comment.isReplyVisible = !comment.isReplyVisible;
+                                                          });
+                                                        },
+                                                         child: Text(
+                                                            "View Reply ${comment.replyCount.toString()}",
+                                                            style: TextStyle(
+                                                                color:
+                                                                    Colors.blue[600],
+                                                                fontSize: 9,
+                                                                ),
+                                                          ),
+                                                       ):Container(),
+                                                    ],
                                                   ),
                                                 ],
                                               ),
@@ -268,10 +301,35 @@ class _CommentWidgetState extends State<CommentWidget> {
                                           ),
                                           Row(
                                             children: [
-                                              const Icon(
-                                                Icons.favorite_border,
-                                                size: 20,
-                                                color: Colors.grey,
+                                              Row(
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      if (!comment.isLiked) {
+                                                        await Provider.of<
+                                                                    CommentProvider>(
+                                                                context,
+                                                                listen: false)
+                                                            .likeComment(
+                                                                comment.id,
+                                                                context,
+                                                                false);
+                                                      }
+                                                    },
+                                                    child:  Icon(comment.isLiked?
+                                                      Icons.favorite:Icons.favorite_border,
+                                                      size: 20,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                      '${comment.likeCount}', // Display the like count
+                                                      style: TextStyle(
+                                                          color:
+                                                              Colors.grey[600],
+                                                          fontSize: 12)),
+                                                ],
                                               ),
                                               GestureDetector(
                                                 key:
@@ -283,70 +341,143 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                     comment,
                                                   );
                                                 },
-                                                child: Icon(Icons.more_vert, size: 20),
+                                                child: Icon(Icons.more_vert,
+                                                    size: 20),
                                               ),
                                             ],
                                           ),
                                         ],
                                       ),
-                                      if (comment.replies.isNotEmpty)
+                    
+                                      if (comment.replies.isNotEmpty && comment.isReplyVisible)
                                         ListView.builder(
                                           shrinkWrap: true,
-                                          physics: NeverScrollableScrollPhysics(),
+                                          physics:
+                                              NeverScrollableScrollPhysics(),
                                           itemCount: comment.replies.length,
                                           itemBuilder: (context, replyIndex) {
-                                            final reply = comment.replies[replyIndex];
+                                            final reply =
+                                                comment.replies[replyIndex];
+                                            final GlobalKey replyiconKey =
+                                                GlobalKey();
+
                                             return Padding(
                                               padding: const EdgeInsets.only(
                                                   left: 40.0, top: 10),
                                               child: Row(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   CircleAvatar(
                                                     radius: 20,
                                                     backgroundImage: NetworkImage(
-                                                        reply.replierImage == null
+                                                        reply.replierImage ==
+                                                                null
                                                             ? reply.replierImage
-                                                            : AppUtils.userImage),
+                                                            : AppUtils
+                                                                .userImage),
                                                   ),
                                                   const SizedBox(width: 10),
                                                   Expanded(
                                                     child: Column(
                                                       crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Text(
-                                                          reply.replierName.toString(),
-                                                          style: const TextStyle(
-                                                            fontWeight: FontWeight.bold,
+                                                          reply.replierName
+                                                              .toString(),
+                                                          style:
+                                                              const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
                                                             fontSize: 12,
                                                           ),
                                                         ),
                                                         Text(
-                                                          reply.content.toString(),
+                                                          reply.content
+                                                              .toString(),
                                                           style: TextStyle(
-                                                            color: Colors.grey[600],
+                                                            color: Colors
+                                                                .grey[600],
                                                             fontSize: 12,
                                                           ),
                                                         ),
                                                         GestureDetector(
-                                                          onTap: ()=>_replyToComment(comment.id, reply.replierName),
+                                                          onTap: () =>
+                                                              _replyToComment(
+                                                                  comment.id,
+                                                                  reply
+                                                                      .replierName),
                                                           child: Text(
                                                             "Reply",
                                                             style: TextStyle(
-                                                                color: Colors.blue[600],
-                                                                fontSize: 12,
-                                                                fontWeight:
-                                                                    FontWeight.bold),
+                                                                color: Colors
+                                                                    .blue[600],
+                                                                fontSize: 9,
+                                                                ),
                                                           ),
                                                         ),
                                                       ],
                                                     ),
                                                   ),
-                                                Icon(
-                                                Icons.favorite_border,
-                                                size: 20,
-                                                color: Colors.grey,
-                                              ),
+                                                  Row(
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          GestureDetector(
+                                                            onTap: () async {
+                                                              if (!reply
+                                                                  .isReplyLiked) {
+                                                                await Provider.of<
+                                                                            CommentProvider>(
+                                                                        context,
+                                                                        listen:
+                                                                            false)
+                                                                    .likeReply(
+                                                                        reply
+                                                                            .id,
+                                                                        comment
+                                                                            .id,
+                                                                        context);
+                                                              }
+                                                              print("Liked Triggered");
+                                                            },
+                                                            child: Icon(
+                                                              reply.isReplyLiked?
+                                                              Icons.favorite:Icons.favorite_border,
+                                                              size: 20,
+                                                              color: 
+                                                       Colors.grey,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 4),
+                                                          Text(
+                                                              '${reply.replyLikeCount}', // Display the reply like count
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      600],
+                                                                  fontSize:
+                                                                      12)),
+                                                        ],
+                                                      ),
+                                                      GestureDetector(
+                                                        key:
+                                                            replyiconKey, // Unique key for dynamic positioning
+                                                        onTap: () {
+                                                          _showReplyOptionsMenu(
+                                                              context,
+                                                              replyiconKey,
+                                                              comment,
+                                                              reply);
+                                                        },
+                                                        child: Icon(
+                                                            Icons.more_vert,
+                                                            size: 20),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ],
                                               ),
                                             );
@@ -425,7 +556,11 @@ class _CommentWidgetState extends State<CommentWidget> {
     );
   }
 
-  void _showOptionsMenu(BuildContext context, GlobalKey key, Comment comment) {
+  void _showOptionsMenu(
+    BuildContext context,
+    GlobalKey key,
+    Comment comment,
+  ) {
     final RenderBox renderBox =
         key.currentContext!.findRenderObject() as RenderBox;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
@@ -466,6 +601,61 @@ class _CommentWidgetState extends State<CommentWidget> {
       if (value == 'delete') {
         Provider.of<CommentProvider>(context, listen: false).deleteComment(
             comment.id.toString(), context, widget.postId, widget.isReelScreen);
+      } else if (value == 'edit') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Edit functionality not implemented.")),
+        );
+      }
+    });
+  }
+
+  //Comment  Reply Option
+  void _showReplyOptionsMenu(
+    BuildContext context,
+    GlobalKey key,
+    Comment comment,
+    Reply reply,
+  ) {
+    final RenderBox renderBox =
+        key.currentContext!.findRenderObject() as RenderBox;
+    final Offset offset = renderBox.localToGlobal(Offset.zero);
+
+    final RelativeRect position = RelativeRect.fromLTRB(
+      offset.dx,
+      offset.dy + renderBox.size.height,
+      offset.dx + renderBox.size.width,
+      offset.dy,
+    );
+
+    showMenu(
+      context: context,
+      position: position,
+      items: [
+        PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              Icon(Icons.edit, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Edit'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(Icons.delete, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Delete'),
+            ],
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value == 'delete') {
+        Provider.of<CommentProvider>(context, listen: false)
+            .deleteCommentReply(reply.id, comment.id, context);
       } else if (value == 'edit') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Edit functionality not implemented.")),

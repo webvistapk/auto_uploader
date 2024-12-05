@@ -26,6 +26,7 @@ class ReelScreen extends StatefulWidget {
 class _ReelScreenState extends State<ReelScreen> {
   late PageController _pageController;
   int _currentIndex = 0;
+  bool isLiked = false;
 
   @override
   void initState() {
@@ -85,6 +86,28 @@ class _ReelScreenState extends State<ReelScreen> {
     }
   }
 
+  void _likePost(int reelId) async {
+  setState(() {
+    widget.reels[_currentIndex].isLiked = !widget.reels[_currentIndex].isLiked;
+  });
+
+  try {
+    await Provider.of<PostProvider>(context, listen: false)
+        .newLike(reelId, context,true);
+  } catch (e) {
+    // Revert the like state in case of an error
+    setState(() {
+      widget.reels[_currentIndex].isLiked =
+          !widget.reels[_currentIndex].isLiked;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to like reel. Please try again.')),
+    );
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,11 +147,14 @@ class _ReelScreenState extends State<ReelScreen> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    // Handle Like Action
+                    _likePost(widget.reels[_currentIndex].id);
+                    print("Reel Liked");
                   },
                   child: Icon(
-                    Icons.favorite_outline,
-                    color: AppColors.white,
+                    widget.reels[_currentIndex].isLiked?
+                    Icons.favorite_outline:
+                    Icons.favorite,
+                    color:widget.reels[_currentIndex].isLiked? AppColors.white:Colors.red,
                     size: 30,
                   ),
                 ),

@@ -94,8 +94,8 @@ class _PostScreenState extends State<PostScreen> {
                                   ? post.user.profileImage!
                                   : "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
                               : AppUtils.userImage,
-                          likes: '100',
-                          comments: '100',
+                          likes: post.likesCount.toString(),
+                          comments: post.commentsCount.toString(),
                           shares: "100",
                           saved: '100',
                           postId: '',
@@ -118,7 +118,9 @@ class _PostScreenState extends State<PostScreen> {
                               });
                             }
                           },
-                          onPressLiked: (){},
+                          onPressLiked: (){
+                            
+                          },
                           isLiked: false,
                         );
                       },

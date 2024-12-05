@@ -193,7 +193,9 @@ class _PostWidgetState extends State<PostWidget> {
                       ? null
                       : () => showComments(widget.postId),
                   child: _buildInteractionIcon(
-                      CupertinoIcons.chat_bubble_fill, widget.shares),
+                      CupertinoIcons.chat_bubble_fill, 
+                      widget.comments //show comments count
+                      ),
                 ),
               ],
             ),

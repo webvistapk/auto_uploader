@@ -410,7 +410,12 @@ class _HomeScreenState extends State<HomeScreen>
       isInteractive: true,
       isUserPost: false,
       onPressed: onPressed,
-      onPressLiked: (){},
+      onPressLiked: (){
+        if(post.is_liked==false){
+          Provider.of<PostProvider>(context,listen:false).newLike(post.id, context,false);
+        }
+         
+      },
       isLiked: false,
       // isInteractive
       //             ?

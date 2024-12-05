@@ -5,6 +5,10 @@ class Comment {
   final String commentText;
   final List<Reply> replies;
   final String timeAgo;
+   bool isLiked;
+   int likeCount;
+   int replyCount;
+   bool isReplyVisible;
 
   Comment({
     required this.id,
@@ -13,6 +17,10 @@ class Comment {
     required this.commentText,
     required this.replies,
     required this.timeAgo,
+    required this.isLiked,
+    required this.likeCount,
+    required this.replyCount,
+    required this.isReplyVisible
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
@@ -23,6 +31,10 @@ class Comment {
       commentText: json['content'],
       timeAgo: json['created_at'],
       replies: [], // Populate replies if your API supports them
+      isLiked: json['is_liked'],
+      likeCount: json['likes_count'],
+      replyCount: json['replies_count'],
+      isReplyVisible: false
     );
   }
 }
@@ -32,12 +44,17 @@ class Reply {
   final String content;
   final String replierName;
   final String replierImage;
+  bool isReplyLiked;
+  int replyLikeCount;
 
   Reply({
     required this.id,
     required this.content,
     required this.replierName,
-    required this.replierImage
+    required this.replierImage,
+    required this.isReplyLiked,
+    required this.replyLikeCount
+
   });
 
   factory Reply.fromJson(Map<String, dynamic> json) {
@@ -46,6 +63,9 @@ class Reply {
       content: json['content'],
       replierName: json['user']['username'],
       replierImage: json['user']['profile_image']??'',
+      replyLikeCount: json['likes_count'],
+      isReplyLiked: json['is_liked']
+
     );
   }
 }

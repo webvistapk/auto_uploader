@@ -10,6 +10,7 @@ class ReelPostModel {
   final DateTime updatedAt;
   final int likesCount;
   final int commentsCount;
+   bool isLiked;
 
   ReelPostModel({
     required this.id,
@@ -21,6 +22,7 @@ class ReelPostModel {
     required this.updatedAt,
     required this.likesCount,
     required this.commentsCount,
+    required this.isLiked
   });
 
   factory ReelPostModel.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class ReelPostModel {
           DateTime.now().toIso8601String()), // Default to now if null
       likesCount: json['likes_count'] ?? 0, // Default value if null
       commentsCount: json['comments_count'] ?? 0, // Default value if null
+      isLiked: json['is_liked']??false,
     );
   }
 }
@@ -53,6 +56,7 @@ class Reel {
   final DateTime updatedAt;
   final int likesCount;
   final int commentsCount;
+  final bool isLiked;
 
   Reel({
     required this.id,
@@ -64,6 +68,7 @@ class Reel {
     required this.updatedAt,
     required this.likesCount,
     required this.commentsCount,
+    required this.isLiked
   });
 
   // Factory constructor to parse JSON data
@@ -80,6 +85,7 @@ class Reel {
       updatedAt: DateTime.parse(json['updated_at']),
       likesCount: json['likes_count'],
       commentsCount: json['comments_count'],
+      isLiked: json['is_liked']
     );
   }
 }

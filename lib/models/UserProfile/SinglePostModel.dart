@@ -24,6 +24,7 @@ class PostDetails {
   final String updatedAt;
   final int likesCount;
   final int commentsCount;
+  bool isLiked;
 
   PostDetails({
     required this.id,
@@ -37,6 +38,7 @@ class PostDetails {
     required this.updatedAt,
     required this.likesCount,
     required this.commentsCount,
+    required this.isLiked
   });
 
   factory PostDetails.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,7 @@ class PostDetails {
       updatedAt: json['updated_at'],
       likesCount: json['likes_count'],
       commentsCount: json['comments_count'],
+      isLiked: json['is_liked'],
     );
   }
 }
