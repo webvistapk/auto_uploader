@@ -8,6 +8,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';
+import 'package:mobile/screens/profile/UserReelScreen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
@@ -109,7 +110,7 @@ class _MainScreenState extends State<MainScreen> {
                         userProfile: widget.userProfile,
                         token: widget.authToken,
                       )
-                      :widget.selectedIndex==1?ReelPostGrid(userId: widget.userProfile.id.toString())
+                      :widget.selectedIndex==1?UserReelScreen()
                     : widget.selectedIndex == 2
                         ? CreatePostScreen(
                             token: widget.authToken,

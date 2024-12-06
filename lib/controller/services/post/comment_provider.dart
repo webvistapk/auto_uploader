@@ -234,7 +234,7 @@ Future<void> replyComment(int commentId, bool isReelScreen,{
 
     String URL = "${ApiURLs.baseUrl}${ApiURLs.delete_post_comment_reply}${replyId.toString()}/";
     //setIsLoading(true);
-    //print("COMMENT ID: ${commentId}");
+    print("COMMENT ID: ${replyId}");
     try {
       // Make the DELETE request
       final response = await http.delete(
@@ -270,7 +270,7 @@ Future<void> likeComment(int commentId, BuildContext context, bool isReply) asyn
     String URL = isReply
     ?"${ApiURLs.baseUrl}${ApiURLs.new_like}comment/$commentId/"
     :"${ApiURLs.baseUrl}${ApiURLs.new_like}reply/$commentId/";
-    
+    print("Commment ID: ${commentId.toString()}");
     // Update the local state after a successful API call
     final response = await http.post(
         Uri.parse(URL),
@@ -295,7 +295,7 @@ Future<void> likeComment(int commentId, BuildContext context, bool isReply) asyn
       }
     
   } catch (e) {
-    
+    ToastNotifier.showErrorToast(context, "Unsuccessful Like try again :${e}");
   }
 }
 

@@ -95,6 +95,11 @@ class _SinglePostState extends State<SinglePost> {
                       .newLike(post.id, context, false);
                   setState(() {});
                 }
+                else{
+                  Provider.of<PostProvider>(context, listen: false)
+                      .disLike(post.id, context, false);
+                  setState(() {});
+                }
               },
               isLiked: false,
             );

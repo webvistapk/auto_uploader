@@ -389,6 +389,32 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> disLike(int postId,BuildContext context, bool isReel)async{
+    final String? token = await Prefrences.getAuthToken();
+
+    String URL= isReel
+    ?"${ApiURLs.baseUrl}${ApiURLs.dislike}/reel/${postId}"
+    :"${ApiURLs.baseUrl}${ApiURLs.dislike}/post/${postId}";
+    try{
+      final response=await http.delete(Uri.parse(URL),headers: {
+        'Authorization': 'Barer $token',
+        'Content-Type': 'application/json'
+      });
+      if(response.statusCode==200){
+        ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
+        notifyListeners();
+      }
+      else{
+         throw Exception('Failed to dislike post');
+        notifyListeners();
+      }
+    }
+    catch(e){
+      ToastNotifier.showErrorToast(context, "Error Dislike the post: $e");
+      notifyListeners();
+    }
+  }
+
   Future<void> newLike(int postID, BuildContext context,bool isReel) async {
     final String? token = await Prefrences.getAuthToken();
 

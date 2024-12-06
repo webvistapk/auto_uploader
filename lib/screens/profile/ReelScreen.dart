@@ -87,26 +87,31 @@ class _ReelScreenState extends State<ReelScreen> {
   }
 
   void _likePost(int reelId) async {
-  setState(() {
-    widget.reels[_currentIndex].isLiked = !widget.reels[_currentIndex].isLiked;
-  });
-
-  try {
-    await Provider.of<PostProvider>(context, listen: false)
-        .newLike(reelId, context,true);
-  } catch (e) {
-    // Revert the like state in case of an error
     setState(() {
       widget.reels[_currentIndex].isLiked =
           !widget.reels[_currentIndex].isLiked;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to like reel. Please try again.')),
-    );
-  }
-}
+    try {
+      if (widget.reels[_currentIndex].isLiked) {
+        await Provider.of<PostProvider>(context, listen: false)
+            .disLike(reelId, context, true);
+      } else {
+        await Provider.of<PostProvider>(context, listen: false)
+            .newLike(reelId, context, true);
+      }
+    } catch (e) {
+      // Revert the like state in case of an error
+      setState(() {
+        widget.reels[_currentIndex].isLiked =
+            !widget.reels[_currentIndex].isLiked;
+      });
 
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to like reel. Please try again.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,127 +122,132 @@ class _ReelScreenState extends State<ReelScreen> {
       ),
       body: widget.reels.isEmpty
           ? Center(
-        child: Text(
-          'No Reels Available',
-          style: TextStyle(fontSize: 18, color: Colors.grey),
-        ),
-      )
+              child: Text(
+                'No Reels Available',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            )
           : Stack(
-        fit: StackFit.expand,
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            itemCount: widget.reels.length,
-            scrollDirection: Axis.vertical,
-            onPageChanged: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            itemBuilder: (BuildContext context, int index) {
-              return ReelPost(
-                src: widget.reels[index].file,
-              );
-            },
-          ),
-          Positioned(
-            right: 20,
-            bottom: 80,
-            child: Column(
+              fit: StackFit.expand,
               children: [
-                GestureDetector(
-                  onTap: () {
-                    _likePost(widget.reels[_currentIndex].id);
-                    print("Reel Liked");
+                PageView.builder(
+                  controller: _pageController,
+                  itemCount: widget.reels.length,
+                  scrollDirection: Axis.vertical,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
                   },
-                  child: Icon(
-                    widget.reels[_currentIndex].isLiked?
-                    Icons.favorite_outline:
-                    Icons.favorite,
-                    color:widget.reels[_currentIndex].isLiked? AppColors.white:Colors.red,
-                    size: 30,
-                  ),
-                ),
-                SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    showComments(widget.reels[_currentIndex].id.toString());
+                  itemBuilder: (BuildContext context, int index) {
+                    return ReelPost(
+                      src: widget.reels[index].file,
+                    );
                   },
-                  child: Icon(
-                    Icons.messenger,
-                    color: AppColors.white,
-                    size: 30,
-                  ),
                 ),
-                SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    // Handle Share Action
-                  },
-                  child: Icon(
-                    FontAwesomeIcons.share,
-                    color: AppColors.white,
-                    size: 30,
-                  ),
-                ),
-                SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    // Handle Bookmark Action
-                  },
-                  child: Icon(
-                    Icons.bookmark_outline,
-                    color: AppColors.white,
-                    size: 30,
-                  ),
-                ),
-                SizedBox(height: 20),
-                if (widget.showEditDeleteOptions)
-                  PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: AppColors.white,
-                      size: 30,
-                    ),
-                    onSelected: (value) async {
-                      if (value == 'delete') {
-                        await deleteReel();
-                      } else if (value == 'edit') {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Edit functionality not implemented.')),
-                        );
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, color: Colors.blue),
-                            SizedBox(width: 8),
-                            Text('Edit'),
-                          ],
+                Positioned(
+                  right: 20,
+                  bottom: 80,
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          _likePost(widget.reels[_currentIndex].id);
+                          print("Reel Liked");
+                        },
+                        child: Icon(
+                          widget.reels[_currentIndex].isLiked
+                              ? Icons.favorite_outline
+                              : Icons.favorite,
+                          color: widget.reels[_currentIndex].isLiked
+                              ? AppColors.white
+                              : Colors.red,
+                          size: 30,
                         ),
                       ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete'),
-                          ],
+                      SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () {
+                          showComments(
+                              widget.reels[_currentIndex].id.toString());
+                        },
+                        child: Icon(
+                          Icons.messenger,
+                          color: AppColors.white,
+                          size: 30,
                         ),
                       ),
+                      SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () {
+                          // Handle Share Action
+                        },
+                        child: Icon(
+                          FontAwesomeIcons.share,
+                          color: AppColors.white,
+                          size: 30,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () {
+                          // Handle Bookmark Action
+                        },
+                        child: Icon(
+                          Icons.bookmark_outline,
+                          color: AppColors.white,
+                          size: 30,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      if (widget.showEditDeleteOptions)
+                        PopupMenuButton<String>(
+                          icon: Icon(
+                            Icons.more_vert,
+                            color: AppColors.white,
+                            size: 30,
+                          ),
+                          onSelected: (value) async {
+                            if (value == 'delete') {
+                              await deleteReel();
+                            } else if (value == 'edit') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Edit functionality not implemented.')),
+                              );
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, color: Colors.blue),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete, color: Colors.red),
+                                  SizedBox(width: 8),
+                                  Text('Delete'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        SizedBox(height: 30),
                     ],
-                  )
-                else
-                  SizedBox(height: 30),
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

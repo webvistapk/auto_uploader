@@ -414,6 +414,10 @@ class _HomeScreenState extends State<HomeScreen>
         if(post.is_liked==false){
           Provider.of<PostProvider>(context,listen:false).newLike(post.id, context,false);
         }
+        else{
+          Provider.of<PostProvider>(context,listen:false).disLike(post.id, context,false);
+          print("Disliked");
+        }
          
       },
       isLiked: false,
