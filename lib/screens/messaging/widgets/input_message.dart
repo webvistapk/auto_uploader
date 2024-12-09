@@ -1,14 +1,21 @@
+import 'dart:developer';
+import 'dart:io'; // For File class
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:mobile/screens/messaging/widgets/media_preview/media_screen_preview.dart';
 
 class ChatInputField extends StatefulWidget {
   final TextEditingController messageController;
   final onPressedSend;
+  final ChatModel chatModel;
   ChatInputField(
-      {super.key, required this.messageController, this.onPressedSend});
+      {super.key,
+      required this.messageController,
+      this.onPressedSend,
+      required this.chatModel});
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();
@@ -81,7 +88,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
               color: Colors.grey,
             ),
             onPressed: () {
-              _showPopupMenu(context, "attachment");
+              _showOptionsBottomSheet(context, "attachment");
               // Handle attachment (file picker or gallery)
             },
           ),
@@ -93,7 +100,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
               color: Colors.grey,
             ),
             onPressed: () {
-              _showPopupMenu(context, "camera");
+              _showOptionsBottomSheet(context, "camera");
               // Handle camera action (open camera or photo picker)
             },
           ),
@@ -172,15 +179,16 @@ class _ChatInputFieldState extends State<ChatInputField> {
   }
 
   final ImagePicker _picker = ImagePicker();
-  List<String> mediaPaths = []; // Store paths of selected media
+  List<File> mediaPaths = []; // Store File objects instead of String paths
 
   // Pick Photos
   Future<void> _pickPhotos() async {
     try {
+      mediaPaths.clear();
       final List<XFile>? result = await _picker.pickMultiImage();
       if (result != null && result.isNotEmpty) {
         setState(() {
-          mediaPaths.addAll(result.map((file) => file.path).toList());
+          mediaPaths.addAll(result.map((file) => File(file.path)).toList());
         });
         _confirmAndNavigate();
       }
@@ -192,13 +200,14 @@ class _ChatInputFieldState extends State<ChatInputField> {
   // Pick Videos
   Future<void> _pickVideos() async {
     try {
+      mediaPaths.clear();
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.video,
         allowMultiple: true,
       );
       if (result != null) {
         setState(() {
-          mediaPaths.addAll(result.paths.cast<String>());
+          mediaPaths.addAll(result.paths.map((path) => File(path!)).toList());
         });
         _confirmAndNavigate();
       }
@@ -210,10 +219,11 @@ class _ChatInputFieldState extends State<ChatInputField> {
   // Take Photo
   Future<void> _takePhoto() async {
     try {
+      mediaPaths.clear();
       final XFile? image = await _picker.pickImage(source: ImageSource.camera);
       if (image != null) {
         setState(() {
-          mediaPaths.add(image.path);
+          mediaPaths.add(File(image.path));
         });
         _confirmAndNavigate();
       }
@@ -225,10 +235,11 @@ class _ChatInputFieldState extends State<ChatInputField> {
   // Record Video
   Future<void> _recordVideo() async {
     try {
+      mediaPaths.clear();
       final XFile? video = await _picker.pickVideo(source: ImageSource.camera);
       if (video != null) {
         setState(() {
-          mediaPaths.add(video.path);
+          mediaPaths.add(File(video.path));
         });
         _confirmAndNavigate();
       }
@@ -256,12 +267,16 @@ class _ChatInputFieldState extends State<ChatInputField> {
               ),
               TextButton(
                 onPressed: () {
+                  log('Files list: $mediaPaths');
+                  // debugger();
                   Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          MediaMessagingScreen(initialMediaList: mediaPaths),
+                      builder: (context) => MediaMessagingScreen(
+                        initialMediaList: mediaPaths,
+                        chatModel: widget.chatModel,
+                      ),
                     ),
                   );
                 },
@@ -274,65 +289,59 @@ class _ChatInputFieldState extends State<ChatInputField> {
     }
   }
 
-  // Method to show the PopupMenu based on the type (attachment or camera)
-  void _showPopupMenu(BuildContext context, String type) async {
-    final RenderBox overlay =
-        Overlay.of(context)!.context.findRenderObject() as RenderBox;
-
-    if (type == "attachment") {
-      await showMenu<String>(
-        context: context,
-        position: RelativeRect.fromLTRB(
-          100.0, // x position of the menu
-          100.0, // y position of the menu
-          100.0, // width of the menu
-          100.0, // height of the menu
-        ),
-        items: [
-          PopupMenuItem<String>(
-            value: 'galleryPhotos',
-            child: Text('Gallery Photos'),
+  void _showOptionsBottomSheet(BuildContext context, String type) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (type == "attachment") ...[
+                ListTile(
+                  leading: const Icon(Icons.photo_album, color: Colors.blue),
+                  title: const Text('Gallery Photos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickPhotos();
+                  },
+                ),
+                ListTile(
+                  leading:
+                      const Icon(Icons.video_library, color: Colors.orange),
+                  title: const Text('Gallery Videos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickVideos();
+                  },
+                ),
+              ],
+              if (type == "camera") ...[
+                ListTile(
+                  leading: const Icon(Icons.camera_alt, color: Colors.green),
+                  title: const Text('Take Photo'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _takePhoto();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.videocam, color: Colors.red),
+                  title: const Text('Record Video'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _recordVideo();
+                  },
+                ),
+              ],
+            ],
           ),
-          PopupMenuItem<String>(
-            value: 'galleryVideos',
-            child: Text('Gallery Videos'),
-          ),
-        ],
-        elevation: 8.0,
-      ).then((value) {
-        if (value == 'galleryPhotos') {
-          _pickPhotos();
-        } else if (value == 'galleryVideos') {
-          _pickVideos();
-        }
-      });
-    } else if (type == "camera") {
-      await showMenu<String>(
-        context: context,
-        position: RelativeRect.fromLTRB(
-          100.0, // x position of the menu
-          100.0, // y position of the menu
-          100.0, // width of the menu
-          100.0, // height of the menu
-        ),
-        items: [
-          PopupMenuItem<String>(
-            value: 'photo',
-            child: Text('Take Photo'),
-          ),
-          PopupMenuItem<String>(
-            value: 'video',
-            child: Text('Record Video'),
-          ),
-        ],
-        elevation: 8.0,
-      ).then((value) {
-        if (value == 'photo') {
-          _takePhoto();
-        } else if (value == 'video') {
-          _recordVideo();
-        }
-      });
-    }
+        );
+      },
+    );
   }
 }

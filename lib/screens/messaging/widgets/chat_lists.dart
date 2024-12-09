@@ -66,9 +66,10 @@ class _ChatListState extends State<ChatList> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => InboxScreen(
-                                userProfile: widget.userProfile,
-                                chatModel: chat,
-                              ),
+                                  userProfile: widget.userProfile,
+                                  chatModel: chat,
+                                  chatName: chatName,
+                                  participantImage: profileImage),
                             ),
                           );
                         },
