@@ -11,22 +11,46 @@ import '../../controller/endpoints.dart';
 class SinglePost extends StatefulWidget {
   final String postId;
   final bool isInteractive;
-  SinglePost({Key? key, required this.postId, this.isInteractive = false})
+  final VoidCallback onPostUpdated;
+
+  SinglePost({Key? key, 
+  required this.postId, 
+  this.isInteractive = false,
+  required this.onPostUpdated,
+  })
       : super(key: key);
 
   @override
   State<SinglePost> createState() => _SinglePostState();
 }
-
 class _SinglePostState extends State<SinglePost> {
   bool isUserPost = false;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.isInteractive == true) isUserPost = true;
-    context.read<PostProvider>().getSinglePost(widget.postId);
+    // Fetch the single post from the provider if available
+    final postProvider = context.read<PostProvider>();
+    if (postProvider.posts != null) {
+      var post = postProvider.posts!.firstWhere(
+        (post) => post.id.toString() == widget.postId,
+     // Return null if no post is found
+      );
+      if (post != null) {
+        postProvider.setSinglePost(post); // Use this to set the post if it's found in the list
+      } else {
+        postProvider.getSinglePost(widget.postId); // Otherwise, fetch it from the API
+      }
+    } else {
+      postProvider.getSinglePost(widget.postId); // Fetch if posts list is empty or null
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    widget.onPostUpdated(); // Call the callback when the screen is popped
   }
 
   @override
@@ -41,23 +65,20 @@ class _SinglePostState extends State<SinglePost> {
         ),
         body: Consumer<PostProvider>(
           builder: (context, postProvider, child) {
-            // Fetch post if not loaded
             if (postProvider.post == null) {
-              // Fetch post data from API if not already loaded
-
               return const Center(child: CircularProgressIndicator());
             }
 
-            final post = postProvider.post;
-            var medaiList =
-                post!.media.map((media) => "${media.file}").toList();
+            final post = postProvider.post!;
+            var mediaList = post.media.map((media) => "${media.file}").toList();
+
             return PostWidget(
               postId: post.id.toString(),
               username: post.user.username,
               location: "Location",
               date: post.createdAt.toString(),
               caption: post.post,
-              mediaUrls: post.media.map((media) => "${media.file}").toList(),
+              mediaUrls: mediaList,
               profileImageUrl: post.user.profileImage != null
                   ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
                   : AppUtils.userImage,
@@ -75,7 +96,7 @@ class _SinglePostState extends State<SinglePost> {
                     context,
                     CupertinoDialogRoute(
                       builder: (_) => FullscreenVideoPlayer(
-                        videoUrl: "${medaiList[0]}",
+                        videoUrl: "${mediaList[0]}",
                       ),
                       context: context,
                     ),
@@ -84,24 +105,20 @@ class _SinglePostState extends State<SinglePost> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => postFullScreen(
-                            mediaUrls: medaiList, initialIndex: 0)),
+                      builder: (context) => postFullScreen(mediaUrls: mediaList, initialIndex: 0),
+                    ),
                   );
                 }
               },
               onPressLiked: () {
-                if (post.isLiked == false) {
-                  Provider.of<PostProvider>(context, listen: false)
-                      .newLike(post.id, context, false);
-                  setState(() {});
-                }
-                else{
-                  Provider.of<PostProvider>(context, listen: false)
-                      .disLike(post.id, context, false);
-                  setState(() {});
+                // Toggle like status
+                if (post.is_liked == false) {
+                  postProvider.newLike(post.id, context, false);
+                } else {
+                  postProvider.userDisLikes(post.id, context, false);
                 }
               },
-              isLiked: false,
+              isLiked: post.is_liked,  // Use the actual 'isLiked' value from the post
             );
           },
         ));

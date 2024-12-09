@@ -22,7 +22,7 @@ class PostDetails {
   final String privacy;
   final String createdAt;
   final String updatedAt;
-  final int likesCount;
+  int likesCount;
   final int commentsCount;
   bool isLiked;
 

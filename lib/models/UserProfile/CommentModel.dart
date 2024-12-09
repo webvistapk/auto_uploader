@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 class Comment {
   final int id;
   final String username;
@@ -9,6 +11,9 @@ class Comment {
    int likeCount;
    int replyCount;
    bool isReplyVisible;
+   bool isReplyLoaded;
+   ValueNotifier<bool> isReplyVisibleNotifier;
+  ValueNotifier<bool> isReplyLoadedNotifier;
 
   Comment({
     required this.id,
@@ -20,8 +25,12 @@ class Comment {
     required this.isLiked,
     required this.likeCount,
     required this.replyCount,
-    required this.isReplyVisible
-  });
+     this.isReplyVisible=false,
+     this.isReplyLoaded=false,
+  }): isReplyVisibleNotifier = ValueNotifier(isReplyVisible),
+        isReplyLoadedNotifier = ValueNotifier(isReplyLoaded);
+
+  
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
@@ -34,7 +43,8 @@ class Comment {
       isLiked: json['is_liked'],
       likeCount: json['likes_count'],
       replyCount: json['replies_count'],
-      isReplyVisible: false
+      isReplyVisible: false,
+      isReplyLoaded: false,
     );
   }
 }

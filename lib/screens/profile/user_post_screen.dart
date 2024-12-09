@@ -72,6 +72,19 @@ class _UserPostScreenState extends State<UserPostScreen> {
     }
   }
 
+  List<PostModel> _getFilteredPosts(List<PostModel> posts) {
+    if (widget.filterType == "image") {
+      return posts
+          .where((post) => post.media.any((media) => media.mediaType == 'image'))
+          .toList();
+    } else if (widget.filterType == "video") {
+      return posts
+          .where((post) => post.media.any((media) => media.mediaType == 'video'))
+          .toList();
+    }
+    return posts;
+  }
+
   List<PostModel> getImagePosts(List<PostModel> posts) {
     return posts.where((post) {
       return post.media.isNotEmpty && post.media[0].mediaType == 'image';
@@ -95,17 +108,20 @@ class _UserPostScreenState extends State<UserPostScreen> {
   Widget build(BuildContext context) {
     print("UI Rebuild");
     return Scaffold(
-      backgroundColor: AppColors.mainBgColor,
-      appBar: AppBar(backgroundColor: AppColors.mainBgColor),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-              !_isLoadingMore) {
-            _fetchPosts(); // Load more posts when the user reaches the bottom
-          }
-          return false;
-        },
-        child: ListView.builder(
+  backgroundColor: AppColors.mainBgColor,
+  appBar: AppBar(backgroundColor: AppColors.mainBgColor),
+  body: NotificationListener<ScrollNotification>(
+    onNotification: (ScrollNotification scrollInfo) {
+      if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+          !_isLoadingMore) {
+        _fetchPosts(); // Load more posts when the user reaches the bottom
+      }
+      return false;
+    },
+    child: Consumer<PostProvider>(
+      builder: (context, postProvider, child) {
+        final filteredPosts = _getFilteredPosts(widget.posts);
+        return ListView.builder(
           controller: _pageController,
           itemCount: _allPosts.length + (_isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
@@ -130,10 +146,11 @@ class _UserPostScreenState extends State<UserPostScreen> {
               return const Center(
                   child: Text("No posts available for this filter"));
             }
+
             var mediaList = post.media.isNotEmpty
                 ? post.media.map((media) => "${media.file}").toList()
                 : [""];
-            // debugger();
+
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +164,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
                     caption: post.post.toString(),
                     mediaUrls: post.media.isNotEmpty
                         ? post.media.map((media) => "${media.file}").toList()
-                        : [], // Ensure empty list if no media
+                        : [],
                     profileImageUrl: post.user.profileImage != null
                         ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
                         : AppUtils.userImage,
@@ -161,7 +178,6 @@ class _UserPostScreenState extends State<UserPostScreen> {
                     refresh: () => _deletePost(post.id.toString()),
                     isUserPost: true,
                     onPressed: () {
-                      // debugger();
                       if (post.media[0].mediaType == 'video') {
                         Navigator.push(
                           context,
@@ -177,20 +193,29 @@ class _UserPostScreenState extends State<UserPostScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  SinglePost(postId: post.id.toString()),
+                                  SinglePost(postId: post.id.toString(),
+                                  onPostUpdated: () => _fetchPosts()
+                                  ),
+                                  
                             ));
                       }
                     },
-                    onPressLiked: () {
-                      //if post is already liked
-                      if (post.is_liked == true) {
-                        print("post Disliked");
-                      }
-                      //is post is not liked yet
-                      else {
-                        Provider.of<PostProvider>(context, listen: false)
-                            .newLike(post.id, context, false);
-                        setState(() {});
+                    onPressLiked: () async {
+                      // Check if post is already liked or not
+                      if (post.is_liked) {
+                        
+                        await postProvider.userDisLikes(post.id, context, false);
+                        setState(() {
+                           post.likesCount--; 
+                           post.is_liked = false;
+                        });
+                      } else {
+                        
+                        await postProvider.newLikes(post.id, context);
+                        setState(() {
+                          post.likesCount++; 
+                          post.is_liked = true; 
+                        });
                       }
                     },
                     isLiked: post.is_liked,
@@ -199,8 +224,10 @@ class _UserPostScreenState extends State<UserPostScreen> {
               ),
             );
           },
-        ),
-      ),
-    );
-  }
+        );
+      },
+    ),
+  ),
+);
+}
 }

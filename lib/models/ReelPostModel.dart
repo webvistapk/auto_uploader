@@ -8,8 +8,8 @@ class ReelPostModel {
   final User user;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final int likesCount;
-  final int commentsCount;
+   int likesCount;
+   int commentsCount;
    bool isLiked;
 
   ReelPostModel({

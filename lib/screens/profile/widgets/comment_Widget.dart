@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/models/UserProfile/commentBottomSheet.dart';
 import 'package:provider/provider.dart';
@@ -56,14 +57,14 @@ class _CommentWidgetState extends State<CommentWidget> {
     super.dispose();
   }
 
-// void loadReplies(String commentId) async {
-//   try {
-//     await Provider.of<CommentProvider>(context,listen: false).fetchReplies(commentId);
-//     print("Replies fetched successfully!");
-//   } catch (e) {
-//     print("Error loading replies: $e");
-//   }
-// }
+void loadReplies(int commentId) async {
+  try {
+    await Provider.of<CommentProvider>(context,listen: false).fetchReplies(commentId);
+    print("Replies fetched successfully!");
+  } catch (e) {
+    print("Error loading replies: $e");
+  }
+}
 
   void _addComment(BuildContext context) {
     if (_formKey.currentState?.validate() ?? false) {
@@ -200,104 +201,229 @@ class _CommentWidgetState extends State<CommentWidget> {
                 ),
               ),
             const Divider(thickness: 1, color: Colors.grey),
-            SingleChildScrollView(
-              child: Expanded(
-                child: Column(
-                  children: [
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: 0,
-                        maxHeight: MediaQuery.of(context).size.height * 0.5,
-                      ),
-                      child: ListView.builder(
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          final comment = comments[index];
-                          final GlobalKey iconKey = GlobalKey();
-
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+            Expanded(
+              //height:MediaQuery.of(context).size.height ,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: comments.length,
+                itemBuilder: (context, index) {
+                  final comment = comments[index];
+                  final GlobalKey iconKey = GlobalKey();
+                    
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 20,
+                                        backgroundImage: NetworkImage(
+                                            comment.avatarUrl == null
+                                                ? comment.avatarUrl
+                                                : AppUtils.userImage),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            comment.username,
+                                            style: const TextStyle(
+                                              fontWeight:
+                                                  FontWeight.bold,
+                                            ),
+                                          ),
+                                          //const SizedBox(height: 5),
+                                          Text(
+                                            comment.commentText,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                                color:
+                                                    Colors.grey[600]),
+                                                    
+                                          ),
+                                          Row(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () =>
+                                                    _replyToComment(
+                                                        comment.id,
+                                                        comment.username),
+                                                child: Text(
+                                                  "Reply",
+                                                  style: TextStyle(
+                                                      color:
+                                                          Colors.blue[600],
+                                                      fontSize:9,
+                                                      ),
+                                                ),
+                                              ),
+                                               SizedBox(width: 20,),
+                                               comment.replyCount>0? GestureDetector(
+                                                onTap: ()async{
+                                                  setState(() {
+                                                    comment.isReplyVisible = !comment.isReplyVisible;
+                                                  });
+                                                  if(!comment.isReplyLoaded){
+                                                    try{
+                                                      await Provider.of<CommentProvider>(context,listen: false).fetchReplies(comment.id);
+                                                      setState(() {
+                                                        comment.isReplyLoaded=true;
+                                                      });
+                                                    }
+                                                    catch(e){
+                                                      ToastNotifier.showErrorToast(context, "Error fetching post ${e}");
+                                                    }
+                                                  }
+                                                },
+                                                 child: Text(
+                                                   comment.isReplyVisible ? "Hide Replies" : "View Reply ${comment.replyCount.toString()}",
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.blue[600],
+                                                        fontSize: 9,
+                                                        ),
+                                                  ),
+                                               ):Container(),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
                                     children: [
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Row(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              CircleAvatar(
-                                                radius: 20,
-                                                backgroundImage: NetworkImage(
-                                                    comment.avatarUrl == null
-                                                        ? comment.avatarUrl
-                                                        : AppUtils.userImage),
-                                              ),
-                                              const SizedBox(width: 10),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    comment.username,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              if (!comment.isLiked) {
+                                                await commentProvider
+                                                    .likeComment(
+                                                        comment.id,
+                                                        context,
+                                                        false);
+                                              }
+                                              else{
+                                                await commentProvider.dislikeComment(comment.id, context, false);
+                                              }
+                                            },
+                                            child:  Icon(comment.isLiked?
+                                              Icons.favorite:Icons.favorite_border,
+                                              size: 20,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                              '${comment.likeCount}', // Display the like count
+                                              style: TextStyle(
+                                                  color:
+                                                      Colors.grey[600],
+                                                  fontSize: 12)),
+                                        ],
+                                      ),
+                                      GestureDetector(
+                                        key:
+                                            iconKey, // Unique key for dynamic positioning
+                                        onTap: () {
+                                          _showOptionsMenu(
+                                            context,
+                                            iconKey,
+                                            comment,
+                                          );
+                                        },
+                                        child: Icon(Icons.more_vert,
+                                            size: 20),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              //Reply Section Sttart from here
+                              if (comment.replies.isNotEmpty && comment.isReplyVisible)
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics:
+                                      NeverScrollableScrollPhysics(),
+                                  itemCount: comment.replies.length,
+                                  itemBuilder: (context, replyIndex) {
+                                   final reply = comment.replies[replyIndex];
+                                    final GlobalKey replyiconKey =
+                                        GlobalKey();
+                    
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 40.0, top: 10),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 20,
+                                            backgroundImage: NetworkImage(
+                                                reply.replierImage ==
+                                                        null
+                                                    ? reply.replierImage
+                                                    : AppUtils
+                                                        .userImage),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .start,
+                                              children: [
+                                                Text(
+                                                  reply.replierName
+                                                      .toString(),
+                                                  style:
+                                                      const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold,
+                                                    fontSize: 12,
                                                   ),
-                                                  //const SizedBox(height: 5),
-                                                  Text(
-                                                    comment.commentText,
+                                                ),
+                                                Text(
+                                                  reply.content
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                    color: Colors
+                                                        .grey[600],
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () =>
+                                                      _replyToComment(
+                                                          comment.id,
+                                                          reply
+                                                              .replierName),
+                                                  child: Text(
+                                                    "Reply",
                                                     style: TextStyle(
-                                                      fontSize: 12,
-                                                        color:
-                                                            Colors.grey[600]),
-                                                            
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: () =>
-                                                            _replyToComment(
-                                                                comment.id,
-                                                                comment.username),
-                                                        child: Text(
-                                                          "Reply",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.blue[600],
-                                                              fontSize:9,
-                                                              ),
+                                                        color: Colors
+                                                            .blue[600],
+                                                        fontSize: 9,
                                                         ),
-                                                      ),
-                                                       SizedBox(width: 20,),
-                                                       comment.replyCount>0? GestureDetector(
-                                                        onTap: (){
-                                                          setState(() {
-                                                            comment.isReplyVisible = !comment.isReplyVisible;
-                                                          });
-                                                        },
-                                                         child: Text(
-                                                            "View Reply ${comment.replyCount.toString()}",
-                                                            style: TextStyle(
-                                                                color:
-                                                                    Colors.blue[600],
-                                                                fontSize: 9,
-                                                                ),
-                                                          ),
-                                                       ):Container(),
-                                                    ],
                                                   ),
-                                                ],
-                                              ),
-                                            ],
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                           Row(
                                             children: [
@@ -305,195 +431,63 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                 children: [
                                                   GestureDetector(
                                                     onTap: () async {
-                                                      if (!comment.isLiked) {
-                                                        await Provider.of<
-                                                                    CommentProvider>(
-                                                                context,
-                                                                listen: false)
-                                                            .likeComment(
-                                                                comment.id,
-                                                                context,
-                                                                false);
-                                                      }
+                                                      if (!reply
+                                                          .isReplyLiked) {
+                                                        await commentProvider
+                                                            .likeComment(reply.id, context, true);}
+                                                            else{
+                                                              await commentProvider.dislikeComment(reply.id, context, true);
+                                                            }
+                                                      print("Liked Triggered with Reply ID : ${reply.id}");
                                                     },
-                                                    child:  Icon(comment.isLiked?
+                                                    child: Icon(
+                                                      reply.isReplyLiked?
                                                       Icons.favorite:Icons.favorite_border,
                                                       size: 20,
-                                                      color: Colors.grey,
+                                                      color: 
+                                               Colors.grey,
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 4),
+                                                  const SizedBox(
+                                                      width: 4),
                                                   Text(
-                                                      '${comment.likeCount}', // Display the like count
+                                                      '${reply.replyLikeCount}', // Display the reply like count
                                                       style: TextStyle(
-                                                          color:
-                                                              Colors.grey[600],
-                                                          fontSize: 12)),
+                                                          color: Colors
+                                                                  .grey[
+                                                              600],
+                                                          fontSize:
+                                                              12)),
                                                 ],
                                               ),
                                               GestureDetector(
                                                 key:
-                                                    iconKey, // Unique key for dynamic positioning
+                                                    replyiconKey, // Unique key for dynamic positioning
                                                 onTap: () {
-                                                  _showOptionsMenu(
-                                                    context,
-                                                    iconKey,
-                                                    comment,
-                                                  );
+                                                  _showReplyOptionsMenu(
+                                                      context,
+                                                      replyiconKey,
+                                                      comment,
+                                                      reply);
                                                 },
-                                                child: Icon(Icons.more_vert,
+                                                child: Icon(
+                                                    Icons.more_vert,
                                                     size: 20),
                                               ),
                                             ],
                                           ),
                                         ],
                                       ),
-                    //Reply Section Sttart from here
-                                      if (comment.replies.isNotEmpty && comment.isReplyVisible)
-                                        ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                          itemCount: comment.replies.length,
-                                          itemBuilder: (context, replyIndex) {
-                                            final reply =
-                                                comment.replies[replyIndex];
-                                            final GlobalKey replyiconKey =
-                                                GlobalKey();
-
-                                            return Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 40.0, top: 10),
-                                              child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  CircleAvatar(
-                                                    radius: 20,
-                                                    backgroundImage: NetworkImage(
-                                                        reply.replierImage ==
-                                                                null
-                                                            ? reply.replierImage
-                                                            : AppUtils
-                                                                .userImage),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          reply.replierName
-                                                              .toString(),
-                                                          style:
-                                                              const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 12,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          reply.content
-                                                              .toString(),
-                                                          style: TextStyle(
-                                                            color: Colors
-                                                                .grey[600],
-                                                            fontSize: 12,
-                                                          ),
-                                                        ),
-                                                        GestureDetector(
-                                                          onTap: () =>
-                                                              _replyToComment(
-                                                                  comment.id,
-                                                                  reply
-                                                                      .replierName),
-                                                          child: Text(
-                                                            "Reply",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .blue[600],
-                                                                fontSize: 9,
-                                                                ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          GestureDetector(
-                                                            onTap: () async {
-                                                              if (!reply
-                                                                  .isReplyLiked) {
-                                                                await Provider.of<
-                                                                            CommentProvider>(
-                                                                        context,
-                                                                        listen:
-                                                                            false)
-                                                                    .likeReply(
-                                                                        reply
-                                                                            .id,
-                                                                        comment
-                                                                            .id,
-                                                                        context);
-                                                              }
-                                                              print("Liked Triggered");
-                                                            },
-                                                            child: Icon(
-                                                              reply.isReplyLiked?
-                                                              Icons.favorite:Icons.favorite_border,
-                                                              size: 20,
-                                                              color: 
-                                                       Colors.grey,
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 4),
-                                                          Text(
-                                                              '${reply.replyLikeCount}', // Display the reply like count
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                          .grey[
-                                                                      600],
-                                                                  fontSize:
-                                                                      12)),
-                                                        ],
-                                                      ),
-                                                      GestureDetector(
-                                                        key:
-                                                            replyiconKey, // Unique key for dynamic positioning
-                                                        onTap: () {
-                                                          _showReplyOptionsMenu(
-                                                              context,
-                                                              replyiconKey,
-                                                              comment,
-                                                              reply);
-                                                        },
-                                                        child: Icon(
-                                                            Icons.more_vert,
-                                                            size: 20),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                    ],
-                                  ),
+                                    );
+                                  },
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ],

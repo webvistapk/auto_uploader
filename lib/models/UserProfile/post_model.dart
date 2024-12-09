@@ -8,9 +8,9 @@ class PostModel {
   final String privacy;
   final String createdAt;
   final String updatedAt;
-  final int likesCount;
-  final int commentsCount;
-  final bool is_liked;
+   int likesCount;
+   int commentsCount;
+   bool is_liked;
 
   PostModel({
     required this.id,

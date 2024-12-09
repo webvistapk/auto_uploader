@@ -87,31 +87,41 @@ class _ReelScreenState extends State<ReelScreen> {
   }
 
   void _likePost(int reelId) async {
+  setState(() {
+    // Toggle the like state for the reel
+    widget.reels[_currentIndex].isLiked =
+        !widget.reels[_currentIndex].isLiked;
+  });
+
+  try {
+    if (widget.reels[_currentIndex].isLiked) {
+      // If the reel is liked, send a like request
+      await Provider.of<PostProvider>(context, listen: false)
+          .newLike(reelId, context, true);  // Like the reel
+    } else {
+      // If the reel is unliked, send a dislike request
+      await Provider.of<PostProvider>(context, listen: false)
+          .disLike(reelId, context, true);  // Dislike the reel
+    }
+
+    // If successful, show a success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Reel ${widget.reels[_currentIndex].isLiked ? "Liked" : "Unliked"} successfully.')),
+    );
+  } catch (e) {
+    // Revert the like state in case of an error
     setState(() {
       widget.reels[_currentIndex].isLiked =
           !widget.reels[_currentIndex].isLiked;
     });
 
-    try {
-      if (widget.reels[_currentIndex].isLiked) {
-        await Provider.of<PostProvider>(context, listen: false)
-            .disLike(reelId, context, true);
-      } else {
-        await Provider.of<PostProvider>(context, listen: false)
-            .newLike(reelId, context, true);
-      }
-    } catch (e) {
-      // Revert the like state in case of an error
-      setState(() {
-        widget.reels[_currentIndex].isLiked =
-            !widget.reels[_currentIndex].isLiked;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to like reel. Please try again.')),
-      );
-    }
+    // Show error message if the like/dislike request fails
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to like/dislike the reel. Please try again.')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +174,10 @@ class _ReelScreenState extends State<ReelScreen> {
                               : Colors.red,
                           size: 30,
                         ),
+                      ),
+                      Text(
+                        widget.reels[_currentIndex].likesCount.toString(),
+                        style: TextStyle(fontSize: 12,color: Colors.white),
                       ),
                       SizedBox(height: 20),
                       GestureDetector(

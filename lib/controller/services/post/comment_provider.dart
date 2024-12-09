@@ -45,9 +45,9 @@ class CommentProvider extends ChangeNotifier{
             .toList();
 
             // After fetching comments, fetch replies for each comment
-      for (var comment in _comments) {
-        await fetchReplies(comment.id);  // Ensure commentId is passed as a string
-      }
+      // for (var comment in _comments) {
+      //   await fetchReplies(comment.id);  // Ensure commentId is passed as a string
+      // }
         print("COmmentS ${_comments}");
 
         //print("fetch Comments triggered");
@@ -106,7 +106,8 @@ class CommentProvider extends ChangeNotifier{
         isLiked: currentComment.isLiked,
         likeCount: currentComment.likeCount,
         replyCount: currentComment.replyCount,
-        isReplyVisible: currentComment.isReplyVisible
+        isReplyVisible: currentComment.isReplyVisible,
+        isReplyLoaded: currentComment.isReplyLoaded
   );
         notifyListeners(); // Notify listeners for UI update
       }
@@ -264,40 +265,89 @@ Future<void> replyComment(int commentId, bool isReelScreen,{
 
 Future<void> likeComment(int commentId, BuildContext context, bool isReply) async {
   try {
-    // Call the API to like the comment
-    //await ApiService.likeComment(commentId); // Replace with your API logic
-     final String? token = await Prefrences.getAuthToken();
+    final String? token = await Prefrences.getAuthToken();
     String URL = isReply
-    ?"${ApiURLs.baseUrl}${ApiURLs.new_like}comment/$commentId/"
-    :"${ApiURLs.baseUrl}${ApiURLs.new_like}reply/$commentId/";
-    print("Commment ID: ${commentId.toString()}");
-    // Update the local state after a successful API call
-    final response = await http.post(
-        Uri.parse(URL),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
+        ? "${ApiURLs.baseUrl}${ApiURLs.new_like}reply/${commentId.toString()}/"
+        : "${ApiURLs.baseUrl}${ApiURLs.new_like}comment/${commentId.toString()}/";
 
-      if (response.statusCode == 200) {
-        final commentIndex = comments.indexWhere((comment) => comment.id == commentId);
-        if (commentIndex != -1) {
+    final response = await http.post(
+      Uri.parse(URL),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final commentIndex = comments.indexWhere((comment) => comment.id == commentId);
+      if (commentIndex != -1) {
+        if (isReply) {
+          final replyIndex = comments[commentIndex].replies.indexWhere((reply) => reply.id == commentId);
+          if (replyIndex != -1) {
+            comments[commentIndex].replies[replyIndex].isReplyLiked = true;
+            comments[commentIndex].replies[replyIndex].replyLikeCount += 1;
+          }
+        } else {
           comments[commentIndex].isLiked = true;
-       comments[commentIndex].likeCount += 1;
-      notifyListeners();
-    }
-        ToastNotifier.showSuccessToast(context, "Liked Successfully");
-        notifyListeners();
-      } else {
-        throw Exception('Failed to like comment');
+          comments[commentIndex].likeCount += 1;
+        }
+
         notifyListeners();
       }
-    
+      ToastNotifier.showSuccessToast(context, "Liked Successfully");
+    } else {
+      throw Exception('Failed to like comment');
+    }
   } catch (e) {
-    ToastNotifier.showErrorToast(context, "Unsuccessful Like try again :${e}");
+    ToastNotifier.showErrorToast(context, "Unsuccessful Like: ${e}");
   }
 }
+
+Future<void> dislikeComment(int commentId, BuildContext context, bool isReply) async {
+  try {
+    final String? token = await Prefrences.getAuthToken();
+    String URL = isReply
+        ? "${ApiURLs.baseUrl}${ApiURLs.dislike}reply/${commentId.toString()}/"
+        : "${ApiURLs.baseUrl}${ApiURLs.dislike}comment/${commentId.toString()}/";
+
+    final response = await http.delete(
+      Uri.parse(URL),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final commentIndex = comments.indexWhere((comment) => comment.id == commentId);
+      if (commentIndex != -1) {
+    
+        if (isReply) {
+          final replyIndex = comments[commentIndex].replies.indexWhere((reply) => reply.id == commentId);
+          print("reply ID ${replyIndex}");
+          //final reply = comment[]
+          if (replyIndex != -1) {
+            comments[commentIndex].replies[replyIndex].isReplyLiked = false;
+            comments[commentIndex].replies[replyIndex].replyLikeCount -= 1;
+            print('Reply Like Count: ${comments[commentIndex].replies[replyIndex].replyLikeCount}');
+          }
+        } else {
+          comments[commentIndex].isLiked = false;
+          comments[commentIndex].likeCount -= 1;
+        }
+
+        notifyListeners();
+      }
+      ToastNotifier.showSuccessToast(context, "Disliked Successfully");
+    } else {
+      throw Exception('Failed to dislike comment');
+    }
+  } catch (e) {
+    ToastNotifier.showErrorToast(context, "Unsuccessful Dislike: ${e}");
+  }
+}
+
+
 
 Future<void> likeReply(int replyId, int commentId, BuildContext context) async {
   try {

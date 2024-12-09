@@ -65,24 +65,29 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _fetchPosts() async {
-    final postProvider = Provider.of<PostProvider>(context, listen: false);
-    setState(() {
-      _isLoadingMore = true;
-    });
-    List<PostModel> newPosts = await postProvider.fetchFollowerPost(context,
-        limit: 10, offset: _offset);
-    setState(() {
-      _posts.addAll(newPosts); // Append new posts to the existing list
-      _offset += 10;
-      _isLoadingMore = false;
-    });
-  }
+  final postProvider = Provider.of<PostProvider>(context, listen: false);
+
+  setState(() {
+    _isLoadingMore = true;
+  });
+
+  // Fetch posts directly from the provider
+  await postProvider.fetchFollowerPost(context, limit: 10, offset: _offset);
+
+  // Fetch posts from the provider after the fetch operation
+  setState(() {
+    _posts.addAll(postProvider.posts!); // Add posts from provider to _posts
+    _offset += 10;
+    _isLoadingMore = false;
+  });
+}
 
   @override
   void dispose() {
     _tabController?.dispose();
     super.dispose();
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -225,34 +230,35 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             )
                           :
-                          // Padding(
-                          //     padding: const EdgeInsets.all(8.0),
-                          //     child: Column(
-                          //       children: _posts
-                          //           .map((post) => _buildPostCard(post))
-                          //           .toList(),
-                          //     ),
-                          //   ),
+                          
                           Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: ListView.builder(
-                                itemCount: _posts.length,
-                                shrinkWrap: true, // Prevents unbounded height
-                                physics:
-                                    NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                                itemBuilder: (context, index) {
-                                  final post = _posts[index];
-                                  return _buildPostCard(post, () {
-                                    Navigator.push(
-                                        context,
-                                        CupertinoDialogRoute(
-                                            builder: (_) => SinglePost(
-                                                postId: post.id.toString()),
-                                            context: context));
-
-                                    // Check if the result indicates a need to refresh
-                                  });
-                                },
+                              child: Consumer<PostProvider>(
+                                builder: (context,postProvider,child) {
+                                 
+                                  return ListView.builder(
+                                    itemCount: _posts!.length,
+                                    shrinkWrap: true, // Prevents unbounded height
+                                    physics:
+                                        NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                                    itemBuilder: (context, index) {
+                                      final post = _posts[index];
+                                      return _buildPostCard(post, () {
+                                        Navigator.push(
+                                            context,
+                                            CupertinoDialogRoute(
+                                                builder: (_) => SinglePost(
+                                                    postId: post.id.toString(),
+                                                    onPostUpdated: () => _fetchPosts()
+                                                    ),
+                                                    
+                                                context: context));
+                                  
+                                        // Check if the result indicates a need to refresh
+                                      });
+                                    },
+                                  );
+                                }
                               ),
                             ),
                       if (_isLoadingMore)
@@ -379,73 +385,48 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildPostCard(PostModel post, onPressed) {
-    log('Hello $_currentIndexMap');
-    List<String> fullMediaUrls = post.media.map((media) {
-      print(media);
-      // debugger();
-      final file = media.file;
-      return file;
-    }).toList();
-    log(fullMediaUrls.toString());
-    // debugger();
+  log('Hello $_currentIndexMap');
+  List<String> fullMediaUrls = post.media.map((media) {
+    print(media);
+    final file = media.file;
+    return file;
+  }).toList();
 
-    return PostWidget(
-      postId: post.id.toString(),
-      username: post.user.username,
-      location: 'Location',
-      date: post.createdAt,
-      caption: '',
-      mediaUrls: fullMediaUrls,
-      profileImageUrl: post.user.profileImage != null
-          ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
-          : AppUtils.userImage,
-      isVideo:
-          post.media.any((media) => media.mediaType == 'video') ? true : false,
-      likes: post.likesCount.toString(),
-      comments: post.commentsCount.toString(),
-      shares: "50",
-      saved: "50",
-      refresh: () {},
-      showCommentSection: false,
-      isInteractive: true,
-      isUserPost: false,
-      onPressed: onPressed,
-      onPressLiked: (){
-        if(post.is_liked==false){
-          Provider.of<PostProvider>(context,listen:false).newLike(post.id, context,false);
-        }
-        else{
-          Provider.of<PostProvider>(context,listen:false).disLike(post.id, context,false);
-          print("Disliked");
-        }
-         
-      },
-      isLiked: false,
-      // isInteractive
-      //             ?
-      //             : () {
-      // if (widget.isVideo) {
-      //   Navigator.push(
-      //     context,
-      //     CupertinoDialogRoute(
-      //       builder: (_) => FullscreenVideoPlayer(
-      //         videoUrl: "${widget.mediaUrls[0]}",
-      //       ),
-      //       context: context,
-      //     ),
-      //   );
-      // } else {
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //         builder: (context) => postFullScreen(
-      //             mediaUrls: widget.mediaUrls,
-      //             initialIndex: _currentImageIndex)),
-      //   );
-      // }
-      //               },
-    );
-  }
+  return PostWidget(
+    postId: post.id.toString(),
+    username: post.user.username,
+    location: 'Location',
+    date: post.createdAt,
+    caption: '',
+    mediaUrls: fullMediaUrls,
+    profileImageUrl: post.user.profileImage != null
+        ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+        : AppUtils.userImage,
+    isVideo: post.media.any((media) => media.mediaType == 'video') ? true : false,
+    likes: post.likesCount.toString(),
+    comments: post.commentsCount.toString(),
+    shares: "50",
+    saved: "50",
+    refresh: () {},
+    showCommentSection: false,
+    isInteractive: true,
+    isUserPost: false,
+    onPressed: onPressed,
+    onPressLiked: () async {
+      final postProvider = Provider.of<PostProvider>(context, listen: false);
+
+      if (post.is_liked == false) {
+        // Like the post
+        await postProvider.newLikes(post.id, context,); 
+      } else {
+        // Dislike the post
+        await postProvider.userDisLikes(post.id, context, false);
+      }
+    },
+    isLiked: post.is_liked, // Use the post's `isLiked` value
+  );
+}
+
 }
 
 class StatusView extends StatefulWidget {

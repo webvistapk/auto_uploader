@@ -107,7 +107,9 @@ class _PostScreenState extends State<PostScreen> {
                                 context,
                                 CupertinoDialogRoute(
                                     builder: (_) =>
-                                        SinglePost(postId: post.id.toString()),
+                                        SinglePost(postId: post.id.toString(),
+                                        onPostUpdated: () => _fetchPost()
+                                        ),
                                     context: context));
 
                             // Check if the result indicates a need to refresh
