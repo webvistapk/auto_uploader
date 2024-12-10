@@ -39,6 +39,7 @@ class _InboxScreenState extends State<InboxScreen> {
   void initState() {
     super.initState();
     chatController = Provider.of<ChatController>(context, listen: false);
+    chatController.connectWebSocket(widget.chatModel.id);
     fetching(widget.chatModel.id);
 
     // Add scroll listener for pagination

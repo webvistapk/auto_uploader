@@ -121,6 +121,7 @@ class ChatController extends ChangeNotifier {
   }
 
   // Connect to WebSocket
+
   void connectWebSocket(int chatId) {
     // Close existing connection if any
     _channel?.sink.close();
@@ -130,32 +131,40 @@ class ChatController extends ChangeNotifier {
       Uri.parse('ws://147.79.117.253:8001/ws/chat/$chatId/'),
     );
 
-    _channel?.stream.listen((message) {
-      try {
-        debugger();
-        // Decode the incoming WebSocket message
-        final data = json.decode(message);
+    _channel?.stream.listen(
+      (message) {
+        try {
+          print('Raw WebSocket message: $message'); // Debugging
 
-        // Step 1: Create the message from WebSocket data
-        final newMessages = List<MessageModel>.from(
-          data['data'].map((message) => MessageModel.fromJson(message)),
-        );
+          // Decode the incoming WebSocket message
+          final data = json.decode(message);
 
-        // Step 2: Add the received message to the list
-        _messages.addAll(newMessages);
+          // Ensure the data is a valid JSON object
+          if (data is Map<String, dynamic>) {
+            // Parse the JSON object into a MessageModel
+            final newMessage = MessageModel.fromJson(data);
 
-        // Notify listeners about new messages
-        notifyListeners();
-      } catch (e) {
-        print('Error parsing WebSocket message: $e');
-      }
-    }, onError: (error) {
-      print('WebSocket error: $error');
-      _reconnectWebSocket(chatId);
-    }, onDone: () {
-      print('WebSocket closed. Attempting to reconnect...');
-      _reconnectWebSocket(chatId);
-    });
+            // Add the new message to the message list
+            _messages.add(newMessage);
+
+            // Notify listeners about the update
+            notifyListeners();
+          } else {
+            print('Unexpected data format: $data');
+          }
+        } catch (e) {
+          print('Error parsing WebSocket message: $e');
+        }
+      },
+      onError: (error) {
+        print('WebSocket error: $error');
+        _reconnectWebSocket(chatId); // Reconnect on error
+      },
+      onDone: () {
+        print('WebSocket closed. Attempting to reconnect...');
+        _reconnectWebSocket(chatId); // Reconnect when closed
+      },
+    );
   }
 
   // Reconnect WebSocket if connection is lost
@@ -199,13 +208,15 @@ class ChatController extends ChangeNotifier {
         final responseBody = await response.stream.bytesToString();
         final messageData = json
             .decode(responseBody)['data']; // Extract 'data' from the response
+
+        // debugger();
         _channel?.sink.add(json.encode({
-          'data':
-              messageData, // Send the complete 'data' object as per your structure
+          'id': messageData[
+              'id'], // Send the complete 'data' object as per your structure
         }));
 // Step 3: Add the sent message to the list
-        MessageModel sentMessage = MessageModel.fromJson(messageData);
-        _messages.add(sentMessage);
+        // MessageModel sentMessage = MessageModel.fromJson(messageData);
+        // _messages.add(sentMessage);
         _isSending = false;
         notifyListeners();
 
