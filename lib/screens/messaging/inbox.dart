@@ -13,7 +13,14 @@ import 'widgets/own_message.dart';
 class InboxScreen extends StatefulWidget {
   final UserProfile userProfile;
   final ChatModel chatModel;
-  InboxScreen({Key? key, required this.userProfile, required this.chatModel})
+  final chatName;
+  final participantImage;
+  InboxScreen(
+      {Key? key,
+      required this.userProfile,
+      required this.chatModel,
+      this.chatName,
+      this.participantImage})
       : super(key: key);
 
   @override
@@ -125,7 +132,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                     width: 28,
                                     height: 28,
                                     image: NetworkImage(
-                                      widget.userProfile.profileUrl ??
+                                      widget.participantImage ??
                                           "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg",
                                     ),
                                     fit: BoxFit.fill,
@@ -136,7 +143,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.chatModel.name ?? 'Unknown',
+                                    widget.chatName ?? 'Unknown',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
@@ -200,10 +207,14 @@ class _InboxScreenState extends State<InboxScreen> {
 
                                     final formatDate =
                                         formatDateString(message.createdAt);
+                                    final formatTime =
+                                        formatDateString(message.createdAt);
                                     if (isOwnMessage) {
                                       return OwnMessage(
                                         text: message.content,
-                                        timestamp: formatDate,
+                                        timestampDate: formatDate,
+                                        timestampTime: formatTime,
+                                        mediaList: message.media,
                                       );
                                     } else {
                                       return buildUserMessage(
@@ -222,8 +233,7 @@ class _InboxScreenState extends State<InboxScreen> {
                         try {
                           await chatController.sendMessage(
                               messageController.text.trim(),
-                              widget.chatModel.id,
-                              widget.userProfile.username!, []);
+                              widget.chatModel.id, []);
 
                           if (mounted) {
                             setState(() {});
@@ -237,6 +247,7 @@ class _InboxScreenState extends State<InboxScreen> {
                         setState(() {});
                         _scrollToBottom();
                       },
+                      chatModel: widget.chatModel,
                     ),
                   ],
                 ),
@@ -252,6 +263,17 @@ class _InboxScreenState extends State<InboxScreen> {
     try {
       DateTime dateTime = DateTime.parse(dateString);
       final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
+      return formatter.format(dateTime);
+    } catch (e) {
+      print('Error parsing date: $e');
+      return 'Invalid date';
+    }
+  }
+
+  String formatTimeString(String dateString) {
+    try {
+      DateTime dateTime = DateTime.parse(dateString);
+      final DateFormat formatter = DateFormat('HH:mm');
       return formatter.format(dateTime);
     } catch (e) {
       print('Error parsing date: $e');

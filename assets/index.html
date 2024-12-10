@@ -53,8 +53,8 @@
     <!-- Login Form -->
     <div id="loginForm">
         <h2>Login</h2>
-        <input type="text" id="username" placeholder="Username or Email" value="testuser1" />
-        <input type="password" id="password" placeholder="Password" value="Testpass1" />
+        <input type="text" id="username" placeholder="Username or Email" />
+        <input type="password" id="password" placeholder="Password" />
         <button id="loginButton">Login</button>
         <div id="loginError" style="color: red;"></div>
     </div>
@@ -78,16 +78,13 @@
     </div>
 
     <script>
-        // const apiUrl = "http://localhost:8000/api"; // Replace with your Django API base URL http://147.79.117.253:8001/
         const apiUrl = "http://147.79.117.253:8001/api";
         let accessToken = null;
         let currentChatId = null;
         let websocket = null;
 
-        // Show login form and hide chat interface
         document.getElementById("loginForm").style.display = "block";
 
-        // Login Functionality
         document.getElementById("loginButton").onclick = async () => {
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
@@ -113,11 +110,9 @@
                 const data = await response.json();
                 accessToken = data.access;
 
-                // Hide login form and show chat interface
                 document.getElementById("loginForm").style.display = "none";
                 document.getElementById("chatInterface").style.display = "block";
 
-                // Load chats
                 loadChats();
             } catch (error) {
                 console.error("Error logging in:", error);
@@ -125,14 +120,10 @@
             }
         };
 
-        // Fetch and display all chats
         async function loadChats() {
             try {
                 const response = await fetch(`${apiUrl}/chat/`, {
-                    headers: {
-                        "Authorization": `Bearer ${accessToken}`,
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" },
                 });
                 const chats = await response.json();
                 renderChats(chats);
@@ -141,43 +132,33 @@
             }
         }
 
-        // Render the chat list
         function renderChats(chats) {
             const chatList = document.getElementById("chatList");
             chatList.innerHTML = "";
             chats.chat.forEach(chat => {
                 const chatDiv = document.createElement("div");
                 chatDiv.textContent = chat.name || `Chat ID: ${chat.id}`;
-                chatDiv.className = "chat-item";
                 chatDiv.style.cursor = "pointer";
                 chatDiv.onclick = () => loadMessages(chat.id);
                 chatList.appendChild(chatDiv);
             });
         }
 
-        // Load messages for the selected chat
         async function loadMessages(chatId) {
             try {
                 currentChatId = chatId;
-
                 const response = await fetch(`${apiUrl}/chat/${chatId}/messages/`, {
-                    headers: {
-                        "Authorization": `Bearer ${accessToken}`,
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" },
                 });
 
                 const messages = await response.json();
                 renderMessages(messages);
-
-                // Enable input and connect WebSocket
                 connectWebSocket(chatId);
             } catch (error) {
                 console.error("Error fetching messages:", error);
             }
         }
 
-        // Render the messages
         function renderMessages(messages) {
             const messageList = document.getElementById("messages");
             messageList.innerHTML = "";
@@ -188,73 +169,30 @@
             });
         }
 
-        // Add a new message to the UI
-        function addMessage(message) {
-            const messageList = document.getElementById("messages");
-            const messageDiv = document.createElement("div");
-            messageDiv.textContent = `${message.sender_username}: ${message.content}`;
-            messageList.appendChild(messageDiv);
-        }
-
-        // WebSocket connection for real-time messages
         function connectWebSocket(chatId) {
-            if (websocket) {
-                websocket.close(); // Close any existing connection
-            }
+            if (websocket) websocket.close();
 
-            // websocket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${chatId}/`);
             websocket = new WebSocket(`ws://147.79.117.253:8001/ws/chat/${chatId}/`);
-
             websocket.onopen = () => {
-                console.log("WebSocket connected.");
                 document.getElementById("messageInput").disabled = false;
                 document.getElementById("sendMessage").disabled = false;
             };
-
             websocket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                addMessage({ sender_username: data.username, content: data.message });
-            };
-
-            websocket.onclose = () => {
-                console.log("WebSocket closed. Reconnecting...");
-                setTimeout(() => connectWebSocket(chatId), 5000);
+                const messageList = document.getElementById("messages");
+                const messageDiv = document.createElement("div");
+                messageDiv.textContent = `${data.username}: ${data.message}`;
+                messageList.appendChild(messageDiv);
             };
         }
 
-        async function sendMessage(content) {
-            try {
-                const response = await fetch(`${apiUrl}/chat/${currentChatId}/messages/send/`, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${accessToken}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ content }),
-                });
-
-                const message = await response.json();
-                // addMessage(message);
-            } catch (error) {
-                console.error("Error sending message:", error);
-            }
-        }
-
-        // Handle sending messages through WebSocket
         document.getElementById("sendMessage").onclick = () => {
             const messageInput = document.getElementById("messageInput");
-            const usernameInput = document.getElementById("username");
             const content = messageInput.value.trim();
-            const username = usernameInput.value.trim();
 
-            if (content) {
-                if (websocket && websocket.readyState === WebSocket.OPEN) {
-                    sendMessage(content)
-                    websocket.send(JSON.stringify({ message: content, username: username })); // Send via WebSocket
-                    messageInput.value = ""; // Clear the input
-                } else {
-                    console.error("WebSocket is not connected. Cannot send message.");
-                }
+            if (content && websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({ message: content }));
+                messageInput.value = "";
             }
         };
     </script>

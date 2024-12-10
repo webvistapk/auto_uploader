@@ -20,12 +20,13 @@ class ChatController extends ChangeNotifier {
   bool _isConnected = false;
   bool _isMessageLoading = false;
   bool _isLoading = false;
+  bool _isSending = false;
 
   List<MessageModel> get messages => _messages;
   bool get isConnected => _isConnected;
   bool get isMessageLoading => _isMessageLoading;
   bool get isLoading => _isLoading;
-
+  bool get isSending => _isSending;
   // Fetch messages from the server
   // Updated method to handle pagination and new response structure
 
@@ -131,14 +132,17 @@ class ChatController extends ChangeNotifier {
 
     _channel?.stream.listen((message) {
       try {
+        debugger();
         // Decode the incoming WebSocket message
         final data = json.decode(message);
 
         // Step 1: Create the message from WebSocket data
-        MessageModel receivedMessage = MessageModel.fromJson(data['data']);
+        final newMessages = List<MessageModel>.from(
+          data['data'].map((message) => MessageModel.fromJson(message)),
+        );
 
         // Step 2: Add the received message to the list
-        _messages.add(receivedMessage);
+        _messages.addAll(newMessages);
 
         // Notify listeners about new messages
         notifyListeners();
@@ -165,8 +169,9 @@ class ChatController extends ChangeNotifier {
 
   // Send a message via WebSocket and HTTP
 
-  Future<void> sendMessage(
-      String content, int chatId, String username, List<File> files) async {
+  Future<void> sendMessage(String content, int chatId, List<File> files) async {
+    _isSending = true;
+    notifyListeners();
     try {
       // Step 1: Prepare the message and files for sending via form-data
       final uri = Uri.parse(
@@ -177,11 +182,13 @@ class ChatController extends ChangeNotifier {
         })
         ..fields['message'] = content;
 
-      // Add files to the request if any
-      for (var file in files) {
-        // Assuming the files are images or documents and you can specify a key
-        request.files
-            .add(await http.MultipartFile.fromPath('files', file.path));
+      if (files.isNotEmpty) {
+        // Add files to the request if any
+        for (var file in files) {
+          // Assuming the files are images or documents and you can specify a key
+          request.files
+              .add(await http.MultipartFile.fromPath('files', file.path));
+        }
       }
 
       // Step 2: Send the message via HTTP POST request
@@ -192,22 +199,26 @@ class ChatController extends ChangeNotifier {
         final responseBody = await response.stream.bytesToString();
         final messageData = json
             .decode(responseBody)['data']; // Extract 'data' from the response
-
-// Step 3: Add the sent message to the list
-        MessageModel sentMessage = MessageModel.fromJson(messageData);
-        _messages.add(sentMessage);
-        notifyListeners();
-
-// Step 4: Send the entire message data through WebSocket
         _channel?.sink.add(json.encode({
           'data':
               messageData, // Send the complete 'data' object as per your structure
         }));
+// Step 3: Add the sent message to the list
+        MessageModel sentMessage = MessageModel.fromJson(messageData);
+        _messages.add(sentMessage);
+        _isSending = false;
+        notifyListeners();
+
+// Step 4: Send the entire message data through WebSocket
       } else {
+        _isSending = false;
+        notifyListeners();
         throw Exception(
             'Failed to send message. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      _isSending = false;
+      notifyListeners();
       print('Error sending message: $e');
     }
   }
