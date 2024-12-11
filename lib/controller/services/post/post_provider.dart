@@ -25,15 +25,15 @@ class PostProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   PostModel? get post => _post;
   List<PostModel>? get posts => _posts;
-  List<ReelPostModel> _reels = [];
+  List<ReelPostModel>? _reels;
 
-  List<ReelPostModel> get reels => _reels;
+  List<ReelPostModel>? get reels => _reels;
   setIsLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
-void setPost(List<PostModel> posts) {
+  void setPost(List<PostModel> posts) {
     _posts = posts;
     notifyListeners();
   }
@@ -41,7 +41,7 @@ void setPost(List<PostModel> posts) {
   Future<List<PostModel>> fetchFollowerPost(BuildContext context,
       {int limit = 10, int offset = 0}) async {
     setIsLoading(true);
-    
+
     final String? token = await Prefrences.getAuthToken();
     int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
@@ -81,10 +81,10 @@ void setPost(List<PostModel> posts) {
       print("Error fetching follower posts: $e");
       return []; // Return an empty list on error
     } finally {
-      setIsLoading(false); // Make sure to set loading to false even if there was an error
+      setIsLoading(
+          false); // Make sure to set loading to false even if there was an error
     }
   }
-
 
   // Future<List<PostModel>> fetchFollowerPost(BuildContext context,
   //     {int limit = 10, int offset = 0}) async {
@@ -341,53 +341,58 @@ void setPost(List<PostModel> posts) {
   }
 
   Future<List<ReelPostModel>> fetchReels(
-      BuildContext context, String id, int limit, int offset) async {
-    final String? token = await Prefrences.getAuthToken();
+    BuildContext context, String id, int limit, int offset) async {
+  final String? token = await Prefrences.getAuthToken();
 
-    // Base URL and API path
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id";
+  // Base URL and API path
+  String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id";
 
-    // Add query parameters for pagination (limit and offset)
-    Uri uri = Uri.parse(URL).replace(queryParameters: {
-      'limit': limit.toString(), // How many posts per page
-      'offset': offset.toString() // Offset for pagination
+  // Add query parameters for pagination (limit and offset)
+  Uri uri = Uri.parse(URL).replace(queryParameters: {
+    'limit': limit.toString(), // How many posts per page
+    'offset': offset.toString() // Offset for pagination
+  });
+
+  try {
+    final response = await http.get(uri, headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token"
     });
 
-    try {
-      final response = await http.get(uri, headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      });
+    print(response.body);
 
-      print(response.body);
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body);
+      print("REEL FETCHED SUCCESSFULLY");
 
-      if (response.statusCode == 200) {
-        final jsonList = jsonDecode(response.body);
-        print("REEL GETTED SUCCESSFULLY");
-        // print(jsonList);
-        //log("Reel Data: ${jsonList['reels']}"); // Log the correct data
-
-        List<ReelPostModel> reelList = [];
-        for (var reelJson in jsonList['reels']) {
-          // Change 'posts' to 'reels'
-          final reel = ReelPostModel.fromJson(reelJson);
-          reelList.add(reel);
-        }
-        print("PROVIDER REEL :${reelList}");
-
-        notifyListeners();
-        return reelList;
-      } else {
-        return [];
+      // Convert JSON to ReelPostModel list
+      List<ReelPostModel> reelList = [];
+      for (var reelJson in jsonList['reels']) {
+        final reel = ReelPostModel.fromJson(reelJson);
+        reelList.add(reel);
       }
-    } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error: $e");
-      print(e);
-      return []; // Return an empty list on exception
-    } finally {
-      setIsLoading(false);
+
+      // Update the provider's state
+      if (_reels == null) {
+        _reels = reelList; // Initialize _reels if null
+      } else {
+        _reels!.addAll(reelList); // Append new data for pagination
+      }
+
+      notifyListeners();
+      return reelList;
+    } else {
+      return [];
     }
+  } catch (e) {
+    ToastNotifier.showErrorToast(context, "There is an Error: $e");
+    print(e);
+    return []; // Return an empty list on exception
+  } finally {
+    setIsLoading(false);
   }
+}
+
 
   Future<void> deletePost(
       String postId, BuildContext context, bool isReelPost) async {
@@ -461,179 +466,168 @@ void setPost(List<PostModel> posts) {
     }
   }
 
-
   Future<void> newLikes(int postId, BuildContext context) async {
-  final String? token = await Prefrences.getAuthToken();
-  print("POst ID is : ${postId}");
-  
-  // API endpoint to like a post
-  String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}post/${postId}/";
-  Uri uri = Uri.parse(URL);
-
-  try {
-    final response = await http.post(
-      uri,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      //final int newLikesCount = data['likes_count']; // Extract new like count
-        
-      // Find the post in _posts and update it
-      final postIndex = _posts!.indexWhere((post) => post.id == postId);
-      if (postIndex != -1) {
-        
-        _posts?[postIndex].likesCount += 1;
-          _posts?[postIndex].is_liked = true; // Assuming you want to mark it as liked
-          ToastNotifier.showSuccessToast(context, "Post Liked Successfully");
-        
-        notifyListeners();
-         
-      }
-      else{
-        print("Post index is wrong");
-      }
-
-      // Notify listeners to refresh UI (if you're using Provider)
-      notifyListeners();
-    } else {
-      throw Exception("Failed to like post");
-    }
-  } catch (e) {
-    ToastNotifier.showErrorToast(context, "Error: $e");
-  }
-}
-
-Future<void> userDisLikes(int postId, BuildContext context,bool isReel) async {
-  final String? token = await Prefrences.getAuthToken();
-  print("POst ID is : ${postId}");
-  
-  // API endpoint to like a post
-  String URL = 
-  isReel? 
-  "${ApiURLs.baseUrl}${ApiURLs.dislike}reel/${postId.toString()}/"
-  : "${ApiURLs.baseUrl}${ApiURLs.dislike}post/${postId.toString()}/";
-
-  Uri uri = Uri.parse(URL);
-
-  try {
-    final response = await http.delete(
-      uri,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
-    print("API HITtED");
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-     // final int newLikesCount = data['likes_count']; // Extract new like count
-
-      // Find the post in _posts and update it
-      final postIndex = _posts!.indexWhere((post) => post.id == postId);
-      if (postIndex != -1) {
-       print("Post Index ${postIndex}");
-       
-          _posts?[postIndex].likesCount -= 1;
-          _posts?[postIndex].is_liked = false; // Assuming you want to mark it as liked
-          ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
-      
-      }
-      else{
-        print("Post index is wrong");
-        ToastNotifier.showErrorToast(context, "Post Disliked Faild");
-      }
-
-      // Notify listeners to refresh UI (if you're using Provider)
-      notifyListeners();
-    } else {
-      throw Exception("Failed to dislike post");
-    }
-  } catch (e) {
-    ToastNotifier.showErrorToast(context, "Error: $e");
-  }
-}
-
-
-  Future<void> disLike(int postId, BuildContext context, bool isReel) async {
     final String? token = await Prefrences.getAuthToken();
+    print("POst ID is : ${postId}");
 
-    String URL =
-     isReel
-        ? "${ApiURLs.baseUrl}${ApiURLs.dislike}reel/${postId.toString()}/"
-        : "${ApiURLs.baseUrl}${ApiURLs.dislike}post/${postId.toString()}/";
+    // API endpoint to like a post
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}post/${postId}/";
+    Uri uri = Uri.parse(URL);
+
     try {
-      final response = await http.delete(Uri.parse(URL), headers: {
-        'Authorization': 'Barer $token',
-        'Content-Type': 'application/json'
-      });
-      print("API Hitted");
+      final response = await http.post(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
       if (response.statusCode == 200) {
-        ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
+        final data = jsonDecode(response.body);
+        //final int newLikesCount = data['likes_count']; // Extract new like count
+
+        // Find the post in _posts and update it
+        final postIndex = _posts!.indexWhere((post) => post.id == postId);
+        if (postIndex != -1) {
+          _posts?[postIndex].likesCount += 1;
+          _posts?[postIndex].is_liked =
+              true; // Assuming you want to mark it as liked
+          notifyListeners();
+        } else {
+          print("Post index is wrong");
+        }
+
+        // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
       } else {
-        throw Exception('Failed to dislike post');
-       
+        throw Exception("Failed to like post");
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "Error Dislike the post: $e");
-      notifyListeners();
+      ToastNotifier.showErrorToast(context, "Error: $e");
     }
   }
 
-  Future<void> newLike(int postID, BuildContext context, bool isReel) async {
-  final String? token = await Prefrences.getAuthToken();
+  Future<void> userDisLikes(
+      int postId, BuildContext context) async {
+    final String? token = await Prefrences.getAuthToken();
+    print("POst ID is : ${postId}");
 
-  String URL = isReel
-      ? "${ApiURLs.baseUrl}${ApiURLs.new_like}reel/$postID/"
-      : "${ApiURLs.baseUrl}${ApiURLs.new_like}post/$postID/";
-  print("Post ID in Like ${postID}");
+    // API endpoint to like a post
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.dislike}post/${postId.toString()}/";
 
-  try {
-    final response = await http.post(
-      Uri.parse(URL),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    Uri uri = Uri.parse(URL);
 
-    if (response.statusCode == 200) {
-      if (isReel) {
-        // Handle liking a reel
-        final reelIndex = _reels!.indexWhere((reel) => reel.id == postID);
-        if (reelIndex != -1) {
-          _reels?[reelIndex].likesCount += 1;
-          _reels?[reelIndex].isLiked = true;  // Mark as liked
-          ToastNotifier.showSuccessToast(context, "Reel Liked Successfully");
-        }
+    try {
+      final response = await http.delete(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+      print("API HITtED");
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        // final int newLikesCount = data['likes_count']; // Extract new like count
+
+        // Find the post in _posts and update it
+      
+          final postIndex = _posts!.indexWhere((post) => post.id == postId);
+          if (postIndex != -1) {
+            print("Post Index ${postIndex}");
+
+            _posts?[postIndex].likesCount -= 1;
+            _posts?[postIndex].is_liked =
+                false; // Assuming you want to mark it as liked
+            ToastNotifier.showSuccessToast(
+                context, "Post Disliked Successfully");
+          } else {
+            print("Post index is wrong");
+            ToastNotifier.showErrorToast(context, "Post Disliked Faild");
+          }
+        
+
+        // Notify listeners to refresh UI (if you're using Provider)
+        notifyListeners();
       } else {
-        // Handle liking a post
-        if (_post != null) {
-          _post!.is_liked = true;
-          _post!.likesCount += 1;
-        }
+        throw Exception("Failed to dislike post");
       }
-
-      // Notify listeners to update UI
-      notifyListeners();
-      ToastNotifier.showSuccessToast(context, "Liked Successfully");
-      print("Post liked successfully");
-    } else {
-      throw Exception('Failed to like post');
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error: $e");
     }
-  } catch (e) {
-    ToastNotifier.showErrorToast(context, "Error liking the post: $e");
-    notifyListeners();
-    print(e);
   }
-}
 
 
+   Future<void> reelLike(int reelID, BuildContext context, int reelIndex) async {
+    final String? token = await Prefrences.getAuthToken();
+    //print("Reel ID ${postID}");
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}reel/$reelID/";
+        
+   // print("Post ID in Like ${postID}");
+
+    try {
+      final response = await http.post(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      print("API HITTED");
+      if (response.statusCode == 200) {
+      
+           // _reels?[reelIndex].isLiked = true;
+            _reels?[reelIndex].likesCount += 1;
+            _reels?[reelIndex].isLiked = true;
+    
+
+        // Notify listeners to update UI
+        notifyListeners();
+      } else {
+        throw Exception('Failed to like post');
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error liking the post: $e");
+      notifyListeners();
+      print(e);
+    }
+  }
+
+  Future<void> reelDisLike(int reelID, BuildContext context, int reelIndex) async {
+    final String? token = await Prefrences.getAuthToken();
+    //print("Reel ID ${postID}");
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.dislike}reel/$reelID/";
+        
+   // print("Post ID in Like ${postID}");
+
+    try {
+      final response = await http.delete(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      print("API HITTED");
+      if (response.statusCode == 200) {
+      
+           // _reels?[reelIndex].isLiked = true;
+            _reels?[reelIndex].likesCount -= 1;
+            _reels?[reelIndex].isLiked = false;
+    
+
+        // Notify listeners to update UI
+        notifyListeners();
+      } else {
+        throw Exception('Failed to dislike reel');
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error disliking the post: $e");
+      notifyListeners();
+      print(e);
+    }
+  }
 
   List<PostModel> _cachedPosts = [];
 

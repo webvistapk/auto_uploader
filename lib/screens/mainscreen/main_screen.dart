@@ -6,6 +6,7 @@ import 'package:mobile/models/ReelPostModel.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
+import 'package:mobile/screens/notification/notificationScreen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 import 'package:mobile/screens/profile/UserReelScreen.dart';
@@ -115,7 +116,8 @@ class _MainScreenState extends State<MainScreen> {
                         ? CreatePostScreen(
                             token: widget.authToken,
                             userProfile: widget.userProfile,
-                          )
+                          ):
+                           widget.selectedIndex == 3?NotificationScreen()
                         : widget.selectedIndex == 4
                             ? ProfileScreen(
                                 id: widget.userProfile.id,

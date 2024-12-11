@@ -113,9 +113,9 @@ class _SinglePostState extends State<SinglePost> {
               onPressLiked: () {
                 // Toggle like status
                 if (post.is_liked == false) {
-                  postProvider.newLike(post.id, context, false);
+                  postProvider.newLikes(post.id, context);
                 } else {
-                  postProvider.userDisLikes(post.id, context, false);
+                  postProvider.userDisLikes(post.id, context,);
                 }
               },
               isLiked: post.is_liked,  // Use the actual 'isLiked' value from the post

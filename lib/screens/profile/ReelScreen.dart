@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
 import 'package:mobile/screens/profile/widgets/reel_post.dart';
 import 'package:provider/provider.dart';
@@ -8,13 +10,13 @@ import '../../controller/services/post/post_provider.dart';
 import '../../models/ReelPostModel.dart';
 
 class ReelScreen extends StatefulWidget {
-  final List<ReelPostModel> reels;
+  //final List<ReelPostModel> reels;
   final int initialIndex; // The index to start from
   final bool showEditDeleteOptions;
 
   const ReelScreen({
     Key? key,
-    required this.reels,
+    // required this.reels,
     this.initialIndex = 0,
     this.showEditDeleteOptions = true,
   }) : super(key: key);
@@ -26,13 +28,55 @@ class ReelScreen extends StatefulWidget {
 class _ReelScreenState extends State<ReelScreen> {
   late PageController _pageController;
   int _currentIndex = 0;
-  bool isLiked = false;
+  // bool isLiked = false;
+  List<ReelPostModel> _reels = [];
+  int limit = 10;
+  int offset = 0;
+  bool _isLoading = false;
+  bool _hasMore = true;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _currentIndex);
+    _fetchReels();
+  }
+
+  void _fetchReels() async {
+    if (_isLoading || !_hasMore) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      UserProfile? userProfile = await UserPreferences().getCurrentUser();
+      String? userId = userProfile!.id.toString();
+      if (userId == null) {
+        print("Error: User ID is null. Please check the preferences.");
+        // Optionally, navigate the user to the login screen here.
+        return;
+      }
+
+      print("UserID: $userId");
+
+      List<ReelPostModel> fetchedReels =
+          await Provider.of<PostProvider>(context, listen: false)
+              .fetchReels(context, userId, limit, offset);
+
+      setState(() {
+        _reels.addAll(fetchedReels);
+        offset += limit;
+        if (fetchedReels.length < limit) _hasMore = false;
+      });
+    } catch (e) {
+      print("Error fetching reels: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -69,199 +113,177 @@ class _ReelScreenState extends State<ReelScreen> {
   Future<void> deleteReel() async {
     // Call deletePost from the provider
     await Provider.of<PostProvider>(context, listen: false)
-        .deletePost(widget.reels[_currentIndex].id.toString(), context, true);
+        .deletePost(_reels[_currentIndex].id.toString(), context, true);
 
     // Update the reel list and current index
     setState(() {
-      widget.reels.removeAt(_currentIndex);
+      _reels.removeAt(_currentIndex);
 
-      if (_currentIndex >= widget.reels.length) {
-        _currentIndex = widget.reels.isEmpty ? 0 : widget.reels.length - 1;
+      if (_currentIndex >= _reels.length) {
+        _currentIndex = _reels.isEmpty ? 0 : _reels.length - 1;
       }
     });
 
     // Navigate to the next reel if available
-    if (widget.reels.isNotEmpty) {
+    if (_reels.isNotEmpty) {
       _pageController.jumpToPage(_currentIndex);
     }
   }
 
-  void _likePost(int reelId) async {
-  setState(() {
-    // Toggle the like state for the reel
-    widget.reels[_currentIndex].isLiked =
-        !widget.reels[_currentIndex].isLiked;
-  });
-
-  try {
-    if (widget.reels[_currentIndex].isLiked) {
-      // If the reel is liked, send a like request
-      await Provider.of<PostProvider>(context, listen: false)
-          .newLike(reelId, context, true);  // Like the reel
-    } else {
-      // If the reel is unliked, send a dislike request
-      await Provider.of<PostProvider>(context, listen: false)
-          .disLike(reelId, context, true);  // Dislike the reel
-    }
-
-    // If successful, show a success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Reel ${widget.reels[_currentIndex].isLiked ? "Liked" : "Unliked"} successfully.')),
-    );
-  } catch (e) {
-    // Revert the like state in case of an error
-    setState(() {
-      widget.reels[_currentIndex].isLiked =
-          !widget.reels[_currentIndex].isLiked;
-    });
-
-    // Show error message if the like/dislike request fails
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to like/dislike the reel. Please try again.')),
-    );
-  }
-}
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.black,
-        iconTheme: IconThemeData(color: AppColors.white),
-      ),
-      body: widget.reels.isEmpty
-          ? Center(
-              child: Text(
-                'No Reels Available',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            )
-          : Stack(
-              fit: StackFit.expand,
-              children: [
-                PageView.builder(
-                  controller: _pageController,
-                  itemCount: widget.reels.length,
-                  scrollDirection: Axis.vertical,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    return ReelPost(
-                      src: widget.reels[index].file,
-                    );
-                  },
-                ),
-                Positioned(
-                  right: 20,
-                  bottom: 80,
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          _likePost(widget.reels[_currentIndex].id);
-                          print("Reel Liked");
-                        },
-                        child: Icon(
-                          widget.reels[_currentIndex].isLiked
-                              ? Icons.favorite_outline
-                              : Icons.favorite,
-                          color: widget.reels[_currentIndex].isLiked
-                              ? AppColors.white
-                              : Colors.red,
-                          size: 30,
-                        ),
-                      ),
-                      Text(
-                        widget.reels[_currentIndex].likesCount.toString(),
-                        style: TextStyle(fontSize: 12,color: Colors.white),
-                      ),
-                      SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: () {
-                          showComments(
-                              widget.reels[_currentIndex].id.toString());
-                        },
-                        child: Icon(
-                          Icons.messenger,
-                          color: AppColors.white,
-                          size: 30,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: () {
-                          // Handle Share Action
-                        },
-                        child: Icon(
-                          FontAwesomeIcons.share,
-                          color: AppColors.white,
-                          size: 30,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: () {
-                          // Handle Bookmark Action
-                        },
-                        child: Icon(
-                          Icons.bookmark_outline,
-                          color: AppColors.white,
-                          size: 30,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      if (widget.showEditDeleteOptions)
-                        PopupMenuButton<String>(
-                          icon: Icon(
-                            Icons.more_vert,
-                            color: AppColors.white,
-                            size: 30,
-                          ),
-                          onSelected: (value) async {
-                            if (value == 'delete') {
-                              await deleteReel();
-                            } else if (value == 'edit') {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Edit functionality not implemented.')),
-                              );
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit, color: Colors.blue),
-                                  SizedBox(width: 8),
-                                  Text('Edit'),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete, color: Colors.red),
-                                  SizedBox(width: 8),
-                                  Text('Delete'),
-                                ],
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        SizedBox(height: 30),
-                    ],
+        appBar: AppBar(
+          backgroundColor: AppColors.black,
+          iconTheme: IconThemeData(color: AppColors.white),
+        ),
+        body: Consumer<PostProvider>(builder: (context, postProvider, child) {
+          final reels = postProvider.reels;
+          return _reels.isEmpty
+              ? Center(
+                  child: Text(
+                    'No Reels Available',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-                ),
-              ],
-            ),
-    );
+                )
+              : Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    PageView.builder(
+                      controller: _pageController,
+                      itemCount: reels?.length,
+                      scrollDirection: Axis.vertical,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      },
+                      itemBuilder: (BuildContext context, int index) {
+                        return ReelPost(
+                          src: reels![index].file,
+                        );
+                      },
+                    ),
+                    Positioned(
+                        right: 20,
+                        bottom: 80,
+                        child: Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () async {
+                                if (!reels[_currentIndex].isLiked) {
+                                 await postProvider.reelLike(
+                                    reels![_currentIndex].id,
+                                    context,
+                                    _currentIndex,
+                                  );
+                                } else {
+                                 await  postProvider.reelDisLike(
+                                    reels![_currentIndex].id,
+                                    context,
+                                    _currentIndex,
+                                  );
+                                }
+                              },
+                              child: Icon(
+                                reels![_currentIndex].isLiked
+                                    ? Icons.favorite
+                                    : Icons.favorite_outline,
+                                color: reels![_currentIndex].isLiked
+                                    ? Colors.red
+                                    : AppColors.white,
+                                size: 30,
+                              ),
+                            ),
+                            Text(
+                              reels[_currentIndex].likesCount.toString(),
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.white),
+                            ),
+                            SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: () {
+                                showComments(
+                                    _reels[_currentIndex].id.toString());
+                              },
+                              child: Icon(
+                                Icons.messenger,
+                                color: AppColors.white,
+                                size: 30,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: () {
+                                // Handle Share Action
+                              },
+                              child: Icon(
+                                FontAwesomeIcons.share,
+                                color: AppColors.white,
+                                size: 30,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: () {
+                                // Handle Bookmark Action
+                              },
+                              child: Icon(
+                                Icons.bookmark_outline,
+                                color: AppColors.white,
+                                size: 30,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            if (widget.showEditDeleteOptions)
+                              PopupMenuButton<String>(
+                                icon: Icon(
+                                  Icons.more_vert,
+                                  color: AppColors.white,
+                                  size: 30,
+                                ),
+                                onSelected: (value) async {
+                                  if (value == 'delete') {
+                                    await deleteReel();
+                                  } else if (value == 'edit') {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Edit functionality not implemented.')),
+                                    );
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                    value: 'edit',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.edit, color: Colors.blue),
+                                        SizedBox(width: 8),
+                                        Text('Edit'),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.delete, color: Colors.red),
+                                        SizedBox(width: 8),
+                                        Text('Delete'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            else
+                              SizedBox(height: 30),
+                          ],
+                        )),
+                  ],
+                );
+        }));
   }
 }

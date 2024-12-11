@@ -66,7 +66,7 @@ class _UserReelScreenState extends State<UserReelScreen> {
   @override
   Widget build(BuildContext context) {
     return ReelScreen(
-      reels: _reels,
+      //reels: _reels,
       showEditDeleteOptions: false, // Hide edit/delete options in this context
     );
   }

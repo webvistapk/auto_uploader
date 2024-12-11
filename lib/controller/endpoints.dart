@@ -46,4 +46,7 @@ class ApiURLs {
   static const String post_comment_reply_fetch="posts/reply/get/";
   static const String new_post_comment_reply="posts/reply/new/";
   static const String delete_post_comment_reply="posts/reply/delete/";
+
+  //Notification URL
+  static const String notification="notification/get/";
 }

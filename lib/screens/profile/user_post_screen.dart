@@ -204,7 +204,7 @@ class _UserPostScreenState extends State<UserPostScreen> {
                       // Check if post is already liked or not
                       if (post.is_liked) {
                         
-                        await postProvider.userDisLikes(post.id, context, false);
+                        await postProvider.userDisLikes(post.id, context,);
                         setState(() {
                            post.likesCount--; 
                            post.is_liked = false;

@@ -60,8 +60,9 @@ class _HomeScreenState extends State<HomeScreen>
     storyService.getUserStatus();
     storyService.getFollowersStatus();
 
-    // Initial fetch for posts with pagination
-    _fetchPosts();
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchPosts();
+    });
   }
 
   void _fetchPosts() async {
@@ -420,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen>
         await postProvider.newLikes(post.id, context,); 
       } else {
         // Dislike the post
-        await postProvider.userDisLikes(post.id, context, false);
+        await postProvider.userDisLikes(post.id, context,);
       }
     },
     isLiked: post.is_liked, // Use the post's `isLiked` value
