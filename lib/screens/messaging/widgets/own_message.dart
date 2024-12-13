@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/endpoints.dart';
-import 'package:mobile/screens/advance_video_player.dart';
 import 'package:mobile/screens/messaging/widgets/media_item.dart';
-import 'package:mobile/screens/messaging/widgets/message_video_player.dart';
 
 class OwnMessage extends StatelessWidget {
   final String text;

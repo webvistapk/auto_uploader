@@ -78,8 +78,7 @@ class _MessageVideoPlayerState extends State<MessageVideoPlayer> {
               Navigator.push(
                   context,
                   CupertinoDialogRoute(
-                      builder: (_) =>
-                          MediaMessageDisplay(mediaUrl: widget.videoUrl),
+                      builder: (_) => MediaMessageDisplay(mediaUrl: url),
                       context: context));
             },
             child: const Icon(

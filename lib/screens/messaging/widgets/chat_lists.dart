@@ -59,9 +59,9 @@ class _ChatListState extends State<ChatList> {
                       }
                       final String updateAt = formatMessageDate(chat.updatedAt);
                       return InkWell(
-                        onTap: () {
+                        onTap: () async {
                           // Navigate to the Inbox screen when a chat is tapped
-                          Navigator.push(
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => InboxScreen(
@@ -71,6 +71,12 @@ class _ChatListState extends State<ChatList> {
                                   participantImage: profileImage),
                             ),
                           );
+                          //refresh the indicator messaging point
+
+                          if (result) {
+                            widget.chatProvider.fetchChats();
+                            if (mounted) setState(() {});
+                          }
                         },
                         child: ListTile(
                           leading: CircleAvatar(

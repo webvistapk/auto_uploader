@@ -161,8 +161,6 @@ class ChatController extends ChangeNotifier {
 
             // Notify listeners about the update
             notifyListeners();
-
-            await ChatProvider().fetchChats();
           } else {
             print('Unexpected data format: $data');
           }

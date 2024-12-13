@@ -33,7 +33,6 @@ class _InboxScreenState extends State<InboxScreen> {
   bool isLoading = false;
   int offset = 0;
   final int limit = 10;
-
   bool moreLoading = false;
 
   @override
