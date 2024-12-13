@@ -33,6 +33,7 @@ class PostWidget extends StatefulWidget {
   final onPressed;
   final onPressLiked;
   final bool isLiked;
+  final String? scrollCommentId;
 
   const PostWidget({
     Key? key,
@@ -54,7 +55,8 @@ class PostWidget extends StatefulWidget {
     required this.isUserPost,
     required this.onPressed,
     required this.onPressLiked,
-    required this.isLiked
+    required this.isLiked,
+    this.scrollCommentId
     
   }) : super(key: key);
 
@@ -68,6 +70,7 @@ class _PostWidgetState extends State<PostWidget> {
 
   void _likePost() {
     isLiked=widget.isLiked;
+    if(mounted)
     setState(() {
       isLiked = !isLiked;
     });
@@ -99,6 +102,7 @@ class _PostWidgetState extends State<PostWidget> {
                 isUsedSingle: true,
                 postId: postId,
                 isReelScreen: false,
+                scrollCommentId: widget.scrollCommentId,
               );
       },
     );
@@ -106,7 +110,8 @@ class _PostWidgetState extends State<PostWidget> {
 
   @override
   Widget build(BuildContext context) {
-    log("Post ID is here ${widget.postId}");
+    
+    print("NOtification Comment ID: ${widget.scrollCommentId}");
     final GlobalKey iconKey = GlobalKey();
     if (widget.profileImageUrl
         .contains('http://147.79.117.253:8001http://147.79.117.253:8001')) {
@@ -114,6 +119,7 @@ class _PostWidgetState extends State<PostWidget> {
           'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg';
     }
     return SingleChildScrollView(
+      physics: ScrollPhysics(),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -221,6 +227,7 @@ class _PostWidgetState extends State<PostWidget> {
                         isUsedSingle: false,
                         postId: widget.postId,
                         isReelScreen: false,
+                        scrollCommentId: widget.scrollCommentId,
                       )
                     : InkWell(
                         onTap: () {
@@ -286,6 +293,7 @@ class _PostWidgetState extends State<PostWidget> {
         viewportFraction: 1.0,
         autoPlay: false,
         onPageChanged: (index, reason) {
+          if(mounted)
           setState(() {
             _currentImageIndex = index;
           });
@@ -395,12 +403,14 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     try {
       _controller = VideoPlayerController.network(widget.videoUrl);
       await _controller.initialize();
+      if(mounted)
       setState(() {
         _isError = false;
       });
     } catch (e) {
       log(widget.videoUrl);
       log("Video initialization error: $e");
+      if(mounted)
       setState(() {
         _isError = true;
       });

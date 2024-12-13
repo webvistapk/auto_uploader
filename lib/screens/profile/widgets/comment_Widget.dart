@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -16,13 +17,15 @@ class CommentWidget extends StatefulWidget {
   final bool isUsedSingle;
   final bool isReelScreen;
   final String postId;
+  final String? scrollCommentId;
 
-  CommentWidget(
-      {Key? key,
-      required this.isUsedSingle,
-      required this.postId,
-      required this.isReelScreen})
-      : super(key: key);
+  CommentWidget({
+    Key? key,
+    required this.isUsedSingle,
+    required this.postId,
+    required this.isReelScreen,
+    this.scrollCommentId,
+  }) : super(key: key);
 
   @override
   State<CommentWidget> createState() => _CommentWidgetState();
@@ -30,41 +33,98 @@ class CommentWidget extends StatefulWidget {
 
 class _CommentWidgetState extends State<CommentWidget> {
   final TextEditingController _commentController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> commentKey = GlobalKey<FormState>();
   final FocusNode _commentFocusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
+  ScrollController _scrollController = ScrollController();
   File? _mediaFile;
   int? _replyingCommentId;
   String? _replyingToUsername;
   bool isLiked = false;
-  bool showReply=false;
+  bool showReply = false;
+  CommentProvider? commentProvider;
+
+  Map<String, GlobalKey> commentKeys = {}; // For comment keys
+  Map<String, Map<String, GlobalKey>> replyKeys =
+      {}; // For reply keys (nested map for each comment's replies)
 
   @override
   void initState() {
     super.initState();
     print("init state triggered");
+
+    commentProvider=Provider.of<CommentProvider>(context, listen:false);
+    
     // Fetch comments when the widget is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<CommentProvider>(context, listen: false)
-          .fetchComments(widget.postId, widget.isReelScreen);
+    // Provider.of<CommentProvider>(context, listen: false)
+    //       .fetchComments(widget.postId, widget.isReelScreen);
+fetchingData();
     });
   }
+
+
+ 
+  void _scrollToComment(String? commentID) {
+  final commentKey = commentKeys[commentID];
+  if (commentKey != null) {
+    final context = commentKey.currentContext;
+    if (context != null) {
+      final renderBox = context.findRenderObject() as RenderBox?;
+      final position = renderBox?.localToGlobal(Offset.zero);
+
+      // Scroll to the comment position
+      if (position != null) {
+        _scrollController?.animateTo(
+          position.dy,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    }
+  }
+}
 
   @override
   void dispose() {
     _commentController.dispose();
     _commentFocusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-void loadReplies(int commentId) async {
-  try {
-    await Provider.of<CommentProvider>(context,listen: false).fetchReplies(commentId);
-    print("Replies fetched successfully!");
-  } catch (e) {
-    print("Error loading replies: $e");
-  }
+
+void fetchingData()async{
+  final data=
+   await commentProvider!.fetchComments(widget.postId, widget.isReelScreen);
+    if(data!=null){
+      _scrollToBottom();
+    }
 }
+
+void _scrollToBottom() {
+    setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+   }
+});
+}
+
+
+  void loadReplies(int commentId) async {
+    try {
+      await Provider.of<CommentProvider>(context, listen: false)
+          .fetchReplies(commentId);
+      print("Replies fetched successfully!");
+    } catch (e) {
+      print("Error loading replies: $e");
+    }
+  }
 
   void _addComment(BuildContext context) {
     if (_formKey.currentState?.validate() ?? false) {
@@ -95,6 +155,7 @@ void loadReplies(int commentId) async {
 
       // Clear input after adding the comment
       _commentController.clear();
+      if(mounted)
       setState(() {
         _mediaFile = null;
         _replyingCommentId = null;
@@ -104,6 +165,7 @@ void loadReplies(int commentId) async {
   }
 
   void _replyToComment(int commentId, String username) {
+    if(mounted)
     setState(() {
       _replyingCommentId = commentId;
       _replyingToUsername = username;
@@ -116,6 +178,7 @@ void loadReplies(int commentId) async {
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      if(mounted)
       setState(() {
         _mediaFile = File(pickedFile.path);
       });
@@ -124,6 +187,8 @@ void loadReplies(int commentId) async {
 
   @override
   Widget build(BuildContext context) {
+    print("WIDGET COMMENT SECTION ${widget.scrollCommentId}");
+
     return Stack(
       children: [
         widget.isUsedSingle
@@ -204,12 +269,22 @@ void loadReplies(int commentId) async {
             Expanded(
               //height:MediaQuery.of(context).size.height ,
               child: ListView.builder(
+                controller: _scrollController,
                 shrinkWrap: true,
                 itemCount: comments.length,
                 itemBuilder: (context, index) {
                   final comment = comments[index];
                   final GlobalKey iconKey = GlobalKey();
-                    
+                  final commentID = comment.id;
+                  if (!commentKeys.containsKey(commentID)) {
+                    commentKeys[commentID.toString()] = GlobalKey();
+                  }
+                  // debugger();
+                  // print('COMMENT KEYS${commentKey}');
+                  // //final commentKey = commentKeys[commentID]!;
+
+                  // debugger();
+                  // ScrollController _scrollController = ScrollController();
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -217,93 +292,115 @@ void loadReplies(int commentId) async {
                       children: [
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 20,
-                                        backgroundImage: NetworkImage(
-                                            comment.avatarUrl == null
-                                                ? comment.avatarUrl
-                                                : AppUtils.userImage),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            comment.username,
-                                            style: const TextStyle(
-                                              fontWeight:
-                                                  FontWeight.bold,
-                                            ),
-                                          ),
-                                          //const SizedBox(height: 5),
-                                          Text(
-                                            comment.commentText,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                                color:
-                                                    Colors.grey[600]),
-                                                    
-                                          ),
-                                          Row(
+                                  Expanded(
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 20,
+                                          backgroundImage: NetworkImage(
+                                              comment.avatarUrl == null
+                                                  ? comment.avatarUrl
+                                                  : AppUtils.userImage),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              GestureDetector(
-                                                onTap: () =>
-                                                    _replyToComment(
-                                                        comment.id,
-                                                        comment.username),
-                                                child: Text(
-                                                  "Reply",
-                                                  style: TextStyle(
-                                                      color:
-                                                          Colors.blue[600],
-                                                      fontSize:9,
-                                                      ),
+                                              Text(
+                                                comment.username??'',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                               SizedBox(width: 20,),
-                                               comment.replyCount>0? GestureDetector(
-                                                onTap: ()async{
-                                                  setState(() {
-                                                    comment.isReplyVisible = !comment.isReplyVisible;
-                                                  });
-                                                  if(!comment.isReplyLoaded){
-                                                    try{
-                                                      await Provider.of<CommentProvider>(context,listen: false).fetchReplies(comment.id);
-                                                      setState(() {
-                                                        comment.isReplyLoaded=true;
-                                                      });
-                                                    }
-                                                    catch(e){
-                                                      ToastNotifier.showErrorToast(context, "Error fetching post ${e}");
-                                                    }
-                                                  }
-                                                },
-                                                 child: Text(
-                                                   comment.isReplyVisible ? "Hide Replies" : "View Reply ${comment.replyCount.toString()}",
-                                                    style: TextStyle(
-                                                        color:
-                                                            Colors.blue[600],
+                                              //const SizedBox(height: 5),
+                                              Text(
+                                                comment.commentText??'',
+                                                style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey[600]),
+                                                softWrap: true,
+                                                overflow: TextOverflow.visible,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () =>
+                                                        _replyToComment(
+                                                            comment.id,
+                                                            comment.username),
+                                                    child: Text(
+                                                      "Reply",
+                                                      style: TextStyle(
+                                                        color: Colors.blue[600],
                                                         fontSize: 9,
-                                                        ),
+                                                      ),
+                                                    ),
                                                   ),
-                                               ):Container(),
+                                                  SizedBox(
+                                                    width: 20,
+                                                  ),
+                                                  comment.replyCount > 0
+                                                      ? GestureDetector(
+                                                          onTap: () async {
+                                                            setState(() {
+                                                              comment.isReplyVisible =
+                                                                  !comment
+                                                                      .isReplyVisible;
+                                                            });
+                                                            if (!comment
+                                                                .isReplyLoaded) {
+                                                              try {
+                                                                await Provider.of<
+                                                                            CommentProvider>(
+                                                                        context,
+                                                                        listen:
+                                                                            false)
+                                                                    .fetchReplies(
+                                                                        comment
+                                                                            .id);
+                                                                setState(() {
+                                                                  comment.isReplyLoaded =
+                                                                      true;
+                                                                });
+                                                              } catch (e) {
+                                                                ToastNotifier
+                                                                    .showErrorToast(
+                                                                        context,
+                                                                        "Error fetching post ${e}");
+                                                              }
+                                                            }
+                                                          },
+                                                          child: Text(
+                                                            comment.isReplyVisible
+                                                                ? "Hide Replies"
+                                                                : "View Reply ${comment.replyCount.toString()}",
+                                                            style: TextStyle(
+                                                              color: Colors
+                                                                  .blue[600],
+                                                              fontSize: 9,
+                                                            ),
+                                                          ),
+                                                        )
+                                                      : Container(),
+                                                ],
+                                              ),
                                             ],
                                           ),
-                                        ],
-                                      ),
-                                    ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   Row(
                                     children: [
@@ -313,17 +410,18 @@ void loadReplies(int commentId) async {
                                             onTap: () async {
                                               if (!comment.isLiked) {
                                                 await commentProvider
-                                                    .likeComment(
-                                                        comment.id,
-                                                        context,
-                                                        false);
-                                              }
-                                              else{
-                                                await commentProvider.dislikeComment(comment.id, context, false);
+                                                    .likeComment(comment.id,
+                                                        context, false);
+                                              } else {
+                                                await commentProvider
+                                                    .dislikeComment(comment.id,
+                                                        0, context, false);
                                               }
                                             },
-                                            child:  Icon(comment.isLiked?
-                                              Icons.favorite:Icons.favorite_border,
+                                            child: Icon(
+                                              comment.isLiked
+                                                  ? Icons.favorite
+                                                  : Icons.favorite_border,
                                               size: 20,
                                               color: Colors.grey,
                                             ),
@@ -332,8 +430,7 @@ void loadReplies(int commentId) async {
                                           Text(
                                               '${comment.likeCount}', // Display the like count
                                               style: TextStyle(
-                                                  color:
-                                                      Colors.grey[600],
+                                                  color: Colors.grey[600],
                                                   fontSize: 12)),
                                         ],
                                       ),
@@ -347,79 +444,69 @@ void loadReplies(int commentId) async {
                                             comment,
                                           );
                                         },
-                                        child: Icon(Icons.more_vert,
-                                            size: 20),
+                                        child: Icon(Icons.more_vert, size: 20),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
                               //Reply Section Sttart from here
-                              if (comment.replies.isNotEmpty && comment.isReplyVisible)
+
+                              if (comment.replies.isNotEmpty &&
+                                  comment.isReplyVisible)
                                 ListView.builder(
                                   shrinkWrap: true,
-                                  physics:
-                                      NeverScrollableScrollPhysics(),
+                                  physics: NeverScrollableScrollPhysics(),
                                   itemCount: comment.replies.length,
                                   itemBuilder: (context, replyIndex) {
-                                   final reply = comment.replies[replyIndex];
-                                    final GlobalKey replyiconKey =
-                                        GlobalKey();
-                    
+                                    final reply = comment.replies[replyIndex];
+                                    final GlobalKey replyiconKey = GlobalKey();
+
                                     return Padding(
                                       padding: const EdgeInsets.only(
                                           left: 40.0, top: 10),
                                       child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           CircleAvatar(
                                             radius: 20,
                                             backgroundImage: NetworkImage(
-                                                reply.replierImage ==
-                                                        null
+                                                reply.replierImage == null
                                                     ? reply.replierImage
-                                                    : AppUtils
-                                                        .userImage),
+                                                    : AppUtils.userImage),
                                           ),
                                           const SizedBox(width: 10),
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment
-                                                      .start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  reply.replierName
-                                                      .toString(),
-                                                  style:
-                                                      const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                  reply.replierName.toString(),
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
                                                     fontSize: 12,
                                                   ),
                                                 ),
                                                 Text(
-                                                  reply.content
-                                                      .toString(),
+                                                  reply.content.toString(),
                                                   style: TextStyle(
-                                                    color: Colors
-                                                        .grey[600],
+                                                    color: Colors.grey[600],
                                                     fontSize: 12,
                                                   ),
                                                 ),
                                                 GestureDetector(
-                                                  onTap: () =>
-                                                      _replyToComment(
-                                                          comment.id,
-                                                          reply
-                                                              .replierName),
+                                                  onTap: () => _replyToComment(
+                                                    comment.id,
+                                                    reply.replierName,
+                                                  ),
                                                   child: Text(
                                                     "Reply",
                                                     style: TextStyle(
-                                                        color: Colors
-                                                            .blue[600],
-                                                        fontSize: 9,
-                                                        ),
+                                                      color: Colors.blue[600],
+                                                      fontSize: 9,
+                                                    ),
                                                   ),
                                                 ),
                                               ],
@@ -431,33 +518,39 @@ void loadReplies(int commentId) async {
                                                 children: [
                                                   GestureDetector(
                                                     onTap: () async {
-                                                      if (!reply
-                                                          .isReplyLiked) {
+                                                      if (!reply.isReplyLiked) {
                                                         await commentProvider
-                                                            .likeComment(reply.id, context, true);}
-                                                            else{
-                                                              await commentProvider.dislikeComment(reply.id, context, true);
-                                                            }
-                                                      print("Liked Triggered with Reply ID : ${reply.id}");
+                                                            .likeReply(
+                                                                reply.id,
+                                                                comment.id,
+                                                                context);
+                                                      } else {
+                                                        await commentProvider
+                                                            .dislikeComment(
+                                                                comment.id,
+                                                                reply.id,
+                                                                context,
+                                                                true);
+                                                      }
+                                                      print(
+                                                          "Liked Triggered with Reply ID : ${reply.id}");
                                                     },
                                                     child: Icon(
-                                                      reply.isReplyLiked?
-                                                      Icons.favorite:Icons.favorite_border,
+                                                      reply.isReplyLiked
+                                                          ? Icons.favorite
+                                                          : Icons
+                                                              .favorite_border,
                                                       size: 20,
-                                                      color: 
-                                               Colors.grey,
+                                                      color: Colors.grey,
                                                     ),
                                                   ),
-                                                  const SizedBox(
-                                                      width: 4),
+                                                  const SizedBox(width: 4),
                                                   Text(
                                                       '${reply.replyLikeCount}', // Display the reply like count
                                                       style: TextStyle(
-                                                          color: Colors
-                                                                  .grey[
-                                                              600],
-                                                          fontSize:
-                                                              12)),
+                                                          color:
+                                                              Colors.grey[600],
+                                                          fontSize: 12)),
                                                 ],
                                               ),
                                               GestureDetector(
@@ -470,8 +563,7 @@ void loadReplies(int commentId) async {
                                                       comment,
                                                       reply);
                                                 },
-                                                child: Icon(
-                                                    Icons.more_vert,
+                                                child: Icon(Icons.more_vert,
                                                     size: 20),
                                               ),
                                             ],

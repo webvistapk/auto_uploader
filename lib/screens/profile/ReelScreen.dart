@@ -13,12 +13,14 @@ class ReelScreen extends StatefulWidget {
   //final List<ReelPostModel> reels;
   final int initialIndex; // The index to start from
   final bool showEditDeleteOptions;
+  final String? reelId;
 
   const ReelScreen({
     Key? key,
     // required this.reels,
     this.initialIndex = 0,
     this.showEditDeleteOptions = true,
+    this.reelId,
   }) : super(key: key);
 
   @override
@@ -39,9 +41,22 @@ class _ReelScreenState extends State<ReelScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: _currentIndex);
+    
+    
     _fetchReels();
+
+    if (widget.reelId != null) {
+      final index = getReelIndexById(widget.reelId!, _reels);
+      if (index != -1) {
+        _currentIndex = index;
+      }}
+      _pageController = PageController(initialPage: _currentIndex);
   }
+
+
+int getReelIndexById(String reelId, List<ReelPostModel> reels) {
+  return reels.indexWhere((reel) => reel.id == reelId);
+}
 
   void _fetchReels() async {
     if (_isLoading || !_hasMore) return;

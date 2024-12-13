@@ -11,11 +11,13 @@ import '../../controller/endpoints.dart';
 class SinglePost extends StatefulWidget {
   final String postId;
   final bool isInteractive;
+  final String? commentId;
   final VoidCallback onPostUpdated;
 
   SinglePost({Key? key, 
   required this.postId, 
   this.isInteractive = false,
+  this.commentId,
   required this.onPostUpdated,
   })
       : super(key: key);
@@ -25,7 +27,6 @@ class SinglePost extends StatefulWidget {
 }
 class _SinglePostState extends State<SinglePost> {
   bool isUserPost = false;
-
   @override
   void initState() {
     super.initState();
@@ -47,6 +48,7 @@ class _SinglePostState extends State<SinglePost> {
     }
   }
 
+
   @override
   void dispose() {
     super.dispose();
@@ -55,6 +57,7 @@ class _SinglePostState extends State<SinglePost> {
 
   @override
   Widget build(BuildContext context) {
+    print("NOtification Comment ID: ${widget.commentId}");
     return Scaffold(
         appBar: AppBar(
           leading: InkWell(
@@ -71,7 +74,6 @@ class _SinglePostState extends State<SinglePost> {
 
             final post = postProvider.post!;
             var mediaList = post.media.map((media) => "${media.file}").toList();
-
             return PostWidget(
               postId: post.id.toString(),
               username: post.user.username,
@@ -88,6 +90,7 @@ class _SinglePostState extends State<SinglePost> {
               shares: "100",
               saved: '100',
               showCommentSection: true,
+              scrollCommentId:widget.commentId,
               refresh: () => postProvider.getSinglePost(widget.postId),
               isUserPost: isUserPost,
               onPressed: () {
