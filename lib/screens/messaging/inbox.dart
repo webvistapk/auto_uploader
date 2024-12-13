@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
-import 'package:mobile/screens/messaging/model/message_model.dart';
 import 'package:mobile/screens/messaging/widgets/input_message.dart';
 import 'package:provider/provider.dart';
 import 'model/chat_model.dart';
@@ -35,11 +34,14 @@ class _InboxScreenState extends State<InboxScreen> {
   int offset = 0;
   final int limit = 10;
 
+  bool moreLoading = false;
+
   @override
   void initState() {
     super.initState();
     chatController = Provider.of<ChatController>(context, listen: false);
     chatController.connectWebSocket(widget.chatModel.id);
+
     fetching(widget.chatModel.id);
 
     // Add scroll listener for pagination
@@ -58,25 +60,55 @@ class _InboxScreenState extends State<InboxScreen> {
       setState(() {
         isLoading = true;
       });
+
+      await chatController.ReadMessages(widget.chatModel.id);
       await chatController.loadMessages(chatID, offset: offset, limit: limit);
+
       setState(() {
         isLoading = false;
+        moreLoading = false;
       });
+
+      // Scroll to the bottom for initial load
+      if (offset == 0) {
+        _scrollToBottom();
+      }
     } catch (error) {
       ToastNotifier.showErrorToast(context, 'Error loading messages: $error');
       setState(() {
         isLoading = false;
+        moreLoading = false;
       });
     }
   }
 
   Future<void> loadMoreMessages() async {
-    if (!isLoading) {
+    if (!moreLoading) {
       setState(() {
-        isLoading = true;
-        offset += limit; // Increase offset to load next set of messages
+        moreLoading = true;
       });
-      await fetching(widget.chatModel.id);
+
+      // Save the current scroll offset
+      final double previousScrollHeight =
+          _scrollController.position.maxScrollExtent;
+
+      offset += limit; // Increase offset to load the next set of messages
+
+      await chatController.loadMessages(widget.chatModel.id,
+          offset: offset, limit: limit);
+
+      setState(() {
+        moreLoading = false;
+      });
+
+      // Restore the scroll position after loading messages
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          final double newScrollHeight =
+              _scrollController.position.maxScrollExtent;
+          _scrollController.jumpTo(newScrollHeight - previousScrollHeight);
+        }
+      });
     }
   }
 
@@ -88,6 +120,7 @@ class _InboxScreenState extends State<InboxScreen> {
   }
 
   void _scrollToBottom() {
+    setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -187,7 +220,8 @@ class _InboxScreenState extends State<InboxScreen> {
                     ),
                     // Chat List
                     Expanded(
-                      child: chatController.isMessageLoading
+                      child: chatController.isMessageLoading &&
+                              chatController.messages.isEmpty
                           ? Center(
                               child: CircularProgressIndicator.adaptive(),
                             )
@@ -233,25 +267,36 @@ class _InboxScreenState extends State<InboxScreen> {
                       onPressedSend: () async {
                         try {
                           await chatController.sendMessage(
-                              messageController.text.trim(),
-                              widget.chatModel.id, []);
+                            messageController.text.trim(),
+                            widget.chatModel.id,
+                            [],
+                          );
 
+                          // Clear the input field and scroll to the bottom
                           if (mounted) {
-                            setState(() {});
+                            setState(() {
+                              messageController.clear();
+                            });
+                            Future.delayed(
+                                Duration(seconds: 1), _scrollToBottom);
                           }
-                          _scrollToBottom();
                         } catch (e) {
                           ToastNotifier.showErrorToast(context, e.toString());
                         }
-
-                        messageController.clear();
-                        setState(() {});
-                        _scrollToBottom();
                       },
                       chatModel: widget.chatModel,
                     ),
                   ],
                 ),
+                if (moreLoading)
+                  Positioned(
+                    top: 30, // Aligns the loader at the top
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
               ],
             );
           },

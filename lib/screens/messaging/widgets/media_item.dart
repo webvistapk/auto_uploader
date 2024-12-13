@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/endpoints.dart';
+import 'package:mobile/screens/messaging/widgets/media_display_message.dart';
 import 'package:mobile/screens/messaging/widgets/message_video_player.dart';
 
 class MediaItem extends StatefulWidget {
@@ -60,29 +61,38 @@ class _MediaItemState extends State<MediaItem> {
       url = ApiURLs.baseUrl2 + url;
       if (mounted) setState(() {});
     }
-    return Image.network(
-      url,
-      height: 200,
-      width: size.width * .60,
-      fit: BoxFit.cover,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Container(
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+            context,
+            CupertinoDialogRoute(
+                builder: (_) => MediaMessageDisplay(mediaUrl: url),
+                context: context));
+      },
+      child: Image.network(
+        url,
+        height: 200,
+        width: size.width * .60,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            height: 200,
+            width: size.width * .60,
+            color: Colors.grey.shade300,
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => Container(
           height: 200,
           width: size.width * .60,
           color: Colors.grey.shade300,
-          child: const Center(child: CircularProgressIndicator()),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) => Container(
-        height: 200,
-        width: size.width * .60,
-        color: Colors.grey.shade300,
-        child: const Center(
-          child: Icon(
-            Icons.broken_image,
-            size: 50,
-            color: Colors.red,
+          child: const Center(
+            child: Icon(
+              Icons.broken_image,
+              size: 50,
+              color: Colors.red,
+            ),
           ),
         ),
       ),

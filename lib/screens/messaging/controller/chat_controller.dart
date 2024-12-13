@@ -69,6 +69,7 @@ class ChatController extends ChangeNotifier {
       {int offset = 0, int limit = 10}) async {
     _isMessageLoading = true;
     notifyListeners();
+
     try {
       String authToken = await Prefrences.getAuthToken();
       final response = await http.get(
@@ -84,23 +85,24 @@ class ChatController extends ChangeNotifier {
         final data = json.decode(response.body);
 
         if (data['status'] == 'success') {
-          _isMessageLoading = false;
-          notifyListeners();
           final newMessages = List<MessageModel>.from(
             data['messages'].map((message) => MessageModel.fromJson(message)),
           );
-          // Append new messages to the existing list
+
+          _isMessageLoading = false;
+          notifyListeners();
+          // Ensure the list is reversed: Previous messages first, new ones after
           if (offset == 0) {
             // First load or refresh
-            _messages = newMessages;
+            _messages = newMessages.reversed.toList();
           } else {
-            // Pagination: Append messages
-            _messages.addAll(newMessages);
+            // Append new messages at the top, reverse them into the correct order
+            _messages = [...newMessages.reversed, ..._messages];
           }
 
           notifyListeners();
 
-          // Handle pagination
+          // Pagination handling
           if (data['has_next_page'] != null && data['has_next_page']) {
             log('More messages are available. Next offset: ${data['next_offset']}');
           } else {
@@ -120,6 +122,16 @@ class ChatController extends ChangeNotifier {
     }
   }
 
+  Future<void> ReadMessages(int chatId) async {
+    try {
+      final data = await ChatProvider().ReadMessages(chatId);
+      if (data) {
+        notifyListeners();
+      }
+    } catch (e) {
+      notifyListeners();
+    }
+  }
   // Connect to WebSocket
 
   void connectWebSocket(int chatId) {
@@ -132,7 +144,7 @@ class ChatController extends ChangeNotifier {
     );
 
     _channel?.stream.listen(
-      (message) {
+      (message) async {
         try {
           print('Raw WebSocket message: $message'); // Debugging
 
@@ -149,6 +161,8 @@ class ChatController extends ChangeNotifier {
 
             // Notify listeners about the update
             notifyListeners();
+
+            await ChatProvider().fetchChats();
           } else {
             print('Unexpected data format: $data');
           }

@@ -59,6 +59,8 @@ class ChatProvider with ChangeNotifier {
             }
             return ChatModel.fromJson(chat);
           }).toList();
+
+          notifyListeners();
         } else {
           _isLoading = false; // Set loading to true when the fetch starts
           notifyListeners();
@@ -77,6 +79,32 @@ class ChatProvider with ChangeNotifier {
     } finally {
       _isLoading = false; // Set loading to false after the fetch is complete
       notifyListeners();
+    }
+  }
+
+  ReadMessages(int chatId) async {
+    try {
+      final url = '$baseUrl/api/chat/messages/read/$chatId/';
+
+      String? authToken = await Prefrences.getAuthToken();
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } catch (e) {
+      return false;
     }
   }
 

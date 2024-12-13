@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/endpoints.dart';
+import 'package:mobile/screens/messaging/widgets/media_display_message.dart';
 import 'package:video_player/video_player.dart';
 
 class MessageVideoPlayer extends StatefulWidget {
@@ -71,10 +73,20 @@ class _MessageVideoPlayerState extends State<MessageVideoPlayer> {
           _buildLoadingThumbnail(),
         // Play Icon
         if (_controller.value.isInitialized)
-          const Icon(
-            Icons.play_circle_fill,
-            size: 50,
-            color: Colors.white,
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  CupertinoDialogRoute(
+                      builder: (_) =>
+                          MediaMessageDisplay(mediaUrl: widget.videoUrl),
+                      context: context));
+            },
+            child: const Icon(
+              Icons.play_circle_fill,
+              size: 50,
+              color: Colors.white,
+            ),
           ),
       ],
     );

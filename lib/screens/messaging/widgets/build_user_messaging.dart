@@ -58,7 +58,7 @@ class UnifiedMessage extends StatelessWidget {
           // Message Bubble
           if (text.isNotEmpty)
             Container(
-              // margin: const EdgeInsets.only(left: 55, top: 8.0),
+              margin: const EdgeInsets.only(right: 20),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isOwnMessage

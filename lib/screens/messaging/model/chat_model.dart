@@ -3,6 +3,7 @@ class ChatModel {
   final String? name;
   final List<Participant> participants; // List of participant details
   final bool isGroup;
+  final bool unReadMessages;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -10,6 +11,7 @@ class ChatModel {
     required this.id,
     required this.name,
     required this.participants,
+    required this.unReadMessages,
     required this.isGroup,
     required this.createdAt,
     required this.updatedAt,
@@ -24,6 +26,7 @@ class ChatModel {
           .map((participant) => Participant.fromJson(participant))
           .toList(),
       isGroup: json['is_group'],
+      unReadMessages: json['unread_messages'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );

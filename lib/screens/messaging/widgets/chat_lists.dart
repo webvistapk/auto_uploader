@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/inbox.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
-import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:provider/provider.dart'; // Import the provider
 
 class ChatList extends StatefulWidget {
@@ -22,14 +21,14 @@ class _ChatListState extends State<ChatList> {
   Widget build(BuildContext context) {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
-        if (chatProvider.isLoading) {
+        if (chatProvider.isLoading && chatProvider.chats.isEmpty) {
           // Show loading indicator when fetching data
           return Center(child: CircularProgressIndicator());
         } else {
           // Show list of chats if loading is false
           return Expanded(
             child: chatProvider.chats.isEmpty
-                ? Center(
+                ? const Center(
                     child: Text(
                       "No chats available", // Display message if no chats
                       style: TextStyle(fontSize: 18, color: Colors.grey),
@@ -94,11 +93,12 @@ class _ChatListState extends State<ChatList> {
                                   //   style: const TextStyle(
                                   //       color: Colors.grey, fontSize: 12),
                                   // ),
-                                  const Icon(
-                                    Icons.circle,
-                                    color: Colors.blue,
-                                    size: 10,
-                                  ),
+                                  if (chat.unReadMessages)
+                                    const Icon(
+                                      Icons.circle,
+                                      color: Colors.blue,
+                                      size: 10,
+                                    ),
                                 ],
                               ),
                             ],
@@ -107,9 +107,9 @@ class _ChatListState extends State<ChatList> {
                             children: [
                               Flexible(
                                 child: Container(
-                                  child: Text(
+                                  child: const Text(
                                     "Welcome to the Message Screen List",
-                                    style: const TextStyle(fontSize: 12),
+                                    style: TextStyle(fontSize: 12),
                                     overflow: TextOverflow.ellipsis,
                                     softWrap: true,
                                   ),
@@ -120,7 +120,7 @@ class _ChatListState extends State<ChatList> {
                                 child: Text(
                                   chat.updatedAt
                                       .toIso8601String(), // Replace with the timestamp if available
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       color: Colors.grey, fontSize: 10),
                                 ),
                               ),
