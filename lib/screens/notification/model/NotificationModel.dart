@@ -1,20 +1,46 @@
+class NotificationResponse {
+  final String status;
+  final List<NotificationModel> notifications;
+  final int totalCount;
+  final bool hasNextPage;
+  final int? nextOffset;
+
+  NotificationResponse({
+    required this.status,
+    required this.notifications,
+    required this.totalCount,
+    required this.hasNextPage,
+    this.nextOffset,
+  });
+
+  factory NotificationResponse.fromJson(Map<String, dynamic> json) {
+    return NotificationResponse(
+      status: json['status'],
+      notifications: (json['notifications'] as List)
+          .map((item) => NotificationModel.fromJson(item))
+          .toList(),
+      totalCount: json['total_count'],
+      hasNextPage: json['has_next_page'],
+      nextOffset: json['next_offset'],
+    );
+  }
+}
+
 class NotificationModel {
   final int id;
-  final String action;
   final Actor actor;
-  final Target target;
-  final Reel? reel;
+  final String action;
   final Post? post;
+  final Reel? reel;
   final Comment? comment;
-  final DateTime createdAt;
+  final String createdAt;
 
   NotificationModel({
     required this.id,
-    required this.action,
     required this.actor,
-    required this.target,
-    this.reel,
+    required this.action,
     this.post,
+    this.reel,
     this.comment,
     required this.createdAt,
   });
@@ -22,13 +48,18 @@ class NotificationModel {
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
       id: json['id'],
+      actor: Actor.fromJson(json['actor']['result']),
       action: json['action'],
-      actor: Actor.fromJson(json['actor']),
-      target: Target.fromJson(json['target']),
-      reel: json['reel'] != null ? Reel.fromJson(json['reel']) : null,
-      post: json['post'] != null ? Post.fromJson(json['post']) : null,
-      comment: json['comment'] != null ? Comment.fromJson(json['comment']) : null,
-      createdAt: DateTime.parse(json['created_at']),
+      post: json['post']['result'] != null
+          ? Post.fromJson(json['post']['result'])
+          : null,
+      reel: json['reel']['result'] != null
+          ? Reel.fromJson(json['reel']['result'])
+          : null,
+      comment: json['comment']['result'] != null
+          ? Comment.fromJson(json['comment']['result'])
+          : null,
+      createdAt: json['created_at'],
     );
   }
 }
@@ -59,28 +90,16 @@ class Actor {
   }
 }
 
-class Target {
+class Post {
   final int id;
-  final String username;
-  final String firstName;
-  final String lastName;
-  final String? profileImage;
+  final String post;
 
-  Target({
-    required this.id,
-    required this.username,
-    required this.firstName,
-    required this.lastName,
-    this.profileImage,
-  });
+  Post({required this.id, required this.post});
 
-  factory Target.fromJson(Map<String, dynamic> json) {
-    return Target(
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
       id: json['id'],
-      username: json['username'],
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      profileImage: json['profile_image'],
+      post: json['post'],
     );
   }
 }
@@ -99,20 +118,6 @@ class Reel {
   }
 }
 
-class Post {
-  final int id;
-  final String post;
-
-  Post({required this.id, required this.post});
-
-  factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
-      id: json['id'],
-      post: json['post'],
-    );
-  }
-}
-
 class Comment {
   final int id;
   final String content;
@@ -123,6 +128,6 @@ class Comment {
     return Comment(
       id: json['id'],
       content: json['content'],
-    );
-  }
+);
+}
 }

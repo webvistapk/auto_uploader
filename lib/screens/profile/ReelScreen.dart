@@ -83,7 +83,7 @@ class _ReelScreenState extends State<ReelScreen> {
         return;
       }
 
-      print("UserID: $userId");
+     // print("User REEL SCRREN: $userId");
 
       List<ReelPostModel> fetchedReels =
           await Provider.of<PostProvider>(context, listen: false)
@@ -183,6 +183,7 @@ class _ReelScreenState extends State<ReelScreen> {
                         });
                       },
                       itemBuilder: (BuildContext context, int index) {
+                        print("RELL URL : ${reels![index].file}");
                         return ReelPost(
                           src: reels![index].file,
                         );
