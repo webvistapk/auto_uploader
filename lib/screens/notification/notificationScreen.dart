@@ -130,23 +130,36 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ReelScreen(
-                            reelId: notification.reel!.id.toString(), // Pass the reel ID here
+                            isNotificationReel: true,
+                            initialIndex: 0,
+                            reelId: notification.reel!.id
+                                .toString(), // Pass the reel ID here
                             showEditDeleteOptions: true,
                           ),
                         ),
                       );
                     } else if (notification.post != null) {
                       // Navigate to post
-                      
+
                       //print("Comment ID is HERE: ${notification.comment!.id.toString()}");
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>SinglePost(
-                        postId: notification.post!.id.toString(),onPostUpdated: (){})));
-                    }
-                    else if(notification.post != null && notification.comment !=null){
-                      print("Comment ID is HERE2: ${notification.comment!.id.toString()}");
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>SinglePost(
-                        postId: notification.post!.id.toString(),commentId: notification.comment!.id.toString(), onPostUpdated: (){})
-                      ));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SinglePost(
+                                  postId: notification.post!.id.toString(),
+                                  onPostUpdated: () {})));
+                    } else if (notification.post != null &&
+                        notification.comment != null) {
+                      print(
+                          "Comment ID is HERE2: ${notification.comment!.id.toString()}");
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SinglePost(
+                                  postId: notification.post!.id.toString(),
+                                  commentId:
+                                      notification.comment!.id.toString(),
+                                  onPostUpdated: () {})));
                     }
                   },
                 ),

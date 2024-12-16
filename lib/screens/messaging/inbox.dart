@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
-import 'package:mobile/screens/messaging/model/message_model.dart';
 import 'package:mobile/screens/messaging/widgets/input_message.dart';
 import 'package:provider/provider.dart';
 import 'model/chat_model.dart';
@@ -13,7 +12,14 @@ import 'widgets/own_message.dart';
 class InboxScreen extends StatefulWidget {
   final UserProfile userProfile;
   final ChatModel chatModel;
-  InboxScreen({Key? key, required this.userProfile, required this.chatModel})
+  final chatName;
+  final participantImage;
+  InboxScreen(
+      {Key? key,
+      required this.userProfile,
+      required this.chatModel,
+      this.chatName,
+      this.participantImage})
       : super(key: key);
 
   @override
@@ -27,11 +33,14 @@ class _InboxScreenState extends State<InboxScreen> {
   bool isLoading = false;
   int offset = 0;
   final int limit = 10;
+  bool moreLoading = false;
 
   @override
   void initState() {
     super.initState();
     chatController = Provider.of<ChatController>(context, listen: false);
+    chatController.connectWebSocket(widget.chatModel.id);
+
     fetching(widget.chatModel.id);
 
     // Add scroll listener for pagination
@@ -50,25 +59,55 @@ class _InboxScreenState extends State<InboxScreen> {
       setState(() {
         isLoading = true;
       });
+
+      // await chatController.ReadMessages(widget.chatModel.id);
       await chatController.loadMessages(chatID, offset: offset, limit: limit);
+
       setState(() {
         isLoading = false;
+        moreLoading = false;
       });
+
+      // Scroll to the bottom for initial load
+      if (offset == 0) {
+        _scrollToBottom();
+      }
     } catch (error) {
       ToastNotifier.showErrorToast(context, 'Error loading messages: $error');
       setState(() {
         isLoading = false;
+        moreLoading = false;
       });
     }
   }
 
   Future<void> loadMoreMessages() async {
-    if (!isLoading) {
+    if (!moreLoading) {
       setState(() {
-        isLoading = true;
-        offset += limit; // Increase offset to load next set of messages
+        moreLoading = true;
       });
-      await fetching(widget.chatModel.id);
+
+      // Save the current scroll offset
+      final double previousScrollHeight =
+          _scrollController.position.maxScrollExtent;
+
+      offset += limit; // Increase offset to load the next set of messages
+
+      await chatController.loadMessages(widget.chatModel.id,
+          offset: offset, limit: limit);
+
+      setState(() {
+        moreLoading = false;
+      });
+
+      // Restore the scroll position after loading messages
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          final double newScrollHeight =
+              _scrollController.position.maxScrollExtent;
+          _scrollController.jumpTo(newScrollHeight - previousScrollHeight);
+        }
+      });
     }
   }
 
@@ -80,6 +119,7 @@ class _InboxScreenState extends State<InboxScreen> {
   }
 
   void _scrollToBottom() {
+    setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -109,7 +149,7 @@ class _InboxScreenState extends State<InboxScreen> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  Navigator.pop(context);
+                                  Navigator.pop(context, true);
                                 },
                                 child: const Icon(Icons.arrow_back),
                               ),
@@ -125,7 +165,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                     width: 28,
                                     height: 28,
                                     image: NetworkImage(
-                                      widget.userProfile.profileUrl ??
+                                      widget.participantImage ??
                                           "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg",
                                     ),
                                     fit: BoxFit.fill,
@@ -136,7 +176,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.chatModel.name,
+                                    widget.chatName ?? 'Unknown',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16,
@@ -179,7 +219,8 @@ class _InboxScreenState extends State<InboxScreen> {
                     ),
                     // Chat List
                     Expanded(
-                      child: chatController.isMessageLoading
+                      child: chatController.isMessageLoading &&
+                              chatController.messages.isEmpty
                           ? Center(
                               child: CircularProgressIndicator.adaptive(),
                             )
@@ -200,12 +241,16 @@ class _InboxScreenState extends State<InboxScreen> {
 
                                     final formatDate =
                                         formatDateString(message.createdAt);
+                                    final formatTime =
+                                        formatDateString(message.createdAt);
                                     if (isOwnMessage) {
-                                      return OwnMessage(
-                                        text: message.content,
-                                        timestamp: formatDate,
-                                      );
-                                    } else {
+                                      //   return OwnMessage(
+                                      //     text: message.content,
+                                      //     timestampDate: formatDate,
+                                      //     timestampTime: formatTime,
+                                      //     mediaList: message.media,
+                                      //   );
+                                      // } else {
                                       return buildUserMessage(
                                         timestamp: formatDate,
                                         userProfile: widget.userProfile,
@@ -221,25 +266,37 @@ class _InboxScreenState extends State<InboxScreen> {
                       onPressedSend: () async {
                         try {
                           await chatController.sendMessage(
-                              messageController.text.trim(),
-                              widget.chatModel.id,
-                              widget.userProfile.username!, []);
+                            messageController.text.trim(),
+                            widget.chatModel.id,
+                            widget.userProfile.username!,
+                            [],
+                          );
 
+                          // Clear the input field and scroll to the bottom
                           if (mounted) {
-                            setState(() {});
+                            setState(() {
+                              messageController.clear();
+                            });
+                            Future.delayed(
+                                Duration(seconds: 1), _scrollToBottom);
                           }
-                          _scrollToBottom();
                         } catch (e) {
                           ToastNotifier.showErrorToast(context, e.toString());
                         }
-
-                        messageController.clear();
-                        setState(() {});
-                        _scrollToBottom();
                       },
+                      // chatModel: widget.chatModel,
                     ),
                   ],
                 ),
+                if (moreLoading)
+                  Positioned(
+                    top: 30, // Aligns the loader at the top
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
               ],
             );
           },
@@ -252,6 +309,17 @@ class _InboxScreenState extends State<InboxScreen> {
     try {
       DateTime dateTime = DateTime.parse(dateString);
       final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
+      return formatter.format(dateTime);
+    } catch (e) {
+      print('Error parsing date: $e');
+      return 'Invalid date';
+    }
+  }
+
+  String formatTimeString(String dateString) {
+    try {
+      DateTime dateTime = DateTime.parse(dateString);
+      final DateFormat formatter = DateFormat('HH:mm');
       return formatter.format(dateTime);
     } catch (e) {
       print('Error parsing date: $e');

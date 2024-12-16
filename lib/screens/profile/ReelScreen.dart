@@ -14,6 +14,7 @@ class ReelScreen extends StatefulWidget {
   final int initialIndex; // The index to start from
   final bool showEditDeleteOptions;
   final String? reelId;
+  final bool? isNotificationReel;
 
   const ReelScreen({
     Key? key,
@@ -21,6 +22,7 @@ class ReelScreen extends StatefulWidget {
     this.initialIndex = 0,
     this.showEditDeleteOptions = true,
     this.reelId,
+    this.isNotificationReel,
   }) : super(key: key);
 
   @override
@@ -41,22 +43,29 @@ class _ReelScreenState extends State<ReelScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    
-    
+
     _fetchReels();
 
     if (widget.reelId != null) {
       final index = getReelIndexById(widget.reelId!, _reels);
       if (index != -1) {
         _currentIndex = index;
-      }}
-      _pageController = PageController(initialPage: _currentIndex);
+      }
+    }
+    _pageController = PageController(initialPage: _currentIndex);
+
+    if (widget.isNotificationReel == true && widget.reelId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 1), () {
+          showComments(widget.reelId!);
+        });
+      });
+    }
   }
 
-
-int getReelIndexById(String reelId, List<ReelPostModel> reels) {
-  return reels.indexWhere((reel) => reel.id == reelId);
-}
+  int getReelIndexById(String reelId, List<ReelPostModel> reels) {
+    return reels.indexWhere((reel) => reel.id == reelId);
+  }
 
   void _fetchReels() async {
     if (_isLoading || !_hasMore) return;
@@ -145,8 +154,6 @@ int getReelIndexById(String reelId, List<ReelPostModel> reels) {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,13 +196,13 @@ int getReelIndexById(String reelId, List<ReelPostModel> reels) {
                             GestureDetector(
                               onTap: () async {
                                 if (!reels[_currentIndex].isLiked) {
-                                 await postProvider.reelLike(
+                                  await postProvider.reelLike(
                                     reels![_currentIndex].id,
                                     context,
                                     _currentIndex,
                                   );
                                 } else {
-                                 await  postProvider.reelDisLike(
+                                  await postProvider.reelDisLike(
                                     reels![_currentIndex].id,
                                     context,
                                     _currentIndex,

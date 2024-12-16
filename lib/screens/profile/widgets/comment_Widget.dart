@@ -53,37 +53,35 @@ class _CommentWidgetState extends State<CommentWidget> {
     super.initState();
     print("init state triggered");
 
-    commentProvider=Provider.of<CommentProvider>(context, listen:false);
-    
+    commentProvider = Provider.of<CommentProvider>(context, listen: false);
+
     // Fetch comments when the widget is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    // Provider.of<CommentProvider>(context, listen: false)
-    //       .fetchComments(widget.postId, widget.isReelScreen);
-fetchingData();
+      // Provider.of<CommentProvider>(context, listen: false)
+      //       .fetchComments(widget.postId, widget.isReelScreen);
+      fetchingData();
     });
   }
 
-
- 
   void _scrollToComment(String? commentID) {
-  final commentKey = commentKeys[commentID];
-  if (commentKey != null) {
-    final context = commentKey.currentContext;
-    if (context != null) {
-      final renderBox = context.findRenderObject() as RenderBox?;
-      final position = renderBox?.localToGlobal(Offset.zero);
+    final commentKey = commentKeys[commentID];
+    if (commentKey != null) {
+      final context = commentKey.currentContext;
+      if (context != null) {
+        final renderBox = context.findRenderObject() as RenderBox?;
+        final position = renderBox?.localToGlobal(Offset.zero);
 
-      // Scroll to the comment position
-      if (position != null) {
-        _scrollController?.animateTo(
-          position.dy,
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
+        // Scroll to the comment position
+        if (position != null) {
+          _scrollController?.animateTo(
+            position.dy,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
       }
     }
   }
-}
 
   @override
   void dispose() {
@@ -93,16 +91,15 @@ fetchingData();
     super.dispose();
   }
 
-
-void fetchingData()async{
-  final data=
-   await commentProvider!.fetchComments(widget.postId, widget.isReelScreen);
-    if(data!=null){
+  void fetchingData() async {
+    final data = await commentProvider!
+        .fetchComments(widget.postId, widget.isReelScreen);
+    if (data != null) {
       _scrollToBottom();
     }
-}
+  }
 
-void _scrollToBottom() {
+  void _scrollToBottom() {
     setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -111,10 +108,9 @@ void _scrollToBottom() {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
-   }
-});
-}
-
+      }
+    });
+  }
 
   void loadReplies(int commentId) async {
     try {
@@ -155,22 +151,22 @@ void _scrollToBottom() {
 
       // Clear input after adding the comment
       _commentController.clear();
-      if(mounted)
-      setState(() {
-        _mediaFile = null;
-        _replyingCommentId = null;
-        _replyingToUsername = null;
-      });
+      if (mounted)
+        setState(() {
+          _mediaFile = null;
+          _replyingCommentId = null;
+          _replyingToUsername = null;
+        });
     }
   }
 
   void _replyToComment(int commentId, String username) {
-    if(mounted)
-    setState(() {
-      _replyingCommentId = commentId;
-      _replyingToUsername = username;
-      _commentController.text = "@$username ";
-    });
+    if (mounted)
+      setState(() {
+        _replyingCommentId = commentId;
+        _replyingToUsername = username;
+        _commentController.text = "@$username ";
+      });
     _commentFocusNode.requestFocus();
   }
 
@@ -178,10 +174,10 @@ void _scrollToBottom() {
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      if(mounted)
-      setState(() {
-        _mediaFile = File(pickedFile.path);
-      });
+      if (mounted)
+        setState(() {
+          _mediaFile = File(pickedFile.path);
+        });
     }
   }
 
@@ -319,14 +315,14 @@ void _scrollToBottom() {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                comment.username??'',
+                                                comment.username ?? '',
                                                 style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                               //const SizedBox(height: 5),
                                               Text(
-                                                comment.commentText??'',
+                                                comment.commentText ?? '',
                                                 style: TextStyle(
                                                     fontSize: 12,
                                                     color: Colors.grey[600]),
