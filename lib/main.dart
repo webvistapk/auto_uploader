@@ -8,16 +8,9 @@ import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
-import 'package:mobile/screens/messaging/chat_screen.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
-import 'package:mobile/screens/messaging/message_screen.dart';
-import 'package:mobile/screens/post/add_post_screen.dart';
-import 'package:mobile/screens/profile/follower/follower_screen.dart';
-import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
-import 'package:mobile/screens/widget/video_player_widget.dart';
-import 'package:mobile/video_stream_screen.dart';
 // import 'package:mobile/screens/widget/alert_screen.dart';
 import 'package:provider/provider.dart';
 

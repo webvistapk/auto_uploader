@@ -11,8 +11,11 @@ import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/post/component/privacy_option_sheet.dart';
 import 'package:mobile/screens/post/component/tag_option_sheet.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
+import 'package:mobile/screens/post/pool/add_pools.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart'; // Add video player package for video handling
+import 'package:video_player/video_player.dart';
+
+import 'component/interaction_bottom_sheet.dart'; // Add video player package for video handling
 
 class AddPostScreen extends StatefulWidget {
   final UserProfile? userProfile;
@@ -99,6 +102,25 @@ class _AddPostScreenState extends State<AddPostScreen> {
     print('Updated Policy : $privacyPolicy');
   }
 
+  List<String>? interactionSheetOptions;
+
+  void showInteractionsSheet(BuildContext context) async {
+    final result = await showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      builder: (_) => InteractionsBottomSheet(
+        initialSelectedOptions: interactionSheetOptions,
+      ),
+    );
+
+    if (result != null) {
+      log("Selected Options: $result");
+      setState(() {
+        interactionSheetOptions = result;
+      });
+    }
+  }
+
   bool isLoading = false;
 
   @override
@@ -116,7 +138,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
           ),
           centerTitle: true,
           title: Text(
-            widget.type == "post" ? "Post Uploading..." : "Reel Uploading...",
+            widget.type == "poll"
+                ? "Poll Posting"
+                : widget.type == "post"
+                    ? "Post Posting..."
+                    : "Reel Posting...",
             style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
@@ -129,78 +155,89 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Divider(),
-                  widget.type == 'reel'
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                                height: 250,
-                                width: 300,
-                                child: _buildMediaWidget()),
-                          ],
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.only(left: 20, right: 20),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 120,
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.grey[300],
-                                ),
-                                child:
-                                    _buildMediaWidget(), // Replace with media preview (image or video)
+                  widget.mediFiles == null || widget.mediFiles!.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: TextField(
+                            controller: titleController,
+                            cursorColor: Colors.red,
+                            maxLines: 5,
+                            style: AppTextStyles.poppinsRegular(fontSize: 25),
+                            decoration: InputDecoration(
+                              hintText: 'Start Typing for Post...',
+                              hintStyle:
+                                  AppTextStyles.poppinsRegular().copyWith(
+                                color: Colors.black45,
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
                               ),
-                              SizedBox(width: 15),
-                              widget.type == "reel"
-                                  ? SizedBox()
-                                  : Expanded(
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 10),
-                                        child: Stack(
-                                          children: [
-                                            TextField(
-                                              controller: titleController,
-                                              cursorColor: Colors.red,
-                                              textInputAction:
-                                                  TextInputAction.done,
-                                              maxLines: 5,
-                                              style: AppTextStyles
-                                                  .poppinsRegular(),
-                                              decoration: InputDecoration(
-                                                hintMaxLines: 4,
-                                                hintText: widget.type == "post"
-                                                    ? "Describe your post here, add hashtags, mention or anything else that compels you."
-                                                    : "Describe your reel here, add hashtags, mention or anything else that compels you.",
-                                                hintStyle: AppTextStyles
-                                                        .poppinsRegular()
-                                                    .copyWith(
-                                                  color: Colors.black,
-                                                  fontSize: 13,
-                                                ),
-                                                focusedBorder:
-                                                    UnderlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: Colors.white),
-                                                ),
-                                                enabledBorder:
-                                                    UnderlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: Colors.white),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        )
+                      : widget.type == 'reel'
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 250,
+                                  width: 300,
+                                  child: _buildMediaWidget(),
+                                ),
+                              ],
+                            )
+                          : Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    height: 120,
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.grey[300],
+                                    ),
+                                    child: _buildMediaWidget(),
+                                  ),
+                                  SizedBox(width: 15),
+                                  Expanded(
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 10),
+                                      child: TextField(
+                                        controller: titleController,
+                                        cursorColor: Colors.red,
+                                        textInputAction: TextInputAction.done,
+                                        maxLines: 5,
+                                        style: AppTextStyles.poppinsRegular(),
+                                        decoration: InputDecoration(
+                                          hintMaxLines: 4,
+                                          hintText: widget.type == "post"
+                                              ? "Describe your post here, add hashtags, mention or anything else that compels you."
+                                              : "Describe your reel here, add hashtags, mention or anything else that compels you.",
+                                          hintStyle:
+                                              AppTextStyles.poppinsRegular()
+                                                  .copyWith(
+                                            color: Colors.black,
+                                            fontSize: 13,
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                            borderSide:
+                                                BorderSide(color: Colors.white),
+                                          ),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide:
+                                                BorderSide(color: Colors.white),
+                                          ),
                                         ),
                                       ),
                                     ),
-                            ],
-                          ),
-                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
                   Divider(color: Color(0xffD3D3D3)),
                   ListTile(
                     leading: Icon(Icons.location_on_rounded, size: 25),
@@ -239,7 +276,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         color: Colors.grey, size: 17),
                   ),
                   ListTile(
-                    onTap: () {},
+                    onTap: () {
+                      showInteractionsSheet(context);
+                    },
                     leading: Icon(Icons.bubble_chart_outlined, size: 25),
                     title: Text(
                       "Interactions",
@@ -247,25 +286,21 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           AppTextStyles.poppinsRegular().copyWith(fontSize: 14),
                     ),
                     trailing: Icon(Icons.arrow_forward_ios_rounded,
-                        color: Colors.grey.shade300, size: 17),
+                        color: Colors.grey, size: 17),
                   ),
                   SizedBox(height: 20),
                 ],
               ),
             ),
-            // Show loading spinner when isLoading is true
             if (isLoading)
               Container(
-                // color: Colors.black.withOpacity(0.5),
                 child: const Center(
                   child: SpinKitCircle(
                     color: Colors.blue,
                     size: 60.0,
                   ),
                 ),
-              )
-            else
-              SizedBox()
+              ),
           ],
         ),
         bottomNavigationBar: Padding(
@@ -289,7 +324,17 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     log("Keywords: $keywords");
                     log("Tag User id: $selectedTagUsers");
                     log("Privacy Policy: $privacyPolicy");
-                    if (widget.type == "post") {
+                    if (widget.type == 'poll') {
+                      setState(() {
+                        isLoading = false;
+                      });
+
+                      Navigator.push(
+                          context,
+                          CupertinoDialogRoute(
+                              builder: (_) => AddPollScreen(),
+                              context: context));
+                    } else if (widget.type == "post") {
                       final response = await pro.createNewPost(context,
                           postTitle: titleController.text.trim(),
                           peopleTags: selectedTagUsers,
@@ -355,10 +400,19 @@ class _AddPostScreenState extends State<AddPostScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.arrow_upward, size: 20, color: Colors.white),
+                  Icon(
+                      widget.type == 'poll'
+                          ? Icons.next_plan_outlined
+                          : Icons.arrow_upward,
+                      size: 20,
+                      color: Colors.white),
                   SizedBox(width: 5),
                   Text(
-                    widget.type == "post" ? "Post" : "Reel",
+                    widget.type == "post"
+                        ? "Post"
+                        : widget.type == 'poll'
+                            ? "Next"
+                            : "Reel",
                     style: AppTextStyles.poppinsMedium().copyWith(
                       fontSize: 16,
                       color: Colors.white,
@@ -370,7 +424,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: isLoading ? Colors.grey : Colors.red,
+                color: isLoading
+                    ? Colors.grey
+                    : widget.type == 'poll'
+                        ? Colors.blue
+                        : Colors.red,
               ),
             ),
           ),
