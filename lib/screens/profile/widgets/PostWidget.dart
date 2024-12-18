@@ -83,16 +83,16 @@ class _PostWidgetState extends State<PostWidget> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return widget.showCommentSection == false
-            ? Container(
+            ? SizedBox(
                 width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * 0.8,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                ),
+                height: MediaQuery.of(context).size.height * 0.7,
+                // decoration: BoxDecoration(
+                //   color: Colors.white,
+                //   borderRadius: const BorderRadius.only(
+                //     topLeft: Radius.circular(10),
+                //     topRight: Radius.circular(10),
+                //   ),
+                // ),
                 child: CommentWidget(
                   isUsedSingle: true,
                   postId: postId,

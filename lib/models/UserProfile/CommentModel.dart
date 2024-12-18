@@ -1,5 +1,33 @@
 import 'package:flutter/cupertino.dart';
 
+class CommentModel {
+  String status;
+  List<Comment> comments;
+  int totalCount;
+  bool hasNextPage;
+  int nextOffset;
+
+  CommentModel({
+    required this.status,
+    required this.comments,
+    required this.totalCount,
+    required this.hasNextPage,
+    required this.nextOffset,
+  });
+
+  factory CommentModel.fromJson(Map<String, dynamic> json) {
+    return CommentModel(
+      status: json['status'],
+      comments: (json['comments'] as List)
+          .map((item) => Comment.fromJson(item))
+          .toList(),
+      totalCount: json['total_count'],
+      hasNextPage: json['has_next_page'],
+      nextOffset: json['next_offset'],
+    );
+  }
+}
+
 class Comment {
   final int id;
   final String username;

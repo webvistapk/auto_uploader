@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -18,6 +19,15 @@ class CommentProvider extends ChangeNotifier {
   List<Comment> get comments => _comments;
   List<Reply> get replies => _replies;
   bool get isCommentLoading => _isCommentLoading;
+  bool _isLoading = false;
+bool get isLoading => _isLoading;
+int _nextOffset=0;
+int get nextOffset=>_nextOffset;
+
+  setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   setCommentLoadin(bool value) {
     _isCommentLoading = value;
@@ -66,43 +76,66 @@ class CommentProvider extends ChangeNotifier {
   //   return _comments;
   // }
 
-   fetchComments(String postId, bool isReelScreen) async {
-    setCommentLoadin(true);
+   fetchComments(String postId, bool isReelScreen,{int limit = 10, int offset = 0}) async {
+    setLoading(true);
     print("POst ID: $postId");
     final String? token = await Prefrences.getAuthToken();
     final url =
         "${ApiURLs.baseUrl}${isReelScreen ? ApiURLs.reel_comment_fetch : ApiURLs.post_comment_fetch}$postId/";
     try {
       final response = await http.get(
-        Uri.parse(url),
+        Uri.parse(url).replace(
+          queryParameters: {
+            'limit':limit.toString(),
+            'offset':offset.toString()
+          }
+        ),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       );
+      
       print("Response of Comments is Here: ${response.body} :: to Here");
+      
       if (response.statusCode == 200) {
         setCommentLoadin(false);
-        final data = json.decode(response.body);
-        _comments = (data['comments'] as List)
-            .map((comment) => Comment.fromJson(comment))
-            .toList();
+        
+         final data = json.decode(response.body);
+        // _comments = (data['comments'] as List)
+        //      .map((comment) => Comment.fromJson(comment))
+        //     .toList();
+        CommentModel commentResponse = CommentModel.fromJson(data);
+           
+        if (offset == 0) {
+          _comments = commentResponse.comments;
+          _nextOffset=commentResponse.nextOffset??0;
+        } else {
+          _comments.addAll(commentResponse.comments); // Append more comments to the existing list
+          _nextOffset=commentResponse.nextOffset??_nextOffset;
+        }
+        if(!commentResponse.hasNextPage){
+          _nextOffset=-1;
+        }
+
+        //return commentResponse;
 
         // After fetching comments, fetch replies for each comment
         // for (var comment in _comments) {
         //   await fetchReplies(comment.id);  // Ensure commentId is passed as a string
         // }
-        print("COmmentS ${_comments}");
-
         //print("fetch Comments triggered");
       } else {
         setCommentLoadin(false);
         throw Exception("Failed to load comments");
       }
     } catch (error) {
-      setCommentLoadin(false);
+      
       print(error);
       rethrow; // Re-throw the error to handle it in the calling code if needed
+    }
+    finally{
+setLoading(false);
     }
     return _comments;
   }
@@ -193,7 +226,7 @@ class CommentProvider extends ChangeNotifier {
       final response = await request.send();
       if (response.statusCode == 201) {
         ToastNotifier.showSuccessToast(context, "Comment added successfully");
-        fetchComments(postId, isReelScreen);
+        fetchComments(postId, isReelScreen,limit: 10,offset: 0);
       } else {
         ToastNotifier.showErrorToast(context, "Failed to add comment");
       }
@@ -266,7 +299,7 @@ class CommentProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         // Show success message
         ToastNotifier.showSuccessToast(context, "comment deleted successfully");
-        fetchComments(postId, isReelScreen);
+        fetchComments(postId, isReelScreen,limit: 10,offset: 0);
         notifyListeners();
       } else {
         // Show error message if deletion failed

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/models/UserProfile/commentBottomSheet.dart';
+import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/utils.dart';
@@ -43,6 +44,11 @@ class _CommentWidgetState extends State<CommentWidget> {
   bool isLiked = false;
   bool showReply = false;
   CommentProvider? commentProvider;
+
+  int _limit = 10;
+  int _offset = 0;
+  bool _isLoadingMore = false;
+  bool showMore = false;
 
   Map<String, GlobalKey> commentKeys = {}; // For comment keys
   Map<String, Map<String, GlobalKey>> replyKeys =
@@ -92,8 +98,9 @@ class _CommentWidgetState extends State<CommentWidget> {
   }
 
   void fetchingData() async {
-    final data = await commentProvider!
-        .fetchComments(widget.postId, widget.isReelScreen);
+    final data = await commentProvider!.fetchComments(
+        widget.postId, widget.isReelScreen,
+        limit: _limit, offset: _offset);
     if (data != null) {
       _scrollToBottom();
     }
@@ -213,6 +220,7 @@ class _CommentWidgetState extends State<CommentWidget> {
         }
 
         final comments = commentProvider.comments;
+
         if (comments.isEmpty) {
           return const Center(
             child: Text("No comments available."),
@@ -227,27 +235,6 @@ class _CommentWidgetState extends State<CommentWidget> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Wrap(
-                    //   crossAxisAlignment: WrapCrossAlignment.center,
-                    //   children: [
-                    //     Container(
-                    //       height: 50,
-                    //       width: 50,
-                    //       decoration: BoxDecoration(
-                    //         color: Colors.green,
-                    //         borderRadius: BorderRadius.circular(25),
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 10),
-                    //     const Text(
-                    //       "Person Name",
-                    //       style: TextStyle(
-                    //         fontWeight: FontWeight.bold,
-                    //         fontSize: 16,
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
@@ -263,24 +250,20 @@ class _CommentWidgetState extends State<CommentWidget> {
               ),
             const Divider(thickness: 1, color: Colors.grey),
             Expanded(
-              //height:MediaQuery.of(context).size.height ,
               child: ListView.builder(
-                controller: _scrollController,
                 shrinkWrap: true,
                 itemCount: comments.length,
                 itemBuilder: (context, index) {
+                  print("Index ${index}");
+                  print("Length ${comments.length}");
                   final comment = comments[index];
+                  
                   final GlobalKey iconKey = GlobalKey();
                   final commentID = comment.id;
+
                   if (!commentKeys.containsKey(commentID)) {
                     commentKeys[commentID.toString()] = GlobalKey();
                   }
-                  // debugger();
-                  // print('COMMENT KEYS${commentKey}');
-                  // //final commentKey = commentKeys[commentID]!;
-
-                  // debugger();
-                  // ScrollController _scrollController = ScrollController();
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -575,9 +558,58 @@ class _CommentWidgetState extends State<CommentWidget> {
                       ],
                     ),
                   );
+
+                  // }
+                  // else{
+                  //     GestureDetector(
+                  //       onTap: (){
+                  //          setState(() {
+                  //           _isLoadingMore = true;
+                  //           _offset +=
+                  //               _limit; // Increment offset to fetch the next set of notifications
+                  //         });
+
+                  //         commentProvider.fetchComments(
+                  //           widget.postId,
+                  //           widget.isReelScreen,
+                  //           limit: _limit,
+                  //           offset: _offset,
+                  //         );
+
+                  //         setState(() {
+                  //           _isLoadingMore = false;
+                  //         });
+                  //       },
+                  //       child: Container(
+                  //         padding: EdgeInsets.symmetric(vertical: 10),
+                  //         alignment: Alignment.center,
+                  //         color: Colors.blue,
+                  //         child: commentProvider.isLoading
+                  //             ? CircularProgressIndicator(color: Colors.white)
+                  //             : Text(
+                  //                 'Show More Comments',
+                  //                 style: TextStyle(color: Colors.black),
+                  //               ),
+                  //       ),
+                  //     );
+                  // }
                 },
               ),
             ),
+
+            if (true) ...[
+                     Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            showMore = !showMore;
+                            // Add logic to fetch more comments here
+                          });
+                        },
+                        child: Text(showMore ? "Show Less" : "Show More"),
+                      ),
+                    )
+            ]
           ],
         );
       },
