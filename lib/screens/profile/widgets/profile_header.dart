@@ -7,6 +7,7 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/common/app_snackbar.dart';
 import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
@@ -129,8 +130,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               children: [
                 profileContainer(
                     widget.user.profileUrl == null
-                        ? AppUtils.testImage
-                        : 'http://147.79.117.253:8001' +
+                        ? AppUtils.userImage
+                        : ApiURLs.baseUrl +
                             widget.user.profileUrl!,
                     "${widget.user.firstName.toString()} ${widget.user.lastName.toString()}",
                     widget.user.position ?? "JobType",

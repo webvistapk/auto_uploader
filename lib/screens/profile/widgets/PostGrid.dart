@@ -138,7 +138,7 @@ class _PostGridState extends State<PostGrid> {
                                 ],
                               )
                             : Image.network(
-                                "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.media[0].file}",
+                                "${post.media[0].file}",
                                 fit: BoxFit.cover,
                                 loadingBuilder:
                                     (context, child, loadingProgress) {

@@ -10,6 +10,11 @@ import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
+import 'package:mobile/screens/messaging/message_screen.dart';
+import 'package:mobile/screens/notification/controller/notificationProvider.dart';
+import 'package:mobile/screens/post/add_post_screen.dart';
+import 'package:mobile/screens/profile/follower/follower_screen.dart';
+import 'package:mobile/screens/post/widgets/add_post_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
 // import 'package:mobile/screens/widget/alert_screen.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +43,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => ChatProvider()),
           ChangeNotifierProvider(create: (_) => ChatController()),
           ChangeNotifierProvider(create: (_) => CommentProvider()),
+          ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ],
         child: MaterialApp(
             title: 'Fillet Social Media App',

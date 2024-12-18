@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/common/utils.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/models/follower_following/following_model.dart';
 
 class FollowingTile extends StatelessWidget {
@@ -17,41 +19,36 @@ class FollowingTile extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: Colors.grey[300],
-            radius: 25,
-            child: following.profileImage != null &&
-                    following.profileImage!.isNotEmpty
-                ? ClipOval(
-                    child: Image.network(
-                        'http://147.79.117.253:8001${following.profileImage}',
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (BuildContext context, Widget child,
-                          ImageChunkEvent? loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.person,
-                        color: Colors.grey[700],
-                        size: 30,
+              backgroundColor: Colors.grey[300],
+              radius: 25,
+              child: ClipOval(
+                child: Image.network(
+                  following.profileImage != null &&
+                          following.profileImage!.isNotEmpty
+                      ? '${ApiURLs.baseUrl.replaceAll("/api/", "")}${following.profileImage}'
+                      : AppUtils.userImage,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (BuildContext context, Widget child,
+                      ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
                       ),
-                    ),
-                  )
-                : Icon(
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) => Icon(
                     Icons.person,
                     color: Colors.grey[700],
                     size: 30,
                   ),
-          ),
+                ),
+              )),
           SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -19,30 +19,41 @@ import '../../endpoints.dart';
 import 'package:http/http.dart' as http;
 
 class PostProvider extends ChangeNotifier {
-  PostDetails? _post;
+  PostModel? _post;
+  List<PostModel>? _posts;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-  PostDetails? get post => _post;
+  PostModel? get post => _post;
+  List<PostModel>? get posts => _posts;
+  List<ReelPostModel>? _reels;
 
+  List<ReelPostModel>? get reels => _reels;
   setIsLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
-  Future<List<PostModel>> fetchFollowerPost(BuildContext context, {int limit = 10, int offset = 0}) async {
+  void setPost(List<PostModel> posts) {
+    _posts = posts;
+    notifyListeners();
+  }
+
+  Future<List<PostModel>> fetchFollowerPost(BuildContext context,
+      {int limit = 10, int offset = 0}) async {
+    setIsLoading(true);
+
     final String? token = await Prefrences.getAuthToken();
     int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     // API endpoint for fetching follower posts
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_follower_posts}$_loggedInUserId/";
+    String URL =
+        "${ApiURLs.baseUrl}${ApiURLs.get_follower_posts}$_loggedInUserId/";
 
     // Construct the URI with pagination parameters
     Uri uri = Uri.parse(URL).replace(queryParameters: {
       'limit': limit.toString(),
       'offset': offset.toString(),
     });
-
-    setIsLoading(true);
 
     try {
       final response = await http.get(uri, headers: {
@@ -52,24 +63,73 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        List<PostModel> followerPosts = (data['posts'] as List).map((postJson) => PostModel.fromJson(postJson)).toList();
-        print("Response ${response.body}");
-        // Cache or update the follower posts
-        setPosts(followerPosts);
+        List<PostModel> followerPosts = (data['posts'] as List)
+            .map((postJson) => PostModel.fromJson(postJson))
+            .toList();
+        print("Response of Follower Posts: ${response.body}");
+
+        // Update the list of posts and notify listeners
+        setPost(followerPosts);
 
         return followerPosts;
       } else {
         throw Exception("Failed to fetch follower posts");
       }
     } catch (e) {
+      setIsLoading(false);
       ToastNotifier.showErrorToast(context, "Error: $e");
       print("Error fetching follower posts: $e");
-      return [];
+      return []; // Return an empty list on error
     } finally {
-      setIsLoading(false);
+      setIsLoading(
+          false); // Make sure to set loading to false even if there was an error
     }
   }
 
+  // Future<List<PostModel>> fetchFollowerPost(BuildContext context,
+  //     {int limit = 10, int offset = 0}) async {
+  //   final String? token = await Prefrences.getAuthToken();
+  //   int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
+
+  //   // API endpoint for fetching follower posts
+  //   String URL =
+  //       "${ApiURLs.baseUrl}${ApiURLs.get_follower_posts}$_loggedInUserId/";
+
+  //   // Construct the URI with pagination parameters
+  //   Uri uri = Uri.parse(URL).replace(queryParameters: {
+  //     'limit': limit.toString(),
+  //     'offset': offset.toString(),
+  //   });
+
+  //   setIsLoading(true);
+
+  //   try {
+  //     final response = await http.get(uri, headers: {
+  //       "Content-Type": "application/json",
+  //       "Authorization": "Bearer $token",
+  //     });
+
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+  //       List<PostModel> followerPosts = (data['posts'] as List)
+  //           .map((postJson) => PostModel.fromJson(postJson))
+  //           .toList();
+  //       print("Response ${response.body}");
+  //       // Cache or update the follower posts
+  //       setPosts(followerPosts);
+
+  //       return followerPosts;
+  //     } else {
+  //       throw Exception("Failed to fetch follower posts");
+  //     }
+  //   } catch (e) {
+  //     ToastNotifier.showErrorToast(context, "Error: $e");
+  //     print("Error fetching follower posts: $e");
+  //     return [];
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
 
   createNewPost(context,
       {required String postTitle,
@@ -233,13 +293,13 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ReelPostModel>> fetchFollowersReels(
-      BuildContext context) async {
+  Future<List<ReelPostModel>> fetchFollowersReels(BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
     int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
 
     // Base URL and API path
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_follower_reel_post}$_loggedInUserId";
+    String URL =
+        "${ApiURLs.baseUrl}${ApiURLs.get_follower_reel_post}$_loggedInUserId";
 
     // Add query parameters for pagination (limit and offset)
     Uri uri = Uri.parse(URL);
@@ -280,58 +340,66 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ReelPostModel>> fetchReels(BuildContext context, String id, int limit, int offset) async {
-    final String? token = await Prefrences.getAuthToken();
+  Future<List<ReelPostModel>> fetchReels(
+    BuildContext context, String id, int limit, int offset) async {
+  final String? token = await Prefrences.getAuthToken();
 
-    // Base URL and API path
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id";
+  // Base URL and API path
+  String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id";
 
-    // Add query parameters for pagination (limit and offset)
-    Uri uri = Uri.parse(URL).replace(queryParameters: {
-      'limit': limit.toString(), // How many posts per page
-      'offset': offset.toString() // Offset for pagination
+  // Add query parameters for pagination (limit and offset)
+  Uri uri = Uri.parse(URL).replace(queryParameters: {
+    'limit': limit.toString(), // How many posts per page
+    'offset': offset.toString() // Offset for pagination
+  });
+
+  try {
+    final response = await http.get(uri, headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token"
     });
 
-    try {
-      final response = await http.get(uri, headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      });
+    print(response.body);
 
-      print(response.body);
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body);
+      print("REEL FETCHED SUCCESSFULLY");
 
-      if (response.statusCode == 200) {
-        final jsonList = jsonDecode(response.body);
-        print("REEL GETTED SUCCESSFULLY");
-        // print(jsonList);
-        //log("Reel Data: ${jsonList['reels']}"); // Log the correct data
-
-        List<ReelPostModel> reelList = [];
-        for (var reelJson in jsonList['reels']) {
-          // Change 'posts' to 'reels'
-          final reel = ReelPostModel.fromJson(reelJson);
-          reelList.add(reel);
-        }
-        print("PROVIDER REEL :${reelList}");
-
-        notifyListeners();
-        return reelList;
-      } else {
-        return [];
+      // Convert JSON to ReelPostModel list
+      List<ReelPostModel> reelList = [];
+      for (var reelJson in jsonList['reels']) {
+        final reel = ReelPostModel.fromJson(reelJson);
+        reelList.add(reel);
       }
-    } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error: $e");
-      print(e);
-      return []; // Return an empty list on exception
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
-  Future<void> deletePost(String postId, BuildContext context,bool isReelPost) async {
+      // Update the provider's state
+      if (_reels == null) {
+        _reels = reelList; // Initialize _reels if null
+      } else {
+        _reels!.addAll(reelList); // Append new data for pagination
+      }
+
+      notifyListeners();
+      return reelList;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    ToastNotifier.showErrorToast(context, "There is an Error: $e");
+    print(e);
+    return []; // Return an empty list on exception
+  } finally {
+    setIsLoading(false);
+  }
+}
+
+
+  Future<void> deletePost(
+      String postId, BuildContext context, bool isReelPost) async {
     final String? token = await Prefrences.getAuthToken();
 
-    String URL = "${ApiURLs.baseUrl}${isReelPost?ApiURLs.delete_reel:ApiURLs.delete_post}$postId/";
+    String URL =
+        "${ApiURLs.baseUrl}${isReelPost ? ApiURLs.delete_reel : ApiURLs.delete_post}$postId/";
     setIsLoading(true);
     try {
       // Make the DELETE request
@@ -362,10 +430,16 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  void setSinglePost(PostModel post) {
+    _post = post;
+    notifyListeners();
+  }
+
+  // Modify your getSinglePost method to only fetch the post if it isn't already available in the list
   Future<void> getSinglePost(String postID) async {
     final String? token = await Prefrences.getAuthToken();
     setIsLoading(true);
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_single_post}${postID}/";
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_single_post}$postID/";
     try {
       final response = await http.get(
         Uri.parse(URL),
@@ -377,8 +451,11 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print("RESPONSE OF POST: ${response.body}");
-        _post = PostDetails.fromJson(data['posts']);
-        print(_post);
+        // Assign the post directly to the _post variable
+        _post = PostModel.fromJson(data['posts']);
+        // Optionally add to the list of posts
+        _posts?.add(_post!); // If you want to keep the post in the list
+        notifyListeners();
       } else {
         throw Exception('Failed to load post');
       }
@@ -389,11 +466,106 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> newLike(int postID, BuildContext context) async {
+  Future<void> newLikes(int postId, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
+    print("POst ID is : ${postId}");
 
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}$postID/";
-    print("Post ID in Like ${postID}");
+    // API endpoint to like a post
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}post/${postId}/";
+    Uri uri = Uri.parse(URL);
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        //final int newLikesCount = data['likes_count']; // Extract new like count
+
+        // Find the post in _posts and update it
+        final postIndex = _posts!.indexWhere((post) => post.id == postId);
+        if (postIndex != -1) {
+          _posts?[postIndex].likesCount += 1;
+          _posts?[postIndex].is_liked =
+              true; // Assuming you want to mark it as liked
+          notifyListeners();
+        } else {
+          print("Post index is wrong");
+        }
+
+        // Notify listeners to refresh UI (if you're using Provider)
+        notifyListeners();
+      } else {
+        throw Exception("Failed to like post");
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error: $e");
+    }
+  }
+
+  Future<void> userDisLikes(
+      int postId, BuildContext context) async {
+    final String? token = await Prefrences.getAuthToken();
+    print("POst ID is : ${postId}");
+
+    // API endpoint to like a post
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.dislike}post/${postId.toString()}/";
+
+    Uri uri = Uri.parse(URL);
+
+    try {
+      final response = await http.delete(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+      print("API HITtED");
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        // final int newLikesCount = data['likes_count']; // Extract new like count
+
+        // Find the post in _posts and update it
+      
+          final postIndex = _posts!.indexWhere((post) => post.id == postId);
+          if (postIndex != -1) {
+            print("Post Index ${postIndex}");
+
+            _posts?[postIndex].likesCount -= 1;
+            _posts?[postIndex].is_liked =
+                false; // Assuming you want to mark it as liked
+            ToastNotifier.showSuccessToast(
+                context, "Post Disliked Successfully");
+          } else {
+            print("Post index is wrong");
+            ToastNotifier.showErrorToast(context, "Post Disliked Faild");
+          }
+        
+
+        // Notify listeners to refresh UI (if you're using Provider)
+        notifyListeners();
+      } else {
+        throw Exception("Failed to dislike post");
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error: $e");
+    }
+  }
+
+
+   Future<void> reelLike(int reelID, BuildContext context, int reelIndex) async {
+    final String? token = await Prefrences.getAuthToken();
+    //print("Reel ID ${postID}");
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}reel/$reelID/";
+        
+   // print("Post ID in Like ${postID}");
+
     try {
       final response = await http.post(
         Uri.parse(URL),
@@ -402,16 +574,18 @@ class PostProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
       );
-
+      print("API HITTED");
       if (response.statusCode == 200) {
-        ToastNotifier.showSuccessToast(context, "Post Liked Successfully");
-        print("Post liked successfully");
-        // Refresh or update the UI based on your business logic
-        // If needed, you can fetch the updated like count or status here
+      
+           // _reels?[reelIndex].isLiked = true;
+            _reels?[reelIndex].likesCount += 1;
+            _reels?[reelIndex].isLiked = true;
+    
+
+        // Notify listeners to update UI
         notifyListeners();
       } else {
         throw Exception('Failed to like post');
-        notifyListeners();
       }
     } catch (e) {
       ToastNotifier.showErrorToast(context, "Error liking the post: $e");
@@ -420,6 +594,40 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> reelDisLike(int reelID, BuildContext context, int reelIndex) async {
+    final String? token = await Prefrences.getAuthToken();
+    //print("Reel ID ${postID}");
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.dislike}reel/$reelID/";
+        
+   // print("Post ID in Like ${postID}");
+
+    try {
+      final response = await http.delete(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      print("API HITTED");
+      if (response.statusCode == 200) {
+      
+           // _reels?[reelIndex].isLiked = true;
+            _reels?[reelIndex].likesCount -= 1;
+            _reels?[reelIndex].isLiked = false;
+    
+
+        // Notify listeners to update UI
+        notifyListeners();
+      } else {
+        throw Exception('Failed to dislike reel');
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error disliking the post: $e");
+      notifyListeners();
+      print(e);
+    }
+  }
 
   List<PostModel> _cachedPosts = [];
 
@@ -440,4 +648,5 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  getPostById(int id) {}
 }

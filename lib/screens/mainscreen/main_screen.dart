@@ -2,15 +2,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
+import 'package:mobile/models/ReelPostModel.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
+import 'package:mobile/screens/notification/notificationScreen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';
+import 'package:mobile/screens/profile/UserReelScreen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/screens/profile/request_screen/request_sereen.dart';
+import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -107,17 +111,20 @@ class _MainScreenState extends State<MainScreen> {
                         userProfile: widget.userProfile,
                         token: widget.authToken,
                       )
+                      :widget.selectedIndex==1?UserReelScreen()
                     : widget.selectedIndex == 2
                         ? CreatePostScreen(
                             token: widget.authToken,
                             userProfile: widget.userProfile,
-                          )
+                          ):
+                           widget.selectedIndex == 3?NotificationScreen()
                         : widget.selectedIndex == 4
                             ? ProfileScreen(
                                 id: widget.userProfile.id,
                                 userProfile: widget.userProfile,
                                 authToken: widget.authToken,
                               )
+                            
                             : _pages[widget.selectedIndex],
                 bottomNavigationBar: SafeArea(
                   child: Padding(
@@ -140,7 +147,7 @@ class _MainScreenState extends State<MainScreen> {
 
                         /// Search
                         SalomonBottomBarItem(
-                          icon: Icon(CupertinoIcons.search),
+                          icon: Icon(Icons.video_collection),
                           title: Text(""),
                           selectedColor: Colors.teal,
                         ),

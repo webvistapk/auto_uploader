@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -9,73 +10,212 @@ import '../../../prefrences/prefrences.dart';
 import '../../endpoints.dart';
 import 'package:http/http.dart' as http;
 
-
-class CommentProvider extends ChangeNotifier{
+class CommentProvider extends ChangeNotifier {
   //Comment Provider starts here
 
   List<Comment> _comments = [];
   bool _isCommentLoading = false;
-
+  List<Reply> _replies = [];
   List<Comment> get comments => _comments;
+  List<Reply> get replies => _replies;
   bool get isCommentLoading => _isCommentLoading;
-  setCommentLoadin(bool value){
+  bool _isLoading = false;
+bool get isLoading => _isLoading;
+int _nextOffset=0;
+int get nextOffset=>_nextOffset;
+
+  setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  setCommentLoadin(bool value) {
     _isCommentLoading = value;
     notifyListeners();
   }
 
-  Future<List<Comment>> fetchComments(String postId,bool isReelScreen) async {
-    setCommentLoadin(true);
-    // print("POst ID: $postId");
+
+  // Future<List<Comment>> fetchComments(String postId, bool isReelScreen) async {
+  //   setCommentLoadin(true);
+  //   print("POst ID: $postId");
+  //   final String? token = await Prefrences.getAuthToken();
+  //   final url =
+  //       "${ApiURLs.baseUrl}${isReelScreen ? ApiURLs.reel_comment_fetch : ApiURLs.post_comment_fetch}$postId/";
+  //   try {
+  //     final response = await http.get(
+  //       Uri.parse(url),
+  //       headers: {
+  //         'Authorization': 'Bearer $token',
+  //         'Content-Type': 'application/json',
+  //       },
+  //     );
+  //     print("Response of Comments is Here: ${response.body} :: to Here");
+  //     if (response.statusCode == 200) {
+  //       setCommentLoadin(false);
+  //       final data = json.decode(response.body);
+  //       _comments = (data['comments'] as List)
+  //           .map((comment) => Comment.fromJson(comment))
+  //           .toList();
+
+  //       // After fetching comments, fetch replies for each comment
+  //       // for (var comment in _comments) {
+  //       //   await fetchReplies(comment.id);  // Ensure commentId is passed as a string
+  //       // }
+  //       print("COmmentS ${_comments}");
+
+  //       //print("fetch Comments triggered");
+  //     } else {
+  //       setCommentLoadin(false);
+  //       throw Exception("Failed to load comments");
+  //     }
+  //   } catch (error) {
+  //     setCommentLoadin(false);
+  //     print(error);
+  //     rethrow; // Re-throw the error to handle it in the calling code if needed
+  //   }
+  //   return _comments;
+  // }
+
+   fetchComments(String postId, bool isReelScreen,{int limit = 10, int offset = 0}) async {
+    setLoading(true);
+    print("POst ID: $postId");
     final String? token = await Prefrences.getAuthToken();
-    final url = "${ApiURLs.baseUrl}${isReelScreen?ApiURLs.reel_comment_fetch:ApiURLs.post_comment_fetch}$postId/";
+    final url =
+        "${ApiURLs.baseUrl}${isReelScreen ? ApiURLs.reel_comment_fetch : ApiURLs.post_comment_fetch}$postId/";
     try {
-      final response = await http.get(Uri.parse(url),
+      final response = await http.get(
+        Uri.parse(url).replace(
+          queryParameters: {
+            'limit':limit.toString(),
+            'offset':offset.toString()
+          }
+        ),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       );
-      //print("Response ${response.body}");
+      
+      print("Response of Comments is Here: ${response.body} :: to Here");
+      
       if (response.statusCode == 200) {
         setCommentLoadin(false);
-        final data = json.decode(response.body);
-        _comments = (data['comments'] as List)
-            .map((comment) => Comment.fromJson(comment))
-            .toList();
-        //print("COmmentS ${_comments}");
+        
+         final data = json.decode(response.body);
+        // _comments = (data['comments'] as List)
+        //      .map((comment) => Comment.fromJson(comment))
+        //     .toList();
+        CommentModel commentResponse = CommentModel.fromJson(data);
+           
+        if (offset == 0) {
+          _comments = commentResponse.comments;
+          _nextOffset=commentResponse.nextOffset??0;
+        } else {
+          _comments.addAll(commentResponse.comments); // Append more comments to the existing list
+          _nextOffset=commentResponse.nextOffset??_nextOffset;
+        }
+        if(!commentResponse.hasNextPage){
+          _nextOffset=-1;
+        }
 
-        print("fetch Comments triggered");
+        //return commentResponse;
 
+        // After fetching comments, fetch replies for each comment
+        // for (var comment in _comments) {
+        //   await fetchReplies(comment.id);  // Ensure commentId is passed as a string
+        // }
+        //print("fetch Comments triggered");
       } else {
         setCommentLoadin(false);
         throw Exception("Failed to load comments");
       }
     } catch (error) {
-      setCommentLoadin(false);
+      
       print(error);
       rethrow; // Re-throw the error to handle it in the calling code if needed
+    }
+    finally{
+setLoading(false);
     }
     return _comments;
   }
 
-  Future<void> addComment(String postId, bool isReelScreen,{
+  Future<void> fetchReplies(int commentId) async {
+    setCommentLoadin(true);
+    print("Comment ID: ${commentId}");
+    final String? token = await Prefrences.getAuthToken();
+    final url =
+        "${ApiURLs.baseUrl}${ApiURLs.post_comment_reply_fetch}${commentId.toString()}/";
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      print("API HITTED SUCCESSFULLY");
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print("Replies List1: ${response.body}");
+
+        _replies = (data['reply'] as List)
+            .map((reply) => Reply.fromJson(reply))
+            .toList();
+
+        print("Replies List: ${response.body}");
+
+        final index =
+            _comments.indexWhere((comment) => comment.id == commentId);
+        if (index != -1) {
+          final currentComment = _comments[index];
+          _comments[index] = Comment(
+              id: currentComment.id,
+              username: currentComment.username,
+              avatarUrl: currentComment.avatarUrl,
+              commentText: currentComment.commentText,
+              replies: _replies, // Update the replies
+              timeAgo: currentComment.timeAgo,
+              isLiked: currentComment.isLiked,
+              likeCount: currentComment.likeCount,
+              replyCount: currentComment.replyCount,
+              isReplyVisible: currentComment.isReplyVisible,
+              isReplyLoaded: currentComment.isReplyLoaded);
+          notifyListeners(); // Notify listeners for UI update
+        }
+      } else {
+        throw Exception("Failed to fetch replies");
+      }
+    } catch (error) {
+      print("Error fetching replies: $error");
+      rethrow;
+    } finally {
+      setCommentLoadin(false);
+    }
+  }
+
+  Future<void> addComment(
+    String postId,
+    bool isReelScreen, {
     required String content,
-    required List<String> keywords,
+    //required List<String> keywords,
     File? media,
     required BuildContext context,
   }) async {
     try {
-      print("POST ID : ${postId}");
+      // print("POST ID : ${postId}");
       final String? token = await Prefrences.getAuthToken();
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('${ApiURLs.baseUrl}${isReelScreen?ApiURLs.reel_comment_add:ApiURLs.post_comment_add}$postId/'),
+        Uri.parse(
+            '${ApiURLs.baseUrl}${isReelScreen ? ApiURLs.reel_comment_add : ApiURLs.post_comment_add}$postId/'),
       );
-      request.headers['Authorization']='Bearer $token';
+      request.headers['Authorization'] = 'Bearer $token';
       request.fields['postId'] = postId;
       request.fields['content'] = content;
-      request.fields['keywords'] = keywords.join(',');
-      request.fields['tags']="2";
+      //request.fields['keywords'] = keywords.join(',');
+      //request.fields['tags']="2";
 
       if (media != null) {
         request.files.add(
@@ -86,7 +226,7 @@ class CommentProvider extends ChangeNotifier{
       final response = await request.send();
       if (response.statusCode == 201) {
         ToastNotifier.showSuccessToast(context, "Comment added successfully");
-        fetchComments(postId,isReelScreen);
+        fetchComments(postId, isReelScreen,limit: 10,offset: 0);
       } else {
         ToastNotifier.showErrorToast(context, "Failed to add comment");
       }
@@ -95,8 +235,52 @@ class CommentProvider extends ChangeNotifier{
     }
   }
 
+  Future<void> replyComment(
+    int commentId,
+    bool isReelScreen, {
+    required String content,
+    //required List<String> keywords,
+    File? media,
+    required BuildContext context,
+  }) async {
+    try {
+      print("Comment POST ID : ${commentId}");
+      final String? token = await Prefrences.getAuthToken();
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+            '${ApiURLs.baseUrl}${ApiURLs.new_post_comment_reply}${commentId.toString()}/'),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+      //request.fields['postId'] = commentId.toString();
+      request.fields['content'] = content;
+      //request.fields['keywords'] = keywords.join(',');
+      //request.fields['tags']="2";
 
-  void deleteComment(String commentId, BuildContext context,String postId,bool isReelScreen) async {
+      if (media != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('media', media.path),
+        );
+      }
+
+      final response = await request.send();
+      if (response.statusCode == 201) {
+        ToastNotifier.showSuccessToast(
+            context, "Comment reply added successfully");
+        fetchReplies(commentId);
+        Comment comment =
+            comments.firstWhere((comment) => comment.id == commentId);
+        comment.replyCount++;
+      } else {
+        ToastNotifier.showErrorToast(context, "Failed to add comment reply");
+      }
+    } catch (error) {
+      ToastNotifier.showErrorToast(context, "Error: $error");
+    }
+  }
+
+  void deleteComment(String commentId, BuildContext context, String postId,
+      bool isReelScreen) async {
     final String? token = await Prefrences.getAuthToken();
 
     String URL = "${ApiURLs.baseUrl}${ApiURLs.delete_post_comment}$commentId/";
@@ -115,7 +299,7 @@ class CommentProvider extends ChangeNotifier{
       if (response.statusCode == 200) {
         // Show success message
         ToastNotifier.showSuccessToast(context, "comment deleted successfully");
-        fetchComments(postId,isReelScreen);
+        fetchComments(postId, isReelScreen,limit: 10,offset: 0);
         notifyListeners();
       } else {
         // Show error message if deletion failed
@@ -128,4 +312,219 @@ class CommentProvider extends ChangeNotifier{
       ToastNotifier.showErrorToast(context, "There is an Error: $e");
     }
   }
+
+  void deleteCommentReply(int replyId, commentId, BuildContext context) async {
+    final String? token = await Prefrences.getAuthToken();
+
+    String URL =
+        "${ApiURLs.baseUrl}${ApiURLs.delete_post_comment_reply}${replyId.toString()}/";
+    //setIsLoading(true);
+    print("COMMENT ID: ${replyId}");
+    try {
+      // Make the DELETE request
+      final response = await http.delete(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Show success message
+        ToastNotifier.showSuccessToast(
+            context, "comment reply deleted successfully");
+        fetchReplies(commentId);
+        Comment comment =
+            comments.firstWhere((comment) => comment.id == commentId);
+        comment.replyCount--;
+        if (comment.replyCount == 0) {
+          comment.isReplyVisible = false;
+        }
+        notifyListeners();
+      } else {
+        // Show error message if deletion failed
+        ToastNotifier.showErrorToast(
+            context, "Sorry comment reply is not deleted. Please Try Again!");
+
+        notifyListeners();
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+    }
+  }
+
+  Future<void> likeComment(
+      int commentId, BuildContext context, bool isReply) async {
+    try {
+      final String? token = await Prefrences.getAuthToken();
+      String URL = isReply
+          ? "${ApiURLs.baseUrl}${ApiURLs.new_like}reply/${commentId.toString()}/"
+          : "${ApiURLs.baseUrl}${ApiURLs.new_like}comment/${commentId.toString()}/";
+
+      final response = await http.post(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final commentIndex =
+            comments.indexWhere((comment) => comment.id == commentId);
+        if (commentIndex != -1) {
+          if (isReply) {
+            final replyIndex = comments[commentIndex]
+                .replies
+                .indexWhere((reply) => reply.id == commentId);
+            if (replyIndex != -1) {
+              comments[commentIndex].replies[replyIndex].isReplyLiked = true;
+              comments[commentIndex].replies[replyIndex].replyLikeCount += 1;
+            }
+          } else {
+            comments[commentIndex].isLiked = true;
+            comments[commentIndex].likeCount += 1;
+          }
+
+          notifyListeners();
+        }
+        //ToastNotifier.showSuccessToast(context, "Liked Successfully");
+      } else {
+        throw Exception('Failed to like comment');
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Unsuccessful Like: ${e}");
+    }
+  }
+
+  Future<void> dislikeComment(
+      int commentId, replyId, BuildContext context, bool isReply) async {
+    try {
+      final String? token = await Prefrences.getAuthToken();
+      String URL = isReply
+          ? "${ApiURLs.baseUrl}${ApiURLs.dislike}reply/${replyId.toString()}/"
+          : "${ApiURLs.baseUrl}${ApiURLs.dislike}comment/${commentId.toString()}/";
+
+      final response = await http.delete(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final commentIndex =
+            comments.indexWhere((comment) => comment.id == commentId);
+        if (commentIndex != -1) {
+          if (isReply) {
+          
+          final comment = _comments[commentIndex];
+          final replyIndex = comment.replies.indexWhere((r) => r.id == replyId);
+          if (replyIndex != -1) {
+            // Update the reply state
+            comment.replies[replyIndex] = Reply(
+              id: comment.replies[replyIndex].id,
+              replierName: comment.replies[replyIndex].replierName,
+              content: comment.replies[replyIndex].content,
+              replierImage: comment.replies[replyIndex].replierImage,
+              isReplyLiked: false, // Mark as liked
+              replyLikeCount: comment.replies[replyIndex].replyLikeCount -
+                  1, // Increment like count
+            );
+
+            // Update the comment in the provider
+            _comments[commentIndex] = Comment(
+              id: comment.id,
+              username: comment.username,
+              avatarUrl: comment.avatarUrl,
+              commentText: comment.commentText,
+              replies: comment.replies, // Updated replies
+              timeAgo: comment.timeAgo,
+              isLiked: comment.isLiked,
+              likeCount: comment.likeCount,
+              replyCount: comment.replyCount,
+              isReplyVisible: comment.isReplyVisible,
+              isReplyLoaded: comment.isReplyLoaded,
+            );
+
+            notifyListeners();
+          
+            }
+          } else {
+            comments[commentIndex].isLiked = false;
+            comments[commentIndex].likeCount -= 1;
+          }
+
+          notifyListeners();
+        }
+        //ToastNotifier.showSuccessToast(context, "Disliked Successfully");
+      } else {
+        throw Exception('Failed to dislike comment');
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Unsuccessful Dislike: ${e}");
+    }
+  }
+
+  Future<void> likeReply(
+      int replyId, int commentId, BuildContext context) async {
+    try {
+      // Call the API to like the comment
+      //await ApiService.likeComment(commentId); // Replace with your API logic
+      final String? token = await Prefrences.getAuthToken();
+      String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}reply/$replyId/";
+
+      // Update the local state after a successful API call
+      final response = await http.post(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        final commentIndex = _comments.indexWhere((c) => c.id == commentId);
+        if (commentIndex != -1) {
+          final comment = _comments[commentIndex];
+          final replyIndex = comment.replies.indexWhere((r) => r.id == replyId);
+          if (replyIndex != -1) {
+            // Update the reply state
+            comment.replies[replyIndex] = Reply(
+              id: comment.replies[replyIndex].id,
+              replierName: comment.replies[replyIndex].replierName,
+              content: comment.replies[replyIndex].content,
+              replierImage: comment.replies[replyIndex].replierImage,
+              isReplyLiked: true, // Mark as liked
+              replyLikeCount: comment.replies[replyIndex].replyLikeCount +
+                  1, // Increment like count
+            );
+
+            // Update the comment in the provider
+            _comments[commentIndex] = Comment(
+              id: comment.id,
+              username: comment.username,
+              avatarUrl: comment.avatarUrl,
+              commentText: comment.commentText,
+              replies: comment.replies, // Updated replies
+              timeAgo: comment.timeAgo,
+              isLiked: comment.isLiked,
+              likeCount: comment.likeCount,
+              replyCount: comment.replyCount,
+              isReplyVisible: comment.isReplyVisible,
+              isReplyLoaded: comment.isReplyLoaded,
+            );
+
+            notifyListeners();
+          }
+        }
+      } else {
+        throw Exception('Failed to like comment');
+      }
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Faild : ${e}");
+    }
+  }
+
 }
