@@ -17,6 +17,9 @@ class PostManager {
     required List<String> keywordsList,
     required String privacyPost,
     required List<File> mediaFiles,
+    String? pollTitle,
+    String? pollDescription,
+    List<String>? pollOptions,
     required String token, // Bearer token for authorization
   }) async {
     String url = baseUrl + ApiURLs.create_new_post;
@@ -32,7 +35,17 @@ class PostManager {
     request.headers.addAll(headers);
 
     // Add fields
+    if (pollTitle != null && pollDescription != null && pollOptions != null) {
+      request.fields['poll_title'] = pollTitle;
+      request.fields['poll_description'] = pollDescription;
 
+      // Add option values
+      String optionsString =
+          pollOptions.join(','); // Example: "Option 1,Option 2,Option 3"
+
+      // Add the list as a form field
+      request.fields['polls'] = optionsString;
+    }
     request.fields['post'] = postTitle;
     request.fields['privacy'] = privacyPost;
 
