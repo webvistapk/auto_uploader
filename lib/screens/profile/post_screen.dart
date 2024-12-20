@@ -106,10 +106,9 @@ class _PostScreenState extends State<PostScreen> {
                             final result = await Navigator.push(
                                 context,
                                 CupertinoDialogRoute(
-                                    builder: (_) =>
-                                        SinglePost(postId: post.id.toString(),
-                                        onPostUpdated: () => _fetchPost()
-                                        ),
+                                    builder: (_) => SinglePost(
+                                        postId: post.id.toString(),
+                                        onPostUpdated: () => _fetchPost()),
                                     context: context));
 
                             // Check if the result indicates a need to refresh
@@ -120,10 +119,8 @@ class _PostScreenState extends State<PostScreen> {
                               });
                             }
                           },
-                          onPressLiked: (){
-                            
-                          },
-                          isLiked: false,
+                          onPressLiked: () {},
+                          isLiked: false, postModel: post,
                         );
                       },
                     );

@@ -12,11 +12,11 @@ import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 import 'package:mobile/screens/notification/controller/notificationProvider.dart';
 import 'package:mobile/screens/splash_screen.dart';
+
 // import 'package:mobile/screens/widget/alert_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'controller/services/StatusProvider.dart';
-import 'screens/post/pool/poll_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +50,6 @@ class MyApp extends StatelessWidget {
               primarySwatch: Colors.green,
               textTheme: GoogleFonts.poppinsTextTheme(),
             ),
-            home: PollScreen()));
+            home: SplashScreen()));
   }
 }

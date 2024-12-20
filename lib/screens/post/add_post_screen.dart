@@ -102,7 +102,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     print('Updated Policy : $privacyPolicy');
   }
 
-  List<String>? interactionSheetOptions;
+  List<String> interactionSheetOptions = ["Comments"];
 
   void showInteractionsSheet(BuildContext context) async {
     final result = await showModalBottomSheet(
@@ -138,11 +138,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
           ),
           centerTitle: true,
           title: Text(
-            widget.type == "poll"
-                ? "Poll Posting"
-                : widget.type == "post"
-                    ? "Post Posting..."
-                    : "Reel Posting...",
+            "Posting...",
             style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
@@ -161,6 +157,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           child: TextField(
                             controller: titleController,
                             cursorColor: Colors.red,
+                            textInputAction: TextInputAction.done,
                             maxLines: 5,
                             style: AppTextStyles.poppinsRegular(fontSize: 25),
                             decoration: InputDecoration(
@@ -324,45 +321,68 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     log("Keywords: $keywords");
                     log("Tag User id: $selectedTagUsers");
                     log("Privacy Policy: $privacyPolicy");
-                    if (widget.type == 'poll') {
-                      setState(() {
-                        isLoading = false;
-                      });
-
-                      Navigator.push(
-                          context,
-                          CupertinoDialogRoute(
-                              builder: (_) => AddPollScreen(),
-                              context: context));
-                    } else if (widget.type == "post") {
-                      final response = await pro.createNewPost(context,
-                          postTitle: titleController.text.trim(),
-                          peopleTags: selectedTagUsers,
-                          keywordsList: keywords,
-                          privacyPost: privacyPolicy,
-                          mediaFiles: widget.mediFiles!);
-
-                      if (response != null) {
-                        ToastNotifier.showSuccessToast(
-                            context, "Post Successfully posted!");
-                        setState(() {
-                          isLoading = false;
-                        });
-                        final token = await Prefrences.getAuthToken();
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => MainScreen(
-                                    userProfile: widget.userProfile!,
-                                    authToken: token),
-                                context: context),
-                            (route) => false);
-                      } else {
+                    if (interactionSheetOptions.contains('Polls')) {
+                      if (titleController.text.isEmpty) {
                         setState(() {
                           isLoading = false;
                         });
                         ToastNotifier.showErrorToast(
-                            context, "Something went wrong. Try again.");
+                            context, "Post Title / Descritption is required!");
+                      } else {
+                        setState(() {
+                          isLoading = false;
+                        });
+
+                        Navigator.push(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => AddPollScreen(
+                                      postTitle: titleController.text.trim(),
+                                      selectedTagUsers: selectedTagUsers,
+                                      keywordList: keywords,
+                                      privacyPolicy: privacyPolicy,
+                                      mediaFiles: widget.mediFiles!,
+                                      userProfile: widget.userProfile!,
+                                    ),
+                                context: context));
+                      }
+                    } else if (widget.type == "post") {
+                      if (titleController.text.isEmpty) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ToastNotifier.showErrorToast(
+                            context, "Post Title / Descritption is required!");
+                      } else {
+                        final response = await pro.createNewPost(context,
+                            postTitle: titleController.text.trim(),
+                            peopleTags: selectedTagUsers,
+                            keywordsList: keywords,
+                            privacyPost: privacyPolicy,
+                            mediaFiles: widget.mediFiles!);
+
+                        if (response != null) {
+                          ToastNotifier.showSuccessToast(
+                              context, "Post Successfully posted!");
+                          setState(() {
+                            isLoading = false;
+                          });
+                          final token = await Prefrences.getAuthToken();
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              CupertinoDialogRoute(
+                                  builder: (_) => MainScreen(
+                                      userProfile: widget.userProfile!,
+                                      authToken: token),
+                                  context: context),
+                              (route) => false);
+                        } else {
+                          setState(() {
+                            isLoading = false;
+                          });
+                          ToastNotifier.showErrorToast(
+                              context, "Network Problem. Try again.");
+                        }
                       }
                     } else {
                       final response = await pro.createNewReel(context,
@@ -401,18 +421,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                      widget.type == 'poll'
+                      interactionSheetOptions.contains('Polls')
                           ? Icons.next_plan_outlined
                           : Icons.arrow_upward,
                       size: 20,
                       color: Colors.white),
                   SizedBox(width: 5),
                   Text(
-                    widget.type == "post"
-                        ? "Post"
-                        : widget.type == 'poll'
-                            ? "Next"
-                            : "Reel",
+                    interactionSheetOptions.any((element) => element == 'Polls')
+                        ? "Next"
+                        : "Post",
                     style: AppTextStyles.poppinsMedium().copyWith(
                       fontSize: 16,
                       color: Colors.white,
@@ -426,7 +444,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 borderRadius: BorderRadius.circular(10),
                 color: isLoading
                     ? Colors.grey
-                    : widget.type == 'poll'
+                    : interactionSheetOptions.contains('Polls')
                         ? Colors.blue
                         : Colors.red,
               ),

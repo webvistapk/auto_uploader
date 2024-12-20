@@ -5,9 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
-import 'package:mobile/screens/profile/SinglePost.dart';
-import 'package:mobile/screens/profile/imageFullScreen.dart';
-import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
+import 'package:mobile/models/UserProfile/post_model.dart';
+import 'package:mobile/screens/post/pool/poll_bottom_sheet.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -34,31 +33,32 @@ class PostWidget extends StatefulWidget {
   final onPressLiked;
   final bool isLiked;
   final String? scrollCommentId;
+  final PostModel postModel;
 
-  const PostWidget({
-    Key? key,
-    required this.postId,
-    required this.username,
-    required this.location,
-    required this.date,
-    required this.caption,
-    required this.mediaUrls,
-    required this.profileImageUrl,
-    required this.isVideo,
-    required this.likes,
-    required this.comments,
-    required this.shares,
-    required this.saved,
-    required this.refresh,
-    this.showCommentSection = false,
-    this.isInteractive = false,
-    required this.isUserPost,
-    required this.onPressed,
-    required this.onPressLiked,
-    required this.isLiked,
-    this.scrollCommentId
-    
-  }) : super(key: key);
+  const PostWidget(
+      {Key? key,
+      required this.postId,
+      required this.username,
+      required this.location,
+      required this.date,
+      required this.caption,
+      required this.mediaUrls,
+      required this.profileImageUrl,
+      required this.isVideo,
+      required this.likes,
+      required this.comments,
+      required this.shares,
+      required this.saved,
+      required this.refresh,
+      this.showCommentSection = false,
+      this.isInteractive = false,
+      required this.isUserPost,
+      required this.onPressed,
+      required this.onPressLiked,
+      required this.isLiked,
+      this.scrollCommentId,
+      required this.postModel})
+      : super(key: key);
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
@@ -69,11 +69,11 @@ class _PostWidgetState extends State<PostWidget> {
   bool isLiked = false;
 
   void _likePost() {
-    isLiked=widget.isLiked;
-    if(mounted)
-    setState(() {
-      isLiked = !isLiked;
-    });
+    isLiked = widget.isLiked;
+    if (mounted)
+      setState(() {
+        isLiked = !isLiked;
+      });
     widget.onPressLiked;
   }
 
@@ -110,8 +110,8 @@ class _PostWidgetState extends State<PostWidget> {
 
   @override
   Widget build(BuildContext context) {
-    
     print("NOtification Comment ID: ${widget.scrollCommentId}");
+    print("Interations: ${widget.postModel.interactions}");
     final GlobalKey iconKey = GlobalKey();
     if (widget.profileImageUrl
         .contains('http://147.79.117.253:8001http://147.79.117.253:8001')) {
@@ -186,23 +186,39 @@ class _PostWidgetState extends State<PostWidget> {
                 _buildInteractionIcon(CupertinoIcons.bookmark, widget.saved),
                 SizedBox(width: 10),
                 GestureDetector(
-                  onTap:
-                      widget.onPressLiked, // Call _likePost when the like icon is clicked
+                  onTap: widget
+                      .onPressLiked, // Call _likePost when the like icon is clicked
                   child: _buildInteractionIcon(
                     widget.isLiked ? Icons.favorite : Icons.favorite_border,
-                    widget.likes,   //show Count of likes
+                    widget.likes, //show Count of likes
                   ),
                 ),
-                SizedBox(width: 10),
-                GestureDetector(
-                  onTap: widget.showCommentSection
-                      ? null
-                      : () => showComments(widget.postId),
-                  child: _buildInteractionIcon(
-                      CupertinoIcons.chat_bubble_fill, 
-                      widget.comments //show comments count
-                      ),
-                ),
+                if (widget.postModel.interactions!.contains('comments')) ...[
+                  SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: widget.showCommentSection
+                        ? null
+                        : () => showComments(widget.postId),
+                    child: _buildInteractionIcon(
+                        CupertinoIcons.chat_bubble_fill,
+                        widget.comments //show comments count
+                        ),
+                  ),
+                ],
+                if (widget.postModel.interactions!.contains('polls')) ...[
+                  SizedBox(width: 10),
+                  GestureDetector(
+                      onTap: () => showPollModal(
+                          context,
+                          widget.postModel.polls ?? [],
+                          widget.postModel.pollTitle ?? '',
+                          widget.postModel.pollDescription ?? ''),
+                      child: Icon(
+                        Icons.poll_outlined,
+                        size: 20,
+                        color: Colors.black,
+                      )),
+                ],
               ],
             ),
             const SizedBox(height: 8),
@@ -293,10 +309,10 @@ class _PostWidgetState extends State<PostWidget> {
         viewportFraction: 1.0,
         autoPlay: false,
         onPageChanged: (index, reason) {
-          if(mounted)
-          setState(() {
-            _currentImageIndex = index;
-          });
+          if (mounted)
+            setState(() {
+              _currentImageIndex = index;
+            });
         },
       ),
     );
@@ -403,17 +419,17 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     try {
       _controller = VideoPlayerController.network(widget.videoUrl);
       await _controller.initialize();
-      if(mounted)
-      setState(() {
-        _isError = false;
-      });
+      if (mounted)
+        setState(() {
+          _isError = false;
+        });
     } catch (e) {
       log(widget.videoUrl);
       log("Video initialization error: $e");
-      if(mounted)
-      setState(() {
-        _isError = true;
-      });
+      if (mounted)
+        setState(() {
+          _isError = true;
+        });
     }
   }
 

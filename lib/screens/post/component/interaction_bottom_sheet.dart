@@ -14,7 +14,7 @@ class _InteractionsBottomSheetState extends State<InteractionsBottomSheet> {
   late ValueNotifier<Set<String>> selectedOptions;
 
   // Define available options
-  final List<String> options = ['Comments', 'Pools'];
+  final List<String> options = ['Comments', 'Polls'];
 
   @override
   void initState() {

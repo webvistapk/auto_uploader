@@ -28,25 +28,28 @@ class ApiURLs {
   static const String create_new_reel_endpoint = "posts/reel/new/save/";
   static const String create_new_story_endpoint = "posts/story/new/save/";
   static const String get_reel_post = "posts/reel/get/";
-  static const String get_user_status='posts/story/get/';
-  static const String get_followers_status='posts/story/get/following/';
-  static const String get_follower_posts="posts/get/following/";
+  static const String get_user_status = 'posts/story/get/';
+  static const String get_followers_status = 'posts/story/get/following/';
+  static const String get_follower_posts = "posts/get/following/";
   //static const String delete_reel="posts/reel/delete/";
   static const String get_follower_reel_post = "posts/reel/get/following/";
-  static const String new_like="posts/like/new/";
-   static const String dislike="posts/like/delete/";
-  static const String post_comment_fetch="posts/comment/get/post/";
-  static const String post_comment_add="posts/comment/new/post/";
-  static const String delete_post_comment="posts/comment/delete/";
+  static const String new_like = "posts/like/new/";
+  static const String dislike = "posts/like/delete/";
+  static const String post_comment_fetch = "posts/comment/get/post/";
+  static const String post_comment_add = "posts/comment/new/post/";
+  static const String delete_post_comment = "posts/comment/delete/";
 
-  static const String reel_comment_fetch="posts/comment/get/reel/";
-  static const String reel_comment_add="posts/comment/new/reel/";
-  
+  static const String reel_comment_fetch = "posts/comment/get/reel/";
+  static const String reel_comment_add = "posts/comment/new/reel/";
+
   //static const String delete_post_comment="posts/comment/delete/";
-  static const String post_comment_reply_fetch="posts/reply/get/";
-  static const String new_post_comment_reply="posts/reply/new/";
-  static const String delete_post_comment_reply="posts/reply/delete/";
+  static const String post_comment_reply_fetch = "posts/reply/get/";
+  static const String new_post_comment_reply = "posts/reply/new/";
+  static const String delete_post_comment_reply = "posts/reply/delete/";
 
   //Notification URL
-  static const String notification="notification/get/";
+  static const String notification = "notification/get/";
+
+  //Vote New
+  static const String voteNew = "posts/vote/new/";
 }

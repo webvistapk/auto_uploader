@@ -235,7 +235,7 @@ class _PostAndReelsState extends State<PostAndReels>
                                       builder: (_) => AddPostScreen(
                                             mediFiles: mediaFiles,
                                             userProfile: widget.userProfile,
-                                            type: "poll",
+                                            type: "post",
                                           )));
                             }
                       : selectedReel.isEmpty
@@ -246,7 +246,7 @@ class _PostAndReelsState extends State<PostAndReels>
                                       builder: (_) => AddPostScreen(
                                             mediFiles: selectedReel,
                                             userProfile: widget.userProfile,
-                                            type: "poll",
+                                            type: "post",
                                           )));
                             }
                           : () {

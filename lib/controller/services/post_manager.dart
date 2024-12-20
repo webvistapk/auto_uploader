@@ -54,14 +54,15 @@ class PostManager {
     } else {
       request.fields['tags'] = peopleTags.join(',');
     }
-
-    // Add media files
-    for (var file in mediaFiles) {
-      request.files.add(await http.MultipartFile.fromPath(
-        'media',
-        file.path,
-        filename: basename(file.path), // Use path's basename as the filename
-      ));
+    if (mediaFiles.isNotEmpty) {
+// Add media files
+      for (var file in mediaFiles) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'media',
+          file.path,
+          filename: basename(file.path), // Use path's basename as the filename
+        ));
+      }
     }
 
     try {
@@ -76,12 +77,12 @@ class PostManager {
 
         return jsonDecode(response.body);
       } else {
-        // debugger();
+        debugger();
         log('Failed to create post: ${response.statusCode}, ${response.body}');
         return null;
       }
     } catch (error) {
-      // debugger();
+      debugger();
       print('Error occurred: $error');
       return null;
     }

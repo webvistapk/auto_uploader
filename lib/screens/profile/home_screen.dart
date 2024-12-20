@@ -60,35 +60,34 @@ class _HomeScreenState extends State<HomeScreen>
     storyService.getUserStatus();
     storyService.getFollowersStatus();
 
-     WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchPosts();
     });
   }
 
   void _fetchPosts() async {
-  final postProvider = Provider.of<PostProvider>(context, listen: false);
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
 
-  setState(() {
-    _isLoadingMore = true;
-  });
+    setState(() {
+      _isLoadingMore = true;
+    });
 
-  // Fetch posts directly from the provider
-  await postProvider.fetchFollowerPost(context, limit: 10, offset: _offset);
+    // Fetch posts directly from the provider
+    await postProvider.fetchFollowerPost(context, limit: 10, offset: _offset);
 
-  // Fetch posts from the provider after the fetch operation
-  setState(() {
-    _posts.addAll(postProvider.posts!); // Add posts from provider to _posts
-    _offset += 10;
-    _isLoadingMore = false;
-  });
-}
+    // Fetch posts from the provider after the fetch operation
+    setState(() {
+      _posts.addAll(postProvider.posts!); // Add posts from provider to _posts
+      _offset += 10;
+      _isLoadingMore = false;
+    });
+  }
 
   @override
   void dispose() {
     _tabController?.dispose();
     super.dispose();
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -230,37 +229,32 @@ class _HomeScreenState extends State<HomeScreen>
                                 style: AppTextStyles.poppinsBold(),
                               ),
                             )
-                          :
-                          
-                          Padding(
+                          : Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Consumer<PostProvider>(
-                                builder: (context,postProvider,child) {
-                                 
-                                  return ListView.builder(
-                                    itemCount: _posts!.length,
-                                    shrinkWrap: true, // Prevents unbounded height
-                                    physics:
-                                        NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                                    itemBuilder: (context, index) {
-                                      final post = _posts[index];
-                                      return _buildPostCard(post, () {
-                                        Navigator.push(
-                                            context,
-                                            CupertinoDialogRoute(
-                                                builder: (_) => SinglePost(
-                                                    postId: post.id.toString(),
-                                                    onPostUpdated: () => _fetchPosts()
-                                                    ),
-                                                    
-                                                context: context));
-                                  
-                                        // Check if the result indicates a need to refresh
-                                      });
-                                    },
-                                  );
-                                }
-                              ),
+                                  builder: (context, postProvider, child) {
+                                return ListView.builder(
+                                  itemCount: _posts!.length,
+                                  shrinkWrap: true, // Prevents unbounded height
+                                  physics:
+                                      NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                                  itemBuilder: (context, index) {
+                                    final post = _posts[index];
+                                    return _buildPostCard(post, () {
+                                      Navigator.push(
+                                          context,
+                                          CupertinoDialogRoute(
+                                              builder: (_) => SinglePost(
+                                                  postId: post.id.toString(),
+                                                  onPostUpdated: () =>
+                                                      _fetchPosts()),
+                                              context: context));
+
+                                      // Check if the result indicates a need to refresh
+                                    });
+                                  },
+                                );
+                              }),
                             ),
                       if (_isLoadingMore)
                         Padding(
@@ -386,48 +380,54 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildPostCard(PostModel post, onPressed) {
-  log('Hello $_currentIndexMap');
-  List<String> fullMediaUrls = post.media.map((media) {
-    print(media);
-    final file = media.file;
-    return file;
-  }).toList();
+    log('Hello $_currentIndexMap');
+    List<String> fullMediaUrls = post.media.map((media) {
+      print(media);
+      final file = media.file;
+      return file;
+    }).toList();
 
-  return PostWidget(
-    postId: post.id.toString(),
-    username: post.user.username,
-    location: 'Location',
-    date: post.createdAt,
-    caption: '',
-    mediaUrls: fullMediaUrls,
-    profileImageUrl: post.user.profileImage != null
-        ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
-        : AppUtils.userImage,
-    isVideo: post.media.any((media) => media.mediaType == 'video') ? true : false,
-    likes: post.likesCount.toString(),
-    comments: post.commentsCount.toString(),
-    shares: "50",
-    saved: "50",
-    refresh: () {},
-    showCommentSection: false,
-    isInteractive: true,
-    isUserPost: false,
-    onPressed: onPressed,
-    onPressLiked: () async {
-      final postProvider = Provider.of<PostProvider>(context, listen: false);
+    return PostWidget(
+      postId: post.id.toString(),
+      username: post.user.username,
+      location: 'Location',
+      date: post.createdAt,
+      caption: '',
+      mediaUrls: fullMediaUrls,
+      profileImageUrl: post.user.profileImage != null
+          ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+          : AppUtils.userImage,
+      isVideo:
+          post.media.any((media) => media.mediaType == 'video') ? true : false,
+      likes: post.likesCount.toString(),
+      comments: post.commentsCount.toString(),
+      shares: "50",
+      saved: "50",
+      refresh: () {},
+      showCommentSection: false,
+      isInteractive: true,
+      isUserPost: false,
+      onPressed: onPressed,
+      onPressLiked: () async {
+        final postProvider = Provider.of<PostProvider>(context, listen: false);
 
-      if (post.is_liked == false) {
-        // Like the post
-        await postProvider.newLikes(post.id, context,); 
-      } else {
-        // Dislike the post
-        await postProvider.userDisLikes(post.id, context,);
-      }
-    },
-    isLiked: post.is_liked, // Use the post's `isLiked` value
-  );
-}
-
+        if (post.isLiked == false) {
+          // Like the post
+          await postProvider.newLikes(
+            post.id,
+            context,
+          );
+        } else {
+          // Dislike the post
+          await postProvider.userDisLikes(
+            post.id,
+            context,
+          );
+        }
+      },
+      isLiked: post.isLiked, postModel: post, // Use the post's `isLiked` value
+    );
+  }
 }
 
 class StatusView extends StatefulWidget {

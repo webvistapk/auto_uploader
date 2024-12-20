@@ -1,4 +1,31 @@
-class PostModel {
+class PostsResponse {
+  final String status;
+  final List<Post> posts;
+  final int totalCount;
+  final bool hasNextPage;
+  final int? nextOffset;
+
+  PostsResponse({
+    required this.status,
+    required this.posts,
+    required this.totalCount,
+    required this.hasNextPage,
+    this.nextOffset,
+  });
+
+  factory PostsResponse.fromJson(Map<String, dynamic> json) {
+    return PostsResponse(
+      status: json['status'],
+      posts:
+          (json['posts'] as List).map((post) => Post.fromJson(post)).toList(),
+      totalCount: json['total_count'],
+      hasNextPage: json['has_next_page'],
+      nextOffset: json['next_offset'],
+    );
+  }
+}
+
+class Post {
   final int id;
   final String post;
   final List<Tag> tags;
@@ -6,21 +33,25 @@ class PostModel {
   final String? interactions;
   final String? pollTitle;
   final String? pollDescription;
-  final List<Poll>? polls; // Optional list of polls
+  final List<Poll> polls;
   final List<Media> media;
   final User user;
   final String privacy;
   final String createdAt;
   final String updatedAt;
-  int likesCount;
-  int commentsCount;
-  bool isLiked;
+  final int likesCount;
+  final int commentsCount;
+  final bool isLiked;
 
-  PostModel({
+  Post({
     required this.id,
     required this.post,
     required this.tags,
     required this.keywords,
+    this.interactions,
+    this.pollTitle,
+    this.pollDescription,
+    required this.polls,
     required this.media,
     required this.user,
     required this.privacy,
@@ -29,15 +60,10 @@ class PostModel {
     required this.likesCount,
     required this.commentsCount,
     required this.isLiked,
-    this.interactions,
-    this.pollTitle,
-    this.pollDescription,
-    this.polls, // Optional list of polls
   });
 
-  // Factory method to parse JSON data
-  factory PostModel.fromJson(Map<String, dynamic> json) {
-    return PostModel(
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
       id: json['id'],
       post: json['post'],
       tags: (json['tags'] as List).map((tag) => Tag.fromJson(tag)).toList(),
@@ -46,9 +72,8 @@ class PostModel {
       interactions: json['interactions'],
       pollTitle: json['poll_title'],
       pollDescription: json['poll_description'],
-      polls: (json['polls'] as List?)
-          ?.map((poll) => Poll.fromJson(poll))
-          .toList(), // Parse polls list if available
+      polls:
+          (json['polls'] as List).map((poll) => Poll.fromJson(poll)).toList(),
       media: (json['media'] as List).map((m) => Media.fromJson(m)).toList(),
       user: User.fromJson(json['user']),
       privacy: json['privacy'],
@@ -57,32 +82,6 @@ class PostModel {
       likesCount: json['likes_count'],
       commentsCount: json['comments_count'],
       isLiked: json['is_liked'],
-    );
-  }
-}
-
-class Poll {
-  final int id;
-  final String poll;
-  final int voteCount;
-  final bool isVoted;
-
-  Poll({
-    required this.id,
-    required this.poll,
-    required this.voteCount,
-    required this.isVoted,
-  });
-  int calculateTotalVotes(List<Poll> polls) {
-    return polls.fold(0, (sum, poll) => sum + poll.voteCount);
-  }
-
-  factory Poll.fromJson(Map<String, dynamic> json) {
-    return Poll(
-      id: json['id'],
-      poll: json['poll'],
-      voteCount: json['vote_count'],
-      isVoted: json['is_voted'],
     );
   }
 }
@@ -127,6 +126,29 @@ class Keyword {
   }
 }
 
+class Poll {
+  final int id;
+  final String poll;
+  final int voteCount;
+  final bool isVoted;
+
+  Poll({
+    required this.id,
+    required this.poll,
+    required this.voteCount,
+    required this.isVoted,
+  });
+
+  factory Poll.fromJson(Map<String, dynamic> json) {
+    return Poll(
+      id: json['id'],
+      poll: json['poll'],
+      voteCount: json['vote_count'],
+      isVoted: json['is_voted'],
+    );
+  }
+}
+
 class Media {
   final int id;
   final String mediaType;
@@ -152,14 +174,14 @@ class User {
   final String username;
   final String firstName;
   final String lastName;
-  final String? profileImage; // Add this field
+  final String? profileImage;
 
   User({
     required this.id,
     required this.username,
     required this.firstName,
     required this.lastName,
-    this.profileImage, // Make profileImage optional
+    this.profileImage,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -168,7 +190,7 @@ class User {
       username: json['username'],
       firstName: json['first_name'],
       lastName: json['last_name'],
-      profileImage: json['profile_image'], // Parse the profileImage field
+      profileImage: json['profile_image'], // Allowing null here
     );
   }
 }
