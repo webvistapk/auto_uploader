@@ -1,11 +1,21 @@
+import 'dart:developer';
+import 'dart:io'; // For File class
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mobile/screens/messaging/model/chat_model.dart';
+import 'package:mobile/screens/messaging/widgets/media_preview/media_screen_preview.dart';
 
 class ChatInputField extends StatefulWidget {
   final TextEditingController messageController;
   final onPressedSend;
+  final ChatModel chatModel;
   ChatInputField(
-      {super.key, required this.messageController, this.onPressedSend});
+      {super.key,
+      required this.messageController,
+      this.onPressedSend,
+      required this.chatModel});
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();
@@ -78,6 +88,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
               color: Colors.grey,
             ),
             onPressed: () {
+              _showOptionsBottomSheet(context, "attachment");
               // Handle attachment (file picker or gallery)
             },
           ),
@@ -89,6 +100,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
               color: Colors.grey,
             ),
             onPressed: () {
+              _showOptionsBottomSheet(context, "camera");
               // Handle camera action (open camera or photo picker)
             },
           ),
@@ -160,6 +172,173 @@ class _ChatInputFieldState extends State<ChatInputField> {
                 ),
               );
             },
+          ),
+        );
+      },
+    );
+  }
+
+  final ImagePicker _picker = ImagePicker();
+  List<File> mediaPaths = []; // Store File objects instead of String paths
+
+  // Pick Photos
+  Future<void> _pickPhotos() async {
+    try {
+      mediaPaths.clear();
+      final List<XFile>? result = await _picker.pickMultiImage();
+      if (result != null && result.isNotEmpty) {
+        setState(() {
+          mediaPaths.addAll(result.map((file) => File(file.path)).toList());
+        });
+        _confirmAndNavigate();
+      }
+    } catch (e) {
+      print("Error picking photos: $e");
+    }
+  }
+
+  // Pick Videos
+  Future<void> _pickVideos() async {
+    try {
+      mediaPaths.clear();
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.video,
+        allowMultiple: true,
+      );
+      if (result != null) {
+        setState(() {
+          mediaPaths.addAll(result.paths.map((path) => File(path!)).toList());
+        });
+        _confirmAndNavigate();
+      }
+    } catch (e) {
+      print("Error picking videos: $e");
+    }
+  }
+
+  // Take Photo
+  Future<void> _takePhoto() async {
+    try {
+      mediaPaths.clear();
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        setState(() {
+          mediaPaths.add(File(image.path));
+        });
+        _confirmAndNavigate();
+      }
+    } catch (e) {
+      print("Error taking photo: $e");
+    }
+  }
+
+  // Record Video
+  Future<void> _recordVideo() async {
+    try {
+      mediaPaths.clear();
+      final XFile? video = await _picker.pickVideo(source: ImageSource.camera);
+      if (video != null) {
+        setState(() {
+          mediaPaths.add(File(video.path));
+        });
+        _confirmAndNavigate();
+      }
+    } catch (e) {
+      print("Error recording video: $e");
+    }
+  }
+
+  // Show Confirmation Dialog and Navigate
+  void _confirmAndNavigate() {
+    if (mediaPaths.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Confirm Selection'),
+            content:
+                const Text('Do you want to proceed with the selected media?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  log('Files list: $mediaPaths');
+                  // debugger();
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MediaMessagingScreen(
+                        initialMediaList: mediaPaths,
+                        chatModel: widget.chatModel,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void _showOptionsBottomSheet(BuildContext context, String type) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (type == "attachment") ...[
+                ListTile(
+                  leading: const Icon(Icons.photo_album, color: Colors.blue),
+                  title: const Text('Gallery Photos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickPhotos();
+                  },
+                ),
+                ListTile(
+                  leading:
+                      const Icon(Icons.video_library, color: Colors.orange),
+                  title: const Text('Gallery Videos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickVideos();
+                  },
+                ),
+              ],
+              if (type == "camera") ...[
+                ListTile(
+                  leading: const Icon(Icons.camera_alt, color: Colors.green),
+                  title: const Text('Take Photo'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _takePhoto();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.videocam, color: Colors.red),
+                  title: const Text('Record Video'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _recordVideo();
+                  },
+                ),
+              ],
+            ],
           ),
         );
       },

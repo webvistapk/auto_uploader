@@ -60,7 +60,7 @@ class _InboxScreenState extends State<InboxScreen> {
         isLoading = true;
       });
 
-      // await chatController.ReadMessages(widget.chatModel.id);
+      await chatController.ReadMessages(widget.chatModel.id);
       await chatController.loadMessages(chatID, offset: offset, limit: limit);
 
       setState(() {
@@ -149,7 +149,7 @@ class _InboxScreenState extends State<InboxScreen> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  Navigator.pop(context, true);
+                                  Navigator.pop(context);
                                 },
                                 child: const Icon(Icons.arrow_back),
                               ),
@@ -244,13 +244,13 @@ class _InboxScreenState extends State<InboxScreen> {
                                     final formatTime =
                                         formatDateString(message.createdAt);
                                     if (isOwnMessage) {
-                                      //   return OwnMessage(
-                                      //     text: message.content,
-                                      //     timestampDate: formatDate,
-                                      //     timestampTime: formatTime,
-                                      //     mediaList: message.media,
-                                      //   );
-                                      // } else {
+                                      return OwnMessage(
+                                        text: message.content,
+                                        timestampDate: formatDate,
+                                        timestampTime: formatTime,
+                                        mediaList: message.media,
+                                      );
+                                    } else {
                                       return buildUserMessage(
                                         timestamp: formatDate,
                                         userProfile: widget.userProfile,
@@ -268,7 +268,6 @@ class _InboxScreenState extends State<InboxScreen> {
                           await chatController.sendMessage(
                             messageController.text.trim(),
                             widget.chatModel.id,
-                            widget.userProfile.username!,
                             [],
                           );
 
@@ -284,7 +283,7 @@ class _InboxScreenState extends State<InboxScreen> {
                           ToastNotifier.showErrorToast(context, e.toString());
                         }
                       },
-                      // chatModel: widget.chatModel,
+                      chatModel: widget.chatModel,
                     ),
                   ],
                 ),

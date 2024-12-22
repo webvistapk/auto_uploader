@@ -17,6 +17,10 @@ class PostManager {
     required List<String> keywordsList,
     required String privacyPost,
     required List<File> mediaFiles,
+    String? pollTitle,
+    String? pollDescription,
+    List<String>? pollOptions,
+    required List<String> interactions,
     required String token, // Bearer token for authorization
   }) async {
     String url = baseUrl + ApiURLs.create_new_post;
@@ -32,6 +36,20 @@ class PostManager {
     request.headers.addAll(headers);
 
     // Add fields
+    if (pollTitle != null && pollDescription != null && pollOptions != null) {
+      request.fields['poll_title'] = pollTitle;
+      request.fields['poll_description'] = pollDescription;
+
+      // Add option values
+
+      // Add the list as a form field
+      for (var i = 0; i < pollOptions.length; i++) {
+        request.fields['polls'] = pollOptions[i];
+      }
+    }
+    if (interactions.isNotEmpty) {
+      request.fields['interactions'] = interactions.join(',').toLowerCase();
+    }
 
     request.fields['post'] = postTitle;
     request.fields['privacy'] = privacyPost;
@@ -41,14 +59,15 @@ class PostManager {
     } else {
       request.fields['tags'] = peopleTags.join(',');
     }
-
-    // Add media files
-    for (var file in mediaFiles) {
-      request.files.add(await http.MultipartFile.fromPath(
-        'media',
-        file.path,
-        filename: basename(file.path), // Use path's basename as the filename
-      ));
+    if (mediaFiles.isNotEmpty) {
+// Add media files
+      for (var file in mediaFiles) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'media',
+          file.path,
+          filename: basename(file.path), // Use path's basename as the filename
+        ));
+      }
     }
 
     try {
@@ -63,12 +82,12 @@ class PostManager {
 
         return jsonDecode(response.body);
       } else {
-        // debugger();
+        debugger();
         log('Failed to create post: ${response.statusCode}, ${response.body}');
         return null;
       }
     } catch (error) {
-      // debugger();
+      debugger();
       print('Error occurred: $error');
       return null;
     }

@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1s
 
 environment:
-  sdk: '>=3.4.0-282.1.beta'
+  sdk: '>=3.2.0-42.2.beta'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -57,6 +57,7 @@ dependencies:
  
   image_picker:
   permission_handler: ^11.0.1
+ 
 
   
   shimmer: ^3.0.0
@@ -71,6 +72,10 @@ dependencies:
   web_socket_channel: ^2.4.0
   intl: ^0.19.0
   file_picker: ^8.0.0+1
+  video_thumbnail: ^0.5.3
+  mime: ^1.0.4
+  http_parser: ^4.0.2
+  cached_network_image: ^3.3.1
 
 dev_dependencies:
   flutter_test:

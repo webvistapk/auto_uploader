@@ -8,10 +8,9 @@ class MessageModel {
   final String senderLastName;
   final String content;
   final String createdAt;
-  final List<dynamic>
-      media; // Assuming media is a list, you can refine the type
-  final List<dynamic> keywords; // Assuming keywords is a list, refine if needed
-  final List<dynamic> tags; // Assuming tags is a list, refine if needed
+  final List<dynamic> media; // Media list
+  final List<dynamic> keywords; // Keywords list
+  final List<dynamic> tags; // Tags list
 
   MessageModel({
     required this.id,
@@ -30,15 +29,15 @@ class MessageModel {
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
       id: json['id'] ?? 0,
-      senderId: json['sender']['id'] ?? 0, // sender id from nested object
-      senderUsername: json['sender']['username'] ?? '',
-      senderFirstName: json['sender']['first_name'] ?? '',
-      senderLastName: json['sender']['last_name'] ?? '',
-      content: json['message'] ?? '', // Map 'message' field from the response
+      senderId: json['sender']?['id'] ?? 0, // Handle nested null safely
+      senderUsername: json['sender']?['username'] ?? '',
+      senderFirstName: json['sender']?['first_name'] ?? '',
+      senderLastName: json['sender']?['last_name'] ?? '',
+      content: json['message'] ?? '', // Map 'message' field
       createdAt: json['created_at'] ?? '',
-      media: json['media'] ?? [], // Ensure it's an empty list if no media
-      keywords: json['keywords'] ?? [], // Default to an empty list
-      tags: json['tags'] ?? [], // Default to an empty list
+      media: json['media'] ?? [],
+      keywords: json['keywords'] ?? [],
+      tags: json['tags'] ?? [],
     );
   }
 
@@ -63,7 +62,7 @@ class MessageModel {
   // Helper method to display formatted message time (optional)
   String formatDateString(String dateString) {
     try {
-      DateTime dateTime = DateTime.parse(dateString);
+      final DateTime dateTime = DateTime.parse(dateString);
       final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
       return formatter.format(dateTime);
     } catch (e) {

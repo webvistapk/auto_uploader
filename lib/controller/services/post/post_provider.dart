@@ -63,6 +63,7 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
         List<PostModel> followerPosts = (data['posts'] as List)
             .map((postJson) => PostModel.fromJson(postJson))
             .toList();
@@ -136,7 +137,11 @@ class PostProvider extends ChangeNotifier {
       required List<int> peopleTags,
       required List<String> keywordsList,
       required String privacyPost,
-      required List<File> mediaFiles}) async {
+      required List<File> mediaFiles,
+      String? pollTitle,
+      String? pollDescription,
+      List<String>? pollOptions,
+      required List<String>? interactions}) async {
     try {
       _isLoading = true;
       notifyListeners();
@@ -150,7 +155,11 @@ class PostProvider extends ChangeNotifier {
             keywordsList: keywordsList,
             privacyPost: privacyPost,
             mediaFiles: mediaFiles,
-            token: token);
+            token: token,
+            pollTitle: pollTitle,
+            pollDescription: pollDescription,
+            pollOptions: pollOptions,
+            interactions: interactions!);
 
         if (response != null) {
           log("Post: $response");
@@ -293,13 +302,13 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ReelPostModel>> fetchFollowersReels(BuildContext context,int? userID) async {
+  Future<List<ReelPostModel>> fetchFollowersReels(
+      BuildContext context, int? userID) async {
     final String? token = await Prefrences.getAuthToken();
-   // int? _loggedInUserId = ;
+    // int? _loggedInUserId = ;
 //debugger();
     // Base URL and API path
-    String URL =
-        "${ApiURLs.baseUrl}${ApiURLs.get_follower_reel_post}$userID/";
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_follower_reel_post}$userID/";
 
     // Add query parameters for pagination (limit and offset)
     Uri uri = Uri.parse(URL);
@@ -325,10 +334,10 @@ class PostProvider extends ChangeNotifier {
           reelList.add(reel);
 
           if (_reels == null) {
-        _reels = reelList; // Initialize _reels if null
-      } else {
-        _reels!.addAll(reelList); // Append new data for pagination
-      }
+            _reels = reelList; // Initialize _reels if null
+          } else {
+            _reels!.addAll(reelList); // Append new data for pagination
+          }
         }
         print("PROVIDER REEL :${reelList}");
 
@@ -347,58 +356,57 @@ class PostProvider extends ChangeNotifier {
   }
 
   Future<List<ReelPostModel>> fetchReels(
-    BuildContext context, String id, int limit, int offset) async {
-  final String? token = await Prefrences.getAuthToken();
+      BuildContext context, String id, int limit, int offset) async {
+    final String? token = await Prefrences.getAuthToken();
 
-  // Base URL and API path
-  String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id/";
+    // Base URL and API path
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id/";
 
-  // Add query parameters for pagination (limit and offset)
-  Uri uri = Uri.parse(URL).replace(queryParameters: {
-    'limit': limit.toString(), // How many posts per page
-    'offset': offset.toString() // Offset for pagination
-  });
-
-  try {
-    final response = await http.get(uri, headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token"
+    // Add query parameters for pagination (limit and offset)
+    Uri uri = Uri.parse(URL).replace(queryParameters: {
+      'limit': limit.toString(), // How many posts per page
+      'offset': offset.toString() // Offset for pagination
     });
 
-    print(response.body);
+    try {
+      final response = await http.get(uri, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      });
 
-    if (response.statusCode == 200) {
-      final jsonList = jsonDecode(response.body);
-      print("REEL FETCHED SUCCESSFULLY");
+      print(response.body);
 
-      // Convert JSON to ReelPostModel list
-      List<ReelPostModel> reelList = [];
-      for (var reelJson in jsonList['reels']) {
-        final reel = ReelPostModel.fromJson(reelJson);
-        reelList.add(reel);
-      }
+      if (response.statusCode == 200) {
+        final jsonList = jsonDecode(response.body);
+        print("REEL FETCHED SUCCESSFULLY");
 
-      // Update the provider's state
-      if (_reels == null) {
-        _reels = reelList; // Initialize _reels if null
+        // Convert JSON to ReelPostModel list
+        List<ReelPostModel> reelList = [];
+        for (var reelJson in jsonList['reels']) {
+          final reel = ReelPostModel.fromJson(reelJson);
+          reelList.add(reel);
+        }
+
+        // Update the provider's state
+        if (_reels == null) {
+          _reels = reelList; // Initialize _reels if null
+        } else {
+          _reels!.addAll(reelList); // Append new data for pagination
+        }
+
+        notifyListeners();
+        return reelList;
       } else {
-        _reels!.addAll(reelList); // Append new data for pagination
+        return [];
       }
-
-      notifyListeners();
-      return reelList;
-    } else {
-      return [];
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      print(e);
+      return []; // Return an empty list on exception
+    } finally {
+      setIsLoading(false);
     }
-  } catch (e) {
-    ToastNotifier.showErrorToast(context, "There is an Error: $e");
-    print(e);
-    return []; // Return an empty list on exception
-  } finally {
-    setIsLoading(false);
   }
-}
-
 
   Future<void> deletePost(
       String postId, BuildContext context, bool isReelPost) async {
@@ -497,7 +505,7 @@ class PostProvider extends ChangeNotifier {
         final postIndex = _posts!.indexWhere((post) => post.id == postId);
         if (postIndex != -1) {
           _posts?[postIndex].likesCount += 1;
-          _posts?[postIndex].is_liked =
+          _posts?[postIndex].isLiked =
               true; // Assuming you want to mark it as liked
           notifyListeners();
         } else {
@@ -514,13 +522,13 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> userDisLikes(
-      int postId, BuildContext context) async {
+  Future<void> userDisLikes(int postId, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
     print("POst ID is : ${postId}");
 
     // API endpoint to like a post
-    String URL = "${ApiURLs.baseUrl}${ApiURLs.dislike}post/${postId.toString()}/";
+    String URL =
+        "${ApiURLs.baseUrl}${ApiURLs.dislike}post/${postId.toString()}/";
 
     Uri uri = Uri.parse(URL);
 
@@ -538,21 +546,19 @@ class PostProvider extends ChangeNotifier {
         // final int newLikesCount = data['likes_count']; // Extract new like count
 
         // Find the post in _posts and update it
-      
-          final postIndex = _posts!.indexWhere((post) => post.id == postId);
-          if (postIndex != -1) {
-            print("Post Index ${postIndex}");
 
-            _posts?[postIndex].likesCount -= 1;
-            _posts?[postIndex].is_liked =
-                false; // Assuming you want to mark it as liked
-            ToastNotifier.showSuccessToast(
-                context, "Post Disliked Successfully");
-          } else {
-            print("Post index is wrong");
-            ToastNotifier.showErrorToast(context, "Post Disliked Faild");
-          }
-        
+        final postIndex = _posts!.indexWhere((post) => post.id == postId);
+        if (postIndex != -1) {
+          print("Post Index ${postIndex}");
+
+          _posts?[postIndex].likesCount -= 1;
+          _posts?[postIndex].isLiked =
+              false; // Assuming you want to mark it as liked
+          ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
+        } else {
+          print("Post index is wrong");
+          ToastNotifier.showErrorToast(context, "Post Disliked Faild");
+        }
 
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
@@ -564,13 +570,12 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-
-   Future<void> reelLike(int reelID, BuildContext context, int reelIndex) async {
+  Future<void> reelLike(int reelID, BuildContext context, int reelIndex) async {
     final String? token = await Prefrences.getAuthToken();
     //print("Reel ID ${postID}");
     String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}reel/$reelID/";
-        
-   // print("Post ID in Like ${postID}");
+
+    // print("Post ID in Like ${postID}");
 
     try {
       final response = await http.post(
@@ -582,11 +587,9 @@ class PostProvider extends ChangeNotifier {
       );
       print("API HITTED");
       if (response.statusCode == 200) {
-      
-           // _reels?[reelIndex].isLiked = true;
-            _reels?[reelIndex].likesCount += 1;
-            _reels?[reelIndex].isLiked = true;
-    
+        // _reels?[reelIndex].isLiked = true;
+        _reels?[reelIndex].likesCount += 1;
+        _reels?[reelIndex].isLiked = true;
 
         // Notify listeners to update UI
         notifyListeners();
@@ -600,12 +603,13 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> reelDisLike(int reelID, BuildContext context, int reelIndex) async {
+  Future<void> reelDisLike(
+      int reelID, BuildContext context, int reelIndex) async {
     final String? token = await Prefrences.getAuthToken();
     //print("Reel ID ${postID}");
     String URL = "${ApiURLs.baseUrl}${ApiURLs.dislike}reel/$reelID/";
-        
-   // print("Post ID in Like ${postID}");
+
+    // print("Post ID in Like ${postID}");
 
     try {
       final response = await http.delete(
@@ -617,11 +621,9 @@ class PostProvider extends ChangeNotifier {
       );
       print("API HITTED");
       if (response.statusCode == 200) {
-      
-           // _reels?[reelIndex].isLiked = true;
-            _reels?[reelIndex].likesCount -= 1;
-            _reels?[reelIndex].isLiked = false;
-    
+        // _reels?[reelIndex].isLiked = true;
+        _reels?[reelIndex].likesCount -= 1;
+        _reels?[reelIndex].isLiked = false;
 
         // Notify listeners to update UI
         notifyListeners();

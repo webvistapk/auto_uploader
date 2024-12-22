@@ -269,6 +269,7 @@ class ProviderManager {
     // debugger();
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
+      log(response.body);
       return combineFollowersAndFollowings(responseData);
     } else {
       return [];

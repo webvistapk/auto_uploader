@@ -228,9 +228,27 @@ class _PostAndReelsState extends State<PostAndReels>
                                                 : "reel",
                                           )));
                             }
-                          : null
+                          : () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => AddPostScreen(
+                                            mediFiles: mediaFiles,
+                                            userProfile: widget.userProfile,
+                                            type: "post",
+                                          )));
+                            }
                       : selectedReel.isEmpty
-                          ? null
+                          ? () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => AddPostScreen(
+                                            mediFiles: selectedReel,
+                                            userProfile: widget.userProfile,
+                                            type: "post",
+                                          )));
+                            }
                           : () {
                               Navigator.push(
                                   context,
