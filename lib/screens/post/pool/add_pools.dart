@@ -18,14 +18,17 @@ class AddPollScreen extends StatefulWidget {
   final String privacyPolicy;
   final List<File> mediaFiles;
   final UserProfile userProfile;
-  const AddPollScreen(
-      {super.key,
-      required this.postTitle,
-      required this.selectedTagUsers,
-      required this.keywordList,
-      required this.privacyPolicy,
-      required this.mediaFiles,
-      required this.userProfile});
+  final List<String> interactions;
+  const AddPollScreen({
+    super.key,
+    required this.postTitle,
+    required this.selectedTagUsers,
+    required this.keywordList,
+    required this.privacyPolicy,
+    required this.mediaFiles,
+    required this.userProfile,
+    required this.interactions,
+  });
 
   @override
   State<AddPollScreen> createState() => _AddPollScreenState();
@@ -238,7 +241,8 @@ class _AddPollScreenState extends State<AddPollScreen> {
                                 pollTitle: _pollTitleController.text.trim(),
                                 pollDescription:
                                     _pollDescriptionController.text.trim(),
-                                pollOptions: pollOptions);
+                                pollOptions: pollOptions,
+                                interactions: widget.interactions);
 
                             if (response != null) {
                               ToastNotifier.showSuccessToast(

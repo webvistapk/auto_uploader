@@ -343,6 +343,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                       privacyPolicy: privacyPolicy,
                                       mediaFiles: widget.mediFiles!,
                                       userProfile: widget.userProfile!,
+                                      interactions: interactionSheetOptions,
                                     ),
                                 context: context));
                       }
@@ -359,7 +360,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             peopleTags: selectedTagUsers,
                             keywordsList: keywords,
                             privacyPost: privacyPolicy,
-                            mediaFiles: widget.mediFiles!);
+                            mediaFiles: widget.mediFiles!,
+                            interactions: interactionSheetOptions);
 
                         if (response != null) {
                           ToastNotifier.showSuccessToast(

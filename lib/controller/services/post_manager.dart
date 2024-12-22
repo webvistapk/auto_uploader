@@ -20,6 +20,7 @@ class PostManager {
     String? pollTitle,
     String? pollDescription,
     List<String>? pollOptions,
+    required List<String> interactions,
     required String token, // Bearer token for authorization
   }) async {
     String url = baseUrl + ApiURLs.create_new_post;
@@ -40,12 +41,16 @@ class PostManager {
       request.fields['poll_description'] = pollDescription;
 
       // Add option values
-      String optionsString =
-          pollOptions.join(','); // Example: "Option 1,Option 2,Option 3"
 
       // Add the list as a form field
-      request.fields['polls'] = optionsString;
+      for (var i = 0; i < pollOptions.length; i++) {
+        request.fields['polls'] = pollOptions[i];
+      }
     }
+    if (interactions.isNotEmpty) {
+      request.fields['interactions'] = interactions.join(',').toLowerCase();
+    }
+
     request.fields['post'] = postTitle;
     request.fields['privacy'] = privacyPost;
 

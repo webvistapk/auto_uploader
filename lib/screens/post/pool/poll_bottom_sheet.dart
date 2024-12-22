@@ -1,11 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
-import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:mobile/prefrences/prefrences.dart';
 
-postVote(int postId, String authToken) async {
+postVote(int postId, String authToken, context) async {
   final url = 'http://147.79.117.253:8001/api/posts/vote/new/$postId/';
   final headers = {
     'Authorization': 'Bearer $authToken',
@@ -14,21 +17,22 @@ postVote(int postId, String authToken) async {
   try {
     final response = await http.post(Uri.parse(url), headers: headers);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       print('Vote posted successfully');
       return true;
     } else {
-      print('Failed to post vote: ${response.statusCode}');
+      ToastNotifier.showErrorToast(
+          context, 'Failed to post vote: ${response.statusCode}');
       return false;
     }
   } catch (e) {
-    print('Error posting vote: $e');
+    ToastNotifier.showErrorToast(context, 'Error posting vote: $e');
     return false;
   }
 }
 
 Poll? selectedPollOption;
-
+bool isLoadingPoll = false;
 int calculateTotalVotes(List<Poll> polls) {
   return polls.fold(0, (sum, poll) => sum + poll.voteCount);
 }
@@ -130,21 +134,34 @@ void showPollModal(BuildContext context, List<Poll> pollPost, String pollTitle,
                   ),
                   onPressed: selectedPollOption != null
                       ? () async {
+                          setState(() {
+                            isLoadingPoll = true;
+                          });
                           final authToken = await Prefrences.getAuthToken();
-                          final response =
-                              await postVote(selectedPollOption!.id, authToken);
+                          final response = await postVote(
+                              selectedPollOption!.id, authToken, context);
 
                           if (response) {
+                            setState(() {
+                              isLoadingPoll = false;
+                            });
                             Navigator.pop(context);
 
                             showPercentageResult(context, pollPost);
                           }
+                          setState(() {
+                            isLoadingPoll = false;
+                          });
                         }
                       : null,
-                  child: Text("Next",
-                      style: selectedPollOption == null
-                          ? null
-                          : AppTextStyles.poppinsBold(color: Colors.white)),
+                  child: isLoadingPoll
+                      ? Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        )
+                      : Text("Next",
+                          style: selectedPollOption == null
+                              ? null
+                              : AppTextStyles.poppinsBold(color: Colors.white)),
                 ),
               ),
               const SizedBox(height: 20),
@@ -164,6 +181,7 @@ void showPercentageResult(BuildContext context, List<Poll> pollData) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (context) {
+      log("Poll Calculate Vote: ${calculateTotalVotes(pollData)}");
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -194,9 +212,10 @@ void showPercentageResult(BuildContext context, List<Poll> pollData) {
           ),
           const SizedBox(height: 20),
           ...pollData.map((option) {
-            double percentage = calculateTotalVotes(pollData) > 0
-                ? (option.voteCount / calculateTotalVotes(pollData))
-                : 0.0;
+            double percentage =
+                (option.voteCount / calculateTotalVotes(pollData));
+            log("Percentage: $percentage");
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: AnimatedContainer(
@@ -237,7 +256,9 @@ void showPercentageResult(BuildContext context, List<Poll> pollData) {
                             Text(
                               '${(percentage * 100).toStringAsFixed(1)}%',
                               style: TextStyle(
-                                  color: Colors.black,
+                                  color: percentage == 1
+                                      ? Colors.white
+                                      : Colors.black,
                                   fontWeight: FontWeight.bold),
                             ),
                           ],

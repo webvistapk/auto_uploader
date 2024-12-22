@@ -140,7 +140,8 @@ class PostProvider extends ChangeNotifier {
       required List<File> mediaFiles,
       String? pollTitle,
       String? pollDescription,
-      List<String>? pollOptions}) async {
+      List<String>? pollOptions,
+      required List<String>? interactions}) async {
     try {
       _isLoading = true;
       notifyListeners();
@@ -157,7 +158,8 @@ class PostProvider extends ChangeNotifier {
             token: token,
             pollTitle: pollTitle,
             pollDescription: pollDescription,
-            pollOptions: pollOptions);
+            pollOptions: pollOptions,
+            interactions: interactions!);
 
         if (response != null) {
           log("Post: $response");

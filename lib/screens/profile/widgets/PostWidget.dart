@@ -208,11 +208,17 @@ class _PostWidgetState extends State<PostWidget> {
                 if (widget.postModel.interactions!.contains('polls')) ...[
                   SizedBox(width: 10),
                   GestureDetector(
-                      onTap: () => showPollModal(
-                          context,
-                          widget.postModel.polls ?? [],
-                          widget.postModel.pollTitle ?? '',
-                          widget.postModel.pollDescription ?? ''),
+                      onTap: () {
+                        widget.postModel.polls!
+                                .any((element) => element.isVoted == true)
+                            ? showPercentageResult(
+                                context, widget.postModel.polls!)
+                            : showPollModal(
+                                context,
+                                widget.postModel.polls ?? [],
+                                widget.postModel.pollTitle ?? '',
+                                widget.postModel.pollDescription ?? '');
+                      },
                       child: Icon(
                         Icons.poll_outlined,
                         size: 20,
