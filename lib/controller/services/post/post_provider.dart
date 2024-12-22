@@ -293,13 +293,13 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ReelPostModel>> fetchFollowersReels(BuildContext context) async {
+  Future<List<ReelPostModel>> fetchFollowersReels(BuildContext context,int? userID) async {
     final String? token = await Prefrences.getAuthToken();
-    int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
-
+   // int? _loggedInUserId = ;
+//debugger();
     // Base URL and API path
     String URL =
-        "${ApiURLs.baseUrl}${ApiURLs.get_follower_reel_post}$_loggedInUserId";
+        "${ApiURLs.baseUrl}${ApiURLs.get_follower_reel_post}$userID/";
 
     // Add query parameters for pagination (limit and offset)
     Uri uri = Uri.parse(URL);
@@ -323,6 +323,12 @@ class PostProvider extends ChangeNotifier {
           // Change 'posts' to 'reels'
           final reel = ReelPostModel.fromJson(reelJson);
           reelList.add(reel);
+
+          if (_reels == null) {
+        _reels = reelList; // Initialize _reels if null
+      } else {
+        _reels!.addAll(reelList); // Append new data for pagination
+      }
         }
         print("PROVIDER REEL :${reelList}");
 
@@ -345,7 +351,7 @@ class PostProvider extends ChangeNotifier {
   final String? token = await Prefrences.getAuthToken();
 
   // Base URL and API path
-  String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id";
+  String URL = "${ApiURLs.baseUrl}${ApiURLs.get_reel_post}$id/";
 
   // Add query parameters for pagination (limit and offset)
   Uri uri = Uri.parse(URL).replace(queryParameters: {

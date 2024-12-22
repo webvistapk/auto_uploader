@@ -68,6 +68,7 @@ class _UserReelScreenState extends State<UserReelScreen> {
     return ReelScreen(
       //reels: _reels,
       showEditDeleteOptions: false, // Hide edit/delete options in this context
+      isUserScreen: false,
     );
   }
 }

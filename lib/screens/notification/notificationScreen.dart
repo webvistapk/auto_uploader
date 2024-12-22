@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/CommentModel.dart';
@@ -33,7 +35,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void _loadMoreNotifications() {
     setState(() {
       _isLoadingMore = true;
-      _offset += _limit; // Increment offset to fetch the next set of notifications
+      _offset +=
+          _limit; // Increment offset to fetch the next set of notifications
     });
 
     _fetchNotifications();
@@ -75,10 +78,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            itemCount: modelNotifications.length + (notificationProvider.nextOffset != -1 ? 1 : 0), // Extra item for the button
+            itemCount: modelNotifications.length +
+                (notificationProvider.nextOffset != -1
+                    ? 1
+                    : 0), // Extra item for the button
             itemBuilder: (context, index) {
               print("INdex ${index}");
-                  print("Length ${modelNotifications.length}");
+              print("Length ${modelNotifications.length}");
               if (index < modelNotifications.length) {
                 final notification = modelNotifications[index];
                 return Container(
@@ -101,16 +107,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     children: [
                       // Profile Image
                       Hero(
-                        tag: 'actor_${notification.actor.id}',
+                        tag: 'actor_${notification.actor!.id}',
                         child: CircleAvatar(
                           radius: 28,
                           backgroundImage: NetworkImage(
-                            notification.actor.profileImage ??
+                            notification.actor!.profileImage ??
                                 AppUtils.userImage,
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
+                      //Text(notification.actio)
                       // Notification Details
                       Expanded(
                         child: Column(
@@ -125,7 +132,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 children: [
                                   TextSpan(
                                     text:
-                                        '${notification.actor.firstName} ${notification.actor.lastName} ',
+                                        '${notification.actor!.firstName} ${notification.actor!.lastName} ',
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold),
                                   ),
@@ -139,7 +146,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   if (notification.reel != null)
                                     const TextSpan(
                                       text: 'on your Reel',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   if (notification.post != null)
                                     TextSpan(
@@ -153,7 +161,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              notification.createdAt,
+                              notification.createdAt.toString(),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
@@ -164,7 +172,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                       // Navigation Button
                       IconButton(
-                        icon: const Icon(Icons.chevron_right, color: Colors.grey),
+                        icon:
+                            const Icon(Icons.chevron_right, color: Colors.grey),
                         onPressed: () {
                           _navigateToDetails(notification);
                         },
@@ -173,7 +182,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
                 );
               } else {
-                
                 // This is the "Show More" button
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
@@ -196,28 +204,107 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   void _navigateToDetails(notification) {
+    print("Notification ${notification.action}");
+ //   debugger();
     if (notification.reel != null) {
-      Navigator.push(
+      if(notification.action=='commented'){
+        Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ReelScreen(
             isNotificationReel: true,
             initialIndex: 0,
             reelId: notification.reel!.id.toString(),
+            commentHightlightId: notification.comment.id.toString(),
             showEditDeleteOptions: true,
+            isUserScreen: false
           ),
         ),
       );
-    } else if (notification.post != null) {
-      Navigator.push(
+       }
+       else{
+        Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => SinglePost(
-            postId: notification.post!.id.toString(),
-            onPostUpdated: () {},
+          builder: (context) => ReelScreen(
+            isNotificationReel: true,
+            initialIndex: 0,
+            showEditDeleteOptions: true,
+            isUserScreen: false,
           ),
         ),
       );
-    }
-  }
+       }
+      
+    } 
+
+    //Reply for Reel
+    else if (notification.action == 'replied' && notification.reply.postOrReel.type=='reel') {
+        print("Reply navigated for Reel");
+
+       
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ReelScreen(
+            isNotificationReel: true,
+            initialIndex: 0,
+            reelId: notification.reel!.id.toString(),
+            commentHightlightId: notification.comment.id.toString(),
+            replyHighlightId: notification.reply.result.id.toString(),
+            showEditDeleteOptions: true,
+            isUserScreen: false,
+          ),
+          ),
+        );
+      
+      } 
+
+//Reply for Post
+   else if (notification.action == 'replied' && notification.reply.postOrReel.type=='post') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SinglePost(
+              postId: notification.reply.postOrReel.data['id'].toString(),
+              commentId: notification.comment!.id.toString(),
+             replyID: notification.reply.result.id.toString(),
+              onPostUpdated: () {},
+            ),
+          ),
+        );
+      } 
+    
+    
+    else if (notification.post != null) {
+      //Navigate to commetn
+      
+      if (notification.action=='commented') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SinglePost(
+              postId: notification.post!.id.toString(),
+              commentId: notification.comment.id.toString(),
+              onPostUpdated: () {},
+            ),
+          ),
+        );
+      } 
+      
+      //Navigate to Post 
+      else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SinglePost(
+              postId: notification.post!.id.toString(),
+              //commentId: notification.comment!.id.toString(),
+              onPostUpdated: () {},
+            ),
+          ),
+        );
+      }
+      
+  }}
 }

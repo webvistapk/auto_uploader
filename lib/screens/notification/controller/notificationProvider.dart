@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/prefrences/prefrences.dart';
@@ -36,9 +37,14 @@ class NotificationProvider with ChangeNotifier {
           'Authorization': 'Bearer $token',
         },
       );
+      //debugger();
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        //print("response ${data}");
+           //print("response body  ${response.body}");
+           //print(data['notification']['reply']);
+        //debugger();
         final notificationResponse = NotificationResponse.fromJson(data);
 
         // Handle the first fetch or load more notifications

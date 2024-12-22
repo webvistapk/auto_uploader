@@ -47,6 +47,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => ChatController()),
           ChangeNotifierProvider(create: (_) => CommentProvider()),
           ChangeNotifierProvider(create: (_) => NotificationProvider()),
+          ChangeNotifierProvider(create: (_) => ReplyProvider()),
         ],
         child: MaterialApp(
             title: 'Fillet Social Media App',

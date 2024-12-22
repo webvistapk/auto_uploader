@@ -60,7 +60,7 @@ class Userstatus {
       map['stories'] = _stories?.map((v) => v.toJson()).toList();
     }
     map['total_count'] = _totalCount;
-    map['has_next_page'] = _hasNextPage;
+    map['has_next_page'] = _hasNextPage??0;
     map['next_offset'] = _nextOffset;
     return map;
   }

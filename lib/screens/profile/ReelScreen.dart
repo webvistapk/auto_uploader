@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/controller/function/commentBottomSheet.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
@@ -15,14 +18,20 @@ class ReelScreen extends StatefulWidget {
   final bool showEditDeleteOptions;
   final String? reelId;
   final bool? isNotificationReel;
+  String? commentHightlightId;
+  String? replyHighlightId;
+  final bool isUserScreen;
 
-  const ReelScreen({
+   ReelScreen({
     Key? key,
     // required this.reels,
     this.initialIndex = 0,
     this.showEditDeleteOptions = true,
     this.reelId,
     this.isNotificationReel,
+    this.commentHightlightId,
+    this.replyHighlightId,
+    required this.isUserScreen,
   }) : super(key: key);
 
   @override
@@ -48,6 +57,7 @@ class _ReelScreenState extends State<ReelScreen> {
 
     if (widget.reelId != null) {
       final index = getReelIndexById(widget.reelId!, _reels);
+      //debugger();
       if (index != -1) {
         _currentIndex = index;
       }
@@ -57,7 +67,7 @@ class _ReelScreenState extends State<ReelScreen> {
     if (widget.isNotificationReel == true && widget.reelId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(seconds: 1), () {
-          showComments(widget.reelId!);
+          showComments(widget.reelId!,true,context,'');
         });
       });
     }
@@ -76,7 +86,11 @@ class _ReelScreenState extends State<ReelScreen> {
 
     try {
       UserProfile? userProfile = await UserPreferences().getCurrentUser();
-      String? userId = userProfile!.id.toString();
+      int? userId = userProfile!.id;
+      // UserProfile? currentUserID; 
+      // userProfile.then((value){
+      //   currentUserID=value!;
+      // });
       if (userId == null) {
         print("Error: User ID is null. Please check the preferences.");
         // Optionally, navigate the user to the login screen here.
@@ -85,15 +99,31 @@ class _ReelScreenState extends State<ReelScreen> {
 
      // print("User REEL SCRREN: $userId");
 
-      List<ReelPostModel> fetchedReels =
-          await Provider.of<PostProvider>(context, listen: false)
-              .fetchReels(context, userId, limit, offset);
-
-      setState(() {
+      // List<ReelPostModel> fetchedReels =
+      //     await Provider.of<PostProvider>(context, listen: false)
+      //         .fetchReels(context, userId, limit, offset);
+      if(widget.isUserScreen){
+        List<ReelPostModel> fetchedReels =
+           await Provider.of<PostProvider>(context, listen: false)
+               .fetchReels(context, userId.toString(), limit, offset);
+               setState(() {
         _reels.addAll(fetchedReels);
         offset += limit;
         if (fetchedReels.length < limit) _hasMore = false;
       });
+      }
+      else{
+      List<ReelPostModel> fetchedReels = await Provider.of<PostProvider>(context, listen: false)
+          .fetchFollowersReels(context,userId);
+          setState(() {
+        _reels.addAll(fetchedReels);
+        offset += limit;
+        if (fetchedReels.length < limit) _hasMore = false;
+      });
+
+      }
+        
+      
     } catch (e) {
       print("Error fetching reels: $e");
     } finally {
@@ -107,31 +137,6 @@ class _ReelScreenState extends State<ReelScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  void showComments(String postId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height * 0.8,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-            ),
-          ),
-          child: CommentWidget(
-            isUsedSingle: true,
-            postId: postId,
-            isReelScreen: true,
-          ),
-        );
-      },
-    );
   }
 
   Future<void> deleteReel() async {
@@ -228,8 +233,9 @@ class _ReelScreenState extends State<ReelScreen> {
                             SizedBox(height: 20),
                             GestureDetector(
                               onTap: () {
+                //                debugger();
                                 showComments(
-                                    _reels[_currentIndex].id.toString());
+                                    _reels[_currentIndex].id.toString(),true,context,widget.commentHightlightId.toString(),replyID: widget.replyHighlightId);
                               },
                               child: Icon(
                                 Icons.messenger,

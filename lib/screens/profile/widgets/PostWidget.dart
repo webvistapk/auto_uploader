@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mobile/controller/function/commentBottomSheet.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
@@ -34,6 +35,7 @@ class PostWidget extends StatefulWidget {
   final onPressLiked;
   final bool isLiked;
   final String? scrollCommentId;
+  final String? scrollReplyID;
 
   const PostWidget({
     Key? key,
@@ -56,7 +58,8 @@ class PostWidget extends StatefulWidget {
     required this.onPressed,
     required this.onPressLiked,
     required this.isLiked,
-    this.scrollCommentId
+    this.scrollCommentId,
+    this.scrollReplyID,
     
   }) : super(key: key);
 
@@ -67,7 +70,7 @@ class PostWidget extends StatefulWidget {
 class _PostWidgetState extends State<PostWidget> {
   int _currentImageIndex = 0;
   bool isLiked = false;
-
+  
   void _likePost() {
     isLiked=widget.isLiked;
     if(mounted)
@@ -77,36 +80,39 @@ class _PostWidgetState extends State<PostWidget> {
     widget.onPressLiked;
   }
 
-  void showComments(String postId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return widget.showCommentSection == false
-            ? SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * 0.7,
-                // decoration: BoxDecoration(
-                //   color: Colors.white,
-                //   borderRadius: const BorderRadius.only(
-                //     topLeft: Radius.circular(10),
-                //     topRight: Radius.circular(10),
-                //   ),
-                // ),
-                child: CommentWidget(
-                  isUsedSingle: true,
-                  postId: postId,
-                  isReelScreen: false,
-                ))
-            : CommentWidget(
-                isUsedSingle: true,
-                postId: postId,
-                isReelScreen: false,
-                scrollCommentId: widget.scrollCommentId,
-              );
-      },
-    );
-  }
+  // void showComments(String postId) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     builder: (BuildContext context) {
+  //       return 
+  //       //widget.showCommentSection == false
+  //          // SizedBox(
+  //            //   width: MediaQuery.of(context).size.width,
+  //             //  height: MediaQuery.of(context).size.height * 0.7,
+  //               // decoration: BoxDecoration(
+  //               //   color: Colors.white,
+  //               //   borderRadius: const BorderRadius.only(
+  //               //     topLeft: Radius.circular(10),
+  //               //     topRight: Radius.circular(10),
+  //               //   ),
+  //               // ),
+  //              // child: CommentWidget(
+  //              //   isUsedSingle: true,
+  //              //   postId: postId,
+  //               //  isReelScreen: false,
+  //              // ));
+  //            CommentWidget(
+  //               isUsedSingle: true,
+  //               postId: postId,
+  //               isReelScreen: false,
+  //               scrollCommentId: widget.scrollCommentId,
+  //             );
+  //     },
+  //   );
+  // }
+
+   
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +203,7 @@ class _PostWidgetState extends State<PostWidget> {
                 GestureDetector(
                   onTap: widget.showCommentSection
                       ? null
-                      : () => showComments(widget.postId),
+                      : () => showComments(widget.postId,false,context,widget.scrollCommentId.toString(),replyID: widget.scrollReplyID),
                   child: _buildInteractionIcon(
                       CupertinoIcons.chat_bubble_fill, 
                       widget.comments //show comments count
@@ -224,14 +230,15 @@ class _PostWidgetState extends State<PostWidget> {
                 const SizedBox(height: 8),
                 widget.showCommentSection
                     ? CommentWidget(
-                        isUsedSingle: false,
                         postId: widget.postId,
                         isReelScreen: false,
-                        scrollCommentId: widget.scrollCommentId,
+                        commentIdToHighlight: widget.scrollCommentId.toString(),
+                        replyIdToHighlight: widget.scrollCommentId.toString(),
+                      
                       )
                     : InkWell(
                         onTap: () {
-                          showComments(widget.postId);
+                          showComments(widget.postId,false,context,widget.scrollCommentId.toString(),replyID: widget.scrollCommentId.toString());
                         },
                         child: Text(
                           'View all ${widget.comments} comments',
@@ -287,7 +294,7 @@ class _PostWidgetState extends State<PostWidget> {
         );
       },
       options: CarouselOptions(
-        height: 350,
+        height: 300,
         enableInfiniteScroll: false,
         enlargeCenterPage: true,
         viewportFraction: 1.0,

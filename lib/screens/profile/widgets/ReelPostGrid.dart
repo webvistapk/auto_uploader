@@ -77,6 +77,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
        // reels: _reels,
         initialIndex: index, // Pass the index of the selected video
         showEditDeleteOptions: true,
+        isUserScreen: true,
       ),
     ));
   }

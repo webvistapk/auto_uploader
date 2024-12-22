@@ -23,7 +23,7 @@ class CommentModel {
           .toList(),
       totalCount: json['total_count'],
       hasNextPage: json['has_next_page'],
-      nextOffset: json['next_offset'],
+      nextOffset: json['next_offset']??0,
     );
   }
 }
@@ -73,6 +73,34 @@ class Comment {
       replyCount: json['replies_count'],
       isReplyVisible: false,
       isReplyLoaded: false,
+    );
+  }
+}
+
+class ReplyModel {
+  String status;
+  List<Reply> reply;
+  int totalCount;
+  bool hasNextPage;
+  int nextOffset;
+
+  ReplyModel({
+    required this.status,
+    required this.reply,
+    required this.totalCount,
+    required this.hasNextPage,
+    required this.nextOffset,
+  });
+
+  factory ReplyModel.fromJson(Map<String, dynamic> json) {
+    return ReplyModel(
+      status: json['status'],
+      reply: (json['reply'] as List)
+          .map((item) => Reply.fromJson(item))
+          .toList(),
+      totalCount: json['total_count'],
+      hasNextPage: json['has_next_page'],
+      nextOffset: json['next_offset']??0,
     );
   }
 }

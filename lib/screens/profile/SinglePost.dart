@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
@@ -12,13 +14,16 @@ class SinglePost extends StatefulWidget {
   final String postId;
   final bool isInteractive;
   final String? commentId;
+  final String? replyID;
   final VoidCallback onPostUpdated;
 
   SinglePost({Key? key, 
   required this.postId, 
   this.isInteractive = false,
   this.commentId,
+  this.replyID,
   required this.onPostUpdated,
+
   })
       : super(key: key);
 
@@ -27,6 +32,7 @@ class SinglePost extends StatefulWidget {
 }
 class _SinglePostState extends State<SinglePost> {
   bool isUserPost = false;
+  
   @override
   void initState() {
     super.initState();
@@ -46,6 +52,7 @@ class _SinglePostState extends State<SinglePost> {
     } else {
       postProvider.getSinglePost(widget.postId); // Fetch if posts list is empty or null
     }
+  
   }
 
 
@@ -54,6 +61,7 @@ class _SinglePostState extends State<SinglePost> {
     super.dispose();
     widget.onPostUpdated(); // Call the callback when the screen is popped
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +99,7 @@ class _SinglePostState extends State<SinglePost> {
               saved: '100',
               showCommentSection: true,
               scrollCommentId:widget.commentId,
+              scrollReplyID: widget.replyID,
               refresh: () => postProvider.getSinglePost(widget.postId),
               isUserPost: isUserPost,
               onPressed: () {
