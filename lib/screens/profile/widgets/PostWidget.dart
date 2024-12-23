@@ -4,6 +4,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mobile/common/app_icons.dart';
+import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/function/commentBottomSheet.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
@@ -38,7 +40,7 @@ class PostWidget extends StatefulWidget {
   final PostModel postModel;
 
   const PostWidget(
-      {Key? key,
+      {super.key,
       required this.postId,
       required this.username,
       required this.location,
@@ -60,8 +62,7 @@ class PostWidget extends StatefulWidget {
       required this.isLiked,
       this.scrollCommentId,
       this.scrollReplyID,
-      required this.postModel})
-      : super(key: key);
+      required this.postModel});
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
@@ -73,10 +74,11 @@ class _PostWidgetState extends State<PostWidget> {
 
   void _likePost() {
     isLiked = widget.isLiked;
-    if (mounted)
+    if (mounted) {
       setState(() {
         isLiked = !isLiked;
       });
+    }
     widget.onPressLiked;
   }
 
@@ -123,7 +125,7 @@ class _PostWidgetState extends State<PostWidget> {
           'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg';
     }
     return SingleChildScrollView(
-      physics: ScrollPhysics(),
+      physics: const ScrollPhysics(),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -135,7 +137,7 @@ class _PostWidgetState extends State<PostWidget> {
                   radius: 20,
                   backgroundImage: widget.profileImageUrl.contains(
                           'http://147.79.117.253:8001http://147.79.117.253:8001')
-                      ? NetworkImage(
+                      ? const NetworkImage(
                           'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg')
                       : NetworkImage(widget.profileImageUrl),
                 ),
@@ -146,11 +148,11 @@ class _PostWidgetState extends State<PostWidget> {
                     children: [
                       Text(
                         widget.username,
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         widget.location,
-                        style: TextStyle(color: Colors.grey, fontSize: 9),
+                        style: const TextStyle(color: Colors.grey, fontSize: 9),
                       ),
                     ],
                   ),
@@ -164,7 +166,7 @@ class _PostWidgetState extends State<PostWidget> {
                         iconKey,
                       );
                     },
-                    child: Icon(Icons.more_vert, size: 20),
+                    child: const Icon(Icons.more_vert, size: 20),
                   ),
               ],
             ),
@@ -176,7 +178,7 @@ class _PostWidgetState extends State<PostWidget> {
                   : Column(
                       children: [
                         _buildImageCarousel(widget.mediaUrls),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         _buildImageIndicator(widget.mediaUrls.length),
                       ],
                     ),
@@ -185,32 +187,32 @@ class _PostWidgetState extends State<PostWidget> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                _buildInteractionIcon(FontAwesomeIcons.share, widget.shares),
-                SizedBox(width: 10),
-                _buildInteractionIcon(CupertinoIcons.bookmark, widget.saved),
-                SizedBox(width: 10),
+                _buildInteractionIcon(AppIcons.share, widget.shares),
+                const SizedBox(width: 10),
+                _buildInteractionIcon(AppIcons.favorite, widget.saved),
+                const SizedBox(width: 10),
                 GestureDetector(
                   onTap: widget
                       .onPressLiked, // Call _likePost when the like icon is clicked
                   child: _buildInteractionIcon(
-                    widget.isLiked ? Icons.favorite : Icons.favorite_border,
+                    widget.isLiked ? AppIcons.heart :  AppIcons.heart_filled,
                     widget.likes, //show Count of likes
                   ),
                 ),
                 if (widget.postModel.interactions!.contains('comments')) ...[
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   GestureDetector(
                     onTap: widget.showCommentSection
                         ? null
                         : () => showComments(widget.postId,false,widget.scrollCommentId,widget.scrollReplyID.toString()),
                     child: _buildInteractionIcon(
-                        CupertinoIcons.chat_bubble_fill,
+                        AppIcons.comment,
                         widget.comments //show comments count
                         ),
                   ),
                 ],
                 if (widget.postModel.interactions!.contains('polls')) ...[
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   GestureDetector(
                       onTap: () {
                         widget.postModel.polls!
@@ -223,7 +225,7 @@ class _PostWidgetState extends State<PostWidget> {
                                 widget.postModel.pollTitle ?? '',
                                 widget.postModel.pollDescription ?? '');
                       },
-                      child: Icon(
+                      child: const Icon(
                         Icons.poll_outlined,
                         size: 20,
                         color: Colors.black,
@@ -237,11 +239,11 @@ class _PostWidgetState extends State<PostWidget> {
               children: [
                 RichText(
                   text: TextSpan(
-                    style: TextStyle(color: Colors.black, fontSize: 11),
+                    style: const TextStyle(color: Colors.black, fontSize: 11),
                     children: [
                       TextSpan(
                         text: '${widget.username} ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       TextSpan(text: widget.caption),
                     ],
@@ -263,7 +265,7 @@ class _PostWidgetState extends State<PostWidget> {
                         },
                         child: Text(
                           'View all ${widget.comments} comments',
-                          style: TextStyle(color: Colors.grey, fontSize: 11),
+                          style: const TextStyle(color: Colors.grey, fontSize: 11),
                         ),
                       )
               ],
@@ -274,11 +276,12 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
-  Widget _buildInteractionIcon(IconData icon, String count) {
+  Widget _buildInteractionIcon(String icon, String count) {
     return Column(
       children: [
-        Icon(icon, size: 20),
-        Text(count, style: TextStyle(fontSize: 9)),
+        ImageIcon(AssetImage(icon),size: 20,),
+       // Icon(icon, size: 20),
+        Text(count, style: const TextStyle(fontSize: 9)),
       ],
     );
   }
@@ -288,7 +291,7 @@ class _PostWidgetState extends State<PostWidget> {
       borderRadius: BorderRadius.circular(10),
       child: Stack(
         children: [
-          Container(
+          SizedBox(
             width: double.infinity,
             height: 400,
             child: VideoPlayerWidget(videoUrl: videoUrl),
@@ -321,10 +324,11 @@ class _PostWidgetState extends State<PostWidget> {
         viewportFraction: 1.0,
         autoPlay: false,
         onPageChanged: (index, reason) {
-          if (mounted)
+          if (mounted) {
             setState(() {
               _currentImageIndex = index;
             });
+          }
         },
       ),
     );
@@ -339,7 +343,7 @@ class _PostWidgetState extends State<PostWidget> {
               return Container(
                 width: 8,
                 height: 8,
-                margin: EdgeInsets.symmetric(horizontal: 3),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color:
@@ -370,7 +374,7 @@ class _PostWidgetState extends State<PostWidget> {
       context: context,
       position: position,
       items: [
-        PopupMenuItem(
+        const PopupMenuItem(
           value: 'edit',
           child: Row(
             children: [
@@ -380,7 +384,7 @@ class _PostWidgetState extends State<PostWidget> {
             ],
           ),
         ),
-        PopupMenuItem(
+        const PopupMenuItem(
           value: 'delete',
           child: Row(
             children: [
@@ -401,7 +405,7 @@ class _PostWidgetState extends State<PostWidget> {
         widget.refresh();
       } else if (value == 'edit') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Edit functionality not implemented.")),
+          const SnackBar(content: Text("Edit functionality not implemented.")),
         );
       }
     });
@@ -411,7 +415,7 @@ class _PostWidgetState extends State<PostWidget> {
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
 
-  const VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
+  const VideoPlayerWidget({super.key, required this.videoUrl});
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -431,17 +435,19 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     try {
       _controller = VideoPlayerController.network(widget.videoUrl);
       await _controller.initialize();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _isError = false;
         });
+      }
     } catch (e) {
       log(widget.videoUrl);
       log("Video initialization error: $e");
-      if (mounted)
+      if (mounted) {
         setState(() {
           _isError = true;
         });
+      }
     }
   }
 
@@ -454,7 +460,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     if (_isError) {
-      return Center(
+      return const Center(
         child: Text("Failed to load video."),
       );
     }
@@ -464,7 +470,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             aspectRatio: 16 / 9,
             child: VideoPlayer(_controller),
           )
-        : Center(
+        : const Center(
             child: CircularProgressIndicator(),
           );
   }

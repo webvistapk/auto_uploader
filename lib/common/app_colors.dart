@@ -4,7 +4,7 @@ class AppColors {
   static const primary = Color.fromARGB(255, 0xAE, 0x34, 0x31);
   static const red = Colors.red;
   static const white = Color.fromARGB(255, 0xFF, 0xFF, 0xFF);
-  static const grey = Color.fromARGB(255, 111, 117, 105);
+  static const grey = Color(0xFFB7B7B7);
   static const blue = Color.fromARGB(255, 0x3e, 0x40, 0x95);
   static const lightGrey = Color.fromARGB(255, 0xc3, 0xc3, 0xc5);
   static const darkGrey = Color.fromARGB(255, 0xAA, 0xAC, 0xAC);
@@ -19,4 +19,5 @@ class AppColors {
   static const Color blackColor = Color.fromARGB(255, 0, 0, 0);
   static const Color greyColor = Color.fromARGB(255, 84, 84, 84);
   static const Color greenColor=Color(0xff54C392);
+  
 }
