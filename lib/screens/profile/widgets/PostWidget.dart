@@ -202,7 +202,7 @@ class _PostWidgetState extends State<PostWidget> {
                   GestureDetector(
                     onTap: widget.showCommentSection
                         ? null
-                        : () => showComments(widget.postId),
+                        : () => showComments(widget.postId,false,widget.scrollCommentId,widget.scrollReplyID.toString()),
                     child: _buildInteractionIcon(
                         CupertinoIcons.chat_bubble_fill,
                         widget.comments //show comments count

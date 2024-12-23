@@ -124,13 +124,14 @@ class _SinglePostState extends State<SinglePost> {
               },
               onPressLiked: () {
                 // Toggle like status
-                if (post.is_liked == false) {
+                if (post.isLiked == false) {
                   postProvider.newLikes(post.id, context);
                 } else {
                   postProvider.userDisLikes(post.id, context,);
                 }
               },
-              isLiked: post.is_liked,  // Use the actual 'isLiked' value from the post
+              isLiked: post.isLiked,  // Use the actual 'isLiked' value from the post
+              postModel: post,
             );
           },
         ));

@@ -543,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen>
       onPressLiked: () async {
         final postProvider = Provider.of<PostProvider>(context, listen: false);
 
-        if (post.is_liked == false) {
+        if (post.isLiked == false) {
           // Like the post
           await postProvider.newLikes(
             post.id,
@@ -557,7 +557,8 @@ class _HomeScreenState extends State<HomeScreen>
           );
         }
       },
-      isLiked: post.is_liked, // Use the post's `isLiked` value
+      isLiked: post.isLiked, // Use the post's `isLiked` 
+      postModel: post,
     );
   }
 }
