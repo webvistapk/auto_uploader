@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Fetch user status on initialization
     mediaProvider.fetchUserStatuses(limit: 10, offset: _offset);
-    mediaProvider.fetchFollowerStories(context,limit: 10,offset: _offset);
+    mediaProvider.fetchFollowerStories(context, limit: 10, offset: _offset);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchPosts();
@@ -221,85 +221,89 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       drawer: const SideBar(),
       backgroundColor: AppColors.mainBgColor,
-      body:  TabBarView(
-  controller: _tabController,
-  physics: NeverScrollableScrollPhysics(), // Disable TabBarView scrolling
-  children: [
-    ValueListenableBuilder<String?>(
-      valueListenable: SearchStore.searchQuery,
-      builder: (context, searchQuery, child) {
-        if (searchQuery == null || searchQuery.isEmpty) {
-          return NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-                  !_isLoadingMore) {
-                _fetchPosts();
-              }
-              return false;
-            },
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Integrate the horizontally scrollable story section
-                  Container(
-                    height: 120, // Adjust height as needed
-                    child: _buildStorySection(), // Calls the horizontal ListView
-                  ),
-                  const Divider(thickness: 1),
-                  _posts.isEmpty
-                      ? Center(
-                          child: Text(
-                            "No Post Available Right Now",
-                            style: AppTextStyles.poppinsBold(),
-                          ),
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Consumer<PostProvider>(
-                              builder: (context, postProvider, child) {
-                            return ListView.builder(
-                              itemCount: _posts!.length,
-                              shrinkWrap: true, // Prevents unbounded height
-                              physics: NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                              itemBuilder: (context, index) {
-                                final post = _posts[index];
-                                return _buildPostCard(post, () {
-                                  Navigator.push(
-                                      context,
-                                      CupertinoDialogRoute(
-                                          builder: (_) => SinglePost(
-                                              postId: post.id.toString(),
-                                              onPostUpdated: () =>
-                                                  _fetchPosts()),
-                                          context: context));
-                                });
-                              },
-                            );
-                          }),
+      body: TabBarView(
+        controller: _tabController,
+        physics: NeverScrollableScrollPhysics(), // Disable TabBarView scrolling
+        children: [
+          ValueListenableBuilder<String?>(
+            valueListenable: SearchStore.searchQuery,
+            builder: (context, searchQuery, child) {
+              if (searchQuery == null || searchQuery.isEmpty) {
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    if (scrollInfo.metrics.pixels ==
+                            scrollInfo.metrics.maxScrollExtent &&
+                        !_isLoadingMore) {
+                      _fetchPosts();
+                    }
+                    return false;
+                  },
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Integrate the horizontally scrollable story section
+                        Container(
+                          height: 120, // Adjust height as needed
+                          child:
+                              _buildStorySection(), // Calls the horizontal ListView
                         ),
-                  if (_isLoadingMore)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                        const Divider(thickness: 1),
+                        _posts.isEmpty
+                            ? Center(
+                                child: Text(
+                                  "No Post Available Right Now",
+                                  style: AppTextStyles.poppinsBold(),
+                                ),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Consumer<PostProvider>(
+                                    builder: (context, postProvider, child) {
+                                  return ListView.builder(
+                                    itemCount: _posts!.length,
+                                    shrinkWrap:
+                                        true, // Prevents unbounded height
+                                    physics:
+                                        NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                                    itemBuilder: (context, index) {
+                                      final post = _posts[index];
+                                      return _buildPostCard(post, () {
+                                        Navigator.push(
+                                            context,
+                                            CupertinoDialogRoute(
+                                                builder: (_) => SinglePost(
+                                                    postId: post.id.toString(),
+                                                    onPostUpdated: () =>
+                                                        _fetchPosts()),
+                                                context: context));
+                                      });
+                                    },
+                                  );
+                                }),
+                              ),
+                        if (_isLoadingMore)
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                      ],
                     ),
-                ],
-              ),
-            ),
-          );
-        } else {
-          return SearchWidget(
-            query: searchQuery,
-            authToken: Prefrences.getAuthToken().toString(),
-          );
-        }
-      },
-    ),
-    Center(child: Text('Disclosure Content Goes Here')),
-  ],
-),
-);
+                  ),
+                );
+              } else {
+                return SearchWidget(
+                  query: searchQuery,
+                  authToken: Prefrences.getAuthToken().toString(),
+                );
+              }
+            },
+          ),
+          Center(child: Text('Disclosure Content Goes Here')),
+        ],
+      ),
+    );
   }
 
   // Widget _buildStoriesSection() {
@@ -401,115 +405,117 @@ class _HomeScreenState extends State<HomeScreen>
   //   );
   // }
 
+  Widget _buildStorySection() {
+    int offset = 0; // Initialize offset
+    return Consumer<MediaProvider>(
+      builder: (context, statusProvider, child) {
+        final users =
+            statusProvider.stories.map((story) => story.user).toList();
 
- Widget _buildStorySection() {
-  int offset = 0; // Initialize offset
-  return Consumer<MediaProvider>(
-    builder: (context, statusProvider, child) {
-      final users = statusProvider.stories.map((story) => story.user).toList();
+        if (users.isEmpty && statusProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      if (users.isEmpty && statusProvider.isLoading) {
-        return const Center(child: CircularProgressIndicator());
-      }
+        if (users.isEmpty) {
+          return Center(child: Text('No users available.'));
+        }
 
-      if (users.isEmpty) {
-        return Center(child: Text('No users available.'));
-      }
+        return SizedBox(
+          height: 100,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (!statusProvider.isLoading &&
+                  scrollInfo.metrics.pixels ==
+                      scrollInfo.metrics.maxScrollExtent) {
+                // Fetch next set of users when reaching the end
 
-      return SizedBox(
-        height: 100,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (!statusProvider.isLoading &&
-                scrollInfo.metrics.pixels ==
-                    scrollInfo.metrics.maxScrollExtent) {
-              // Fetch next set of users when reaching the end
-      
-              statusProvider.fetchFollowerStories(context, limit: 10, offset: offset);
-            }
-            return true;
-          },
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: users.length + (statusProvider.isLoading ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == users.length) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                statusProvider.fetchFollowerStories(context,
+                    limit: 10, offset: offset);
               }
-      
-              final user = users[index];
-           //   debugger();
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap: () { 
-                          final userMediaFiles = statusProvider.stories
-                              .where((story) => story.user!.id == user!.id)
-                              .expand((story) => story.media ?? [])
-                              .map((media) => media.file)
-                              .where((file) => file != null)
-                              .cast<String>()
-                              .toList();
-                  
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StatusView(
-                                statuses: userMediaFiles,
-                                initialIndex: 0,
-                                isVideo: false, // Assume default as false
-                                userProfile: widget.userProfile,
-                                isUser: false,
-                                token: widget!.token.toString(),
-                                viewers: [],
+              return true;
+            },
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: users.length + (statusProvider.isLoading ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == users.length) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final user = users[index];
+                //   debugger();
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            final userMediaFiles = statusProvider.stories
+                                .where((story) => story.user!.id == user!.id)
+                                .expand((story) => story.media ?? [])
+                                .map((media) => media.file)
+                                .where((file) => file != null)
+                                .cast<String>()
+                                .toList();
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StatusView(
+                                  statuses: userMediaFiles,
+                                  initialIndex: 0,
+                                  isVideo: false, // Assume default as false
+                                  userProfile: widget.userProfile,
+                                  isUser: false,
+                                  token: widget!.token.toString(),
+                                  viewers: [],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                          radius: 20,
-                          child: ClipOval(
-                            child: Image.network(
-                              "${user?.profileImage != null ? user!.profileImage : AppUtils.userImage}",
-                              fit: BoxFit.cover,
-                              width: 60,
-                              height: 60,
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return CircularProgressIndicator(
-                                    color: AppColors.blue, strokeWidth: 6);
-                              },
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(Icons.person, size: 60);
-                              },
+                            );
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.transparent,
+                            radius: 20,
+                            child: ClipOval(
+                              child: Image.network(
+                                "${user?.profileImage != null ? user!.profileImage : AppUtils.userImage}",
+                                fit: BoxFit.cover,
+                                width: 60,
+                                height: 60,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return CircularProgressIndicator(
+                                      color: AppColors.blue, strokeWidth: 6);
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(Icons.person, size: 60);
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        user?.username.toString() ?? 'Unknown',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          user?.username.toString() ?? 'Unknown',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Widget _buildPostCard(PostModel post, onPressed) {
     log('Hello $_currentIndexMap');
@@ -543,7 +549,7 @@ class _HomeScreenState extends State<HomeScreen>
       onPressLiked: () async {
         final postProvider = Provider.of<PostProvider>(context, listen: false);
 
-        if (post.is_liked == false) {
+        if (post.isLiked == false) {
           // Like the post
           await postProvider.newLikes(
             post.id,
@@ -557,7 +563,7 @@ class _HomeScreenState extends State<HomeScreen>
           );
         }
       },
-      isLiked: post.is_liked, // Use the post's `isLiked` value
+      isLiked: post.isLiked, postModel: post, // Use the post's `isLiked` value
     );
   }
 }
@@ -911,4 +917,3 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     );
   }
 }
-

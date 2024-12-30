@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_textfield.dart';
 import 'package:mobile/components/authentication_type_view.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
@@ -63,9 +64,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     key: formKey,
                     child: Column(
                       children: [
-                        const SizedBox(height: 100),
+                        const SizedBox(height: 20),
                         const AppLogo(width: 80, height: 80),
-                        const SizedBox(height: 30),
+
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Create Account',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
                         // AuthenticationTypeView(
                         //     onTap: () {
                         //       setState(() {
@@ -74,7 +90,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         //     },
                         //     isActive: isAuthType),
                         // const SizedBox(height: 30),
-                        TextFormField(
+                        CustomAppTextField(
+                          hintText: "Enter email",
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Enter your email";
@@ -86,12 +103,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                           controller: _emailController,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                            labelText: 'Email',
-                          ),
+                          labelText: 'Email',
                         ),
                         const SizedBox(height: 10),
-                        TextFormField(
+                        CustomAppTextField(
+                          hintText: "Enter username",
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Enter your username";
@@ -99,12 +115,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                           controller: _usernameController,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                            labelText: 'Username',
-                          ),
+                          labelText: 'Username',
                         ),
+
                         const SizedBox(height: 10),
-                        TextFormField(
+                        CustomAppTextField(
+                          hintText: "Enter first name",
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Enter your first name";
@@ -112,12 +128,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                           controller: _firstNameController,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                            labelText: 'First Name',
-                          ),
+                          labelText: 'First Name',
                         ),
+
                         const SizedBox(height: 10),
-                        TextFormField(
+                        CustomAppTextField(
+                          hintText: "Enter last name",
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Enter your last name";
@@ -125,24 +141,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                           controller: _lastNameController,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                            labelText: 'Last Name',
-                          ),
+                          labelText: 'Last Name',
                         ),
+
                         const SizedBox(height: 10),
-                        TextFormField(
+                        CustomAppTextField(
+                          hintText: "Enter phone number",
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Enter your phone number";
                             }
+                            return null;
                           },
                           controller: _phoneNumberController,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                            labelText: 'Phone Number',
-                          ),
+                          labelText: 'Phone Number',
                         ),
+
                         const SizedBox(height: 10),
-                        TextFormField(
+                        CustomAppTextField(
+                          hintText: "Enter password",
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Enter your password";
@@ -154,21 +171,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                           controller: _passwordController,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                              labelText: 'Password',
-                              suffixIcon: GestureDetector(
-                                  onTap: () {
-                                    x = !x;
-                                    setState(() {});
-                                  },
-                                  child: x
-                                      ? Icon(Icons.visibility_off)
-                                      : Icon(Icons.visibility))),
+                          labelText: 'Password',
+                          suffixIcon: GestureDetector(
+                              onTap: () {
+                                x = !x;
+                                setState(() {});
+                              },
+                              child: x
+                                  ? Icon(Icons.visibility_off)
+                                  : Icon(Icons.visibility)),
                           obscureText: x,
                         ),
                         const SizedBox(height: 10),
                         if (isAuthType) ...[
-                          TextFormField(
+                          CustomAppTextField(
+                            hintText: "Enter company name",
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return "Enter your Company name";
@@ -176,12 +193,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               return null;
                             },
                             controller: _companyNameController,
-                            decoration: AppStyles.inputDecoration.copyWith(
-                              labelText: 'Company Name',
-                            ),
+                            labelText: 'Company Name',
                           ),
                           const SizedBox(height: 10),
-                          TextFormField(
+                          CustomAppTextField(
+                            hintText: "Enter website url",
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return "Enter your Website Url";
@@ -189,13 +205,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               return null;
                             },
                             controller: _websiteUrl,
-                            decoration: AppStyles.inputDecoration.copyWith(
-                              labelText: 'Website Url',
-                            ),
+                            labelText: 'Website Url',
                           ),
                         ],
                         const SizedBox(height: 10),
-                        TextFormField(
+                        CustomAppTextField(
+                          hintText: "Enter confirm password",
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Enter your confirm password';
@@ -206,16 +221,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                           controller: _confirmPasswordController,
-                          decoration: AppStyles.inputDecoration.copyWith(
-                              labelText: 'Confirm Password',
-                              suffixIcon: GestureDetector(
-                                  onTap: () {
-                                    y = !y;
-                                    setState(() {});
-                                  },
-                                  child: y
-                                      ? Icon(Icons.visibility_off)
-                                      : Icon(Icons.visibility))),
+                          labelText: 'Confirm Password',
+                          suffixIcon: GestureDetector(
+                              onTap: () {
+                                y = !y;
+                                setState(() {});
+                              },
+                              child: y
+                                  ? Icon(Icons.visibility_off)
+                                  : Icon(Icons.visibility)),
                           obscureText: y,
                         ),
                         const SizedBox(height: 20),

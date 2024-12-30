@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_textfield.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/screens/authantication/forgot_password_screen.dart';
 import 'package:mobile/screens/authantication/register_screen.dart';
@@ -56,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 40),
-                          TextFormField(
+                          CustomAppTextField(
                             validator: (value) {
                               if (value!.isEmpty) {
                                 return "Please enter the email or username or phone#";
@@ -64,14 +65,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                             controller: _usernameController,
-                            decoration: AppStyles.inputDecoration.copyWith(
-                              labelText: 'Username, email, phone number',
-                              contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 16),
-                            ),
+                            labelText: 'Email or Username',
+                            hintText: "Enter email or username",
+                            // contentPadding: const EdgeInsets.symmetric(
+                            //     vertical: 20, horizontal: 16),
                           ),
                           const SizedBox(height: 20),
-                          TextFormField(
+                          CustomAppTextField(
                             validator: (value) {
                               if (value!.isEmpty) {
                                 return "Please enter the password";
@@ -79,21 +79,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                             controller: _passwordController,
-                            decoration: AppStyles.inputDecoration.copyWith(
-                              labelText: 'Password',
-                              contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 16),
-                              suffixIcon: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    visible = !visible;
-                                  });
-                                },
-                                child: Icon(
-                                  visible
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                ),
+                            labelText: 'Password',
+                            hintText: "Enter password",
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 20, horizontal: 16),
+                            suffixIcon: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  visible = !visible;
+                                });
+                              },
+                              child: Icon(
+                                visible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
                             ),
                             obscureText: !visible,

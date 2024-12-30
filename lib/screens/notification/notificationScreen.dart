@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/CommentModel.dart';
@@ -205,48 +204,45 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   void _navigateToDetails(notification) {
     print("Notification ${notification.action}");
- //   debugger();
+    //   debugger();
     if (notification.reel != null) {
-      if(notification.action=='commented'){
-        Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ReelScreen(
-            isNotificationReel: true,
-            initialIndex: 0,
-            reelId: notification.reel!.id.toString(),
-            commentHightlightId: notification.comment.id.toString(),
-            showEditDeleteOptions: true,
-            isUserScreen: false
-          ),
-        ),
-      );
-       }
-       else{
-        Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ReelScreen(
-            isNotificationReel: true,
-            initialIndex: 0,
-            showEditDeleteOptions: true,
-            isUserScreen: false,
-          ),
-        ),
-      );
-       }
-      
-    } 
-
-    //Reply for Reel
-    else if (notification.action == 'replied' && notification.reply.postOrReel.type=='reel') {
-        print("Reply navigated for Reel");
-
-       
+      if (notification.action == 'commented') {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ReelScreen(
+                isNotificationReel: true,
+                initialIndex: 0,
+                reelId: notification.reel!.id.toString(),
+                commentHightlightId: notification.comment.id.toString(),
+                showEditDeleteOptions: true,
+                isUserScreen: false),
+          ),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ReelScreen(
+              isNotificationReel: true,
+              initialIndex: 0,
+              showEditDeleteOptions: true,
+              isUserScreen: false,
+            ),
+          ),
+        );
+      }
+    }
+
+    //Reply for Reel
+    else if (notification.action == 'replied' &&
+        notification.reply.postOrReel.type == 'reel') {
+      print("Reply navigated for Reel");
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReelScreen(
             isNotificationReel: true,
             initialIndex: 0,
             reelId: notification.reel!.id.toString(),
@@ -255,31 +251,28 @@ class _NotificationScreenState extends State<NotificationScreen> {
             showEditDeleteOptions: true,
             isUserScreen: false,
           ),
-          ),
-        );
-      
-      } 
+        ),
+      );
+    }
 
 //Reply for Post
-   else if (notification.action == 'replied' && notification.reply.postOrReel.type=='post') {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SinglePost(
-              postId: notification.reply.postOrReel.data['id'].toString(),
-              commentId: notification.comment!.id.toString(),
-             replyID: notification.reply.result.id.toString(),
-              onPostUpdated: () {},
-            ),
+    else if (notification.action == 'replied' &&
+        notification.reply.postOrReel.type == 'post') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SinglePost(
+            postId: notification.reply.postOrReel.data['id'].toString(),
+            commentId: notification.comment!.id.toString(),
+            replyID: notification.reply.result.id.toString(),
+            onPostUpdated: () {},
           ),
-        );
-      } 
-    
-    
-    else if (notification.post != null) {
+        ),
+      );
+    } else if (notification.post != null) {
       //Navigate to commetn
-      
-      if (notification.action=='commented') {
+
+      if (notification.action == 'commented') {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -290,9 +283,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
           ),
         );
-      } 
-      
-      //Navigate to Post 
+      }
+
+      //Navigate to Post
       else {
         Navigator.push(
           context,
@@ -305,6 +298,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
         );
       }
-      
-  }}
+    }
+  }
 }

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_textfield.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 import '../widgets/app_logo.dart';
 import '../../common/app_styles.dart';
 
-class ForgotPasswordScreen extends StatelessWidget {
+class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
+  @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  TextEditingController forgetController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,10 +41,10 @@ class ForgotPasswordScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
-                    TextField(
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Email',
-                      ),
+                    CustomAppTextField(
+                      labelText: 'Email',
+                      controller: forgetController,
+                      hintText: "example@gmail.com",
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(

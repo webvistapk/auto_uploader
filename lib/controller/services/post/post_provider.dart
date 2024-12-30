@@ -133,11 +133,13 @@ class PostProvider extends ChangeNotifier {
   // }
 
   createNewPost(context,
-      {required String postTitle,
+      {required String postField,
       required List<int> peopleTags,
       required List<String> keywordsList,
       required String privacyPost,
       required List<File> mediaFiles,
+      String? postTitle,
+      String? postDescription,
       String? pollTitle,
       String? pollDescription,
       List<String>? pollOptions,
@@ -145,12 +147,12 @@ class PostProvider extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      log("$postTitle, $peopleTags, $keywordsList, $privacyPost, $mediaFiles");
+      log("$postField, $peopleTags, $keywordsList, $privacyPost, $mediaFiles");
       final token = await Prefrences.getAuthToken();
       // debugger();
       if (token != null) {
         final response = await PostManager().createPost(
-            postTitle: postTitle,
+            postField: postField,
             peopleTags: peopleTags,
             keywordsList: keywordsList,
             privacyPost: privacyPost,
@@ -159,6 +161,8 @@ class PostProvider extends ChangeNotifier {
             pollTitle: pollTitle,
             pollDescription: pollDescription,
             pollOptions: pollOptions,
+            postTitle: postTitle,
+            postDescription: postDescription,
             interactions: interactions!);
 
         if (response != null) {
@@ -179,7 +183,7 @@ class PostProvider extends ChangeNotifier {
   }
 
   createNewReel(context,
-      {required String postTitle,
+      {required String postField,
       required List<int> peopleTags,
       required List<String> keywordsList,
       required String privacyPost,
@@ -187,12 +191,12 @@ class PostProvider extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      log("$postTitle, $peopleTags, $keywordsList, $privacyPost, $mediaFiles");
+      log("$postField, $peopleTags, $keywordsList, $privacyPost, $mediaFiles");
       final token = await Prefrences.getAuthToken();
       // debugger();
       if (token != null) {
         final response = await PostManager().createReel(
-            postTitle: postTitle,
+            postField: postField,
             peopleTags: peopleTags,
             keywordsList: keywordsList,
             privacyPost: privacyPost,

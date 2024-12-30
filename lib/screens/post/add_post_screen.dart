@@ -11,6 +11,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/post/component/privacy_option_sheet.dart';
 import 'package:mobile/screens/post/component/tag_option_sheet.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
+import 'package:mobile/screens/post/new_post_now.dart';
 import 'package:mobile/screens/post/pool/add_pools.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -337,7 +338,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             context,
                             CupertinoDialogRoute(
                                 builder: (_) => AddPollScreen(
-                                      postTitle: titleController.text.trim(),
+                                      postField: titleController.text.trim(),
                                       selectedTagUsers: selectedTagUsers,
                                       keywordList: keywords,
                                       privacyPolicy: privacyPolicy,
@@ -355,40 +356,56 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         ToastNotifier.showErrorToast(
                             context, "Post Title / Descritption is required!");
                       } else {
-                        final response = await pro.createNewPost(context,
-                            postTitle: titleController.text.trim(),
-                            peopleTags: selectedTagUsers,
-                            keywordsList: keywords,
-                            privacyPost: privacyPolicy,
-                            mediaFiles: widget.mediFiles!,
-                            interactions: interactionSheetOptions);
-
-                        if (response != null) {
-                          ToastNotifier.showSuccessToast(
-                              context, "Post Successfully posted!");
-                          setState(() {
-                            isLoading = false;
-                          });
-                          final token = await Prefrences.getAuthToken();
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              CupertinoDialogRoute(
-                                  builder: (_) => MainScreen(
+                        setState(() {
+                          isLoading = false;
+                        });
+                        Navigator.push(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => NewPostNow(
+                                      postField: titleController.text.trim(),
+                                      peopleTags: selectedTagUsers,
+                                      keywordsList: keywords,
+                                      privacyPost: privacyPolicy,
+                                      mediaFiles: widget.mediFiles!,
+                                      interactions: interactionSheetOptions,
                                       userProfile: widget.userProfile!,
-                                      authToken: token),
-                                  context: context),
-                              (route) => false);
-                        } else {
-                          setState(() {
-                            isLoading = false;
-                          });
-                          ToastNotifier.showErrorToast(
-                              context, "Network Problem. Try again.");
-                        }
+                                    ),
+                                context: context));
+                        // final response = await pro.createNewPost(context,
+                        //     postField: titleController.text.trim(),
+                        //     peopleTags: selectedTagUsers,
+                        //     keywordsList: keywords,
+                        //     privacyPost: privacyPolicy,
+                        //     mediaFiles: widget.mediFiles!,
+                        //     interactions: interactionSheetOptions);
+
+                        // if (response != null) {
+                        //   ToastNotifier.showSuccessToast(
+                        //       context, "Post Successfully posted!");
+                        //   setState(() {
+                        //     isLoading = false;
+                        //   });
+                        //   final token = await Prefrences.getAuthToken();
+                        //   Navigator.pushAndRemoveUntil(
+                        //       context,
+                        //       CupertinoDialogRoute(
+                        //           builder: (_) => MainScreen(
+                        //               userProfile: widget.userProfile!,
+                        //               authToken: token),
+                        //           context: context),
+                        //       (route) => false);
+                        // } else {
+                        // setState(() {
+                        //   isLoading = false;
+                        // });
+                        //   ToastNotifier.showErrorToast(
+                        //       context, "Network Problem. Try again.");
+                        // }
                       }
                     } else {
                       final response = await pro.createNewReel(context,
-                          postTitle: titleController.text.trim(),
+                          postField: titleController.text.trim(),
                           peopleTags: selectedTagUsers,
                           keywordsList: keywords,
                           privacyPost: privacyPolicy,
@@ -430,7 +447,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       color: Colors.white),
                   SizedBox(width: 5),
                   Text(
-                    interactionSheetOptions.any((element) => element == 'Polls')
+                    interactionSheetOptions
+                                .any((element) => element == 'Polls') ||
+                            widget.type == 'post'
                         ? "Next"
                         : "Post",
                     style: AppTextStyles.poppinsMedium().copyWith(
@@ -446,7 +465,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 borderRadius: BorderRadius.circular(10),
                 color: isLoading
                     ? Colors.grey
-                    : interactionSheetOptions.contains('Polls')
+                    : interactionSheetOptions.contains('Polls') ||
+                            widget.type == 'post'
                         ? Colors.blue
                         : Colors.red,
               ),
@@ -529,6 +549,3 @@ class _AddPostScreenState extends State<AddPostScreen> {
 }
 
 // Function to show the Bottom Sheet
-
-
-

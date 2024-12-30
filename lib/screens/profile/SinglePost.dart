@@ -17,22 +17,22 @@ class SinglePost extends StatefulWidget {
   final String? replyID;
   final VoidCallback onPostUpdated;
 
-  SinglePost({Key? key, 
-  required this.postId, 
-  this.isInteractive = false,
-  this.commentId,
-  this.replyID,
-  required this.onPostUpdated,
-
-  })
-      : super(key: key);
+  SinglePost({
+    Key? key,
+    required this.postId,
+    this.isInteractive = false,
+    this.commentId,
+    this.replyID,
+    required this.onPostUpdated,
+  }) : super(key: key);
 
   @override
   State<SinglePost> createState() => _SinglePostState();
 }
+
 class _SinglePostState extends State<SinglePost> {
   bool isUserPost = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -42,26 +42,26 @@ class _SinglePostState extends State<SinglePost> {
     if (postProvider.posts != null) {
       var post = postProvider.posts!.firstWhere(
         (post) => post.id.toString() == widget.postId,
-     // Return null if no post is found
+        // Return null if no post is found
       );
       if (post != null) {
-        postProvider.setSinglePost(post); // Use this to set the post if it's found in the list
+        postProvider.setSinglePost(
+            post); // Use this to set the post if it's found in the list
       } else {
-        postProvider.getSinglePost(widget.postId); // Otherwise, fetch it from the API
+        postProvider
+            .getSinglePost(widget.postId); // Otherwise, fetch it from the API
       }
     } else {
-      postProvider.getSinglePost(widget.postId); // Fetch if posts list is empty or null
+      postProvider
+          .getSinglePost(widget.postId); // Fetch if posts list is empty or null
     }
-  
   }
-
 
   @override
   void dispose() {
     super.dispose();
     widget.onPostUpdated(); // Call the callback when the screen is popped
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class _SinglePostState extends State<SinglePost> {
               shares: "100",
               saved: '100',
               showCommentSection: true,
-              scrollCommentId:widget.commentId,
+              scrollCommentId: widget.commentId,
               scrollReplyID: widget.replyID,
               refresh: () => postProvider.getSinglePost(widget.postId),
               isUserPost: isUserPost,
@@ -117,20 +117,25 @@ class _SinglePostState extends State<SinglePost> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => postFullScreen(mediaUrls: mediaList, initialIndex: 0),
+                      builder: (context) =>
+                          postFullScreen(mediaUrls: mediaList, initialIndex: 0),
                     ),
                   );
                 }
               },
               onPressLiked: () {
                 // Toggle like status
-                if (post.is_liked == false) {
+                if (post.isLiked == false) {
                   postProvider.newLikes(post.id, context);
                 } else {
-                  postProvider.userDisLikes(post.id, context,);
+                  postProvider.userDisLikes(
+                    post.id,
+                    context,
+                  );
                 }
               },
-              isLiked: post.is_liked,  // Use the actual 'isLiked' value from the post
+              isLiked: post.isLiked,
+              postModel: post, // Use the actual 'isLiked' value from the post
             );
           },
         ));

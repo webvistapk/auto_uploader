@@ -12,7 +12,7 @@ import 'package:mobile/screens/post/pool/widget/custom_text_field.dart';
 import 'package:provider/provider.dart';
 
 class AddPollScreen extends StatefulWidget {
-  final String postTitle;
+  final String postField;
   final List<int> selectedTagUsers;
   final List<String> keywordList;
   final String privacyPolicy;
@@ -21,7 +21,7 @@ class AddPollScreen extends StatefulWidget {
   final List<String> interactions;
   const AddPollScreen({
     super.key,
-    required this.postTitle,
+    required this.postField,
     required this.selectedTagUsers,
     required this.keywordList,
     required this.privacyPolicy,
@@ -233,7 +233,7 @@ class _AddPollScreenState extends State<AddPollScreen> {
                                 .toList();
                             print("Poll Options: $pollOptions");
                             final response = await pro.createNewPost(context,
-                                postTitle: widget.postTitle,
+                                postField: widget.postField,
                                 peopleTags: widget.selectedTagUsers,
                                 keywordsList: widget.keywordList,
                                 privacyPost: widget.privacyPolicy,

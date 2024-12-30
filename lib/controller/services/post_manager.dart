@@ -12,11 +12,13 @@ class PostManager {
   PostManager() : baseUrl = ApiURLs.baseUrl;
 
   Future<dynamic> createPost({
-    required String postTitle,
+    required String postField,
     required List<int> peopleTags,
     required List<String> keywordsList,
     required String privacyPost,
     required List<File> mediaFiles,
+    String? postTitle,
+    String? postDescription,
     String? pollTitle,
     String? pollDescription,
     List<String>? pollOptions,
@@ -51,9 +53,13 @@ class PostManager {
       request.fields['interactions'] = interactions.join(',').toLowerCase();
     }
 
-    request.fields['post'] = postTitle;
+    request.fields['post'] = postField;
     request.fields['privacy'] = privacyPost;
 
+    if (postTitle != null && postDescription != null) {
+      request.fields['post_title'] = postTitle;
+      request.fields['post_description'] = postDescription;
+    }
     request.fields['keywords'] = keywordsList.join(',');
     if (peopleTags.isEmpty) {
     } else {
@@ -94,7 +100,7 @@ class PostManager {
   }
 
   Future<dynamic> createReel({
-    required String postTitle,
+    required String postField,
     required List<int> peopleTags,
     required List<String> keywordsList,
     required String privacyPost,
@@ -115,7 +121,7 @@ class PostManager {
 
     // Add fields
 
-    request.fields['post'] = postTitle;
+    request.fields['post'] = postField;
     request.fields['privacy'] = privacyPost;
 
     request.fields['keywords'] = keywordsList.join(',');
