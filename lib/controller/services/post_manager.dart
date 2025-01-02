@@ -43,10 +43,10 @@ class PostManager {
       request.fields['poll_description'] = pollDescription;
 
       // Add option values
-
+      debugger();
       // Add the list as a form field
-      for (var i = 0; i < pollOptions.length; i++) {
-        request.fields['polls'] = pollOptions[i];
+      for (var i in pollOptions) {
+        request.fields['polls'] = i;
       }
     }
     if (interactions.isNotEmpty) {

@@ -7,6 +7,7 @@ import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
+import 'package:mobile/screens/post/pool/add_pools.dart';
 import 'package:provider/provider.dart';
 
 class NewPostNow extends StatefulWidget {
@@ -17,6 +18,7 @@ class NewPostNow extends StatefulWidget {
   final List<File> mediaFiles; // List of media files
   final List<String> interactions; // Interaction options
   final UserProfile userProfile;
+  final bool isPoll;
   const NewPostNow({
     super.key,
     required this.postField,
@@ -26,6 +28,7 @@ class NewPostNow extends StatefulWidget {
     required this.mediaFiles,
     required this.interactions,
     required this.userProfile,
+    this.isPoll = false,
   });
   @override
   _NewPostNowState createState() => _NewPostNowState();
@@ -102,46 +105,64 @@ class _NewPostNowState extends State<NewPostNow> {
 
                       print("Post Title: $title");
                       print("Post Description: $description");
-
-                      final response = await pro.createNewPost(context,
-                          postField: widget.postField,
-                          peopleTags: widget.peopleTags,
-                          keywordsList: widget.keywordsList,
-                          privacyPost: widget.privacyPost,
-                          mediaFiles: widget.mediaFiles,
-                          postTitle: title,
-                          postDescription: description,
-                          interactions: widget.interactions);
-
-                      if (response != null) {
-                        ToastNotifier.showSuccessToast(
-                            context, "Post Successfully posted!");
-                        setState(() {
-                          isLoading = false;
-                        });
-                        _titleController.clear();
-                        _descriptionController.clear();
-                        final token = await Prefrences.getAuthToken();
-                        Navigator.pushAndRemoveUntil(
+                      if (widget.isPoll) {
+                        Navigator.push(
                             context,
                             CupertinoDialogRoute(
-                                builder: (_) => MainScreen(
-                                    userProfile: widget.userProfile!,
-                                    authToken: token),
-                                context: context),
-                            (route) => false);
+                                builder: (_) => AddPollScreen(
+                                      postField: widget.postField,
+                                      selectedTagUsers: widget.peopleTags,
+                                      keywordList: widget.keywordsList,
+                                      privacyPolicy: widget.privacyPost,
+                                      mediaFiles: widget.mediaFiles,
+                                      userProfile: widget.userProfile,
+                                      interactions: widget.interactions,
+                                      postTitle: title,
+                                      postDescription: description,
+                                    ),
+                                context: context));
                       } else {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        ToastNotifier.showErrorToast(
-                            context, "Network Problem. Try again.");
-                      }
-                      // Clear fields after submission
+                        final response = await pro.createNewPost(context,
+                            postField: widget.postField,
+                            peopleTags: widget.peopleTags,
+                            keywordsList: widget.keywordsList,
+                            privacyPost: widget.privacyPost,
+                            mediaFiles: widget.mediaFiles,
+                            postTitle: title,
+                            postDescription: description,
+                            interactions: widget.interactions);
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Post submitted successfully!')),
-                      );
+                        if (response != null) {
+                          ToastNotifier.showSuccessToast(
+                              context, "Post Successfully posted!");
+                          setState(() {
+                            isLoading = false;
+                          });
+                          _titleController.clear();
+                          _descriptionController.clear();
+                          final token = await Prefrences.getAuthToken();
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              CupertinoDialogRoute(
+                                  builder: (_) => MainScreen(
+                                      userProfile: widget.userProfile!,
+                                      authToken: token),
+                                  context: context),
+                              (route) => false);
+                        } else {
+                          setState(() {
+                            isLoading = false;
+                          });
+                          ToastNotifier.showErrorToast(
+                              context, "Network Problem. Try again.");
+                        }
+                        // Clear fields after submission
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Post submitted successfully!')),
+                        );
+                      }
                     }
 
                     // Handle button press logic here

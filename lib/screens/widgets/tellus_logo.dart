@@ -9,9 +9,10 @@ class TellusLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      'assets/tellus.webp', // Ensure you have your logo in assets
+      'assets/logo.png', // Ensure you have your logo in assets
       width: width,
       height: height,
+      fit: BoxFit.cover,
     );
   }
 }

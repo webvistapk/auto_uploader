@@ -15,12 +15,13 @@ import 'package:mobile/screens/post/new_post_now.dart';
 import 'package:mobile/screens/post/pool/add_pools.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:win32/win32.dart';
 
 import 'component/interaction_bottom_sheet.dart'; // Add video player package for video handling
 
 class AddPostScreen extends StatefulWidget {
   final UserProfile? userProfile;
-  final List<File>? mediFiles;
+  final List<File> mediFiles;
   final type;
   const AddPostScreen({
     super.key,
@@ -45,8 +46,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
     super.initState();
     context.read<PostProvider>();
     // Initialize video controller if it's a video
-    if (widget.mediFiles != null && widget.mediFiles!.isNotEmpty) {
-      File mediaFile = widget.mediFiles![mediaFileIndex()];
+    if (widget.mediFiles != null && widget.mediFiles.isNotEmpty) {
+      File mediaFile = widget.mediFiles[mediaFileIndex()];
       if (isVideo(mediaFile)) {
         _videoController = VideoPlayerController.file(mediaFile)
           ..initialize().then((_) {
@@ -70,7 +71,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   // Choose to show the first or last media file
   int mediaFileIndex() {
-    return 0; // Change this to widget.mediFiles!.length - 1 to show the last media file
+    return 0; // Change this to widget.mediFiles.length - 1 to show the last media file
   }
 
   String privacyPolicy = "public";
@@ -152,7 +153,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Divider(),
-                  widget.mediFiles == null || widget.mediFiles!.isEmpty
+                  widget.mediFiles == null || widget.mediFiles.isEmpty
                       ? Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: TextField(
@@ -322,39 +323,15 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     log("Keywords: $keywords");
                     log("Tag User id: $selectedTagUsers");
                     log("Privacy Policy: $privacyPolicy");
-                    if (interactionSheetOptions.contains('Polls')) {
-                      if (titleController.text.isEmpty) {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        ToastNotifier.showErrorToast(
-                            context, "Post Title / Descritption is required!");
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                        });
 
-                        Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => AddPollScreen(
-                                      postField: titleController.text.trim(),
-                                      selectedTagUsers: selectedTagUsers,
-                                      keywordList: keywords,
-                                      privacyPolicy: privacyPolicy,
-                                      mediaFiles: widget.mediFiles!,
-                                      userProfile: widget.userProfile!,
-                                      interactions: interactionSheetOptions,
-                                    ),
-                                context: context));
-                      }
-                    } else if (widget.type == "post") {
+                    if (interactionSheetOptions.contains('Polls') &&
+                        widget.mediFiles.isNotEmpty) {
                       if (titleController.text.isEmpty) {
                         setState(() {
                           isLoading = false;
                         });
                         ToastNotifier.showErrorToast(
-                            context, "Post Title / Descritption is required!");
+                            context, "Post  is required!");
                       } else {
                         setState(() {
                           isLoading = false;
@@ -363,45 +340,107 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             context,
                             CupertinoDialogRoute(
                                 builder: (_) => NewPostNow(
+                                    postField: titleController.text.trim(),
+                                    peopleTags: selectedTagUsers,
+                                    keywordsList: keywords,
+                                    privacyPost: privacyPolicy,
+                                    mediaFiles: widget.mediFiles,
+                                    interactions: interactionSheetOptions,
+                                    userProfile: widget.userProfile!,
+                                    isPoll: true),
+                                context: context));
+                      }
+                    } else if (widget.mediFiles.isEmpty &&
+                        interactionSheetOptions.contains('Polls')) {
+                      if (titleController.text.isEmpty) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ToastNotifier.showErrorToast(
+                            context, "Post Title / Descritption is required!");
+                      } else {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        Navigator.push(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => AddPollScreen(
                                       postField: titleController.text.trim(),
-                                      peopleTags: selectedTagUsers,
-                                      keywordsList: keywords,
-                                      privacyPost: privacyPolicy,
-                                      mediaFiles: widget.mediFiles!,
-                                      interactions: interactionSheetOptions,
+                                      selectedTagUsers: selectedTagUsers,
+                                      keywordList: keywords,
+                                      privacyPolicy: privacyPolicy,
+                                      mediaFiles: widget.mediFiles,
                                       userProfile: widget.userProfile!,
+                                      interactions: interactionSheetOptions,
                                     ),
                                 context: context));
-                        // final response = await pro.createNewPost(context,
-                        //     postField: titleController.text.trim(),
-                        //     peopleTags: selectedTagUsers,
-                        //     keywordsList: keywords,
-                        //     privacyPost: privacyPolicy,
-                        //     mediaFiles: widget.mediFiles!,
-                        //     interactions: interactionSheetOptions);
+                      }
+                    } else if (widget.mediFiles.isNotEmpty &&
+                        interactionSheetOptions.contains('Polls') == false) {
+                      if (titleController.text.isEmpty) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ToastNotifier.showErrorToast(
+                            context, "Post  is required!");
+                      } else {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        Navigator.push(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => NewPostNow(
+                                    postField: titleController.text.trim(),
+                                    peopleTags: selectedTagUsers,
+                                    keywordsList: keywords,
+                                    privacyPost: privacyPolicy,
+                                    mediaFiles: widget.mediFiles,
+                                    interactions: interactionSheetOptions,
+                                    userProfile: widget.userProfile!,
+                                    isPoll: false),
+                                context: context));
+                      }
+                    } else if (widget.mediFiles.isEmpty &&
+                        interactionSheetOptions.contains('Polls') == false) {
+                      if (titleController.text.isEmpty) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ToastNotifier.showErrorToast(
+                            context, "Post Title / Descritption is required!");
+                      } else {
+                        final response = await pro.createNewPost(context,
+                            postField: titleController.text.trim(),
+                            peopleTags: selectedTagUsers,
+                            keywordsList: keywords,
+                            privacyPost: privacyPolicy,
+                            mediaFiles: widget.mediFiles,
+                            interactions: interactionSheetOptions);
 
-                        // if (response != null) {
-                        //   ToastNotifier.showSuccessToast(
-                        //       context, "Post Successfully posted!");
-                        //   setState(() {
-                        //     isLoading = false;
-                        //   });
-                        //   final token = await Prefrences.getAuthToken();
-                        //   Navigator.pushAndRemoveUntil(
-                        //       context,
-                        //       CupertinoDialogRoute(
-                        //           builder: (_) => MainScreen(
-                        //               userProfile: widget.userProfile!,
-                        //               authToken: token),
-                        //           context: context),
-                        //       (route) => false);
-                        // } else {
-                        // setState(() {
-                        //   isLoading = false;
-                        // });
-                        //   ToastNotifier.showErrorToast(
-                        //       context, "Network Problem. Try again.");
-                        // }
+                        if (response != null) {
+                          ToastNotifier.showSuccessToast(
+                              context, "Post Successfully posted!");
+                          setState(() {
+                            isLoading = false;
+                          });
+                          final token = await Prefrences.getAuthToken();
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              CupertinoDialogRoute(
+                                  builder: (_) => MainScreen(
+                                      userProfile: widget.userProfile!,
+                                      authToken: token),
+                                  context: context),
+                              (route) => false);
+                        } else {
+                          setState(() {
+                            isLoading = false;
+                          });
+                          ToastNotifier.showErrorToast(
+                              context, "Network Problem. Try again.");
+                        }
                       }
                     } else {
                       final response = await pro.createNewReel(context,
@@ -409,7 +448,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           peopleTags: selectedTagUsers,
                           keywordsList: keywords,
                           privacyPost: privacyPolicy,
-                          mediaFiles: widget.mediFiles!);
+                          mediaFiles: widget.mediFiles);
 
                       if (response != null) {
                         ToastNotifier.showSuccessToast(
@@ -448,7 +487,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   SizedBox(width: 5),
                   Text(
                     interactionSheetOptions
-                                .any((element) => element == 'Polls') ||
+                                .any((element) => element == 'Polls') &&
                             widget.type == 'post'
                         ? "Next"
                         : "Post",
@@ -479,11 +518,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
 // Widget to build media display (either image or video)
   Widget _buildMediaWidget() {
-    if (widget.mediFiles == null || widget.mediFiles!.isEmpty) {
+    if (widget.mediFiles == null || widget.mediFiles.isEmpty) {
       return Center(child: Text("No media"));
     }
 
-    File mediaFile = widget.mediFiles![mediaFileIndex()];
+    File mediaFile = widget.mediFiles[mediaFileIndex()];
     if (isVideo(mediaFile)) {
       // Display video
       return Stack(

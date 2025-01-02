@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/app_textfield.dart';
+import 'package:mobile/common/custom_social_button.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/screens/authantication/forgot_password_screen.dart';
 import 'package:mobile/screens/authantication/register_screen.dart';
@@ -41,18 +43,21 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (context) {
             var pro = context.watch<AuthProvider>();
 
-            return Column(
-              children: [
-                // Fixed Header
-                const SizedBox(height: 20),
-                const AppLogo(width: 80, height: 80),
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Fixed Header
+                    const SizedBox(height: 20),
+                    Text(
+                      "Login in to Pine",
+                      style: AppTextStyles.poppinsBold(fontSize: 22),
+                    ),
 
-                // Scrollable content (form and fields)
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Form(
+                    // Scrollable content (form and fields)
+                    Form(
                       key: formKey,
                       child: Column(
                         children: [
@@ -102,31 +107,35 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? const Center(
                                   child: CircularProgressIndicator.adaptive(),
                                 )
-                              : ElevatedButton(
-                                  onPressed: () async {
-                                    if (formKey.currentState!.validate()) {
-                                      FocusScope.of(context).unfocus();
-                                      await pro.loginUser(
-                                        context,
-                                        _usernameController.text.trim(),
-                                        _passwordController.text.trim(),
-                                      );
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                    minimumSize:
-                                        const Size(double.infinity, 50),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50),
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0),
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      if (formKey.currentState!.validate()) {
+                                        FocusScope.of(context).unfocus();
+                                        await pro.loginUser(
+                                          context,
+                                          _usernameController.text.trim(),
+                                          _passwordController.text.trim(),
+                                        );
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.blue,
+                                      minimumSize:
+                                          const Size(double.infinity, 50),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(50),
+                                      ),
                                     ),
+                                    child: const Text('Log in',
+                                        style: AppStyles.buttonTextStyle),
                                   ),
-                                  child: const Text('Log in',
-                                      style: AppStyles.buttonTextStyle),
                                 ),
                           const SizedBox(height: 15),
                           Align(
-                            alignment: Alignment.topRight,
+                            alignment: Alignment.topCenter,
                             child: TextButton(
                               onPressed: () {
                                 Navigator.push(
@@ -149,52 +158,52 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                          if (_errorMessage.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                _errorMessage,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          CustomSocialButton(textTitle: 'Continue with Phone'),
+                          CustomSocialButton(textTitle: 'Continue with Apple'),
+                          CustomSocialButton(textTitle: 'Continue with Google'),
                         ],
                       ),
                     ),
-                  ),
-                ),
-
-                // Fixed Footer (remains stable when keyboard appears)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              CupertinoDialogRoute(
-                                  builder: (_) => RegisterScreen(),
-                                  context: context));
-                        },
-                        style: TextButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                            side: const BorderSide(color: Colors.blue),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    // Fixed Footer (remains stable when keyboard appears)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  CupertinoDialogRoute(
+                                      builder: (_) => RegisterScreen(),
+                                      context: context));
+                            },
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50),
+                                side: const BorderSide(color: Colors.blue),
+                              ),
+                            ),
+                            child: Text(
+                              'Create account',
+                              style: AppTextStyles.poppinsBold(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.normal),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Create account',
-                          style: TextStyle(color: Colors.blue),
-                        ),
+                          const AppLogo(width: 150),
+                        ],
                       ),
-                      const SizedBox(height: 10),
-                      const TellusLogo(width: 100, height: 50),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           },
         ),

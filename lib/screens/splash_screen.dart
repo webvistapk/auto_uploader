@@ -76,11 +76,9 @@ class _SplashScreenState extends State<SplashScreen> {
             padding: EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppLogo(width: 80, height: 80),
-                CircularProgressIndicator.adaptive(),
-                TellusLogo(width: 100, height: 50),
               ],
             ),
           ),
