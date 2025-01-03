@@ -262,12 +262,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
 //Reply for Post
    else if (notification.action == 'replied' && notification.reply.postOrReel.type=='post') {
+    print("${notification}");
+    //debugger();
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => SinglePost(
               postId: notification.reply.postOrReel.data['id'].toString(),
               commentId: notification.comment!.id.toString(),
+              offset: notification.reply.offset,
              replyID: notification.reply.result.id.toString(),
               onPostUpdated: () {},
             ),
@@ -278,7 +281,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     
     else if (notification.post != null) {
       //Navigate to commetn
-      
+      //debugger();
       if (notification.action=='commented') {
         Navigator.push(
           context,
@@ -286,6 +289,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             builder: (context) => SinglePost(
               postId: notification.post!.id.toString(),
               commentId: notification.comment.id.toString(),
+              offset:notification.comment.offset,
               onPostUpdated: () {},
             ),
           ),

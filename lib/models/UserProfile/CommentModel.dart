@@ -6,6 +6,8 @@ class CommentModel {
   int totalCount;
   bool hasNextPage;
   int nextOffset;
+  int previousOffset;
+  bool hasPreviousPage;
 
   CommentModel({
     required this.status,
@@ -13,6 +15,8 @@ class CommentModel {
     required this.totalCount,
     required this.hasNextPage,
     required this.nextOffset,
+    required this.previousOffset,
+    required this.hasPreviousPage,
   });
 
   factory CommentModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +28,8 @@ class CommentModel {
       totalCount: json['total_count'],
       hasNextPage: json['has_next_page'],
       nextOffset: json['next_offset']??0,
+      hasPreviousPage: json['has_previous_page'],
+      previousOffset: json['previous_offset']??0,
     );
   }
 }
@@ -83,6 +89,8 @@ class ReplyModel {
   int totalCount;
   bool hasNextPage;
   int nextOffset;
+  bool hasPreviousPage;
+  int previousOffset;
 
   ReplyModel({
     required this.status,
@@ -90,6 +98,8 @@ class ReplyModel {
     required this.totalCount,
     required this.hasNextPage,
     required this.nextOffset,
+    required this.hasPreviousPage,
+    required this.previousOffset,
   });
 
   factory ReplyModel.fromJson(Map<String, dynamic> json) {
@@ -101,6 +111,8 @@ class ReplyModel {
       totalCount: json['total_count'],
       hasNextPage: json['has_next_page'],
       nextOffset: json['next_offset']??0,
+      hasPreviousPage: json['has_previous_page'],
+      previousOffset: json['previous_offset']??0,
     );
   }
 }

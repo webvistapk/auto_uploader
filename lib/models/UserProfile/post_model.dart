@@ -15,6 +15,8 @@ class PostModel {
   int likesCount;
   int commentsCount;
   bool isLiked;
+  final String? postTitle;
+  final String? postDescription;
 
   PostModel({
     required this.id,
@@ -33,6 +35,8 @@ class PostModel {
     this.pollTitle,
     this.pollDescription,
     this.polls, // Optional list of polls
+    this.postTitle,
+    this.postDescription,
   });
 
   // Factory method to parse JSON data
@@ -57,6 +61,8 @@ class PostModel {
       likesCount: json['likes_count'],
       commentsCount: json['comments_count'],
       isLiked: json['is_liked'],
+      postTitle: json['post_title'],
+      postDescription: json['post_description'],
     );
   }
 }

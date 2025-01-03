@@ -121,6 +121,8 @@ class _PostScreenState extends State<PostScreen> {
                           },
                           onPressLiked: () {},
                           isLiked: false, postModel: post,
+                          postTitle: post.pollTitle,
+              postDescription: post.postDescription
                         );
                       },
                     );

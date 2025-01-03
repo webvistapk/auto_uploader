@@ -122,7 +122,7 @@ class _SideBarState extends State<SideBar> {
       shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.zero, // Removes any border radius
   ),
-      width: MediaQuery.of(context).size.width * .75,
+      width: MediaQuery.of(context).size.width * .85,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -136,7 +136,7 @@ class _SideBarState extends State<SideBar> {
                 // Circular avatar
                 ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(20)),
-                  child: Image.network(AppUtils.userImage),
+                  child: Image.network(AppUtils.userImage,width: 80,),
                 ),
                 const SizedBox(width: 12),
                 // User details
@@ -146,7 +146,7 @@ class _SideBarState extends State<SideBar> {
                     const Text(
                       'First Last',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -155,6 +155,7 @@ class _SideBarState extends State<SideBar> {
                     InkWell(
                       onTap:(){
                          Navigator.pushReplacementNamed(context, '/profile');
+                         print("View Profile");
                       } ,
                       child: const Text(
                         'View Profile',
@@ -202,34 +203,6 @@ class _SideBarState extends State<SideBar> {
                   },
                 ),
                 
-                ListTile(
-                  title: const Text(
-                    'Post Screen',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  onTap: () {
-                    // Navigate to Post Screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>  PostScreen()),
-                    );
-                  },
-                ),
-                ListTile(
-                  title: const Text(
-                    'Reel Screen',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  onTap: () {
-                    // Navigate to Reel Screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>  const FollowerReelScreen()),
-                    );
-                  },
-                ),
                 ListTile(
                   title: const Text(
                     'Settings',

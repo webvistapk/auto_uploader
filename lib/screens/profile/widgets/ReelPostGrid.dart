@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -23,7 +24,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
   bool _isLoadingMore = false;
   bool _hasMore = true;
   final ScrollController _scrollController = ScrollController();
-  int limit = 9;
+  int limit = 10;
   int offset = 0;
 
   @override
@@ -70,8 +71,8 @@ class _ReelPostGridState extends State<ReelPostGrid> {
       _fetchReelPosts();
     }
   }
-
   void _navigateToReelScreen(int index) {
+
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => ReelScreen(
        // reels: _reels,

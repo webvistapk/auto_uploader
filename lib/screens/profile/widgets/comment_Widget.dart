@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:keyboard_avoider/keyboard_avoider.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/comment_provider.dart';
@@ -20,14 +21,19 @@ class CommentWidget extends StatefulWidget {
   final String postId;
   final String commentIdToHighlight;
   final String? replyIdToHighlight;
+  final int? scrollOffset;
+  bool isSinglePost=false;
 
-  CommentWidget({
-    Key? key,
-    required this.postId,
-    required this.isReelScreen,
-    required this.commentIdToHighlight,
-    this.replyIdToHighlight,
-  }) : super(key: key);
+  CommentWidget(
+      {Key? key,
+      required this.postId,
+      required this.isReelScreen,
+      required this.commentIdToHighlight,
+      this.replyIdToHighlight,
+      this.scrollOffset,
+      this.isSinglePost=false,
+      })
+      : super(key: key);
 
   @override
   State<CommentWidget> createState() => _CommentWidgetState();
@@ -45,6 +51,7 @@ class _CommentWidgetState extends State<CommentWidget> {
   bool isLiked = false;
   bool showReply = false;
   CommentProvider? commentProvider;
+  ReplyProvider? replyProvider;
 
   int _limit = 10;
   int _offset = 0;
@@ -54,56 +61,92 @@ class _CommentWidgetState extends State<CommentWidget> {
   int indexIncreament = 0;
   Map<String, GlobalKey> commentKeys = {}; // For comment keys
   //Map<String, Map<String, GlobalKey>> replyKeys =
-   //   {}; // For reply keys (nested map for each comment's replies)
+  //   {}; // For reply keys (nested map for each comment's replies)
   bool replyVisible = false;
   Map<String, GlobalKey<State<StatefulWidget>>> replyKeys = {};
-  
- @override
-void initState() {
-  super.initState();
-  commentProvider = Provider.of<CommentProvider>(context, listen: false);
 
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    if (widget.commentIdToHighlight != 'null') {
-      _fetchAndScrollToComment(int.parse(widget.commentIdToHighlight!));
+  @override
+  void initState() {
+    super.initState();
+    commentProvider = Provider.of<CommentProvider>(context, listen: false);
 
-      setState(() {
-      indexIncreament += 1;
-        
-      });
-    } else {
-      fetchingData();
-    }
-  });
-}
-
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      //debugger();
+      if (widget.commentIdToHighlight != 'null') {
+        _fetchAndScrollToComment(int.parse(widget.commentIdToHighlight));
+       if(widget.replyIdToHighlight !='null'){}
+      } else {
+        fetchingData();
+      }
+    });
+  }
 
   void _fetchAndScrollToComment(int commentId) async {
     // Determine the offset/page where the comment resides
-    int pageContainingComment = await commentProvider!.findPageForComment(
-      postId: widget.postId,
-      commentId: commentId,
-      limit: _limit,
-      isReel: widget.isReelScreen
-    );
-    // Adjust offset and fetch comments for that page
-    _offset = pageContainingComment * _limit;
-
+    //debugger();
+    final data = await commentProvider!.initializeComments(
+        widget.postId, widget.isReelScreen,
+        limit: _limit, offset: widget.scrollOffset!);
     // Scroll to the specific comment
-    _scrollToComment(commentId.toString());
-
-    fetchingData();
+   // _scrollToBottom();
+   _scrollToComment(commentId);
+    if(widget.replyIdToHighlight!='null'){
+      _fetchAndScrollToRely(commentId);
+    }
   }
 
-  void _scrollToComment(String? commentID) {
-    final commentKey = commentKeys[commentID];
+  
+  void _fetchAndScrollToRely(int commentId) async {
+    // Determine the offset/page where the comment resides
+    await replyProvider!.initializeReply(
+        commentId, widget.isReelScreen,
+        limit: _limit, offset: widget.scrollOffset!);
+       
+       await replyProvider!.toggleReplyVisibility(commentId, context);
+    
+    // Scroll to the specific comment
+    //_scrollToBottom();
+    
+  }
+
+  void _scrollToComment(int? commentID) {
+    if (commentProvider!.commentKeys != null)
+      final commentKey = commentProvider?.commentKeys[commentID];
+    debugger();
     if (commentKey != null) {
-      final context = commentKey.currentContext;
+      final context = commentKey?.currentContext;
+      //if (context != null) {
+      final renderBox =
+          commentKey!.currentContext!.findRenderObject() as RenderBox?;
+
+      //final renderBox = context.findRenderObject() as RenderBox?;
+      final position = renderBox?.localToGlobal(Offset.zero);
+
+      setState(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              // _scrollController.position.maxScrollExtent,
+              _scrollController.offset + position!.dy, // Adjust as needed
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        });
+      });
+      //Scroll to the comment position
+    }
+  }
+
+  void _scrollToReply(int replyId) {
+    final replyKey = replyKeys[replyId.toString()];
+    if (replyKey != null) {
+      final context = replyKey.currentContext;
       if (context != null) {
         final renderBox = context.findRenderObject() as RenderBox?;
         final position = renderBox?.localToGlobal(Offset.zero);
 
-        // Scroll to the comment position
+        // Scroll to the reply position
         if (position != null && _scrollController.hasClients) {
           _scrollController.animateTo(
             _scrollController.offset + position.dy, // Adjust as needed
@@ -115,27 +158,6 @@ void initState() {
     }
   }
 
-  void _scrollToReply(int replyId) {
-  final replyKey = replyKeys[replyId.toString()];
-  if (replyKey != null) {
-    final context = replyKey.currentContext;
-    if (context != null) {
-      final renderBox = context.findRenderObject() as RenderBox?;
-      final position = renderBox?.localToGlobal(Offset.zero);
-
-      // Scroll to the reply position
-      if (position != null && _scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.offset + position.dy, // Adjust as needed
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    }
-  }
-}
-
-
   @override
   void dispose() {
     _commentController.dispose();
@@ -145,13 +167,12 @@ void initState() {
   }
 
   void fetchingData() async {
-    final data = await commentProvider!.fetchComments(
+    final data = await commentProvider!.initializeComments(
         widget.postId, widget.isReelScreen,
         limit: _limit, offset: _offset);
+    print("Offset of Comments ${_offset}");
 
-    if (data != null && widget.commentIdToHighlight != 'null') {
-      _scrollToBottom();
-    }
+    _scrollToBottom();
   }
 
   void _scrollToBottom() {
@@ -193,16 +214,16 @@ void initState() {
             media: _mediaFile,
             context: context,
             widget.isReelScreen);
-  
       } else {
         // Its a new comment
-        Provider.of<CommentProvider>(context, listen: false).addComment(
+        commentProvider!.addComment(
             widget.postId,
             content: content,
             //keywords:keywords,
             media: _mediaFile,
             context: context,
             widget.isReelScreen);
+        setState(() {});
       }
 
       // Clear input after adding the comment
@@ -239,26 +260,23 @@ void initState() {
 
   @override
   Widget build(BuildContext context) {
-    //print("WIDGET COMMENT SECTION ${widget.scrollCommentId}");
-
-    return Stack(
-      children: [
-        //widget.isUsedSingle
-        //?
-        // _buildViewCommentsSection(),
-
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
-          child: _buildViewCommentsSection(),
-        ),
-
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: _buildAddCommentSection(context),
-        )
-      ],
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Stack(
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: _buildViewCommentsSection(),
+          ),
+      
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _buildAddCommentSection(context),
+          )
+        ],
+      ),
     );
   }
 
@@ -274,21 +292,26 @@ void initState() {
               child: CircularProgressIndicator(),
             );
           }
-
           final comments = commentProvider.comments;
           if (comments.isEmpty) {
             return const Center(
               child: Text("No comments available."),
             );
           }
-
           return Column(
             children: [
+              !widget.isSinglePost?
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Container(
+                      height: 10,
+                      width: 10,
+                      color: AppColors.greenColor,
+                      child: Text("London"),
+                    ),
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
@@ -301,24 +324,30 @@ void initState() {
                     ),
                   ],
                 ),
-              ),
+              ):Container(),
               const Divider(thickness: 1, color: Colors.grey),
               Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
                   shrinkWrap: true,
                   itemCount: comments.length +
-                      (commentProvider.nextOffset != -1 ? 1 : 0) +
-                      indexIncreament,
+                      (commentProvider.hasNextPage ? 1 : 0) +
+                      (commentProvider.hasPreviousPage
+                          ? 1
+                          : 0), // indexIncreament-(commentProvider.hasNextPage?1:0),
                   itemBuilder: (context, index) {
-                    print("index ${index}");
-                    if (index == 0 && widget.commentIdToHighlight != 'null' ||
-                        commentProvider.previousOffset < 0) {
+                    //    debugger();
+                    if (index == 0 && commentProvider.hasPreviousPage) {
                       return Center(
+                        key: commentProvider?.commentKeys[comments[index].id],
                         child: GestureDetector(
                           onTap: () {
-                            commentProvider.loadPreviousComments(widget.postId,isReel:widget.isReelScreen,
-                                int.parse(widget.commentIdToHighlight), _limit);
+                            print("Previous Comment called");
+                            commentProvider.loadPreviousComments(
+                                widget.postId,
+                                isReel: widget.isReelScreen,
+                                int.parse(widget.commentIdToHighlight),
+                                _limit);
                           },
                           child: commentProvider.isLoading
                               ? CircularProgressIndicator(
@@ -330,11 +359,18 @@ void initState() {
                         ),
                       );
                     }
-                    if (index == comments.length + indexIncreament) {
+
+                    //index == comments.length+(commentProvider.hasNextPage? 0 : 1)
+
+                    if (index ==
+                            comments.length +
+                                (commentProvider.hasPreviousPage ? 1 : 0) &&
+                        commentProvider.hasNextPage) {
                       return Center(
                         child: GestureDetector(
                           onTap: () {
-                            commentProvider.loadNextComments(widget.postId,isReel:widget.isReelScreen);
+                            commentProvider.loadNextComments(widget.postId,
+                                isReel: widget.isReelScreen);
                           },
                           child: commentProvider.isLoading
                               ? CircularProgressIndicator(
@@ -347,7 +383,8 @@ void initState() {
                       );
                     }
                     final GlobalKey iconKey = GlobalKey();
-                    final comment = comments[index - indexIncreament];
+                    final comment = comments[
+                        index - (commentProvider.hasPreviousPage ? 1 : 0)];
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
@@ -412,30 +449,36 @@ void initState() {
                                                     comment.replyCount > 0
                                                         ? GestureDetector(
                                                             onTap: () async {
-                                                              // Provider.of<ReplyProvider>(
-                                                              //         context,
-                                                              //         listen:
-                                                              //             false)
-                                                              //     .toggleReplyVisibility(
-                                                              //         comment.id);
-                                                              final replyProvider =
-                                                                  Provider.of<
-                                                                          ReplyProvider>(
+                                                              print(
+                                                                  "Reply Toggled");
+                                                              Provider.of<ReplyProvider>(
                                                                       context,
                                                                       listen:
-                                                                          false);
-                                                              replyProvider
-                                                                  .fetchReplies(
+                                                                          false)
+                                                                  .toggleReplyVisibility(
                                                                       comment
-                                                                          .id);
-                                                              setState(() {
-                                                                comment.isReplyVisible =
-                                                                    !comment
-                                                                        .isReplyVisible;
-                                                              });
+                                                                          .id,
+                                                                      context);
+                                                              // final replyProvider =
+                                                              //     Provider.of<
+                                                              //             ReplyProvider>(
+                                                              //         context,
+                                                              //         listen:
+                                                              //             false);
+                                                              // replyProvider
+                                                              //     .fetchReplies(
+                                                              //         comment
+                                                              //             .id);
+                                                              // setState(() {
+                                                              //   comment.isReplyVisible =
+                                                              //       !comment
+                                                              //           .isReplyVisible;
+                                                              // });
+                                                              setState(() {});
+                                                             
                                                             },
                                                             child: Text(
-                                                              comment.isReplyVisible
+                                                              comment.isReplyVisible 
                                                                   ? "Hide Replies"
                                                                   : "View Reply ${comment.replyCount.toString()}",
                                                               style: TextStyle(
@@ -448,7 +491,6 @@ void initState() {
                                                         : Container(),
                                                   ],
                                                 ),
-                                               
                                               ],
                                             ),
                                           ),
@@ -463,14 +505,14 @@ void initState() {
                                                             .likeComment(
                                                                 comment.id,
                                                                 context,
-                                                                false);
+                                                                );
                                                       } else {
                                                         await commentProvider
                                                             .dislikeComment(
                                                                 comment.id,
                                                                 0,
                                                                 context,
-                                                                false);
+                                                                );
                                                       }
                                                     },
                                                     child: Icon(
@@ -530,22 +572,55 @@ void initState() {
                                         return const Text(
                                             "No replies available.");
                                       }
+                                      //   debugger();
 
                                       return ListView.builder(
-                                        key: replyKeys[widget.replyIdToHighlight],
+                                        key: replyKeys[
+                                            widget.replyIdToHighlight],
                                         shrinkWrap: true,
                                         physics: NeverScrollableScrollPhysics(),
                                         itemCount: replies.length +
-                                            (nextOffset != -1 ? 1 : 0),
+                                            (replyProvider.hasNextPage ? 1 : 0),
                                         itemBuilder: (context, replyIndex) {
-                                          if (replyIndex == replies.length) {
+                                         
+                                          if (replyIndex == 0 &&
+                                              replyProvider.hasPreviousPage) {
                                             return Center(
                                               child: GestureDetector(
                                                 onTap: () {
-                                                  replyProvider.fetchReplies(
-                                                    comment.id,
-                                                    offset: nextOffset,
-                                                  );
+                                                
+                                                 replyProvider.loadPreviousReply(int.parse(widget.commentIdToHighlight),10, isReel:  widget.isReelScreen);
+                                                },
+                                                child: commentProvider.isLoading
+                                                    ? CircularProgressIndicator(
+                                                        color:
+                                                            AppColors.greyColor)
+                                                    : Text(
+                                                        'Show Previous Reply',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                              ),
+                                            );
+                                          }
+
+                                          if (replyIndex ==
+                                                  replies.length +
+                                                      (replyProvider
+                                                              .hasPreviousPage
+                                                          ? 1
+                                                          : 0) &&
+                                              replyProvider.hasNextPage) {
+                                            return Center(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  replyProvider.loadNextReply(
+                                                      comment.id);
+                                                  // replyProvider.fetchReplies(
+                                                  //   comment.id,
+                                                  //   offset: nextOffset,
+                                                  // );
                                                 },
                                                 child: replyProvider
                                                         .isCommentLoading
@@ -555,16 +630,20 @@ void initState() {
                                                     : Text(
                                                         'Show More Replies',
                                                         style: TextStyle(
-                                                            color: Colors.black),
+                                                            color:
+                                                                Colors.black),
                                                       ),
                                               ),
                                             );
                                           }
 
-                                          final reply = replies[replyIndex];
+                                          final reply = replies[replyIndex -
+                                              (replyProvider.hasPreviousPage
+                                                  ? 1
+                                                  : 0)];
                                           final GlobalKey replyiconKey =
                                               GlobalKey();
-                                          
+
                                           replyKeys[reply.id.toString()] =
                                               replyiconKey;
                                           return Padding(
@@ -629,12 +708,11 @@ void initState() {
                                                               });
                                                             } else {
                                                               await replyProvider
-                                                                  .dislikeComment(
+                                                                  .dislikeReply(
                                                                       comment
                                                                           .id,
                                                                       reply.id,
-                                                                      context,
-                                                                      true);
+                                                                      context);
                                                               setState(() {
                                                                 replyProvider
                                                                     .fetchReplies(
@@ -707,54 +785,56 @@ void initState() {
   }
 
   Widget _buildAddCommentSection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        border: Border(
-          top: BorderSide(color: Colors.grey.shade300, width: 1),
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          border: Border(
+            top: BorderSide(color: Colors.grey.shade300, width: 1),
+          ),
         ),
-      ),
-      child: Form(
-        key: _formKey,
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage(AppUtils.userImage),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextFormField(
-                controller: _commentController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Comment cannot be empty!";
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  hintText: "Add a comment...",
-                  hintStyle:
-                      TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
+        child: Form(
+          key: _formKey,
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundImage: NetworkImage(AppUtils.userImage),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: _commentController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Comment cannot be empty!";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Add a comment...",
+                    hintStyle:
+                        TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
+                    fillColor: Colors.white,
+                    filled: true,
                   ),
-                  fillColor: Colors.white,
-                  filled: true,
                 ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.image),
-              onPressed: _selectMedia,
-            ),
-            IconButton(
-              icon: const Icon(Icons.send),
-              onPressed: () => _addComment(context),
-            ),
-          ],
+              IconButton(
+                icon: const Icon(Icons.image),
+                onPressed: _selectMedia,
+              ),
+              IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: () => _addComment(context),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -858,7 +938,7 @@ void initState() {
       ],
     ).then((value) {
       if (value == 'delete') {
-        Provider.of<CommentProvider>(context, listen: false)
+        Provider.of<ReplyProvider>(context, listen: false)
             .deleteCommentReply(reply.id, comment.id, context);
       } else if (value == 'edit') {
         ScaffoldMessenger.of(context).showSnackBar(

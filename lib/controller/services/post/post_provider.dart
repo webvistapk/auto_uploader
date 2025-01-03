@@ -87,51 +87,6 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  // Future<List<PostModel>> fetchFollowerPost(BuildContext context,
-  //     {int limit = 10, int offset = 0}) async {
-  //   final String? token = await Prefrences.getAuthToken();
-  //   int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
-
-  //   // API endpoint for fetching follower posts
-  //   String URL =
-  //       "${ApiURLs.baseUrl}${ApiURLs.get_follower_posts}$_loggedInUserId/";
-
-  //   // Construct the URI with pagination parameters
-  //   Uri uri = Uri.parse(URL).replace(queryParameters: {
-  //     'limit': limit.toString(),
-  //     'offset': offset.toString(),
-  //   });
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     final response = await http.get(uri, headers: {
-  //       "Content-Type": "application/json",
-  //       "Authorization": "Bearer $token",
-  //     });
-
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body);
-  //       List<PostModel> followerPosts = (data['posts'] as List)
-  //           .map((postJson) => PostModel.fromJson(postJson))
-  //           .toList();
-  //       print("Response ${response.body}");
-  //       // Cache or update the follower posts
-  //       setPosts(followerPosts);
-
-  //       return followerPosts;
-  //     } else {
-  //       throw Exception("Failed to fetch follower posts");
-  //     }
-  //   } catch (e) {
-  //     ToastNotifier.showErrorToast(context, "Error: $e");
-  //     print("Error fetching follower posts: $e");
-  //     return [];
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }
-
   createNewPost(context,
       {required String postTitle,
       required List<int> peopleTags,
@@ -514,11 +469,10 @@ class PostProvider extends ChangeNotifier {
 
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
-      } else {
-        throw Exception("Failed to like post");
-      }
+      } 
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "Error: $e");
+      //ToastNotifier.showErrorToast(context, "Error: $e");
+      print(e);
     }
   }
 
@@ -550,23 +504,18 @@ class PostProvider extends ChangeNotifier {
         final postIndex = _posts!.indexWhere((post) => post.id == postId);
         if (postIndex != -1) {
           print("Post Index ${postIndex}");
-
-          _posts?[postIndex].likesCount -= 1;
-          _posts?[postIndex].isLiked =
+          final currentPost=_posts?[postIndex];
+          currentPost!.likesCount =(currentPost!.likesCount <0)? currentPost!.likesCount -1:0;
+          currentPost!.isLiked =
               false; // Assuming you want to mark it as liked
-          ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
-        } else {
-          print("Post index is wrong");
-          ToastNotifier.showErrorToast(context, "Post Disliked Faild");
-        }
-
+          //ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
+        } 
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
-      } else {
-        throw Exception("Failed to dislike post");
-      }
+      } 
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "Error: $e");
+      //ToastNotifier.showErrorToast(context, "Error: $e");
+      print(e);
     }
   }
 
@@ -593,12 +542,9 @@ class PostProvider extends ChangeNotifier {
 
         // Notify listeners to update UI
         notifyListeners();
-      } else {
-        throw Exception('Failed to like post');
-      }
+      } 
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "Error liking the post: $e");
-      notifyListeners();
+     // ToastNotifier.showErrorToast(context, "Error liking the post: $e");
       print(e);
     }
   }
@@ -622,17 +568,15 @@ class PostProvider extends ChangeNotifier {
       print("API HITTED");
       if (response.statusCode == 200) {
         // _reels?[reelIndex].isLiked = true;
-        _reels?[reelIndex].likesCount -= 1;
-        _reels?[reelIndex].isLiked = false;
+        final currentReel=_reels?[reelIndex];
+        currentReel!.likesCount = (currentReel!.likesCount<0)?currentReel!.likesCount- 1:0;
+        currentReel.isLiked = false; 
 
         // Notify listeners to update UI
         notifyListeners();
-      } else {
-        throw Exception('Failed to dislike reel');
-      }
+      } 
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "Error disliking the post: $e");
-      notifyListeners();
+      //ToastNotifier.showErrorToast(context, "Error disliking the post: $e");
       print(e);
     }
   }

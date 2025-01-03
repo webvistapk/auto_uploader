@@ -5,7 +5,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
@@ -13,6 +15,7 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/models/UserProfile/userstatus.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/messaging/chat_screen.dart';
+import 'package:mobile/screens/notification/notificationScreen.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:mobile/screens/search/widget/search_screen.dart';
@@ -58,11 +61,12 @@ class _HomeScreenState extends State<HomeScreen>
 
     final mediaProvider = Provider.of<MediaProvider>(context, listen: false);
 
-    // Fetch user status on initialization
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Fetch user status on initialization
     mediaProvider.fetchUserStatuses(limit: 10, offset: _offset);
     mediaProvider.fetchFollowerStories(context,limit: 10,offset: _offset);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchPosts();
     });
   }
@@ -112,111 +116,144 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.deepdarkgreyColor,
         elevation: 0,
+        toolbarHeight: 60,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Consumer<MediaProvider>(
-            builder: (context, mediaProvider, child) {
-              final stories = mediaProvider.statuses ??
-                  mediaProvider.followersStatus?.stories;
-
-              // Define profileImageUrl to be accessible in both the if and else blocks
-              final profileImageUrl = (stories != null &&
-                      stories.isNotEmpty &&
-                      stories.first.user?.profileImage != null)
-                  ? '${ApiURLs.baseUrl2}${stories.first.user!.profileImage}'
-                  : AppUtils.userImage; // Fallback URL for profile image
-
-              if (stories != null && stories.isNotEmpty) {
-                final List<Object?> allMediaFiles = stories.expand((story) {
-                  return story.media!
-                      .map((media) => media.file)
-                      .whereType<String>();
-                }).toList();
-                print("USerStories :${allMediaFiles}");
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StatusView(
-                          statuses: allMediaFiles,
-                          initialIndex: 0,
-                          isVideo: false,
-                          viewers: [],
-                          userProfile: widget.userProfile,
-                          token: widget.token!,
-                          isUser: true,
-                        ),
-                      ),
-                    );
-                  },
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(profileImageUrl),
-                  ),
-                );
-              } else {
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (_) => StoryScreen(
-                          userProfile: widget.userProfile,
-                          token: widget.token,
-                        ),
-                      ),
-                    );
-                  },
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(profileImageUrl),
-                  ),
-                );
-              }
-            },
+          child: Image.asset(
+            AppIcons.calender,
+            height: 24,
+            width: 24,
           ),
         ),
+        // leading: Padding(
+        //   padding: const EdgeInsets.all(8.0),
+        //   child: Consumer<MediaProvider>(
+        //     builder: (context, mediaProvider, child) {
+        //       final stories = mediaProvider.statuses ??
+        //           mediaProvider.followersStatus?.stories;
+
+        //       // Define profileImageUrl to be accessible in both the if and else blocks
+        //       final profileImageUrl = (stories != null &&
+        //               stories.isNotEmpty &&
+        //               stories.first.user?.profileImage != null)
+        //           ? '${ApiURLs.baseUrl2}${stories.first.user!.profileImage}'
+        //           : AppUtils.userImage; // Fallback URL for profile image
+
+        //       if (stories != null && stories.isNotEmpty) {
+        //         final List<Object?> allMediaFiles = stories.expand((story) {
+        //           return story.media!
+        //               .map((media) => media.file)
+        //               .whereType<String>();
+        //         }).toList();
+
+        //         final List<int?> storyIds = stories.map((story) => story.id).whereType<int>().toList();
+        //         print("USerStories :${allMediaFiles}");
+        //     //    debugger();
+        //         return InkWell(
+        //           onTap: () {
+        //             Navigator.push(
+        //               context,
+        //               MaterialPageRoute(
+        //                 builder: (context) => StatusView(
+        //                   statuses: allMediaFiles,
+        //                   initialIndex: 0,
+        //                   isVideo: false,
+        //                   viewers: [],
+        //                   userProfile: widget.userProfile,
+        //                   token: widget.token!,
+        //                   isUser: true,
+        //                   statusId: storyIds,
+        //                 ),
+        //               ),
+        //             );
+        //           },
+        //           child: CircleAvatar(
+        //             radius: 20,
+        //             backgroundImage: NetworkImage(profileImageUrl),
+        //           ),
+        //         );
+        //       } else {
+        //         return InkWell(
+        //           onTap: () {
+        //             Navigator.push(
+        //               context,
+        //               CupertinoPageRoute(
+        //                 builder: (_) => StoryScreen(
+        //                   userProfile: widget.userProfile,
+        //                   token: widget.token,
+        //                 ),
+        //               ),
+        //             );
+        //           },
+        //           child: CircleAvatar(
+        //             radius: 20,
+        //             backgroundImage: NetworkImage(profileImageUrl),
+        //           ),
+        //         );
+        //       }
+        //     },
+        //   ),
+        // ),
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(50),
+          preferredSize: Size.fromHeight(40),
           child: Theme(
             data: Theme.of(context).copyWith(
               tabBarTheme: TabBarTheme(
-                labelColor: Colors.black,
-                unselectedLabelColor: Colors.grey,
+                labelColor: Colors.white,
+                unselectedLabelColor: AppColors.darkGrey,
                 indicatorColor: Colors.blue,
               ),
             ),
-            child: TabBar(
-              controller: _tabController,
-              tabs: const [
-                Tab(child: Text('Content')),
-                Tab(child: Text('Disclosure')),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 40,bottom: 0),
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(10)
+                    ),
+                    child: Image.asset(
+                            AppIcons.addIcon, // Small "+" icon
+                            height: 5,
+                            
+                          ),
+                  ),
+                ),
+                TabBar(
+                  controller: _tabController,
+                  padding: EdgeInsets.only(bottom: 0,top: 0),
+                  tabs: const [
+                    Tab(child: Text('Content')),
+                    Tab(child: Text('Disclosure')),
+                  ],
+                ),
               ],
             ),
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.message_outlined, color: Colors.grey),
+            icon: Image.asset(AppIcons.bell,color: AppColors.white,),
             onPressed: () {
               Navigator.push(
                   context,
                   CupertinoDialogRoute(
-                      builder: (_) => ChatScreen(
-                            userProfile: widget.userProfile!,
-                          ),
+                      builder: (_) => NotificationScreen(),
                       context: context));
             },
           ),
-          IconButton(
-            icon: Icon(Icons.search, color: Colors.grey),
-            onPressed: () {
-              showSearch(context: context, delegate: CustomSearchDelegate());
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.search, color: Colors.grey),
+          //   onPressed: () {
+          //     showSearch(context: context, delegate: CustomSearchDelegate());
+          //   },
+          // ),
         ],
       ),
       drawer: const SideBar(),
@@ -239,13 +276,33 @@ class _HomeScreenState extends State<HomeScreen>
             },
             child: SingleChildScrollView(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Integrate the horizontally scrollable story section
-                  Container(
-                    height: 120, // Adjust height as needed
-                    child: _buildStorySection(), // Calls the horizontal ListView
-                  ),
+                 
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                     
+                     Container(
+                      height: 60,
+                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                         children: [
+                           _UserStory(),
+                           Spacer(),
+                           Expanded(
+                            child: _buildStorySection()),
+                           Spacer(),
+                         ],
+                       ),
+                     ), // Calls the horizontal ListView
+                      
                   const Divider(thickness: 1),
+                    ],
+                  ),
                   _posts.isEmpty
                       ? Center(
                           child: Text(
@@ -302,122 +359,93 @@ class _HomeScreenState extends State<HomeScreen>
 );
   }
 
-  // Widget _buildStoriesSection() {
-  //   final mediaProvider = Provider.of<MediaProvider>(context);
-  //   final stories = mediaProvider.followersStatus?.stories ??
-  //       mediaProvider.statuses;
+Widget _UserStory() {
+  return Padding(
+          padding: const EdgeInsets.all(10),
+          child: Consumer<MediaProvider>(
+            builder: (context, mediaProvider, child) {
+              final stories = mediaProvider.statuses ??
+                  mediaProvider.followersStatus?.stories;
 
-  //   if (stories == null || stories.isEmpty) {
-  //     return Center(child: Text('No stories available'));
-  //   }
+              // Define profileImageUrl to be accessible in both the if and else blocks
+              final profileImageUrl = (stories != null &&
+                      stories.isNotEmpty &&
+                      stories.first.user?.profileImage != null)
+                  ? '${ApiURLs.baseUrl2}${stories.first.user!.profileImage}'
+                  : AppUtils.userImage; // Fallback URL for profile image
 
-  //   // Log each story's details to ensure unique users and their media are correctly structured
-  //   print('Total followers with stories: ${stories.length}');
-  //   for (var story in stories) {
-  //     print(
-  //         'Username: ${story.user?.username}, Media Count: ${story.media?.length}');
-  //   }
+              if (stories != null && stories.isNotEmpty) {
+                final List<Object?> allMediaFiles = stories.expand((story) {
+                  return story.media!
+                      .map((media) => media.file)
+                      .whereType<String>();
+                }).toList();
 
-  //   return SizedBox(
-  //     height: 80,
-  //     child: SingleChildScrollView(
-  //       scrollDirection: Axis.horizontal,
-  //       child: Row(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: List.generate(stories.length, (followerIndex) {
-  //           final story = stories[followerIndex];
-
-  //           // Skip if no media
-  //           if (story.media == null || story.media!.isEmpty) return SizedBox();
-
-  //           // Extract only the current follower's media URLs
-  //           final List<String> followerStatuses = story.media!
-  //               .map((media) => '${ApiURLs.baseUrl2}${media.file}')
-  //               .toList();
-
-  //           // Use the first media file as the thumbnail for the story
-  //           final firstMediaFile = story.media!.first.file;
-  //           final username = story.user?.username ?? 'Unknown';
-
-  //           return Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               InkWell(
-  //                 onTap: () {
-  //                   // Debug output on tap
-  //                   print('Tapped on follower: $username');
-  //                   print(
-  //                       'Statuses for this follower: ${followerStatuses.length} items');
-
-  //                   Navigator.push(
-  //                     context,
-  //                     MaterialPageRoute(
-  //                       builder: (context) => FollowerStatusView(
-  //                         followersStatuses: [
-  //                           followerStatuses
-  //                         ], // Pass only current follower's statuses
-  //                         initialFollowerIndex: 0,
-  //                         initialStatusIndex: 0,
-  //                         userProfile: widget.userProfile,
-  //                         token: widget.token!,
-  //                       ),
-  //                     ),
-  //                   );
-  //                 },
-  //                 child: CircleAvatar(
-  //                   backgroundColor: Colors.transparent,
-  //                   radius: 20,
-  //                   child: ClipOval(
-  //                     child: firstMediaFile != null
-  //                         ? Image.network(
-  //                             '${ApiURLs.baseUrl2}$firstMediaFile',
-  //                             fit: BoxFit.cover,
-  //                             width: 40,
-  //                             height: 40,
-  //                             loadingBuilder:
-  //                                 (context, child, loadingProgress) {
-  //                               if (loadingProgress == null) return child;
-  //                               return CircularProgressIndicator(
-  //                                   color: AppColors.blue, strokeWidth: 6);
-  //                             },
-  //                             errorBuilder: (context, error, stackTrace) {
-  //                               return CircularProgressIndicator(
-  //                                 color: AppColors.blue,
-  //                                 strokeWidth: 6,
-  //                               );
-  //                             },
-  //                           )
-  //                         : CircularProgressIndicator(strokeWidth: 6),
-  //                   ),
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 5),
-  //               Text(username, style: const TextStyle(fontSize: 10)),
-  //             ],
-  //           );
-  //         }),
-  //       ),
-  //     ),
-  //   );
-  // }
-
+                final List<int?> storyIds = stories.map((story) => story.id).whereType<int>().toList();
+                print("USerStories :${allMediaFiles}");
+            //    debugger();
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StatusView(
+                          statuses: allMediaFiles,
+                          initialIndex: 0,
+                          isVideo: false,
+                          viewers: [],
+                          userProfile: widget.userProfile,
+                          token: widget.token!,
+                          isUser: true,
+                          statusId: storyIds,
+                        ),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 15,
+                    backgroundImage: NetworkImage(profileImageUrl),
+                  ),
+                );
+              } else {
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (_) => StoryScreen(
+                          userProfile: widget.userProfile,
+                          token: widget.token,
+                        ),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 15,
+                    backgroundImage: NetworkImage(profileImageUrl),
+                  ),
+                );
+              }
+            },
+          ));
+}
 
  Widget _buildStorySection() {
   int offset = 0; // Initialize offset
   return Consumer<MediaProvider>(
     builder: (context, statusProvider, child) {
       final users = statusProvider.stories.map((story) => story.user).toList();
-
+      //debugger();
       if (users.isEmpty && statusProvider.isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
-
+  
       if (users.isEmpty) {
         return Center(child: Text('No users available.'));
       }
-
+  
       return SizedBox(
-        height: 100,
+        height: 80,
         child: NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
             if (!statusProvider.isLoading &&
@@ -438,15 +466,16 @@ class _HomeScreenState extends State<HomeScreen>
                   child: CircularProgressIndicator(),
                 );
               }
-      
+                
               final user = users[index];
            //   debugger();
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(top: 10,left: 20),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       InkWell(
                         onTap: () { 
@@ -469,6 +498,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 isUser: false,
                                 token: widget!.token.toString(),
                                 viewers: [],
+                                statusId: [],
                               ),
                             ),
                           );
@@ -480,8 +510,8 @@ class _HomeScreenState extends State<HomeScreen>
                             child: Image.network(
                               "${user?.profileImage != null ? user!.profileImage : AppUtils.userImage}",
                               fit: BoxFit.cover,
-                              width: 60,
-                              height: 60,
+                              width: 30,
+                              height: 30,
                               loadingBuilder: (context, child, loadingProgress) {
                                 if (loadingProgress == null) return child;
                                 return CircularProgressIndicator(
@@ -494,10 +524,12 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      //const SizedBox(height: 4),
                       Text(
                         user?.username.toString() ?? 'Unknown',
-                        style: const TextStyle(fontSize: 12),
+                        style: GoogleFonts.inder(
+                          textStyle: TextStyle(fontSize: 6,color: AppColors.darkGrey)
+                        ),
                       ),
                     ],
                   ),
@@ -559,6 +591,8 @@ class _HomeScreenState extends State<HomeScreen>
       },
       isLiked: post.isLiked, // Use the post's `isLiked` 
       postModel: post,
+      postTitle: post.pollTitle,
+              postDescription: post.postDescription
     );
   }
 }
@@ -572,6 +606,7 @@ class StatusView extends StatefulWidget {
   final UserProfile? userProfile;
   final String token;
   final bool isUser;
+  final List<int?>? statusId;
 
   StatusView({
     Key? key,
@@ -583,6 +618,7 @@ class StatusView extends StatefulWidget {
     required this.userProfile,
     required this.token,
     required this.isUser,
+    this.statusId,
   }) : super(key: key);
 
   @override
@@ -602,11 +638,13 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
     _currentIndex = widget.initialIndex;
     _animationController =
         AnimationController(vsync: this, duration: Duration(seconds: 15));
     _initializeStatus();
     _loadStatuses(); // Initial status fetch
+    print("Status ID here is : ${widget.statusId![_currentIndex]}");
   }
 
   // Method to load statuses with pagination
@@ -835,6 +873,16 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          GestureDetector(
+                              onTap: () {
+                                Provider.of<MediaProvider>(context,listen: false).deleteUserStories(widget.statusId![_currentIndex]!.toInt(), context);
+                              },
+                              child: Icon(
+                                Icons.delete,
+                                size: 27,
+                                color: Colors.white,
+                              )),
+                          SizedBox(width: 15),
                           Icon(Icons.remove_red_eye, color: Colors.white),
                           SizedBox(width: 5),
                           Text(
@@ -859,6 +907,8 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
                                 size: 27,
                                 color: Colors.white,
                               )),
+
+
                         ],
                       ),
                     ),

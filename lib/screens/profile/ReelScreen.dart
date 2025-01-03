@@ -96,7 +96,7 @@ class _ReelScreenState extends State<ReelScreen> {
         // Optionally, navigate the user to the login screen here.
         return;
       }
-
+    
      // print("User REEL SCRREN: $userId");
 
       // List<ReelPostModel> fetchedReels =
@@ -188,6 +188,7 @@ class _ReelScreenState extends State<ReelScreen> {
                         });
                       },
                       itemBuilder: (BuildContext context, int index) {
+                        //debugger();
                         print("RELL URL : ${reels![index].file}");
                         return ReelPost(
                           src: reels![index].file,
