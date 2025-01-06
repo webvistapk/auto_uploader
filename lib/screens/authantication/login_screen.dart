@@ -7,6 +7,7 @@ import 'package:mobile/common/custom_social_button.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/screens/authantication/forgot_password_screen.dart';
 import 'package:mobile/screens/authantication/register_screen.dart';
+import 'package:mobile/screens/authantication/sign_up_screen.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 import 'package:provider/provider.dart';
 import '../widgets/app_logo.dart';
@@ -180,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                   context,
                                   CupertinoDialogRoute(
-                                      builder: (_) => RegisterScreen(),
+                                      builder: (_) => SignupScreen(),
                                       context: context));
                             },
                             style: TextButton.styleFrom(
