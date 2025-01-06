@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
 import 'package:mobile/screens/authantication/signup/password.dart';
+import 'package:mobile/screens/post/pool/widget/custom_text_field.dart';
 
-class EmailInputScreen extends StatelessWidget {
+class EmailInputScreen extends StatefulWidget {
   const EmailInputScreen({Key? key}) : super(key: key);
+
+  @override
+  State<EmailInputScreen> createState() => _EmailInputScreenState();
+}
+
+class _EmailInputScreenState extends State<EmailInputScreen> {
+  TextEditingController emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +33,17 @@ class EmailInputScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  TextField(
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      border: OutlineInputBorder(),
-                    ),
+                  CustomTextFormField(
+                    controller: emailController,
+                    hintText: "example@gmail.com",
                   ),
+                  // TextField(
+                  //   keyboardType: TextInputType.emailAddress,
+                  //   decoration: InputDecoration(
+                  //     labelText: "Email",
+                  //     border: OutlineInputBorder(),
+                  //   ),
+                  // ),
                 ],
               ),
               CustomContinueButton(
@@ -44,6 +56,7 @@ class EmailInputScreen extends StatelessWidget {
                     ),
                   );
                 },
+                isPressed: true,
               ),
             ],
           ),

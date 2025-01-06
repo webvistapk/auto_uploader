@@ -15,7 +15,6 @@ import 'package:mobile/screens/post/new_post_now.dart';
 import 'package:mobile/screens/post/pool/add_pools.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
-import 'package:win32/win32.dart';
 
 import 'component/interaction_bottom_sheet.dart'; // Add video player package for video handling
 

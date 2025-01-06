@@ -58,11 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
 
                     // Scrollable content (form and fields)
+
+                    const SizedBox(height: 100),
                     Form(
                       key: formKey,
                       child: Column(
                         children: [
-                          const SizedBox(height: 40),
                           CustomAppTextField(
                             validator: (value) {
                               if (value!.isEmpty) {
@@ -71,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                             controller: _usernameController,
-                            labelText: 'Email or Username',
+                            // labelText: 'Email or Username',
                             hintText: "Enter email or username",
                             // contentPadding: const EdgeInsets.symmetric(
                             //     vertical: 20, horizontal: 16),
@@ -85,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                             controller: _passwordController,
-                            labelText: 'Password',
+                            // labelText: 'Password',
                             hintText: "Enter password",
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 20, horizontal: 16),

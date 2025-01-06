@@ -4,6 +4,7 @@ import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/custom_social_button.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/authantication/signup/birthday_screen.dart';
+import 'package:mobile/screens/authantication/signup/phone/phone_input.dart';
 import 'package:mobile/screens/widgets/app_logo.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -46,7 +47,16 @@ class _SignupScreenState extends State<SignupScreen> {
                           builder: (_) => BirthdayScreen(), context: context));
                 },
               ),
-              CustomSocialButton(textTitle: 'Continue with Phone'),
+              CustomSocialButton(
+                textTitle: 'Continue with Phone',
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      CupertinoDialogRoute(
+                          builder: (_) => PhoneInputScreen(),
+                          context: context));
+                },
+              ),
               CustomSocialButton(textTitle: 'Continue with Apple'),
               CustomSocialButton(textTitle: 'Continue with Google'),
 

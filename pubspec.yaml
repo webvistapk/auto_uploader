@@ -50,7 +50,6 @@ dependencies:
   shared_preferences: ^2.0.6
   url_launcher: ^6.0.9
   jwt_decoder: ^2.0.1
-  win32:
   video_player: 
   chewie: ^1.7.5
   card_swiper: ^3.0.1
@@ -76,6 +75,7 @@ dependencies:
   mime: ^1.0.4
   http_parser: ^4.0.2
   cached_network_image: ^3.3.1
+  intl_phone_number_input: ^0.7.4
 
 dev_dependencies:
   flutter_test:

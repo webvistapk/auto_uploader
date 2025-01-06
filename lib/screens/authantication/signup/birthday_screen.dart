@@ -2,12 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/custom_continue_button.dart';
-import 'package:mobile/screens/authantication/community/discover_community.dart';
 import 'package:mobile/screens/authantication/signup/username_screen.dart';
 
-class BirthdayScreen extends StatelessWidget {
+class BirthdayScreen extends StatefulWidget {
   const BirthdayScreen({Key? key}) : super(key: key);
 
+  @override
+  State<BirthdayScreen> createState() => _BirthdayScreenState();
+}
+
+class _BirthdayScreenState extends State<BirthdayScreen> {
+  DateTime? selectedBirthDate;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -49,19 +54,24 @@ class BirthdayScreen extends StatelessWidget {
                     initialDateTime: DateTime(2000, 1, 1),
                     onDateTimeChanged: (DateTime newDateTime) {
                       // Handle date change
+                      setState(() {
+                        selectedBirthDate = newDateTime;
+                      });
                     },
                   ),
                 ),
                 const SizedBox(height: 24),
                 CustomContinueButton(
-                    buttonText: "Continue",
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          CupertinoDialogRoute(
-                              builder: (_) => CreateUsernameScreen(),
-                              context: context));
-                    }),
+                  buttonText: "Continue",
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        CupertinoDialogRoute(
+                            builder: (_) => CreateUsernameScreen(),
+                            context: context));
+                  },
+                  isPressed: selectedBirthDate != null,
+                ),
                 const SizedBox(height: 24),
               ],
             ),

@@ -1,10 +1,23 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
 import 'package:mobile/screens/authantication/signup/email.dart';
+import 'package:mobile/screens/post/pool/widget/custom_text_field.dart';
 
 // Screen 1: First Name and Last Name
-class FirstNameLastNameScreen extends StatelessWidget {
+class FirstNameLastNameScreen extends StatefulWidget {
   const FirstNameLastNameScreen({Key? key}) : super(key: key);
+
+  @override
+  State<FirstNameLastNameScreen> createState() =>
+      _FirstNameLastNameScreenState();
+}
+
+class _FirstNameLastNameScreenState extends State<FirstNameLastNameScreen> {
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+
+  var formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -16,43 +29,39 @@ class FirstNameLastNameScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: [
-                  const Text(
-                    "Enter Your Name",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: "First Name",
-                      border: OutlineInputBorder(),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    const Text(
+                      "Enter Your Name",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: "Last Name",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-              CustomContinueButton(
-                buttonText: "Continue",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EmailInputScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
+                    const SizedBox(height: 16),
+                    CustomTextFormField(
+                        controller: _firstNameController,
+                        hintText: "First Name"),
+                    const SizedBox(height: 16),
+                    CustomTextFormField(
+                        controller: _lastNameController, hintText: "Last Name")
+                  ],
+                ),
+                CustomContinueButton(
+                    buttonText: "Continue",
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          CupertinoDialogRoute(
+                              builder: (_) => EmailInputScreen(),
+                              context: context));
+                    },
+                    isPressed: true),
+              ],
+            ),
           ),
         ),
       ),

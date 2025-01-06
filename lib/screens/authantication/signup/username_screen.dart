@@ -1,10 +1,17 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
 import 'package:mobile/screens/authantication/signup/fisrt_last_name.dart';
 
-class CreateUsernameScreen extends StatelessWidget {
+class CreateUsernameScreen extends StatefulWidget {
   const CreateUsernameScreen({Key? key}) : super(key: key);
 
+  @override
+  State<CreateUsernameScreen> createState() => _CreateUsernameScreenState();
+}
+
+class _CreateUsernameScreenState extends State<CreateUsernameScreen> {
+  TextEditingController usernameController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,17 +30,17 @@ class CreateUsernameScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                createUsername(context),
+                createUsername(context, usernameController),
                 CustomContinueButton(
                   buttonText: "Continue",
                   onPressed: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const FirstNameLastNameScreen(),
-                      ),
-                    );
+                        context,
+                        CupertinoDialogRoute(
+                            builder: (_) => FirstNameLastNameScreen(),
+                            context: context));
                   },
+                  isPressed: true,
                 ),
               ],
             ),
@@ -43,7 +50,7 @@ class CreateUsernameScreen extends StatelessWidget {
     );
   }
 
-  Widget createUsername(BuildContext context) {
+  Widget createUsername(BuildContext context, TextEditingController username) {
     return Column(
       children: [
         const SizedBox(height: 16),
@@ -55,9 +62,12 @@ class CreateUsernameScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+
         Container(
           width: MediaQuery.of(context).size.width * 0.80,
+          height: 40,
           child: TextField(
+            controller: username,
             textAlign: TextAlign.center, // Align input text to the center
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -69,13 +79,13 @@ class CreateUsernameScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          "Available",
-          style: TextStyle(
-            color: Colors.green,
-            fontSize: 14,
-          ),
-        ),
+        // const Text(
+        //   "Available",
+        //   style: TextStyle(
+        //     color: Colors.green,
+        //     fontSize: 14,
+        //   ),
+        // ),
         const SizedBox(height: 16),
         const Text(
           "This can be changed later",

@@ -6,6 +6,7 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
+import 'package:mobile/screens/authantication/community/discover_community.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart'; // Import the login screen
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
@@ -31,9 +32,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Load SharedPreferences and user profile data
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isAuth = prefs.getBool('isAuth') ?? false;
     final data = await Prefrences.getAuthToken();
     // debugger();
-    if (data != null) {
+    if (data != null && isAuth == true) {
       ChatProvider().setAccessToken(data);
       final email = await Prefrences.getUserEmail();
       UserPreferences userPreferences = UserPreferences();
@@ -50,6 +52,14 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ),
         (route) => false,
+      );
+    } else if (isAuth == false) {
+      Navigator.push(
+        context,
+        CupertinoDialogRoute(
+          builder: (_) => DiscoverCommunityScreen(),
+          context: context,
+        ),
       );
     } else {
       Navigator.push(
