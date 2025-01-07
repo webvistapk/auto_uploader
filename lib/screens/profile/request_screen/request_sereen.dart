@@ -162,10 +162,10 @@ class _RequestScreenState extends State<RequestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TopBar(
-        onSearch: (query) => SearchStore.updateSearchQuery(query),
-      ),
-      drawer: const SideBar(),
+      // appBar: TopBar(
+      //   onSearch: (query) => SearchStore.updateSearchQuery(query),
+      // ),
+      //drawer: const SideBar(),
       backgroundColor: AppColors.mainBgColor,
       body: Padding(
         padding: const EdgeInsets.all(10),

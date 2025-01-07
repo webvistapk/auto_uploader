@@ -166,17 +166,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return SafeArea(
         child: Scaffold(
           appBar:
-          //  _loggedInUserId != widget.id
-          //     ? AppBar(
-          //         backgroundColor: AppColors.white,
-          //         title: Text(
-          //           '@userName',
-          //           style: const TextStyle(
-          //               fontSize: 10, color: AppColors.greyColor),
-          //         ),
-          //         centerTitle: true,
-          //       )
-          //     : 
+           _loggedInUserId != widget.id
+              ? AppBar(
+                  backgroundColor: AppColors.white,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '@userName',
+                        style: const TextStyle(
+                            fontSize: 12, color: AppColors.greyColor),
+                      ),
+                      SizedBox(width: 2,),
+                      Image.asset(AppIcons.drop_down,width: 8,),
+                       SizedBox(width: 2,),
+                    ],
+                  ),
+                  centerTitle: true,
+                  leading: InkWell(
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                    child: Icon(Icons.arrow_back)),
+                )
+              : 
           AppBar(
                   backgroundColor: AppColors.white,
                   title: Row(
@@ -194,7 +208,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                   centerTitle: true,
-                  leading: Container(width: 0,),
+                 
+                  leading: Container(),
                 ),
           // PreferredSize(
           //     preferredSize: Size.fromHeight(50.0),
@@ -202,6 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           //       onSearch: (query) => SearchStore.updateSearchQuery(query),
           //     ),
           //   ),
+        
           endDrawer: const SideBar(),
           drawerEnableOpenDragGesture: true,
           backgroundColor: AppColors.white,
