@@ -1,11 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/models/ReelPostModel.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
+import 'package:mobile/screens/messaging/chat_screen.dart';
 import 'package:mobile/screens/notification/notificationScreen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/post/widgets/add_post_screen.dart';
@@ -111,73 +114,104 @@ class _MainScreenState extends State<MainScreen> {
                         userProfile: widget.userProfile,
                         token: widget.authToken,
                       )
-                      :widget.selectedIndex==1?UserReelScreen()
-                    : widget.selectedIndex == 2
-                        ? CreatePostScreen(
-                            token: widget.authToken,
-                            userProfile: widget.userProfile,
-                          ):
-                           widget.selectedIndex == 3?NotificationScreen()
-                        : widget.selectedIndex == 4
-                            ? ProfileScreen(
-                                id: widget.userProfile.id,
+                    : widget.selectedIndex == 1
+                        ? UserReelScreen()
+                        : widget.selectedIndex == 2
+                            ? CreatePostScreen(
+                                token: widget.authToken,
                                 userProfile: widget.userProfile,
-                                authToken: widget.authToken,
                               )
-                            
-                            : _pages[widget.selectedIndex],
+                            : widget.selectedIndex == 3
+                                ? ChatScreen(
+                            userProfile: widget.userProfile!,
+                          )
+                                : widget.selectedIndex == 4
+                                    ? ProfileScreen(
+                                        id: widget.userProfile.id,
+                                        userProfile: widget.userProfile,
+                                        authToken: widget.authToken,
+                                      )
+                                    : _pages[widget.selectedIndex],
                 bottomNavigationBar: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    child: SalomonBottomBar(
-                      currentIndex: widget.selectedIndex,
-                      onTap: (index) {
-                        setState(() {
-                          widget.selectedIndex = index;
-                        });
-                      },
-                      items: [
-                        /// Home
-                        SalomonBottomBarItem(
-                          icon: Icon(CupertinoIcons.home),
-                          title: Text(""),
-                          selectedColor: Colors.teal,
-                        ),
+                  child: SalomonBottomBar(
+                    backgroundColor: AppColors.deepdarkgreyColor,
+                    unselectedItemColor: AppColors.white,
+                    selectedItemColor: AppColors.white,
+                    selectedColorOpacity: 0,
+                    currentIndex: widget.selectedIndex,
+                    itemPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 12),
+                    onTap: (index) {
+                      setState(() {
+                        widget.selectedIndex = index;
+                      });
+                    },
+                    items: [
+                      /// Home
+                      _buildBottomBarItem(
+                        icon: AppIcons.home,
+                        isSelected: widget.selectedIndex == 0,
+                      ),
 
-                        /// Search
-                        SalomonBottomBarItem(
-                          icon: Icon(Icons.video_collection),
-                          title: Text(""),
-                          selectedColor: Colors.teal,
-                        ),
+                      /// Search
+                      _buildBottomBarItem(
+                        icon: AppIcons.search,
+                        isSelected: widget.selectedIndex == 1,
+                      ),
 
-                        /// Add
-                        SalomonBottomBarItem(
-                          icon: Icon(CupertinoIcons.add_circled),
-                          title: Text(""),
-                          selectedColor: Colors.teal,
-                        ),
+                      /// Add
+                      _buildBottomBarItem(
+                        icon: AppIcons.add_item,
+                        isSelected: widget.selectedIndex == 2,
+                      ),
 
-                        /// Notifications
-                        SalomonBottomBarItem(
-                          icon: Icon(CupertinoIcons.bell),
-                          title: Text(""),
-                          selectedColor: Colors.teal,
-                        ),
+                      /// Messages
+                      _buildBottomBarItem(
+                        icon: AppIcons.message,
+                        isSelected: widget.selectedIndex == 3,
+                      ),
 
-                        /// Profile
-                        SalomonBottomBarItem(
-                          icon: const Icon(CupertinoIcons.person_alt_circle),
-                          title: Text(""),
-                          selectedColor: Colors.teal,
-                        ),
-                      ],
-                    ),
+                      /// Profile
+                      _buildBottomBarItem(
+                        icon: AppIcons.profile,
+                        isSelected: widget.selectedIndex == 4,
+                      ),
+                    ],
                   ),
                 ),
               );
       }),
+    );
+  }
+
+  SalomonBottomBarItem _buildBottomBarItem({
+    required String icon,
+    required bool isSelected,
+  }) {
+    return SalomonBottomBarItem(
+      icon: Stack(
+        alignment: Alignment.bottomCenter,
+        clipBehavior: Clip.none,
+        children: [
+          Image.asset(icon,height: 20,),
+          if (isSelected)
+            Positioned(
+              bottom: -12, // Adjust the position for the indicator
+              
+              child:SizedBox(
+                width: 140, // Width of the line
+                  height: 5,
+                child: Container(
+                   // Height of the line
+                  decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(2), // Rounded edges
+                ),),
+              ),
+            ),
+        ],
+      ),
+      title: const Text(""),
+      selectedColor: Colors.teal, // This affects the icon's color when selected
     );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 
 import '../../../common/message_toast.dart';
 import '../../../models/UserProfile/CommentModel.dart';
@@ -13,7 +14,9 @@ import 'package:http/http.dart' as http;
 class CommentProvider extends ChangeNotifier {
   List<Comment> _comments = [];
   bool _isCommentLoading = false;
+  bool _isUpdatePreviousOffset=true;
   List<Reply> _replies = [];
+  final Map<int, GlobalKey> _commentKeys = {};
   bool _isLoading = false;
   int _nextOffset = 0;
   int _previousOffset=0;
@@ -21,12 +24,15 @@ class CommentProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isCommentLoading => _isCommentLoading;
+  bool get isUpdatePreviousOffset => _isUpdatePreviousOffset;
   List<Comment> get comments => _comments;
   List<Reply> get replies => _replies;
   int get nextOffset => _nextOffset;
   int get previousOffset=>_previousOffset;
   int get replyNextOffset => _replyNextOffset;
   bool hasNextPage=true;
+  bool hasPreviousPage=true;
+  Map<int, GlobalKey> get commentKeys => _commentKeys;
 
   setLoading(bool value) {
     _isLoading = value;
@@ -54,51 +60,15 @@ class CommentProvider extends ChangeNotifier {
     }
   }
 
-  // Future<List<Comment>> fetchComments(String postId, bool isReelScreen) async {
-  //   setCommentLoadin(true);
-  //   print("POst ID: $postId");
-  //   final String? token = await Prefrences.getAuthToken();
-  //   final url =
-  //       "${ApiURLs.baseUrl}${isReelScreen ? ApiURLs.reel_comment_fetch : ApiURLs.post_comment_fetch}$postId/";
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse(url),
-  //       headers: {
-  //         'Authorization': 'Bearer $token',
-  //         'Content-Type': 'application/json',
-  //       },
-  //     );
-  //     print("Response of Comments is Here: ${response.body} :: to Here");
-  //     if (response.statusCode == 200) {
-  //       setCommentLoadin(false);
-  //       final data = json.decode(response.body);
-  //       _comments = (data['comments'] as List)
-  //           .map((comment) => Comment.fromJson(comment))
-  //           .toList();
-
-  //       // After fetching comments, fetch replies for each comment
-  //       // for (var comment in _comments) {
-  //       //   await fetchReplies(comment.id);  // Ensure commentId is passed as a string
-  //       // }
-  //       print("COmmentS ${_comments}");
-
-  //       //print("fetch Comments triggered");
-  //     } else {
-  //       setCommentLoadin(false);
-  //       throw Exception("Failed to load comments");
-  //     }
-  //   } catch (error) {
-  //     setCommentLoadin(false);
-  //     print(error);
-  //     rethrow; // Re-throw the error to handle it in the calling code if needed
-  //   }
-  //   return _comments;
-  // }
 
    List<Comment> tempCommentList = [];  // Temporary list for fetching comments only for a specific offset
+initializeComments(String postId, bool isReelScreen, {int limit = 10, int? offset = 0, bool isFromFindMyPage = false, bool isNext = true,}) async {
+    _comments = [];
+    await fetchComments(postId,isReelScreen,limit: 10,offset: offset,);
+  }
 
  // Temporary list for fetching comments only for a specific offset
-fetchComments(String postId, bool isReelScreen, {int limit = 10, int offset = 0, bool isFromFindMyPage = false, bool isNext = true}) async {
+fetchComments(String postId, bool isReelScreen, {int limit = 10, int? offset = 0, bool isNext=false}) async {
   setLoading(true);
   print("Post ID: $postId");
 
@@ -108,7 +78,7 @@ fetchComments(String postId, bool isReelScreen, {int limit = 10, int offset = 0,
   print("Offset: $offset");
 
   try {
-    //   debugger();
+    //  debugger();
     final response = await http.get(
       Uri.parse(url).replace(
         queryParameters: {
@@ -127,31 +97,59 @@ fetchComments(String postId, bool isReelScreen, {int limit = 10, int offset = 0,
 
       final data = json.decode(response.body);
       CommentModel commentResponse = CommentModel.fromJson(data);
-      //debugger();
-      if (isFromFindMyPage) {
-        tempCommentList = commentResponse.comments;
-      } else {
-        if (isNext) {
-          // Append next comments
-          if (offset == 0) {
-            _comments = commentResponse.comments;
-          } else {
-            _comments.addAll(commentResponse.comments);
+      
+      print("Previous Offset Before ${commentResponse.previousOffset}");
+        //debugger();
+       if(offset==0){
+          _isUpdatePreviousOffset=false;
+       }
+       if(!isNext)
+        {if (offset == 0) {
+        _comments = commentResponse.comments;
+        hasNextPage=commentResponse.hasNextPage;
+        _nextOffset=commentResponse.nextOffset??_nextOffset;
+          if(_isUpdatePreviousOffset){
+        _previousOffset=commentResponse.previousOffset??_previousOffset;
+        hasPreviousPage=commentResponse.hasPreviousPage;
           }
-          // Update next offset if there are more comments
-          if (commentResponse.hasNextPage) {
-            _nextOffset = offset + limit;  // Continue loading next comments
-          } else {
-            _nextOffset = -1;  // No more comments, set to -1
-            hasNextPage=commentResponse.hasNextPage;
-          }
-        } else {
-          // Prepend previous comments
+          else{
+            _previousOffset=0;
+            hasPreviousPage=false;
+           }
+      } 
+      else {
+        _comments.addAll(commentResponse.comments); // Append new comments
+         hasNextPage=commentResponse.hasNextPage;
+
+        _nextOffset=commentResponse.nextOffset??_nextOffset;
+         if(_isUpdatePreviousOffset){
+        _previousOffset=commentResponse.previousOffset??_previousOffset;
+         hasPreviousPage=commentResponse.hasPreviousPage;
+         }
+         else{
+            _previousOffset=0;
+            hasPreviousPage=false;
+           }
+      }}
+      else{
           _comments.insertAll(0, commentResponse.comments);
-          // Calculate previous offset for backward navigation
-          _previousOffset = offset - limit >= 0 ? offset - limit : 0;
-        }
+
+          _nextOffset=commentResponse.nextOffset??_nextOffset;
+           if(_isUpdatePreviousOffset){
+          _previousOffset=commentResponse.previousOffset??_previousOffset;
+           hasPreviousPage=commentResponse.hasPreviousPage;
+           }
+           else{
+            _previousOffset=0;
+            hasPreviousPage=false;
+           }
       }
+      //debugger();
+      for (var comment in _comments) {
+      _commentKeys[comment.id] = GlobalKey();
+    }
+      
+      print("comment Key of 1 ${_commentKeys[34]!.currentContext}");
 
       // Notify listeners to update UI
       notifyListeners();
@@ -166,10 +164,8 @@ fetchComments(String postId, bool isReelScreen, {int limit = 10, int offset = 0,
     setLoading(false);
   }
 
-  return isFromFindMyPage ? tempCommentList : _comments;
+  return _comments;
 }
-
-
 
   Future<void> fetchReplies(int commentId, {int limit =10, offset=0}) async {
     setCommentLoadin(true);
@@ -250,17 +246,10 @@ fetchComments(String postId, bool isReelScreen, {int limit = 10, int offset = 0,
   }
 
 void loadPreviousComments(String postId, int commentIdToHighlight, int limit, {bool isReel=false}) async {
-  // Ensure no unnecessary fetches
-  if (_previousOffset <= 0) {
-    print("No previous comments available.");
-    return;
-  }
-
-  // Calculate the offset for fetching previous comments
    int previousOffset = _previousOffset - limit;
-  // if (previousOffset < 0) {
-  //   previousOffset = 0; // Ensure offset is not negative
-  // }
+  if (previousOffset < 0) {
+    previousOffset = 0; // Ensure offset is not negative
+  }
 
   try {
     // Fetch previous comments
@@ -269,9 +258,7 @@ void loadPreviousComments(String postId, int commentIdToHighlight, int limit, {b
       isReel,
       limit: limit,
       offset: previousOffset,
-      isFromFindMyPage: false,
-      isNext: false,
-      
+      isNext: true
     );
   } catch (error) {
     print("Error loading previous comments: $error");
@@ -294,8 +281,7 @@ void loadNextComments(String postId,{bool isReel=false}) async {
       isReel, // Assuming this is for a post and not a reel
       limit: 10, // Fetch only 10 comments
       offset: newNextOffset, // Use the current next offset
-      isFromFindMyPage: false, // Not a specific comment search
-      isNext: true, // Indicating next comments
+     
     );
     //_nextOffset += 10;
 
@@ -306,42 +292,7 @@ void loadNextComments(String postId,{bool isReel=false}) async {
   }
 }
 
- 
-  Future<int> findPageForComment({
-  required String postId,
-  required int commentId,
-  required int limit,
-  bool isNext = true,
-  bool isReel=false // Flag to indicate if we're going forward or backward
-}) async {
-  print("fetch post is called");
-  int offset = 0;
-//debugger();
-  // Loop through comments in batches until the desired comment is found
-  while (true) {
-    // Fetch comments for the current batch with the current offset
-    final comments = await fetchComments(postId, isReel, limit: limit, offset: offset, isFromFindMyPage: true, isNext: isNext);
 
-    // Check if any of the comments in this batch match the commentId
-    if (comments.any((comment) => comment.id == commentId)) {
-      // Reset _comments and set the current batch with the found comment
-      _comments = comments;
-      _nextOffset =  offset+10 ; // Save the offset for the next fetch
-      _previousOffset=offset;
-      // After resetting, call fetchComments to reload the comments from the found offset
-      break; // Exit the loop since we've found the comment
-    }
-      await fetchComments(postId, isReel, limit: limit, offset: offset, isNext: isNext);
-
-    // Exit the loop if there are no more comments left to fetch
-    if (comments.length < limit) break;
-
-    // Increment or decrement offset to fetch the next or previous batch of comments
-    offset = isNext ? offset + limit : offset - limit;
-  }
-
-  throw Exception("Comment not found");
-}
 
   Future<void> addComment(
     String postId,
@@ -418,54 +369,11 @@ void loadNextComments(String postId,{bool isReel=false}) async {
     }
   }
 
-  void deleteCommentReply(int replyId, commentId, BuildContext context) async {
-    final String? token = await Prefrences.getAuthToken();
-
-    String URL =
-        "${ApiURLs.baseUrl}${ApiURLs.delete_post_comment_reply}${replyId.toString()}/";
-    //setIsLoading(true);
-    print("COMMENT ID: ${replyId}");
-    try {
-      // Make the DELETE request
-      final response = await http.delete(
-        Uri.parse(URL),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        // Show success message
-        ToastNotifier.showSuccessToast(
-            context, "comment reply deleted successfully");
-        fetchReplies(commentId);
-        Comment comment =
-            comments.firstWhere((comment) => comment.id == commentId);
-        comment.replyCount--;
-        if (comment.replyCount == 0) {
-          comment.isReplyVisible = false;
-        }
-        notifyListeners();
-      } else {
-        // Show error message if deletion failed
-        ToastNotifier.showErrorToast(
-            context, "Sorry comment reply is not deleted. Please Try Again!");
-
-        notifyListeners();
-      }
-    } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error: $e");
-    }
-  }
-
   Future<void> likeComment(
-      int commentId, BuildContext context, bool isReply) async {
+      int commentId, BuildContext context) async {
     try {
       final String? token = await Prefrences.getAuthToken();
-      String URL = isReply
-          ? "${ApiURLs.baseUrl}${ApiURLs.new_like}reply/${commentId.toString()}/"
-          : "${ApiURLs.baseUrl}${ApiURLs.new_like}comment/${commentId.toString()}/";
+      String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}comment/${commentId.toString()}/";
 
       final response = await http.post(
         Uri.parse(URL),
@@ -479,37 +387,25 @@ void loadNextComments(String postId,{bool isReel=false}) async {
         final commentIndex =
             comments.indexWhere((comment) => comment.id == commentId);
         if (commentIndex != -1) {
-          if (isReply) {
-            final replyIndex = comments[commentIndex]
-                .replies
-                .indexWhere((reply) => reply.id == commentId);
-            if (replyIndex != -1) {
-              comments[commentIndex].replies[replyIndex].isReplyLiked = true;
-              comments[commentIndex].replies[replyIndex].replyLikeCount += 1;
-            }
-          } else {
+          
             comments[commentIndex].isLiked = true;
             comments[commentIndex].likeCount += 1;
-          }
 
           notifyListeners();
         }
         //ToastNotifier.showSuccessToast(context, "Liked Successfully");
-      } else {
-        throw Exception('Failed to like comment');
-      }
+      } 
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "Unsuccessful Like: ${e}");
+      //ToastNotifier.showErrorToast(context, "Unsuccessful Like: ${e}");
+      print(e);
     }
   }
 
   Future<void> dislikeComment(
-      int commentId, replyId, BuildContext context, bool isReply) async {
+      int commentId, replyId, BuildContext context) async {
     try {
       final String? token = await Prefrences.getAuthToken();
-      String URL = isReply
-          ? "${ApiURLs.baseUrl}${ApiURLs.dislike}reply/${replyId.toString()}/"
-          : "${ApiURLs.baseUrl}${ApiURLs.dislike}comment/${commentId.toString()}/";
+      String URL = "${ApiURLs.baseUrl}${ApiURLs.dislike}comment/${commentId.toString()}/";
 
       final response = await http.delete(
         Uri.parse(URL),
@@ -523,112 +419,17 @@ void loadNextComments(String postId,{bool isReel=false}) async {
         final commentIndex =
             comments.indexWhere((comment) => comment.id == commentId);
         if (commentIndex != -1) {
-          if (isReply) {
-          
-          final comment = _comments[commentIndex];
-          final replyIndex = comment.replies.indexWhere((r) => r.id == replyId);
-          if (replyIndex != -1) {
-            // Update the reply state
-            comment.replies[replyIndex] = Reply(
-              id: comment.replies[replyIndex].id,
-              replierName: comment.replies[replyIndex].replierName,
-              content: comment.replies[replyIndex].content,
-              replierImage: comment.replies[replyIndex].replierImage,
-              isReplyLiked: false, // Mark as liked
-              replyLikeCount: comment.replies[replyIndex].replyLikeCount -
-                  1, // Increment like count
-            );
-
-            // Update the comment in the provider
-            _comments[commentIndex] = Comment(
-              id: comment.id,
-              username: comment.username,
-              avatarUrl: comment.avatarUrl,
-              commentText: comment.commentText,
-              replies: comment.replies, // Updated replies
-              timeAgo: comment.timeAgo,
-              isLiked: comment.isLiked,
-              likeCount: comment.likeCount,
-              replyCount: comment.replyCount,
-              isReplyVisible: comment.isReplyVisible,
-              isReplyLoaded: comment.isReplyLoaded,
-            );
-
-            notifyListeners();
-          
-            }
-          } else {
-            comments[commentIndex].isLiked = false;
-            comments[commentIndex].likeCount -= 1;
-          }
+            comments[commentIndex].isLiked =false;
+            comments[commentIndex].likeCount = (comments[commentIndex].likeCount>0)?comments[commentIndex].likeCount - 1:0;
+       
 
           notifyListeners();
         }
         //ToastNotifier.showSuccessToast(context, "Disliked Successfully");
-      } else {
-        throw Exception('Failed to dislike comment');
-      }
+      } 
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "Unsuccessful Dislike: ${e}");
-    }
-  }
-
-  Future<void> likeReply(
-      int replyId, int commentId, BuildContext context) async {
-    try {
-      // Call the API to like the comment
-      //await ApiService.likeComment(commentId); // Replace with your API logic
-      final String? token = await Prefrences.getAuthToken();
-      String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}reply/$replyId/";
-
-      // Update the local state after a successful API call
-      final response = await http.post(
-        Uri.parse(URL),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-      if (response.statusCode == 200) {
-        final commentIndex = _comments.indexWhere((c) => c.id == commentId);
-        if (commentIndex != -1) {
-          final comment = _comments[commentIndex];
-          final replyIndex = comment.replies.indexWhere((r) => r.id == replyId);
-          if (replyIndex != -1) {
-            // Update the reply state
-            comment.replies[replyIndex] = Reply(
-              id: comment.replies[replyIndex].id,
-              replierName: comment.replies[replyIndex].replierName,
-              content: comment.replies[replyIndex].content,
-              replierImage: comment.replies[replyIndex].replierImage,
-              isReplyLiked: true, // Mark as liked
-              replyLikeCount: comment.replies[replyIndex].replyLikeCount +
-                  1, // Increment like count
-            );
-
-            // Update the comment in the provider
-            _comments[commentIndex] = Comment(
-              id: comment.id,
-              username: comment.username,
-              avatarUrl: comment.avatarUrl,
-              commentText: comment.commentText,
-              replies: comment.replies, // Updated replies
-              timeAgo: comment.timeAgo,
-              isLiked: comment.isLiked,
-              likeCount: comment.likeCount,
-              replyCount: comment.replyCount,
-              isReplyVisible: comment.isReplyVisible,
-              isReplyLoaded: comment.isReplyLoaded,
-            );
-
-            notifyListeners();
-          }
-        }
-      } else {
-        throw Exception('Failed to like comment');
-      }
-    } catch (e) {
-      ToastNotifier.showErrorToast(context, "Faild : ${e}");
+      //ToastNotifier.showErrorToast(context, "Unsuccessful Dislike: ${e}");
+      print(e);
     }
   }
 
@@ -642,6 +443,7 @@ class ReplyProvider extends ChangeNotifier{
   int _nextOffset = 0;
   int _previousOffset=0;
   int _replyNextOffset = 0;
+  bool _isUpdatePreviousOffset=true;
 
   bool get isLoading => _isLoading;
   bool get isCommentLoading => _isCommentLoading;
@@ -650,6 +452,10 @@ class ReplyProvider extends ChangeNotifier{
   int get nextOffset => _nextOffset;
   int get previousOffset=>_previousOffset;
   int get replyNextOffset => _replyNextOffset;
+  bool isReplyVisible=false;
+  bool get isUpdatePreviousOffset => _isUpdatePreviousOffset;
+  bool hasNextPage=true;
+  bool hasPreviousPage=true;
 
 setLoading(bool value) {
     _isLoading = value;
@@ -662,7 +468,7 @@ setLoading(bool value) {
   }
 
 
-  Future<void> fetchReplies(int commentId, {int limit =10, offset=0,bool isReply=false}) async {
+  Future<void> fetchReplies(int commentId, {int limit=10, offset=0,bool isReel=false,bool isNext=false}) async {
     setCommentLoadin(true);
     print("Comment ID: ${commentId}");
     final String? token = await Prefrences.getAuthToken();
@@ -686,49 +492,53 @@ setLoading(bool value) {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print("Replies List1: ${response.body}");
-
+        //debugger();
         ReplyModel replyResponse = ReplyModel.fromJson(data);
-      print("COmments Length ${_comments}");
-
-      
-      // If offset is 0, clear the existing comments and load new ones
-      if (offset == 0) {
+     // print("COmments Length ${_comments}");
+       if(offset==0){
+          _isUpdatePreviousOffset=false;
+       }
+       if(!isNext)
+        {if (offset == 0) {
         _replies = replyResponse.reply;
-        _replyNextOffset=replyResponse.nextOffset??0;
-      } else {
+        hasNextPage=replyResponse.hasNextPage;
+        _nextOffset=replyResponse.nextOffset??_nextOffset;
+          if(_isUpdatePreviousOffset){
+        _previousOffset=replyResponse.previousOffset??_previousOffset;
+        hasPreviousPage=replyResponse.hasPreviousPage;
+          }
+          else{
+            _previousOffset=0;
+            hasPreviousPage=false;
+           }
+      } 
+      else {
         _replies.addAll(replyResponse.reply); // Append new comments
-        _replyNextOffset=replyResponse.nextOffset??_replyNextOffset;
+         hasNextPage=replyResponse.hasNextPage;
+
+        _nextOffset=replyResponse.nextOffset??_nextOffset;
+         if(_isUpdatePreviousOffset){
+        _previousOffset=replyResponse.previousOffset??_previousOffset;
+         hasPreviousPage=replyResponse.hasPreviousPage;
+         }
+         else{
+            _previousOffset=0;
+            hasPreviousPage=false;
+           }
+      }}
+      else{
+          _replies.insertAll(0, replyResponse.reply);
+
+          _nextOffset=replyResponse.nextOffset??_nextOffset;
+           if(_isUpdatePreviousOffset){
+          _previousOffset=replyResponse.previousOffset??_previousOffset;
+           hasPreviousPage=replyResponse.hasPreviousPage;
+           }
+           else{
+            _previousOffset=0;
+            hasPreviousPage=false;
+           }
       }
-      // If there are no more comments, set the nextOffset to -1
-      //debugger();
-      if (!replyResponse.hasNextPage) {
-        _replyNextOffset = -1;
-      }
-
-        // _replies = (data['reply'] as List)
-        //     .map((reply) => Reply.fromJson(reply))
-        //     .toList();
-
-         print("Replies List: ${response.body}");
-
-        final index =
-            _comments.indexWhere((comment) => comment.id == commentId);
-        if (index != -1) {
-          final currentComment = _comments[index];
-          _comments[index] = Comment(
-              id: currentComment.id,
-              username: currentComment.username,
-              avatarUrl: currentComment.avatarUrl,
-              commentText: currentComment.commentText,
-              replies: _replies, // Update the replies
-              timeAgo: currentComment.timeAgo,
-              isLiked: currentComment.isLiked,
-              likeCount: currentComment.likeCount,
-              replyCount: currentComment.replyCount,
-              isReplyVisible: currentComment.isReplyVisible,
-              isReplyLoaded: currentComment.isReplyLoaded);
-          notifyListeners(); // Notify listeners for UI update
-        }
       } else {
         throw Exception("Failed to fetch replies");
       }
@@ -737,17 +547,26 @@ setLoading(bool value) {
       rethrow;
     } finally {
       setCommentLoadin(false);
+      
     }
   }
 
+initializeReply(int commentId, bool isReelScreen, {int limit = 10, int? offset = 0}) async {
+    _replies = [];
+    await fetchReplies(commentId,isReel: isReelScreen,limit: 10,offset: offset,);
 
-void toggleReplyVisibility(int commentId) {
+  }
+
+
+toggleReplyVisibility(int commentId,BuildContext context) {
+    //debugger();
+  fetchReplies(commentId);
   // Find the index of the comment
-  int commentIndex = _comments.indexWhere((comment) => comment.id == commentId);
-  
+  final commentProvider= Provider.of<CommentProvider>(context,listen: false);
+  int commentIndex = commentProvider.comments.indexWhere((comment) => comment.id == commentId);
+  _comments=commentProvider.comments;
   if (commentIndex != -1) {
     Comment comment = _comments[commentIndex];
-    
     // Toggle visibility
     comment.isReplyVisible = !comment.isReplyVisible;
     notifyListeners();
@@ -758,7 +577,56 @@ void toggleReplyVisibility(int commentId) {
       comment.isReplyLoaded = true; // Mark replies as loaded after fetching
     }
   }
+  notifyListeners();
 }
+
+
+void loadNextReply(int commentId,{bool isReel=false}) async {
+  // Ensure no duplicate or unnecessary fetches
+  if (nextOffset == -1) {
+    print("No more comments to load.");
+    return;
+  }
+
+  try {
+    // Fetch the next batch of comments (10 at a time)
+    int newNextOffset = _nextOffset;
+    await fetchReplies(
+      commentId,
+     isReel:  isReel, // Assuming this is for a post and not a reel
+     limit: 10, // Fetch only 10 comments
+      offset: newNextOffset, // Use the current next offset
+     
+    );
+
+    
+  } catch (error) {
+    print("Error loading next replies: $error");
+  }
+}
+
+void loadPreviousReply(int commentId, int limit, {bool isReel=false}) async {
+   int previousOffset = _previousOffset - limit;
+  if (previousOffset < 0) {
+    previousOffset = 0; // Ensure offset is not negative
+  }
+
+  try {
+    // Fetch previous comments
+    await fetchReplies(
+      commentId,
+      isReel:  isReel,
+      limit: limit,
+      offset: previousOffset,
+      isNext: true
+    );
+  } catch (error) {
+    print("Error loading previous replies: $error");
+  }
+}
+
+
+
 
 Future<void> replyComment(
     int commentId,
@@ -769,6 +637,7 @@ Future<void> replyComment(
     required BuildContext context,
   }) async {
     try {
+      setCommentLoadin(true);
       print("Comment POST ID : ${commentId}");
       final String? token = await Prefrences.getAuthToken();
       final request = http.MultipartRequest(
@@ -792,15 +661,24 @@ Future<void> replyComment(
       if (response.statusCode == 201) {
         ToastNotifier.showSuccessToast(
             context, "Comment reply added successfully");
-        fetchReplies(commentId);
-        //Comment comment =
-          //  comments.firstWhere((comment) => comment.id == commentId);
-        //comment.replyCount++;
+        //debugger();
+        final commentProvider= Provider.of<CommentProvider>(context,listen: false);
+  int commentIndex = commentProvider.comments.indexWhere((comment) => comment.id == commentId);
+  _comments=commentProvider.comments;
+      Comment comment = _comments[commentIndex];
+        comment.replyCount++;
+        await fetchReplies(commentId);
+        
+      setCommentLoadin(false);
+        notifyListeners();
       } else {
         ToastNotifier.showErrorToast(context, "Failed to add comment reply");
       }
     } catch (error) {
       ToastNotifier.showErrorToast(context, "Error: $error");
+    }
+    finally{
+      setCommentLoadin(false);
     }
   }
 
@@ -862,6 +740,7 @@ Future<void> replyComment(
 
     if (response.statusCode == 200) {
       // Find the comment and the reply
+      print("Respons of Like ${response.body}");
       final commentIndex = _comments.indexWhere((comment) => comment.id == commentId);
       if (commentIndex != -1) {
         final replyIndex = _comments[commentIndex]
@@ -869,28 +748,25 @@ Future<void> replyComment(
             .indexWhere((reply) => reply.id == replyId);
         if (replyIndex != -1) {
           // Update the reply state directly
-          _comments[commentIndex].replies[replyIndex].isReplyLiked = true;
-          _comments[commentIndex].replies[replyIndex].replyLikeCount += 1;
+         final currentReply=_comments[commentIndex].replies[replyIndex];
+          currentReply.isReplyLiked = true;
+          currentReply.replyLikeCount += 1;
 
           // Call notifyListeners() to update the UI
           notifyListeners();
         }
       }
-    } else {
-      throw Exception('Failed to like reply');
-    }
+    } 
   } catch (e) {
     ToastNotifier.showErrorToast(context, "Failed to like reply: ${e}");
   }
 }
 
-  Future<void> dislikeComment(
-      int commentId, replyId, BuildContext context, bool isReply) async {
+  Future<void> dislikeReply(
+      int commentId, replyId, BuildContext context) async {
     try {
       final String? token = await Prefrences.getAuthToken();
-      String URL = isReply
-          ? "${ApiURLs.baseUrl}${ApiURLs.dislike}reply/${replyId.toString()}/"
-          : "${ApiURLs.baseUrl}${ApiURLs.dislike}comment/${commentId.toString()}/";
+      String URL = "${ApiURLs.baseUrl}${ApiURLs.dislike}reply/${replyId.toString()}/";
 
       final response = await http.delete(
         Uri.parse(URL),
@@ -899,58 +775,29 @@ Future<void> replyComment(
           'Content-Type': 'application/json',
         },
       );
-
+//debugger();
       if (response.statusCode == 200) {
-        final commentIndex =
-            comments.indexWhere((comment) => comment.id == commentId);
-        if (commentIndex != -1) {
-          if (isReply) {
-          
-          final comment = _comments[commentIndex];
-          final replyIndex = comment.replies.indexWhere((r) => r.id == replyId);
-          if (replyIndex != -1) {
-            // Update the reply state
-            comment.replies[replyIndex] = Reply(
-              id: comment.replies[replyIndex].id,
-              replierName: comment.replies[replyIndex].replierName,
-              content: comment.replies[replyIndex].content,
-              replierImage: comment.replies[replyIndex].replierImage,
-              isReplyLiked: false, // Mark as liked
-              replyLikeCount: comment.replies[replyIndex].replyLikeCount -
-                  1, // Increment like count
-            );
-
-            // Update the comment in the provider
-            _comments[commentIndex] = Comment(
-              id: comment.id,
-              username: comment.username,
-              avatarUrl: comment.avatarUrl,
-              commentText: comment.commentText,
-              replies: comment.replies, // Updated replies
-              timeAgo: comment.timeAgo,
-              isLiked: comment.isLiked,
-              likeCount: comment.likeCount,
-              replyCount: comment.replyCount,
-              isReplyVisible: comment.isReplyVisible,
-              isReplyLoaded: comment.isReplyLoaded,
-            );
-
-            notifyListeners();
+        final commentIndex = _comments.indexWhere((comment) => comment.id == commentId);
+      if (commentIndex != -1) {
+        final replyIndex = _comments[commentIndex]
+            .replies
+            .indexWhere((reply) => reply.id == replyId);
+        if (replyIndex != -1) {
+          // Update the reply state directly
+         final currentReply=_comments[commentIndex].replies[replyIndex];
+          currentReply.isReplyLiked = false;
+          currentReply.replyLikeCount =(currentReply.replyLikeCount>0)? currentReply.replyLikeCount-1:0;
           
             }
-          } else {
-            comments[commentIndex].isLiked = false;
-            comments[commentIndex].likeCount -= 1;
-          }
+          
 
           notifyListeners();
         }
         //ToastNotifier.showSuccessToast(context, "Disliked Successfully");
-      } else {
-        throw Exception('Failed to dislike comment');
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "Unsuccessful Dislike: ${e}");
+      //ToastNotifier.showErrorToast(context, "Unsuccessful Dislike: ${e}");
+      print(e);
     }
   }
 

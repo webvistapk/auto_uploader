@@ -15,6 +15,7 @@ class SinglePost extends StatefulWidget {
   final bool isInteractive;
   final String? commentId;
   final String? replyID;
+  final int? offset;
   final VoidCallback onPostUpdated;
 
   SinglePost({
@@ -23,6 +24,7 @@ class SinglePost extends StatefulWidget {
     this.isInteractive = false,
     this.commentId,
     this.replyID,
+    this.offset,
     required this.onPostUpdated,
   }) : super(key: key);
 
@@ -100,9 +102,11 @@ class _SinglePostState extends State<SinglePost> {
               showCommentSection: true,
               scrollCommentId: widget.commentId,
               scrollReplyID: widget.replyID,
+              scrollOffset: widget.offset,
               refresh: () => postProvider.getSinglePost(widget.postId),
               isUserPost: isUserPost,
               onPressed: () {
+                //debugger();
                 if (post.media[0].mediaType == 'video') {
                   Navigator.push(
                     context,
@@ -134,8 +138,12 @@ class _SinglePostState extends State<SinglePost> {
                   );
                 }
               },
-              isLiked: post.isLiked,
-              postModel: post, // Use the actual 'isLiked' value from the post
+              isLiked:
+                  post.isLiked, // Use the actual 'isLiked' value from the post
+              postModel: post,
+              isSinglePost: true,
+              postTitle: post.pollTitle,
+              postDescription: post.postDescription,
             );
           },
         ));

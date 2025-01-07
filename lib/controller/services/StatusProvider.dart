@@ -151,5 +151,35 @@ class MediaProvider with ChangeNotifier {
     notifyListeners();
   }
 }
+
+deleteUserStories(int storyId,BuildContext context)async{
+   final String? token = await Prefrences.getAuthToken();
+    //print("Reel ID ${postID}");
+    String URL = "${ApiURLs.baseUrl}${ApiURLs.delete_user_status}$storyId/";
+
+    // print("Post ID in Like ${postID}");
+
+    try {
+      final response = await http.delete(
+        Uri.parse(URL),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      //debugger();
+      print("API HITTED");
+      if (response.statusCode == 200) {
+        // _reels?[reelIndex].isLiked = true;
+   // ToastNotifier.showErrorToast(context, "Story Deleted");
+        // Notify listeners to update UI
+        notifyListeners();
+      } 
+    } catch (e) {
+      //ToastNotifier.showErrorToast(context, "Error disliking the post: $e");
+      print(e);
+    }
+}
+
 }
 

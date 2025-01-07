@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/followers.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
@@ -48,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     // _getUserIdFromToken();
     _initializeData();
-   /* _fetchPosts();*/
+    /* _fetchPosts();*/
     super.initState();
   }
 
@@ -153,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   /*Future<void> _refresh() async {
     // Refresh logic here, for example, fetching new data
-   *//* _fetchPosts();*//*
+   */ /* _fetchPosts();*/ /*
     // You can add a small delay to simulate a network call if necessary
     await Future.delayed(Duration(milliseconds: 400));
   }*/
@@ -164,34 +165,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print(_loggedInUserId);
       return SafeArea(
         child: Scaffold(
-          appBar: _loggedInUserId != widget.id
+          appBar:
+           _loggedInUserId != widget.id
               ? AppBar(
-                  title: Text(
-                    userName ?? '',
-                    style: const TextStyle(
-                        fontSize: 10, color: AppColors.greyColor),
+                  backgroundColor: AppColors.white,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '@userName',
+                        style: const TextStyle(
+                            fontSize: 12, color: AppColors.greyColor),
+                      ),
+                      SizedBox(width: 2,),
+                      Image.asset(AppIcons.drop_down,width: 8,),
+                       SizedBox(width: 2,),
+                    ],
                   ),
                   centerTitle: true,
+                  leading: InkWell(
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                    child: Icon(Icons.arrow_back)),
                 )
-              : AppBar(),
+              : 
+          AppBar(
+                  backgroundColor: AppColors.white,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '@userName',
+                        style: const TextStyle(
+                            fontSize: 12, color: AppColors.greyColor),
+                      ),
+                      SizedBox(width: 2,),
+                      Image.asset(AppIcons.drop_down,width: 8,),
+                       SizedBox(width: 2,),
+                    ],
+                  ),
+                  centerTitle: true,
+                 
+                  leading: Container(),
+                ),
           // PreferredSize(
           //     preferredSize: Size.fromHeight(50.0),
           //     child: TopBar(
           //       onSearch: (query) => SearchStore.updateSearchQuery(query),
           //     ),
           //   ),
-          drawer: const SideBar(),
+        
+          endDrawer: const SideBar(),
           drawerEnableOpenDragGesture: true,
-          backgroundColor: AppColors.mainBgColor,
+          backgroundColor: AppColors.white,
           body: FutureBuilder<UserProfile?>(
             future: _userProfile,
             builder: (context, profileSnapshot) {
-              if (profileSnapshot.connectionState ==
-                  ConnectionState.waiting) {
+              if (profileSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (profileSnapshot.hasError) {
-                return Center(
-                    child: Text('Error: ${profileSnapshot.error}'));
+                return Center(child: Text('Error: ${profileSnapshot.error}'));
               } else if (!profileSnapshot.hasData ||
                   profileSnapshot.data == null) {
                 return const Center(child: Text('No user profile found.'));
@@ -203,8 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   builder: (context, followSnapshot) {
                     if (followSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return const Center(
-                          child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     } else if (followSnapshot.hasError) {
                       return const Center(
                           child: Text('Error checking follow status.'));
@@ -220,10 +255,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         scrollDirection: Axis.vertical,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              height: 10,
-                            ),
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
                             /* if (_loggedInUserId != widget.id)
                                   GestureDetector(
                                     onTap: () {

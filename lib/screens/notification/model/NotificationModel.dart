@@ -67,8 +67,8 @@ class NotificationModel {
       reel: json['reel']?['result'] != null
           ? Reel.fromJson(json['reel']['result'])
           : null,
-      comment: json['comment']?['result'] != null
-          ? Comment.fromJson(json['comment']['result'])
+      comment: json['comment'] != null
+          ? Comment.fromJson(json['comment'])
           : null,
       reply: json['reply'] != null
           ? Reply.fromJson(json['reply'])
@@ -114,13 +114,17 @@ class Actor {
 class Post {
   final int id;
   final String post;
+  final String offset;
+  final String limit;
 
-  Post({required this.id, required this.post});
+  Post({required this.id, required this.post,required this.offset,required this.limit});
 
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(
       id: json['id'] as int? ?? 0,
       post: json['post'] as String? ?? '',
+      offset: json['offset'] as String? ?? '',
+      limit: json['limit'] as String? ?? '',
     );
   }
 }
@@ -128,13 +132,17 @@ class Post {
 class Reel {
   final int id;
   final String file;
+  final int? offset;
+  final int? limit;
 
-  Reel({required this.id, required this.file});
+  Reel({required this.id, required this.file, required this.offset, required this.limit});
 
   factory Reel.fromJson(Map<String, dynamic> json) {
     return Reel(
       id: json['id'] as int? ?? 0,
       file: json['file'] as String? ?? '',
+      offset: json['offset'] ?? 0,
+      limit: json['limit'] ?? 0,
     );
   }
 }
@@ -205,13 +213,19 @@ class PostOrReel {
 class Comment {
   final int id;
   final String content;
+   final int offset;
+  final int limit;
+  
+  
 
-  Comment({required this.id, required this.content});
+  Comment({required this.id, required this.content,required this.limit,required this.offset});
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
-      id: json['id'] as int? ?? 0,
-      content: json['content'] as String? ?? '',
+      id: json['result']?['id'] as int? ?? 0,
+      content: json['result']?['content'] as String? ?? '',
+      offset: json['offset'] as int? ?? 0,
+      limit: json['limit'] as int? ??  0,
     );
   }
 }

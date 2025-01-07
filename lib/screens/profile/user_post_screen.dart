@@ -223,6 +223,8 @@ class _UserPostScreenState extends State<UserPostScreen> {
                         },
                         isLiked: post.isLiked,
                         postModel: post,
+                        postTitle: post.pollTitle,
+              postDescription: post.postDescription
                       ),
                     ],
                   ),

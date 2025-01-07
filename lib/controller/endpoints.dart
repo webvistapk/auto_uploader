@@ -29,6 +29,7 @@ class ApiURLs {
   static const String create_new_story_endpoint = "posts/story/new/save/";
   static const String get_reel_post = "posts/reel/get/";
   static const String get_user_status = 'posts/story/get/';
+  static const String delete_user_status = 'posts/story/delete/';
   static const String get_followers_status = 'posts/story/get/following/';
   static const String get_follower_posts = "posts/get/following/";
   //static const String delete_reel="posts/reel/delete/";

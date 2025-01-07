@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
@@ -56,110 +57,46 @@ class _ProfileImagesState extends State<ProfileImages> {
                 ),
               ),
             ),
-            child: const TabBar(
+            child:  TabBar(
               // physics: NeverScrollableScrollPhysics(),
               isScrollable: true,
 
               labelPadding: EdgeInsets.symmetric(
-                horizontal: 10,
+                horizontal: 18,
               ), // Padding for labels
               indicatorWeight: 1.0,
               tabs: [
                 Tab(
-                  child: Text(
-                    "All",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: tabText("All"),
                 ),
                 Tab(
-                  child: Text(
-                    "Photos",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child:  tabText("Photos"),
                 ),
                 Tab(
-                  child: Text(
-                    "Videos",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: tabText("Videos"),
                 ),
                 Tab(
-                  child: Text(
-                    "Pages",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: tabText("Pages")
                 ),
                 Tab(
-                  child: Text(
-                    "Posts",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: tabText("Posts")
                 ),
                 Tab(
-                  child: Text(
-                    "Tagged",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: tabText("tagged")
                 ),
                 Tab(
-                  child: Text(
-                    "Reel",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: tabText("Reel")
                 ),
                 Tab(
-                  child: Text(
-                    "Info",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: tabText("Info")
                 ),
               ],
             ),
           ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.lightGrey,
-                        // Grey border
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        'Category Name',
-                        style: TextStyle(fontSize: 10),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          vertical: 5, horizontal: paragraph * 1.5),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey,
-                        ), // Grey border
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.add,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          // SizedBox(
+          //   height: 10,
+          // ),
+         
           SingleChildScrollView(
             child: SizedBox(
               height: 500, // Adjust height as needed
@@ -214,5 +151,17 @@ class _ProfileImagesState extends State<ProfileImages> {
         ],
       ),
     );
+  }
+
+  Widget tabText(String text){
+    return Text(text,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.publicSans(
+                      textStyle: TextStyle(
+                          fontSize: 10,
+                          color: Color(0XFF010101)
+                      )
+                    ),
+                  );
   }
 }
