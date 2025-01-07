@@ -93,11 +93,11 @@ class _PostGridState extends State<PostGrid> {
         Expanded(
           child: GridView.builder(
             controller: _scrollController,
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(5.0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              crossAxisSpacing: 3,
+              mainAxisSpacing: 3,
             ),
             itemCount: filteredPosts.length,
             itemBuilder: (context, index) {

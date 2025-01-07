@@ -83,19 +83,37 @@ class PostWidget extends StatefulWidget {
 
 class _PostWidgetState extends State<PostWidget> {
   int _currentImageIndex = 0;
- // bool isLiked = false;
-
-  // void _likePost() {
-  //   isLiked = widget.isLiked;
-  //   if (mounted) {
-  //     setState(() {
-  //       isLiked = !isLiked;
-  //     });
-  //   }
-  //   widget.onPressLiked;
-  // }
-
   
+ String formatWithOrdinalSuffix(DateTime dateTime) {
+  // Step 1: Format the date into "MMMM d yyyy"
+  DateFormat formatter = DateFormat('MMM d yyyy');
+  String formattedDate = formatter.format(dateTime);
+
+  // Step 2: Add the ordinal suffix to the day
+  int day = dateTime.day;
+  String suffix;
+  
+  if (day >= 11 && day <= 13) {
+    suffix = 'th';
+  } else if (day % 10 == 1) {
+    suffix = 'st';
+  } else if (day % 10 == 2) {
+    suffix = 'nd';
+  } else if (day % 10 == 3) {
+    suffix = 'rd';
+  } else {
+    suffix = 'th';
+  }
+
+  // Step 3: Replace the day with the day and suffix
+  String dayWithSuffix = '$day$suffix';
+  formattedDate = formattedDate.replaceFirst(RegExp(r'\d+'), dayWithSuffix);
+
+  return formattedDate;
+}
+
+
+String? date;
   @override
   Widget build(BuildContext context) {
     final GlobalKey iconKey = GlobalKey();
@@ -104,6 +122,7 @@ class _PostWidgetState extends State<PostWidget> {
       var image =
           'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg';
     }
+    date=formatWithOrdinalSuffix(DateTime.parse(widget.date));
 
     return SingleChildScrollView(
       physics: const ScrollPhysics(),
@@ -181,7 +200,7 @@ class _PostWidgetState extends State<PostWidget> {
                                 width: 7,
                               ),
                               Text(
-                                widget.date,
+                               date!,
                                 style: GoogleFonts.inter(
                                     fontSize: 7,
                                     color: AppColors.darkGrey,
@@ -410,6 +429,8 @@ class _PostWidgetState extends State<PostWidget> {
                         widget.scrollCommentId.toString(),
                         replyID: widget.scrollCommentId.toString(),
                         scrollOffset: widget.scrollOffset,
+                        commentCount:int.parse(widget.comments),
+                        isSinglePost: widget.isSinglePost
                       );
                     },
                     child: Text(
@@ -519,7 +540,9 @@ Positioned(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                 Image.asset(AppIcons.event_link,height: 15),
+                SizedBox(height: 2,),
                 Image.asset(AppIcons.service_link,height: 15),
+                SizedBox(height: 2,),
                 Image.asset(AppIcons.group_name,height: 15,),
               
               ],),

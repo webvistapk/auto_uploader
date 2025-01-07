@@ -21,5 +21,12 @@ class AppColors {
   static const Color greenColor=Color(0xff54C392);
   static const Color deepdarkgreyColor=Color(0xff282828);
   static const Color iconredColor=Color(0xffF71E4D);
-  
+   static const Color darkGreenColor=Color(0xff25C1BC);
+   static const Color lightGreyColor=Color(0xff848484);
+   static const Color commentReplyColor=Color(0xff595858);
+   static const Color viewMoreCommentColor=Color(0xff127EE0);
+   static const Color profileTextColor=Color(0xff474849);
+   static const Color profileFollowColor=Color(0xff474849);
+  static const Color profileButtonColor=Color(0xffD8D8D8);
+  static const Color profileTextBlackColor=Color(0xff262626);
 }

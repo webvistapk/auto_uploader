@@ -23,6 +23,7 @@ import 'package:mobile/screens/search/widget/search_widget.dart';
 import 'package:mobile/screens/story/create_story.dart';
 import 'package:mobile/screens/story/create_story_screen.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
+import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
@@ -116,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.deepdarkgreyColor,
+        backgroundColor: AppColors.white,
         elevation: 0,
         toolbarHeight: 60,
         leading: Padding(
@@ -201,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen>
           child: Theme(
             data: Theme.of(context).copyWith(
               tabBarTheme: TabBarTheme(
-                labelColor: Colors.white,
+                labelColor: Colors.black,
                 unselectedLabelColor: AppColors.darkGrey,
                 indicatorColor: Colors.blue,
               ),
@@ -215,13 +216,13 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Container(
                     padding: EdgeInsets.all(2),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: AppColors.darkGrey,
                       borderRadius: BorderRadius.circular(10)
                     ),
                     child: Image.asset(
                             AppIcons.addIcon, // Small "+" icon
                             height: 5,
-                            
+                            color: AppColors.white,
                           ),
                   ),
                 ),
@@ -239,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         actions: [
           IconButton(
-            icon: Image.asset(AppIcons.bell,color: AppColors.white,),
+            icon: Image.asset(AppIcons.bell,color: AppColors.black,),
             onPressed: () {
               Navigator.push(
                   context,
@@ -248,12 +249,12 @@ class _HomeScreenState extends State<HomeScreen>
                       context: context));
             },
           ),
-          // IconButton(
-          //   icon: Icon(Icons.search, color: Colors.grey),
-          //   onPressed: () {
-          //     showSearch(context: context, delegate: CustomSearchDelegate());
-          //   },
-          // ),
+          IconButton(
+            icon: Icon(Icons.search, color: Colors.grey),
+            onPressed: () {
+              showSearch(context: context, delegate: CustomSearchDelegate());
+            },
+          ),
         ],
       ),
       drawer: const SideBar(),
@@ -281,28 +282,21 @@ class _HomeScreenState extends State<HomeScreen>
                 children: [
                   // Integrate the horizontally scrollable story section
                  
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Row(
+                   mainAxisSize: MainAxisSize.min,
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                   mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                     
-                     Container(
-                      height: 60,
-                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                         children: [
-                           _UserStory(),
-                           Spacer(),
-                           Expanded(
-                            child: _buildStorySection()),
-                           Spacer(),
-                         ],
-                       ),
-                     ), // Calls the horizontal ListView
-                      
-                  const Divider(thickness: 1),
+                      _UserStory(),
+                     // Spacer(),
+                     //SizedBox(width: 10),
+                      Flexible(
+                       child: Center(child: _followerStorySection())),
+                      //Spacer(),
                     ],
-                  ),
+                  ), // Calls the horizontal ListView
+                    
+                                  //  const Divider(thickness: 1),
                   _posts.isEmpty
                       ? Center(
                           child: Text(
@@ -360,6 +354,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
 Widget _UserStory() {
+  //debugger();
   return Padding(
           padding: const EdgeInsets.all(10),
           child: Consumer<MediaProvider>(
@@ -382,8 +377,8 @@ Widget _UserStory() {
                 }).toList();
 
                 final List<int?> storyIds = stories.map((story) => story.id).whereType<int>().toList();
-                print("USerStories :${allMediaFiles}");
-            //    debugger();
+               // print("USerStories :${allMediaFiles}");
+            
                 return InkWell(
                   onTap: () {
                     Navigator.push(
@@ -402,9 +397,24 @@ Widget _UserStory() {
                       ),
                     );
                   },
-                  child: CircleAvatar(
-                    radius: 15,
-                    backgroundImage: NetworkImage(profileImageUrl),
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundImage: NetworkImage(profileImageUrl),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        left: 28,
+                        right: 0,
+                        child: Container(
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(8)
+                          ),
+                          child: Image.asset(AppIcons.addIcon,height: 7,)))
+                    ],
                   ),
                 );
               } else {
@@ -421,7 +431,7 @@ Widget _UserStory() {
                     );
                   },
                   child: CircleAvatar(
-                    radius: 15,
+                    radius: 20,
                     backgroundImage: NetworkImage(profileImageUrl),
                   ),
                 );
@@ -430,12 +440,13 @@ Widget _UserStory() {
           ));
 }
 
- Widget _buildStorySection() {
+ Widget _followerStorySection() {
+  
   int offset = 0; // Initialize offset
   return Consumer<MediaProvider>(
     builder: (context, statusProvider, child) {
       final users = statusProvider.stories.map((story) => story.user).toList();
-      //debugger();
+  //    debugger();
       if (users.isEmpty && statusProvider.isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
@@ -443,99 +454,106 @@ Widget _UserStory() {
       if (users.isEmpty) {
         return Center(child: Text('No users available.'));
       }
-  
-      return SizedBox(
-        height: 80,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (!statusProvider.isLoading &&
-                scrollInfo.metrics.pixels ==
-                    scrollInfo.metrics.maxScrollExtent) {
-              // Fetch next set of users when reaching the end
-      
-              statusProvider.fetchFollowerStories(context, limit: 10, offset: offset);
-            }
-            return true;
-          },
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: users.length + (statusProvider.isLoading ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == users.length) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+  double dynamicPadding = users.length == 1
+          ? 100// Default padding for 4 or fewer users
+          : 100.0 - (users.length - 1) * 21.0; // Reduce padding as users increase
+
+      dynamicPadding = dynamicPadding.clamp(20.0, 100.0); 
+      return Padding(
+        padding: EdgeInsets.only(left: dynamicPadding),
+        child: SizedBox(
+          height: 60,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (!statusProvider.isLoading &&
+                  scrollInfo.metrics.pixels ==
+                      scrollInfo.metrics.maxScrollExtent) {
+                // Fetch next set of users when reaching the end
+        
+                statusProvider.fetchFollowerStories(context, limit: 10, offset: offset);
               }
-                
-              final user = users[index];
-           //   debugger();
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10,left: 20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap: () { 
-                          final userMediaFiles = statusProvider.stories
-                              .where((story) => story.user!.id == user!.id)
-                              .expand((story) => story.media ?? [])
-                              .map((media) => media.file)
-                              .where((file) => file != null)
-                              .cast<String>()
-                              .toList();
+              return true;
+            },
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: users.length + (statusProvider.isLoading ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == users.length) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
                   
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StatusView(
-                                statuses: userMediaFiles,
-                                initialIndex: 0,
-                                isVideo: false, // Assume default as false
-                                userProfile: widget.userProfile,
-                                isUser: false,
-                                token: widget!.token.toString(),
-                                viewers: [],
-                                statusId: [],
+                final user = users[index];
+                //debugger();
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10,left: 5),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () { 
+                            final userMediaFiles = statusProvider.stories
+                                .where((story) => story.user!.id == user!.id)
+                                .expand((story) => story.media ?? [])
+                                .map((media) => media.file)
+                                .where((file) => file != null)
+                                .cast<String>()
+                                .toList();
+                   // debugger();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StatusView(
+                                  statuses: userMediaFiles,
+                                  initialIndex: 0,
+                                  isVideo: false, // Assume default as false
+                                  userProfile: widget.userProfile,
+                                  isUser: false,
+                                  token: widget!.token.toString(),
+                                  viewers: [],
+                                  statusId: [],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                          radius: 20,
-                          child: ClipOval(
-                            child: Image.network(
-                              "${user?.profileImage != null ? user!.profileImage : AppUtils.userImage}",
-                              fit: BoxFit.cover,
-                              width: 30,
-                              height: 30,
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return CircularProgressIndicator(
-                                    color: AppColors.blue, strokeWidth: 6);
-                              },
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(Icons.person, size: 60);
-                              },
+                            );
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.transparent,
+                            radius: 20,
+                            child: ClipOval(
+                              child: Image.network(
+                                "${user?.profileImage != null ? user!.profileImage : AppUtils.userImage}",
+                                fit: BoxFit.cover,
+                                width: 45,
+                                height: 45,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return CircularProgressIndicator(
+                                      color: AppColors.blue, strokeWidth: 6);
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(Icons.person, size: 60);
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      //const SizedBox(height: 4),
-                      Text(
-                        user?.username.toString() ?? 'Unknown',
-                        style: GoogleFonts.inder(
-                          textStyle: TextStyle(fontSize: 6,color: AppColors.darkGrey)
+                        //const SizedBox(height: 4),
+                        Text(
+                          user?.username.toString() ?? 'Unknown',
+                          style: GoogleFonts.inder(
+                            textStyle: TextStyle(fontSize: 6,color: AppColors.darkGrey)
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       );
@@ -644,7 +662,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
         AnimationController(vsync: this, duration: Duration(seconds: 15));
     _initializeStatus();
     _loadStatuses(); // Initial status fetch
-    print("Status ID here is : ${widget.statusId![_currentIndex]}");
+    print("Status ID here is : ${widget.statuses![_currentIndex]}");
   }
 
   // Method to load statuses with pagination
