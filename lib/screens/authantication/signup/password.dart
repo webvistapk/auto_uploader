@@ -1,10 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/screens/authantication/signup/phone/phone_input.dart';
 
 class PasswordInputScreen extends StatefulWidget {
-  const PasswordInputScreen({Key? key}) : super(key: key);
+  final String username;
+  final String firstName;
+  final String lastName;
+  final String email;
+  const PasswordInputScreen(
+      {Key? key,
+      required this.username,
+      required this.firstName,
+      required this.lastName,
+      required this.email})
+      : super(key: key);
 
   @override
   State<PasswordInputScreen> createState() => _PasswordInputScreenState();
@@ -130,12 +141,20 @@ class _PasswordInputScreenState extends State<PasswordInputScreen> {
                 CustomContinueButton(
                   buttonText: "Submit",
                   onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      Navigator.push(
+                          context,
+                          CupertinoDialogRoute(
+                              builder: (_) => PhoneInputScreen(
+                                    username: widget.username,
+                                    email: widget.email,
+                                    firstName: widget.firstName,
+                                    lastName: widget.lastName,
+                                    password: _passwordController.text.trim(),
+                                  ),
+                              context: context));
+                    }
                     // Perform submission logic here
-                    Navigator.push(
-                        context,
-                        CupertinoDialogRoute(
-                            builder: (_) => PhoneInputScreen(),
-                            context: context));
                   },
                   isPressed: true,
                 ),

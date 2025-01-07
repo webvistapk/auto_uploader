@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/screens/authantication/signup/email.dart';
 import 'package:mobile/screens/post/pool/widget/custom_text_field.dart';
 
 // Screen 1: First Name and Last Name
 class FirstNameLastNameScreen extends StatefulWidget {
-  const FirstNameLastNameScreen({Key? key}) : super(key: key);
+  final String username;
+  const FirstNameLastNameScreen({Key? key, required this.username})
+      : super(key: key);
 
   @override
   State<FirstNameLastNameScreen> createState() =>
@@ -53,11 +56,22 @@ class _FirstNameLastNameScreenState extends State<FirstNameLastNameScreen> {
                 CustomContinueButton(
                     buttonText: "Continue",
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          CupertinoDialogRoute(
-                              builder: (_) => EmailInputScreen(),
-                              context: context));
+                      if (_firstNameController.text.isEmpty ||
+                          _lastNameController.text.isEmpty) {
+                        ToastNotifier.showErrorToast(
+                            context, "Please Enter the field required");
+                      } else {
+                        Navigator.push(
+                            context,
+                            CupertinoDialogRoute(
+                                builder: (_) => EmailInputScreen(
+                                      username: widget.username,
+                                      firstName:
+                                          _firstNameController.text.trim(),
+                                      lastName: _lastNameController.text.trim(),
+                                    ),
+                                context: context));
+                      }
                     },
                     isPressed: true),
               ],

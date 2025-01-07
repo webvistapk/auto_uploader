@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/screens/authantication/signup/fisrt_last_name.dart';
 
 class CreateUsernameScreen extends StatefulWidget {
@@ -34,11 +35,18 @@ class _CreateUsernameScreenState extends State<CreateUsernameScreen> {
                 CustomContinueButton(
                   buttonText: "Continue",
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        CupertinoDialogRoute(
-                            builder: (_) => FirstNameLastNameScreen(),
-                            context: context));
+                    if (usernameController.text.isEmpty) {
+                      ToastNotifier.showErrorToast(
+                          context, "Please Enter username");
+                    } else {
+                      Navigator.push(
+                          context,
+                          CupertinoDialogRoute(
+                              builder: (_) => FirstNameLastNameScreen(
+                                    username: usernameController.text.trim(),
+                                  ),
+                              context: context));
+                    }
                   },
                   isPressed: true,
                 ),

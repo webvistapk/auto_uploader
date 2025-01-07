@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/screens/authantication/signup/password.dart';
 import 'package:mobile/screens/post/pool/widget/custom_text_field.dart';
 
 class EmailInputScreen extends StatefulWidget {
-  const EmailInputScreen({Key? key}) : super(key: key);
+  final String username;
+  final String firstName;
+  final String lastName;
+  const EmailInputScreen(
+      {Key? key,
+      required this.username,
+      required this.firstName,
+      required this.lastName})
+      : super(key: key);
 
   @override
   State<EmailInputScreen> createState() => _EmailInputScreenState();
@@ -49,12 +58,25 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
               CustomContinueButton(
                 buttonText: "Continue",
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PasswordInputScreen(),
-                    ),
-                  );
+                  if (emailController.text.isEmpty) {
+                    ToastNotifier.showErrorToast(
+                        context, "Email Field Required");
+                  } else if (!emailController.text.contains('@')) {
+                    ToastNotifier.showErrorToast(
+                        context, "Enter Your Correct Email");
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PasswordInputScreen(
+                          username: widget.username,
+                          email: emailController.text.trim(),
+                          firstName: widget.firstName,
+                          lastName: widget.lastName,
+                        ),
+                      ),
+                    );
+                  }
                 },
                 isPressed: true,
               ),

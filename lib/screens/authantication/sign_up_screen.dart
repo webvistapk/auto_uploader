@@ -50,11 +50,11 @@ class _SignupScreenState extends State<SignupScreen> {
               CustomSocialButton(
                 textTitle: 'Continue with Phone',
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      CupertinoDialogRoute(
-                          builder: (_) => PhoneInputScreen(),
-                          context: context));
+                  // Navigator.push(
+                  //     context,
+                  //     CupertinoDialogRoute(
+                  //         builder: (_) => PhoneInputScreen(),
+                  //         context: context));
                 },
               ),
               CustomSocialButton(textTitle: 'Continue with Apple'),
