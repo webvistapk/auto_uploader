@@ -7,6 +7,7 @@ import 'package:mobile/controller/services/provider_manager.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
+import 'package:mobile/screens/authantication/check_login_info.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
@@ -28,7 +29,7 @@ class AuthProvider extends ChangeNotifier {
         final accessToken = data['access'];
         ChatProvider().setAccessToken(accessToken);
         // Save the access token and email
-        await Prefrences.SetAuthToken(accessToken);
+        await Prefrences.setAuthToken(accessToken);
         await Prefrences.SetUserEmail(email);
 
         log("Access Token: $accessToken");
@@ -49,26 +50,39 @@ class AuthProvider extends ChangeNotifier {
           // debugger();
           await userPrefs.saveCurrentUser(userProfile);
         }
+        bool? isLoginInfo = await Prefrences.getLoginInfoSave();
+
         isLoading = false;
         notifyListeners();
-        // Ensure userProfile is not null before navigating
-        if (userProfile != null) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            CupertinoDialogRoute(
-              builder: (_) => MainScreen(
-                email: email,
-                userProfile: userProfile!,
-                authToken: accessToken, // Safe since it's not null here
+        if (isLoginInfo != null && isLoginInfo) {
+          if (userProfile != null) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              CupertinoDialogRoute(
+                builder: (_) => MainScreen(
+                  email: email,
+                  userProfile: userProfile!,
+                  authToken: accessToken, // Safe since it's not null here
+                ),
+                context: context,
               ),
-              context: context,
-            ),
-            (route) => false,
-          );
+              (route) => false,
+            );
+          } else {
+            ToastNotifier.showErrorToast(
+                context, "Failed to retrieve user profile");
+          }
         } else {
-          ToastNotifier.showErrorToast(
-              context, "Failed to retrieve user profile");
+          Navigator.push(
+              context,
+              CupertinoDialogRoute(
+                  builder: (_) => CheckLoginInfoScreen(
+                        userProfile: userProfile!,
+                        authToken: accessToken,
+                      ),
+                  context: context));
         }
+        // Ensure userProfile is not null before navigating
       } else {
         isLoading = false;
         notifyListeners();

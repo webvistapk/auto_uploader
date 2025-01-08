@@ -37,178 +37,183 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: AppColors.mainBgColor, // Set greyish background color
-        resizeToAvoidBottomInset:
-            false, // Prevent resizing when keyboard is open
-        body: Builder(
-          builder: (context) {
-            var pro = context.watch<AuthProvider>();
-
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Fixed Header
-                    const SizedBox(height: 20),
-                    Text(
-                      "Login in to Pine",
-                      style: AppTextStyles.poppinsBold(fontSize: 22),
-                    ),
-
-                    // Scrollable content (form and fields)
-
-                    const SizedBox(height: 100),
-                    Form(
-                      key: formKey,
-                      child: Column(
-                        children: [
-                          CustomAppTextField(
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return "Please enter the email or username or phone#";
-                              }
-                              return null;
-                            },
-                            controller: _usernameController,
-                            // labelText: 'Email or Username',
-                            hintText: "Enter email or username",
-                            // contentPadding: const EdgeInsets.symmetric(
-                            //     vertical: 20, horizontal: 16),
-                          ),
-                          const SizedBox(height: 20),
-                          CustomAppTextField(
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return "Please enter the password";
-                              }
-                              return null;
-                            },
-                            controller: _passwordController,
-                            // labelText: 'Password',
-                            hintText: "Enter password",
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 20, horizontal: 16),
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  visible = !visible;
-                                });
+        backgroundColor: AppColors.mainBgColor,
+        body: Builder(builder: (context) {
+          var pro = context.watch<AuthProvider>();
+          return Stack(
+            children: [
+              // Main content
+              Container(
+                height: double.infinity,
+                width: double.infinity,
+              ),
+              SingleChildScrollView(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      Text(
+                        "Login in to Pine",
+                        style: AppTextStyles.poppinsBold(fontSize: 22),
+                      ),
+                      const SizedBox(height: 100),
+                      Form(
+                        key: formKey,
+                        child: Column(
+                          children: [
+                            CustomAppTextField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "Please enter the email or username or phone#";
+                                }
+                                return null;
                               },
-                              child: Icon(
-                                visible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
+                              controller: _usernameController,
+                              hintText: "Enter email or username",
+                            ),
+                            const SizedBox(height: 20),
+                            CustomAppTextField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "Please enter the password";
+                                }
+                                return null;
+                              },
+                              controller: _passwordController,
+                              hintText: "Enter password",
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 20, horizontal: 16),
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    visible = !visible;
+                                  });
+                                },
+                                child: Icon(
+                                  visible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                ),
+                              ),
+                              obscureText: !visible,
+                            ),
+                            const SizedBox(height: 20),
+                            pro.isLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator.adaptive(),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0),
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        if (formKey.currentState!.validate()) {
+                                          FocusScope.of(context).unfocus();
+                                          await pro.loginUser(
+                                            context,
+                                            _usernameController.text.trim(),
+                                            _passwordController.text.trim(),
+                                          );
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.blue,
+                                        minimumSize:
+                                            const Size(double.infinity, 50),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
+                                      ),
+                                      child: const Text('Log in',
+                                          style: AppStyles.buttonTextStyle),
+                                    ),
+                                  ),
+                            const SizedBox(height: 15),
+                            Align(
+                              alignment: Alignment.topCenter,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const ForgotPasswordScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Forgot password?',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
                               ),
                             ),
-                            obscureText: !visible,
-                          ),
-                          const SizedBox(height: 20),
-                          pro.isLoading
-                              ? const Center(
-                                  child: CircularProgressIndicator.adaptive(),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0),
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      if (formKey.currentState!.validate()) {
-                                        FocusScope.of(context).unfocus();
-                                        await pro.loginUser(
-                                          context,
-                                          _usernameController.text.trim(),
-                                          _passwordController.text.trim(),
-                                        );
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.blue,
-                                      minimumSize:
-                                          const Size(double.infinity, 50),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(50),
-                                      ),
-                                    ),
-                                    child: const Text('Log in',
-                                        style: AppStyles.buttonTextStyle),
-                                  ),
-                                ),
-                          const SizedBox(height: 15),
-                          Align(
-                            alignment: Alignment.topCenter,
-                            child: TextButton(
+                            const SizedBox(height: 30),
+                            CustomSocialButton(
+                                textTitle: 'Continue with Phone'),
+                            CustomSocialButton(
+                                textTitle: 'Continue with Apple'),
+                            CustomSocialButton(
+                                textTitle: 'Continue with Google'),
+                            const SizedBox(height: 30),
+                            TextButton(
                               onPressed: () {
                                 Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        const ForgotPasswordScreen(),
-                                  ),
-                                );
+                                    context,
+                                    CupertinoDialogRoute(
+                                        builder: (_) => SignupScreen(),
+                                        context: context));
                               },
+                              style: TextButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                  side: const BorderSide(color: Colors.blue),
+                                ),
+                              ),
                               child: Text(
-                                'Forgot password?',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
-                                    .copyWith(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                'Create account',
+                                style: AppTextStyles.poppinsBold(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.normal),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          CustomSocialButton(textTitle: 'Continue with Phone'),
-                          CustomSocialButton(textTitle: 'Continue with Apple'),
-                          CustomSocialButton(textTitle: 'Continue with Google'),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    // Fixed Footer (remains stable when keyboard appears)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  CupertinoDialogRoute(
-                                      builder: (_) => SignupScreen(),
-                                      context: context));
-                            },
-                            style: TextButton.styleFrom(
-                              minimumSize: const Size(double.infinity, 50),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                                side: const BorderSide(color: Colors.blue),
-                              ),
-                            ),
-                            child: Text(
-                              'Create account',
-                              style: AppTextStyles.poppinsBold(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.normal),
-                            ),
-                          ),
-                          const AppLogo(width: 150),
-                        ],
+                      const SizedBox(
+                        height: 150,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            );
-          },
-        ),
+              // Footer with fixed logo
+              Positioned(
+                bottom: 0,
+                right: 0,
+                left: 0,
+                child: Container(
+                  width: double.infinity,
+                  color: AppColors.mainBgColor,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: const TellusLogo(width: 150),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
       ),
     );
   }

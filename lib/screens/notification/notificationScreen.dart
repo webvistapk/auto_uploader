@@ -17,7 +17,8 @@ class NotificationScreen extends StatefulWidget {
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> with SingleTickerProviderStateMixin{
+class _NotificationScreenState extends State<NotificationScreen>
+    with SingleTickerProviderStateMixin {
   int _limit = 10;
   int _offset = 0;
   bool _isLoadingMore = false;
@@ -53,7 +54,7 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
   @override
   void dispose() {
     // TODO: implement dispose
-     _tabController?.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -61,7 +62,6 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -77,7 +77,7 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
             ),
             child: TabBar(
               controller: _tabController,
-              padding: EdgeInsets.only(bottom: 0,top: 0),
+              padding: EdgeInsets.only(bottom: 0, top: 0),
               tabs: const [
                 Tab(child: Text('Notification')),
                 Tab(child: Text('Follow Request')),
@@ -88,7 +88,6 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
       ),
       //drawer: const SideBar(),
 
-      
       body: TabBarView(
         controller: _tabController,
         physics: NeverScrollableScrollPhysics(),
@@ -98,9 +97,9 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
               if (notificationProvider.isLoading && _offset == 0) {
                 return const Center(child: CircularProgressIndicator());
               }
-          
+
               final modelNotifications = notificationProvider.notifications;
-          
+
               if (modelNotifications.isEmpty) {
                 return const Center(
                   child: Text(
@@ -109,9 +108,10 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
                   ),
                 );
               }
-          
+
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 itemCount: modelNotifications.length +
                     (notificationProvider.nextOffset != -1
                         ? 1
@@ -206,8 +206,8 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
                           ),
                           // Navigation Button
                           IconButton(
-                            icon:
-                                const Icon(Icons.chevron_right, color: Colors.grey),
+                            icon: const Icon(Icons.chevron_right,
+                                color: Colors.grey),
                             onPressed: () {
                               _navigateToDetails(notification);
                             },
@@ -234,7 +234,6 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
             },
           ),
           RequestScreen()
-        
         ],
       ),
       backgroundColor: const Color(0xFFF5F5F5),
@@ -295,33 +294,33 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
     }
 
 //Reply for Post
-   else if (notification.action == 'replied' && notification.reply.postOrReel.type=='post') {
-    print("${notification}");
-    //debugger();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SinglePost(
-              postId: notification.reply.postOrReel.data['id'].toString(),
-              commentId: notification.comment!.id.toString(),
-              offset: notification.reply.offset,
-             replyID: notification.reply.result.id.toString(),
-              onPostUpdated: () {},
-            ),
+    else if (notification.action == 'replied' &&
+        notification.reply.postOrReel.type == 'post') {
+      print("${notification}");
+      //debugger();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SinglePost(
+            postId: notification.reply.postOrReel.data['id'].toString(),
+            commentId: notification.comment!.id.toString(),
+            offset: notification.reply.offset,
+            replyID: notification.reply.result.id.toString(),
+            onPostUpdated: () {},
           ),
         ),
       );
     } else if (notification.post != null) {
       //Navigate to commetn
       //debugger();
-      if (notification.action=='commented') {
+      if (notification.action == 'commented') {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => SinglePost(
               postId: notification.post!.id.toString(),
               commentId: notification.comment.id.toString(),
-              offset:notification.comment.offset,
+              offset: notification.comment.offset,
               onPostUpdated: () {},
             ),
           ),

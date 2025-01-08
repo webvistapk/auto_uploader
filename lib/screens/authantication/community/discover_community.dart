@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/custom_continue_button.dart';
+import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/authantication/sign_up_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -53,9 +54,8 @@ class DiscoverCommunityScreen extends StatelessWidget {
               CustomContinueButton(
                 buttonText: 'Enter Pine',
                 onPressed: () async {
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  await prefs.setBool('isAuth', true);
+                  await Prefrences.setDiscoverCommunity(true);
+
                   Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (_) => SignupScreen()),

@@ -28,14 +28,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkUserProfile() async {
     // Delay to simulate loading
-    await Future.delayed(Duration(seconds: 4));
+    await Future.delayed(Duration(seconds: 2));
 
     // Load SharedPreferences and user profile data
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isAuth = prefs.getBool('isAuth') ?? false;
+    bool? isCommunity = await Prefrences.getDiscoverCommunity();
+    bool? isLoginInfo = await Prefrences.getLoginInfoSave();
     final data = await Prefrences.getAuthToken();
+
     // debugger();
-    if (data != null && isAuth == true) {
+    if (isLoginInfo != null && isCommunity!) {
       ChatProvider().setAccessToken(data);
       final email = await Prefrences.getUserEmail();
       UserPreferences userPreferences = UserPreferences();
@@ -53,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
         (route) => false,
       );
-    } else if (isAuth == false) {
+    } else if (isCommunity == false) {
       Navigator.push(
         context,
         CupertinoDialogRoute(

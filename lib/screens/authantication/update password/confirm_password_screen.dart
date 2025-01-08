@@ -62,6 +62,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
             context, "Password Changed Successfully");
         SharedPreferences removeUser = await SharedPreferences.getInstance();
         await Prefrences.removeAuthToken();
+        await Prefrences.removeLoginInfo();
         removeUser.remove(Prefrences.authToken);
         await UserPreferences().clearCurrentUser();
         await removeUser.remove(UserPreferences.userKey);

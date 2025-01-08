@@ -13,10 +13,32 @@ class Prefrences {
   static const String followerKey = 'followers';
   static const String followingKey = 'followings';
   static const String statusPermissionKey = "statusKey";
+  static const String communityKey = "communityKey";
+  static const String loginInfoKey = "InfoSaveKey";
 
-  static SetAuthToken(String accessToken) async {
+  static setAuthToken(String accessToken) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(authToken, accessToken);
+  }
+
+  static setDiscoverCommunity(bool community) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(communityKey, community);
+  }
+
+  static getDiscoverCommunity() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(communityKey);
+  }
+
+  static setLoginInfoSave(bool loginInfo) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(loginInfoKey, loginInfo);
+  }
+
+  static getLoginInfoSave() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(loginInfoKey);
   }
 
   static getAuthToken() async {
@@ -46,7 +68,12 @@ class Prefrences {
 
   static removeAuthToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove(Prefrences.authToken);
+    await prefs.remove(Prefrences.authToken);
+  }
+
+  static removeLoginInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(Prefrences.loginInfoKey);
   }
 
   static setMediaPermission(bool permission) async {

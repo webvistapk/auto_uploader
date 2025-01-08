@@ -1,11 +1,18 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_styles.dart';
 import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/widgets/tellus_logo.dart';
 
 class CheckLoginInfoScreen extends StatefulWidget {
-  const CheckLoginInfoScreen({super.key});
+  final UserProfile userProfile;
+  final String authToken;
+  const CheckLoginInfoScreen(
+      {super.key, required this.userProfile, required this.authToken});
 
   @override
   State<CheckLoginInfoScreen> createState() => _CheckLoginInfoScreenState();
@@ -41,7 +48,17 @@ class _CheckLoginInfoScreenState extends State<CheckLoginInfoScreen> {
             TellusLogo(),
             Spacer(),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                await Prefrences.setLoginInfoSave(true);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    CupertinoDialogRoute(
+                        builder: (_) => MainScreen(
+                            userProfile: widget.userProfile,
+                            authToken: widget.authToken),
+                        context: context),
+                    (route) => false);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 minimumSize: const Size(double.infinity, 50),
@@ -55,7 +72,17 @@ class _CheckLoginInfoScreenState extends State<CheckLoginInfoScreen> {
               height: 10,
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () async {
+                await Prefrences.setLoginInfoSave(false);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    CupertinoDialogRoute(
+                        builder: (_) => MainScreen(
+                            userProfile: widget.userProfile,
+                            authToken: widget.authToken),
+                        context: context),
+                    (route) => false);
+              },
               style: TextButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(

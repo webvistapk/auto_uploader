@@ -50,14 +50,14 @@ dependencies:
   shared_preferences: ^2.0.6
   url_launcher: ^6.0.9
   jwt_decoder: ^2.0.1
-  win32: ^5.5.0
+  win32: 
   video_player: 
   chewie: ^1.7.5
   card_swiper: ^3.0.1
  
   image_picker:
   permission_handler: ^11.0.1
-  dotted_border: ^2.1.0
+  dotted_border: 
  
 
   
