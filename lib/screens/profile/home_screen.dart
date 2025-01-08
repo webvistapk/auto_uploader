@@ -249,12 +249,12 @@ class _HomeScreenState extends State<HomeScreen>
                       context: context));
             },
           ),
-          IconButton(
-            icon: Icon(Icons.search, color: Colors.grey),
-            onPressed: () {
-              showSearch(context: context, delegate: CustomSearchDelegate());
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.search, color: Colors.grey),
+          //   onPressed: () {
+          //     showSearch(context: context, delegate: CustomSearchDelegate());
+          //   },
+          // ),
         ],
       ),
       drawer: const SideBar(),
@@ -486,7 +486,7 @@ Widget _UserStory() {
       }
   
       if (users.isEmpty) {
-        return Center(child: Text('No users available.'));
+        return Container();
       }
   double dynamicPadding = users.length == 1
           ? 100// Default padding for 4 or fewer users
@@ -589,7 +589,7 @@ Widget _UserStory() {
               },
             ),
           ),
-        );
+        ));
       },
     );
   }
@@ -643,7 +643,8 @@ Widget _UserStory() {
       isLiked: post.isLiked, // Use the post's `isLiked` 
       postModel: post,
       postTitle: post.pollTitle,
-              postDescription: post.postDescription
+      postDescription: post.postDescription,
+      privacy: post.privacy,
     );
   }
 }

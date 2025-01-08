@@ -76,3 +76,73 @@ class CustomSearchDelegate extends SearchDelegate {
     );
   }
 }
+
+
+
+class SearchScreen extends StatefulWidget {
+  @override
+  _SearchScreenState createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  String query = '';
+  List<String> searchTerms = [
+    "Apple",
+    "Banana",
+    "Mango",
+    "Pear",
+    "Watermelons",
+    "Blueberries",
+    "Pineapples",
+    "Strawberries"
+  ];
+
+  List<String> get filteredResults {
+    return searchTerms
+        .where((term) => term.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: TextField(
+          decoration: InputDecoration(
+            hintText: 'Search...',
+            border: InputBorder.none,
+          ),
+          onChanged: (value) {
+            setState(() {
+              query = value;
+            });
+          },
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: [
+          if (query.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.clear),
+              onPressed: () {
+                setState(() {
+                  query = '';
+                });
+              },
+            ),
+        ],
+      ),
+      body:  SearchWidget(query: query.toLowerCase(),
+      authToken: Prefrences.getAuthToken().toString(),)
+    );
+  }
+}
+
+
+
+
+

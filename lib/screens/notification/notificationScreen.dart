@@ -309,9 +309,9 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
               onPostUpdated: () {},
             ),
           ),
-        ),
-      );
-    } else if (notification.post != null) {
+        );
+   }
+     else if (notification.post != null) {
       //Navigate to commetn
       //debugger();
       if (notification.action=='commented') {
