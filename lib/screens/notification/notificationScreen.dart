@@ -299,18 +299,17 @@ class _NotificationScreenState extends State<NotificationScreen>
       print("${notification}");
       //debugger();
       Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SinglePost(
-            postId: notification.reply.postOrReel.data['id'].toString(),
-            commentId: notification.comment!.id.toString(),
-            offset: notification.reply.offset,
-            replyID: notification.reply.result.id.toString(),
-            onPostUpdated: () {},
-          ),
-        );
-   }
-     else if (notification.post != null) {
+          context,
+          MaterialPageRoute(
+            builder: (context) => SinglePost(
+              postId: notification.reply.postOrReel.data['id'].toString(),
+              commentId: notification.comment!.id.toString(),
+              offset: notification.reply.offset,
+              replyID: notification.reply.result.id.toString(),
+              onPostUpdated: () {},
+            ),
+          ));
+    } else if (notification.post != null) {
       //Navigate to commetn
       //debugger();
       if (notification.action == 'commented') {

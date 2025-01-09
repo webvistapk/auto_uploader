@@ -11,13 +11,15 @@ class PhoneInputScreen extends StatefulWidget {
   final String lastName;
   final String email;
   final String password;
+  final String dateOfBirth;
   const PhoneInputScreen(
       {Key? key,
       required this.username,
       required this.firstName,
       required this.lastName,
       required this.email,
-      required this.password})
+      required this.password,
+      required this.dateOfBirth})
       : super(key: key);
   @override
   _PhoneInputScreenState createState() => _PhoneInputScreenState();
@@ -159,14 +161,15 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                           FocusScope.of(context).unfocus();
                           print(
                               "Complete Number: ${completeNumber}${controller.text}");
-                          // await pro.registerUser(
-                          //     context,
-                          //     widget.username,
-                          //     widget.email,
-                          //     widget.firstName,
-                          //     widget.lastName,
-                          //     completeNumber!,
-                          //     widget.password);
+                          await pro.registerUser(
+                              context,
+                              widget.username,
+                              widget.email,
+                              widget.firstName,
+                              widget.lastName,
+                              "${completeNumber}${controller.text}",
+                              widget.password,
+                              widget.dateOfBirth);
                         }
                       },
                       isPressed: true,

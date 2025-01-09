@@ -174,6 +174,9 @@ void showPollModal(BuildContext context, List<Poll> pollPost, String pollTitle,
 }
 
 void showPercentageResult(BuildContext context, List<Poll> pollData) {
+  final totalVotes = calculateTotalVotes(pollData);
+  log("Poll Calculate Vote: $totalVotes");
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -181,7 +184,6 @@ void showPercentageResult(BuildContext context, List<Poll> pollData) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (context) {
-      log("Poll Calculate Vote: ${calculateTotalVotes(pollData)}");
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -212,8 +214,8 @@ void showPercentageResult(BuildContext context, List<Poll> pollData) {
           ),
           const SizedBox(height: 20),
           ...pollData.map((option) {
-            double percentage =
-                (option.voteCount / calculateTotalVotes(pollData));
+            final double percentage =
+                totalVotes > 0 ? (option.voteCount / totalVotes) : 0.0;
             log("Percentage: $percentage");
 
             return Padding(
@@ -256,7 +258,7 @@ void showPercentageResult(BuildContext context, List<Poll> pollData) {
                             Text(
                               '${(percentage * 100).toStringAsFixed(1)}%',
                               style: TextStyle(
-                                  color: percentage == 1
+                                  color: percentage > 0.0
                                       ? Colors.white
                                       : Colors.black,
                                   fontWeight: FontWeight.bold),

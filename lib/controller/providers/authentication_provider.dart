@@ -95,13 +95,20 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  registerUser(context, String username, String email, String firstName,
-      String lastName, String phoneNumber, String password) async {
+  registerUser(
+      context,
+      String username,
+      String email,
+      String firstName,
+      String lastName,
+      String phoneNumber,
+      String password,
+      String dateOfBirth) async {
     isLoading = true;
     notifyListeners();
     try {
-      final data = await ProviderManager.register(
-          context, username, email, firstName, lastName, phoneNumber, password);
+      final data = await ProviderManager.register(context, username, email,
+          firstName, lastName, phoneNumber, password, dateOfBirth);
       if (data != null) {
         final id = data['id'];
 

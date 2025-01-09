@@ -9,12 +9,14 @@ class PasswordInputScreen extends StatefulWidget {
   final String firstName;
   final String lastName;
   final String email;
+  final String dateOfBirth;
   const PasswordInputScreen(
       {Key? key,
       required this.username,
       required this.firstName,
       required this.lastName,
-      required this.email})
+      required this.email,
+      required this.dateOfBirth})
       : super(key: key);
 
   @override
@@ -151,6 +153,7 @@ class _PasswordInputScreenState extends State<PasswordInputScreen> {
                                     firstName: widget.firstName,
                                     lastName: widget.lastName,
                                     password: _passwordController.text.trim(),
+                                    dateOfBirth: widget.dateOfBirth,
                                   ),
                               context: context));
                     }

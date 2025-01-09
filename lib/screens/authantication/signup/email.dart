@@ -8,11 +8,13 @@ class EmailInputScreen extends StatefulWidget {
   final String username;
   final String firstName;
   final String lastName;
+  final String dateOfBirth;
   const EmailInputScreen(
       {Key? key,
       required this.username,
       required this.firstName,
-      required this.lastName})
+      required this.lastName,
+      required this.dateOfBirth})
       : super(key: key);
 
   @override
@@ -69,6 +71,7 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => PasswordInputScreen(
+                          dateOfBirth: widget.dateOfBirth,
                           username: widget.username,
                           email: emailController.text.trim(),
                           firstName: widget.firstName,

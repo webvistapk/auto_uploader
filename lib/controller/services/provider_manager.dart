@@ -52,8 +52,15 @@ class ProviderManager {
     }
   }
 
-  static register(context, String username, String email, String firstName,
-      String lastName, String phoneNumber, String password) async {
+  static register(
+      context,
+      String username,
+      String email,
+      String firstName,
+      String lastName,
+      String phoneNumber,
+      String password,
+      String dateOfBirth) async {
     try {
       final completeUrl =
           Uri.parse(ApiURLs.baseUrl + ApiURLs.register_endpoint);
@@ -66,6 +73,7 @@ class ProviderManager {
         "last_name": lastName,
         "phone_number": phoneNumber,
         "password": password,
+        "birthday": dateOfBirth,
       };
 
       final headers = {

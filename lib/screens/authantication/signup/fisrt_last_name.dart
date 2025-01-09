@@ -8,7 +8,9 @@ import 'package:mobile/screens/post/pool/widget/custom_text_field.dart';
 // Screen 1: First Name and Last Name
 class FirstNameLastNameScreen extends StatefulWidget {
   final String username;
-  const FirstNameLastNameScreen({Key? key, required this.username})
+  final String dateOfBirth;
+  const FirstNameLastNameScreen(
+      {Key? key, required this.username, required this.dateOfBirth})
       : super(key: key);
 
   @override
@@ -65,6 +67,7 @@ class _FirstNameLastNameScreenState extends State<FirstNameLastNameScreen> {
                             context,
                             CupertinoDialogRoute(
                                 builder: (_) => EmailInputScreen(
+                                      dateOfBirth: widget.dateOfBirth,
                                       username: widget.username,
                                       firstName:
                                           _firstNameController.text.trim(),

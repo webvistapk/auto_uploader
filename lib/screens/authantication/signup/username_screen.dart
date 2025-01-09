@@ -5,7 +5,9 @@ import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/screens/authantication/signup/fisrt_last_name.dart';
 
 class CreateUsernameScreen extends StatefulWidget {
-  const CreateUsernameScreen({Key? key}) : super(key: key);
+  final String dateOfBirth;
+  const CreateUsernameScreen({Key? key, required this.dateOfBirth})
+      : super(key: key);
 
   @override
   State<CreateUsernameScreen> createState() => _CreateUsernameScreenState();
@@ -43,6 +45,7 @@ class _CreateUsernameScreenState extends State<CreateUsernameScreen> {
                           context,
                           CupertinoDialogRoute(
                               builder: (_) => FirstNameLastNameScreen(
+                                    dateOfBirth: widget.dateOfBirth,
                                     username: usernameController.text.trim(),
                                   ),
                               context: context));
