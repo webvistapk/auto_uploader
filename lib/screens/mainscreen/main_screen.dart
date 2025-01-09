@@ -18,6 +18,7 @@ import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/screens/profile/request_screen/request_sereen.dart';
 import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
+import 'package:mobile/screens/search/widget/search_screen.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +41,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   // Loading indicator state
+  ScrollController scrollController = ScrollController();
 
   final List<Widget> _pages = [
     HomeScreen(),
@@ -115,7 +117,7 @@ class _MainScreenState extends State<MainScreen> {
                         token: widget.authToken,
                       )
                     : widget.selectedIndex == 1
-                        ? UserReelScreen()
+                        ? SearchScreen()
                         : widget.selectedIndex == 2
                             ? CreatePostScreen(
                                 token: widget.authToken,
@@ -141,9 +143,15 @@ class _MainScreenState extends State<MainScreen> {
                     currentIndex: widget.selectedIndex,
                     itemPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 12),
                     onTap: (index) {
+                      // if(index==1){
+                      // showSearch(context: context, delegate: CustomSearchDelegate());
+                      // }
+                      // else{
+
                       setState(() {
                         widget.selectedIndex = index;
                       });
+                     // }
                     },
                     items: [
                       /// Home

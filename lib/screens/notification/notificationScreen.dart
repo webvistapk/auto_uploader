@@ -308,9 +308,9 @@ class _NotificationScreenState extends State<NotificationScreen>
             replyID: notification.reply.result.id.toString(),
             onPostUpdated: () {},
           ),
-        ),
-      );
-    } else if (notification.post != null) {
+        );
+   }
+     else if (notification.post != null) {
       //Navigate to commetn
       //debugger();
       if (notification.action == 'commented') {

@@ -46,6 +46,7 @@ class PostWidget extends StatefulWidget {
   final bool isSinglePost;
   final String? postTitle;
   final String? postDescription;
+  final String? privacy;
 
   const PostWidget({
     super.key,
@@ -75,6 +76,7 @@ class PostWidget extends StatefulWidget {
     this.isSinglePost = false,
     this.postTitle,
     this.postDescription,
+    this.privacy
   });
 
   @override
@@ -122,7 +124,7 @@ class _PostWidgetState extends State<PostWidget> {
           'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg';
     }
     date = formatWithOrdinalSuffix(DateTime.parse(widget.date));
-
+  //debugger();
     return SingleChildScrollView(
       physics: const ScrollPhysics(),
       child: Padding(
@@ -259,7 +261,7 @@ class _PostWidgetState extends State<PostWidget> {
                                 width: 5,
                               ),
                               Text(
-                                "privacy",
+                                widget.privacy??'',
                                 style: GoogleFonts.inter(
                                   textStyle: TextStyle(
                                       fontSize: 7, color: AppColors.lightGrey),
@@ -409,7 +411,7 @@ class _PostWidgetState extends State<PostWidget> {
               height: 5,
             ),
             Text(
-              "${widget.caption}This is a photocaptionwithout anyemjojies using #bold #captions",
+              "${widget.caption}",
               style: GoogleFonts.publicSans(
                 fontSize: 10,
                 color: AppColors.darkGrey,
@@ -504,7 +506,7 @@ class _PostWidgetState extends State<PostWidget> {
               ),
             ),
             // The caption container
-            if (widget.isSinglePost!)
+            if (widget.postTitle!=null)
               Positioned(
                 bottom: 5,
                 left: 5,
@@ -537,7 +539,7 @@ class _PostWidgetState extends State<PostWidget> {
               ),
             if (!widget.isSinglePost) ...[
               Positioned(
-                bottom: 5,
+                bottom: widget.postTitle==null?5:85,
                 left: 5,
                 //right: 0,
                 child: Column(

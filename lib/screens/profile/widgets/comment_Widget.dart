@@ -884,7 +884,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                 return Padding(
                                                   padding:
                                                       const EdgeInsets.only(
-                                                          left: 40.0, top: 10),
+                                                          left: 50.0, top: 10),
                                                   child: Row(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment

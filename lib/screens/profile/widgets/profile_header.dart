@@ -493,17 +493,17 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               height: 12,
             ),
             Text(
-              "First Lastname",
+              fullName,
               style: TextStyle(
                   color: AppColors.profileTextColor, fontSize: 10),
             ),
             Text(
-              JobType ?? 'Senior Journalist at Fox News',
+              JobType ?? '',
               style: TextStyle(
                   color: AppColors.profileTextColor, fontSize: 10),
             ),
             Text(
-              "${address} ${city}${country}New York, New York",
+              "${address} ${city}${country}",
               style: TextStyle(
                   color: AppColors.profileTextColor, fontSize: 8),
             )
