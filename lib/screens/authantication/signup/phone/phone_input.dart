@@ -157,14 +157,16 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                               context, "Phone Number is Required");
                         } else {
                           FocusScope.of(context).unfocus();
-                          await pro.registerUser(
-                              context,
-                              widget.username,
-                              widget.email,
-                              widget.firstName,
-                              widget.lastName,
-                              completeNumber!,
-                              widget.password);
+                          print(
+                              "Complete Number: ${completeNumber}${controller.text}");
+                          // await pro.registerUser(
+                          //     context,
+                          //     widget.username,
+                          //     widget.email,
+                          //     widget.firstName,
+                          //     widget.lastName,
+                          //     completeNumber!,
+                          //     widget.password);
                         }
                       },
                       isPressed: true,
