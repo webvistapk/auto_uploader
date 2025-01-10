@@ -31,4 +31,10 @@ static const String bell ="assets/icons/bell.png";
   static const String profile ="assets/icons/profile.png";
 
   static const String drop_down ="assets/icons/drop_down.png";
+
+  //Search Screen
+   static const String searchIcon2 ="assets/icons/search2.png";
+  static const String filter ="assets/icons/search_filter.png";
+  static const String back_arrow ="assets/icons/back_icon.png";
+
 }

@@ -41,22 +41,27 @@ class _SinglePostState extends State<SinglePost> {
     if (widget.isInteractive == true) isUserPost = true;
     // Fetch the single post from the provider if available
     final postProvider = context.read<PostProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
     if (postProvider.posts != null) {
       var post = postProvider.posts!.firstWhere(
         (post) => post.id.toString() == widget.postId,
         // Return null if no post is found
       );
       if (post != null) {
+        
         postProvider.setSinglePost(
             post); // Use this to set the post if it's found in the list
       } else {
+         
         postProvider
             .getSinglePost(widget.postId); // Otherwise, fetch it from the API
       }
     } else {
+       
       postProvider
           .getSinglePost(widget.postId); // Fetch if posts list is empty or null
     }
+    });
   }
 
   @override

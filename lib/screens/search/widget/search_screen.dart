@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
 
@@ -106,35 +108,58 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       appBar: AppBar(
-        title: TextField(
-          decoration: InputDecoration(
-            hintText: 'Search...',
-            border: InputBorder.none,
+       titleSpacing: 0,
+        title: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10,),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+            onTap: (){},
+            child: Icon(Icons.arrow_back_ios,size: 15,),
           ),
-          onChanged: (value) {
-            setState(() {
-              query = value;
-            });
-          },
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(right: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  decoration: BoxDecoration(
+                color: Color.fromRGBO(234, 232, 232, 1), 
+                borderRadius: BorderRadius.circular(8.0),
+                      ),
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      icon: Image.asset(AppIcons.search,width: 20,color: Color(0xffB0B0B0),),
+                      hintText: 'Search...',
+                      hintStyle: GoogleFonts.publicSans(
+                        textStyle: TextStyle(
+                          fontSize: 10
+                        )
+                      ),
+                      border: InputBorder.none,
+                      
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        query = value;
+                      });
+                      
+                    },
+                  ),
+                ),
+              ),
+
+               GestureDetector(
+          onTap: (){},
+          child: Image.asset(AppIcons.filter,width: 20,),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+            ],
+          ),
         ),
-        actions: [
-          if (query.isNotEmpty)
-            IconButton(
-              icon: Icon(Icons.clear),
-              onPressed: () {
-                setState(() {
-                  query = '';
-                });
-              },
-            ),
-        ],
+        
+      
       ),
       body:  SearchWidget(query: query.toLowerCase(),
       authToken: Prefrences.getAuthToken().toString(),)
