@@ -58,30 +58,33 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-
-    final mediaProvider = Provider.of<MediaProvider>(context, listen: false);
-
-    
+   context.read<PostProvider>();
+       _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+    
+    final mediaProvider = context.read<MediaProvider>();
       // Fetch user status on initialization
+      initFunctions(mediaProvider);
+    
+    });
+  }
+
+  initFunctions(MediaProvider mediaProvider){
     mediaProvider.fetchUserStatuses(limit: 10, offset: _offset);
     mediaProvider.fetchFollowerStories(context, limit: 10, offset: _offset);
-
       _fetchPosts();
-    });
   }
 
   void _fetchMoreStatuses() async {
     final mediaProvider = Provider.of<MediaProvider>(context, listen: false);
-
+if(mounted)
     setState(() {
       _isLoadingMore = true;
     });
 
     // Fetch next batch of statuses (e.g., 10 more)
     await mediaProvider.fetchUserStatuses(limit: 10, offset: _offset);
-
+    if(mounted)
     setState(() {
       _stories.addAll(mediaProvider.statuses); // Add new statuses to the list
       _offset += 10; // Increment the offset for the next request
@@ -90,8 +93,9 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _fetchPosts() async {
+    
     final postProvider = Provider.of<PostProvider>(context, listen: false);
-
+if(mounted)
     setState(() {
       _isLoadingMore = true;
     });
@@ -100,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen>
     await postProvider.fetchFollowerPost(context, limit: 10, offset: _offset);
 
     // Fetch posts from the provider after the fetch operation
+    if(mounted)
     setState(() {
       _posts.addAll(postProvider.posts!); // Add posts from provider to _posts
       _offset += 10;
@@ -128,75 +133,6 @@ class _HomeScreenState extends State<HomeScreen>
             width: 24,
           ),
         ),
-        // leading: Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Consumer<MediaProvider>(
-        //     builder: (context, mediaProvider, child) {
-        //       final stories = mediaProvider.statuses ??
-        //           mediaProvider.followersStatus?.stories;
-
-        //       // Define profileImageUrl to be accessible in both the if and else blocks
-        //       final profileImageUrl = (stories != null &&
-        //               stories.isNotEmpty &&
-        //               stories.first.user?.profileImage != null)
-        //           ? '${ApiURLs.baseUrl2}${stories.first.user!.profileImage}'
-        //           : AppUtils.userImage; // Fallback URL for profile image
-
-        //       if (stories != null && stories.isNotEmpty) {
-        //         final List<Object?> allMediaFiles = stories.expand((story) {
-        //           return story.media!
-        //               .map((media) => media.file)
-        //               .whereType<String>();
-        //         }).toList();
-
-        //         final List<int?> storyIds = stories.map((story) => story.id).whereType<int>().toList();
-        //         print("USerStories :${allMediaFiles}");
-        //     //    debugger();
-        //         return InkWell(
-        //           onTap: () {
-        //             Navigator.push(
-        //               context,
-        //               MaterialPageRoute(
-        //                 builder: (context) => StatusView(
-        //                   statuses: allMediaFiles,
-        //                   initialIndex: 0,
-        //                   isVideo: false,
-        //                   viewers: [],
-        //                   userProfile: widget.userProfile,
-        //                   token: widget.token!,
-        //                   isUser: true,
-        //                   statusId: storyIds,
-        //                 ),
-        //               ),
-        //             );
-        //           },
-        //           child: CircleAvatar(
-        //             radius: 20,
-        //             backgroundImage: NetworkImage(profileImageUrl),
-        //           ),
-        //         );
-        //       } else {
-        //         return InkWell(
-        //           onTap: () {
-        //             Navigator.push(
-        //               context,
-        //               CupertinoPageRoute(
-        //                 builder: (_) => StoryScreen(
-        //                   userProfile: widget.userProfile,
-        //                   token: widget.token,
-        //                 ),
-        //               ),
-        //             );
-        //           },
-        //           child: CircleAvatar(
-        //             radius: 20,
-        //             backgroundImage: NetworkImage(profileImageUrl),
-        //           ),
-        //         );
-        //       }
-        //     },
-        //   ),
-        // ),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(40),
           child: Theme(
@@ -271,6 +207,7 @@ class _HomeScreenState extends State<HomeScreen>
             onNotification: (ScrollNotification scrollInfo) {
               if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
                   !_isLoadingMore) {
+                    
                 _fetchPosts();
               }
               return false;
@@ -297,38 +234,38 @@ class _HomeScreenState extends State<HomeScreen>
                   ), // Calls the horizontal ListView
                     
                                   //  const Divider(thickness: 1),
-                  _posts.isEmpty
-                      ? Center(
-                          child: Text(
-                            "No Post Available Right Now",
-                            style: AppTextStyles.poppinsBold(),
-                          ),
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Consumer<PostProvider>(
-                              builder: (context, postProvider, child) {
-                            return ListView.builder(
-                              itemCount: _posts!.length,
-                              shrinkWrap: true, // Prevents unbounded height
-                              physics: NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                              itemBuilder: (context, index) {
-                                final post = _posts[index];
-                                return _buildPostCard(post, () {
-                                  Navigator.push(
-                                      context,
-                                      CupertinoDialogRoute(
-                                          builder: (_) => SinglePost(
-                                              postId: post.id.toString(),
-                                              onPostUpdated: () =>
-                                                  _fetchPosts()),
-                                          context: context));
-                                });
-                              },
-                            );
-                          }),
-                        ),
-                        const Divider(thickness: 1),
+                  // _posts.isEmpty
+                  //     ? Center(
+                  //         child: Text(
+                  //           "No Post Available Right Now",
+                  //           style: AppTextStyles.poppinsBold(),
+                  //         ),
+                  //       )
+                  //     : Padding(
+                  //         padding: const EdgeInsets.all(8.0),
+                  //         child: Consumer<PostProvider>(
+                  //             builder: (context, postProvider, child) {
+                  //           return ListView.builder(
+                  //             itemCount: _posts.length,
+                  //             shrinkWrap: true, // Prevents unbounded height
+                  //             physics: NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                  //             itemBuilder: (context, index) {
+                  //               final post = _posts[index];
+                  //               return _buildPostCard(post, () {
+                  //                 Navigator.push(
+                  //                     context,
+                  //                     CupertinoDialogRoute(
+                  //                         builder: (_) => SinglePost(
+                  //                             postId: post.id.toString(),
+                  //                             onPostUpdated: () =>
+                  //                                 _fetchPosts()),
+                  //                         context: context));
+                  //               });
+                  //             },
+                  //           );
+                  //         }),
+                  //       ),
+                  //       const Divider(thickness: 1),
                         _posts.isEmpty
                             ? Center(
                                 child: Text(
@@ -341,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 child: Consumer<PostProvider>(
                                     builder: (context, postProvider, child) {
                                   return ListView.builder(
-                                    itemCount: _posts!.length,
+                                    itemCount: _posts.length,
                                     shrinkWrap:
                                         true, // Prevents unbounded height
                                     physics:
@@ -354,8 +291,8 @@ class _HomeScreenState extends State<HomeScreen>
                                             CupertinoDialogRoute(
                                                 builder: (_) => SinglePost(
                                                     postId: post.id.toString(),
-                                                    onPostUpdated: () =>
-                                                        _fetchPosts()),
+                                                    onPostUpdated: (){}
+                                                        ),
                                                 context: context));
                                       });
                                     },
@@ -411,7 +348,7 @@ Widget _UserStory() {
                 }).toList();
 
                 final List<int?> storyIds = stories.map((story) => story.id).whereType<int>().toList();
-               // print("USerStories :${allMediaFiles}");
+               
             
                 return InkWell(
                   onTap: () {
@@ -595,9 +532,9 @@ Widget _UserStory() {
   }
 
   Widget _buildPostCard(PostModel post, onPressed) {
-    log('Hello $_currentIndexMap');
+    
     List<String> fullMediaUrls = post.media.map((media) {
-      print(media);
+     
       final file = media.file;
       return file;
     }).toList();
@@ -696,13 +633,13 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
         AnimationController(vsync: this, duration: Duration(seconds: 15));
     _initializeStatus();
     _loadStatuses(); // Initial status fetch
-    print("Status ID here is : ${widget.statuses![_currentIndex]}");
   }
 
   // Method to load statuses with pagination
   void _loadStatuses() {
     final mediaProvider = Provider.of<MediaProvider>(context, listen: false);
     mediaProvider.fetchUserStatuses(limit: _limit, offset: _offset).then((_) {
+      if(mounted)
       setState(() {
         _isLoading = false;
         _hasMore = mediaProvider.hasMore;
@@ -713,6 +650,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   void _initializeStatus() {
     _animationController.stop();
     _timer?.cancel();
+    if(mounted)
     setState(() => _isLoading = true);
 
     if (widget.isVideo) {
@@ -728,10 +666,12 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
 
     _videoController!.addListener(() {
       if (_videoController!.value.isBuffering) {
+        if(mounted)
         setState(() {
           _isLoading = true;
         });
       } else if (_videoController!.value.isInitialized) {
+        if(mounted)
         setState(() {
           _isLoading = false;
         });
@@ -750,7 +690,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
       _animationController.forward(from: 0);
       _timer = Timer(cappedDuration, _onNextStatus);
     } catch (e) {
-      print("Error loading video: $e");
+      if(mounted)
       setState(() => _isLoading = false);
     }
   }
@@ -758,7 +698,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
   void _initializeImage() {
     _animationController.stop();
     _timer?.cancel();
-
+if(mounted)
     setState(() => _isLoading = true);
 
     Image.network(
@@ -767,6 +707,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     ).image.resolve(ImageConfiguration()).addListener(
           ImageStreamListener(
             (ImageInfo info, bool _) {
+              if(mounted)
               setState(() {
                 _isLoading = false;
                 _animationController.duration = Duration(seconds: 10);
@@ -775,7 +716,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
               _timer = Timer(Duration(seconds: 10), _onNextStatus);
             },
             onError: (error, stackTrace) {
-              print("Error loading image: $error");
+              if(mounted)
               setState(() => _isLoading = false);
             },
           ),
@@ -787,12 +728,14 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
     _timer?.cancel();
 
     if (_currentIndex < widget.statuses.length - 1) {
+      if(mounted)
       setState(() {
         _currentIndex++;
       });
       _initializeStatus();
     } else if (_hasMore) {
       // Load next batch of statuses when the current batch ends
+      if(mounted)
       setState(() {
         _offset += _limit;
         _isLoading = true;
@@ -974,6 +917,7 @@ class _StatusViewState extends State<StatusView> with TickerProviderStateMixin {
 
   void _onPreviousStatus() {
     if (_currentIndex > 0) {
+      if(mounted)
       setState(() {
         _currentIndex--;
       });

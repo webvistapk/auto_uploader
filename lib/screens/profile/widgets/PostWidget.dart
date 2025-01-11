@@ -309,7 +309,7 @@ class _PostWidgetState extends State<PostWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Location',
+                      widget.location,
                       style: GoogleFonts.inter(
                         fontSize: 7,
                         color: AppColors.darkGrey,
@@ -665,7 +665,8 @@ class _PostWidgetState extends State<PostWidget> {
     ).then((value) async {
       if (value == 'delete') {
         // Call the deletePost method and wait for its completion
-        await Provider.of<PostProvider>(context, listen: false)
+        
+         Provider.of<PostProvider>(context, listen: false)
             .deletePost(widget.postId, context, false);
 
         // Trigger the refresh callback to update the UI
@@ -695,7 +696,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
     _initializeVideo();
+    });
   }
 
   Future<void> _initializeVideo() async {
@@ -708,8 +711,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         });
       }
     } catch (e) {
-      log(widget.videoUrl);
-      log("Video initialization error: $e");
+
       if (mounted) {
         setState(() {
           _isError = true;

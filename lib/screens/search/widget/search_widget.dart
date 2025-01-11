@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
@@ -22,17 +24,20 @@ class SearchWidget extends StatefulWidget {
 class _SearchWidgetState extends State<SearchWidget>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String selectedCategory = 'All';
+  String selectedCategory = 'Content';
   bool isLoading = false;
 
   Map<String, List<UserProfile>> data = {
-    'All': [],
-    'Accounts': [],
-    'Photos': [],
-    'Pages': [],
-    'Videos': [],
-    'Slides': [],
-  };
+  'Content': [],
+  'People': [],
+  'Business': [],
+  'Jobs': [],
+  'Events': [],
+  'Clubs': [],
+  'Recents': [],
+  
+};
+
   String? token;
   getAuthToken() async {
     if (widget.authToken == null) {
@@ -56,6 +61,8 @@ class _SearchWidgetState extends State<SearchWidget>
     } else {
       _fetchSearchResults(context, widget.query, widget.authToken);
     }
+
+    print("Init State is called");
   }
 
   @override
@@ -81,8 +88,8 @@ class _SearchWidgetState extends State<SearchWidget>
         print("User Results ${userResults}");
         // debugger();
         setState(() {
-          data['All'] = userResults;
-          data['Accounts'] = userResults;
+          data['Content'] = userResults;
+          data['Recents'] = userResults;
         });
       }
     } catch (e) {
@@ -98,8 +105,8 @@ class _SearchWidgetState extends State<SearchWidget>
   void _removeUser(int index) {
     setState(() {
       data[selectedCategory]!.removeAt(index);
-      if (selectedCategory != 'All') {
-        data['All']!.removeAt(index);
+      if (selectedCategory != 'Content') {
+        data['Content']!.removeAt(index);
       }
     });
   }
@@ -130,19 +137,19 @@ class _SearchWidgetState extends State<SearchWidget>
   String _getCategoryName(int index) {
     switch (index) {
       case 0:
-        return 'All';
+        return 'Content';
       case 1:
-        return 'Accounts';
+        return 'People';
       case 2:
-        return 'Photos';
+        return 'Business';
       case 3:
-        return 'Pages';
+        return 'Jobs';
       case 4:
-        return 'Videos';
+        return 'Event';
       case 5:
-        return 'Slides';
+        return 'Clubs';
       default:
-        return 'All';
+        return 'Content';
     }
   }
 
@@ -152,43 +159,67 @@ class _SearchWidgetState extends State<SearchWidget>
 
   @override
   Widget build(BuildContext context) {
+   // debugger();
     final results = _searchUsers(selectedCategory);
-
+    
+    //final recommended=_searchUsers("")
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TabBar(
           controller: _tabController,
           labelColor: Colors.black,
+          physics: ScrollPhysics(),
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.red,
+          indicatorColor: Colors.transparent,
+          dividerHeight: 0,
+          padding: EdgeInsets.symmetric(horizontal: 20),
           isScrollable: true,
+          labelStyle: GoogleFonts.publicSans(
+            textStyle: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff18181)
+            )
+          ),
+          unselectedLabelStyle: GoogleFonts.publicSans(
+            textStyle: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xff848484)
+            )
+          ), 
           tabs: const [
-            Tab(child: Text('All')),
-            Tab(child: Text('Accounts')),
-            Tab(child: Text('Photos')),
-            Tab(child: Text('Pages')),
-            Tab(child: Text('Videos')),
-            Tab(child: Text('Slides')),
+            Tab(child: Text('Content')),
+            Tab(child: Text('People')),
+            Tab(child: Text('Business')),
+            Tab(child: Text('Jobs')),
+            Tab(child: Text('Events')),
+            Tab(child: Text('Clubs')),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 40),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Recents',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Implement "See all" functionality
-                },
-                child:
-                    const Text('See all', style: TextStyle(color: Colors.red)),
-              ),
+              // Text(
+              //   'Recents',
+              //   style: GoogleFonts.publicSans(
+              //     textStyle: TextStyle(
+              //       fontSize: 16,
+              //       fontWeight: FontWeight.bold
+              //     )
+              //   ),
+              // ),
+              // TextButton(
+              //   onPressed: () {
+              //     // Implement "See all" functionality
+              //   },
+              //   child:
+              //       const Text('See all', style: TextStyle(color: Colors.red)),
+              // ),
             ],
           ),
         ),
@@ -201,17 +232,34 @@ class _SearchWidgetState extends State<SearchWidget>
                   itemBuilder: (context, index) {
                     final user = results[index];
                     return ListTile(
-                      leading: const CircleAvatar(
-                        backgroundImage: NetworkImage(
-                            AppUtils.testImage), // Placeholder image
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                       child: Image.network(
+                            user.profileUrl==''?user.profileUrl.toString():AppUtils.userImage,
+                            width: 38,
+                          height: 38,
+                            ),
+                            
                       ),
                       title: Text(
                         user.username!,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: GoogleFonts.publicSans(
+                          textStyle: TextStyle(
+                            color: Color(0xff34342F),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16
+                          )
+                        ),
                       ),
-                      subtitle: Text('${user.firstName} ${user.lastName}'),
+                      subtitle: Text('${user.firstName} ${user.lastName}',
+                      style: GoogleFonts.publicSans(
+                          textStyle: TextStyle(
+                            color: Color(0xff34342F),
+                            fontWeight: FontWeight.normal,
+                            fontSize: 14
+                          ))),
                       trailing: IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(Icons.close ,size:10,color: Color(0xffB5B5B5)),
                         onPressed: () {
                           _removeUser(index);
                         },
@@ -222,6 +270,9 @@ class _SearchWidgetState extends State<SearchWidget>
                   },
                 ),
         ),
+      
+      
+      
       ],
     );
   }
