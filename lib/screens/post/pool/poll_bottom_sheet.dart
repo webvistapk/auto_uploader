@@ -21,12 +21,12 @@ postVote(int postId, String authToken, context) async {
       print('Vote posted successfully');
       return true;
     } else {
-      ToastNotifier.showErrorToast(
+      //ToastNotifier.showErrorToast(
           context, 'Failed to post vote: ${response.statusCode}');
       return false;
     }
   } catch (e) {
-    ToastNotifier.showErrorToast(context, 'Error posting vote: $e');
+    //ToastNotifier.showErrorToast(context, 'Error posting vote: $e');
     return false;
   }
 }

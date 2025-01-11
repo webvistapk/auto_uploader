@@ -55,14 +55,14 @@ class _OldPasswordScreenState extends State<OldPasswordScreen> {
         setState(() {
           isLoading = false;
         });
-        ToastNotifier.showErrorToast(
+        //ToastNotifier.showErrorToast(
             context, "Your Current Password is incorrect");
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
     }
 
     // Call your API here to verify the old password

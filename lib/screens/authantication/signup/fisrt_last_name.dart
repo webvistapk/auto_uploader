@@ -60,7 +60,7 @@ class _FirstNameLastNameScreenState extends State<FirstNameLastNameScreen> {
                     onPressed: () {
                       if (_firstNameController.text.isEmpty ||
                           _lastNameController.text.isEmpty) {
-                        ToastNotifier.showErrorToast(
+                        //ToastNotifier.showErrorToast(
                             context, "Please Enter the field required");
                       } else {
                         Navigator.push(

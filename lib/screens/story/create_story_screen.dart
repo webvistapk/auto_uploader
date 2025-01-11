@@ -184,7 +184,7 @@ class _StoryScreenState extends State<StoryScreen> {
   }
 
   // Widget to build media preview
-  Widget _buildMediaPreview(media, selectFile, isloading) {
+  _buildMediaPreview(media, selectFile, isloading) {
     if (isloading) {
       // Show shimmer effect while loading
       return Shimmer.fromColors(

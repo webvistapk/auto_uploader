@@ -133,7 +133,7 @@ class _NewPostNowState extends State<NewPostNow> {
                             interactions: widget.interactions);
 
                         if (response != null) {
-                          ToastNotifier.showSuccessToast(
+                          //ToastNotifier.showSuccessToast(
                               context, "Post Successfully posted!");
                           setState(() {
                             isLoading = false;
@@ -153,7 +153,7 @@ class _NewPostNowState extends State<NewPostNow> {
                           setState(() {
                             isLoading = false;
                           });
-                          ToastNotifier.showErrorToast(
+                          //ToastNotifier.showErrorToast(
                               context, "Network Problem. Try again.");
                         }
                         // Clear fields after submission

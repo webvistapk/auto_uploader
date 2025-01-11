@@ -65,7 +65,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             .sendfollowRequest(context, currentUserId, widget.user.id);
       } catch (e) {
         // Handle error, e.g., show a snackbar'
-        ToastNotifier.showErrorToast(context, "There is an error occured ${e}");
+        //ToastNotifier.showErrorToast(context, "There is an error occured ${e}");
       }
     }
   }
@@ -87,7 +87,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           "rejected",
         );
       } catch (e) {
-        ToastNotifier.showErrorToast(context, e.toString());
+        //ToastNotifier.showErrorToast(context, e.toString());
       }
     }
   }
@@ -127,7 +127,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50.0, vertical: 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -135,16 +136,15 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     profileContainer(
                         widget.user.profileUrl == null
                             ? AppUtils.userImage
-                            : ApiURLs.baseUrl +
-                                widget.user.profileUrl!,
+                            : ApiURLs.baseUrl + widget.user.profileUrl!,
                         "${widget.user.firstName.toString()} ${widget.user.lastName.toString()}",
                         widget.user.position ?? "JobType",
                         widget.user.address ?? 'Address',
                         widget.user.city ?? "city",
                         widget.user.country ?? 'country'),
-                        SizedBox(
-                          height: 15,
-                        ),
+                    SizedBox(
+                      height: 15,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -165,12 +165,14 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                                 Text(
                                   '${widget.user.following_count}',
                                   style: const TextStyle(
-                                      fontSize: 10,color: AppColors.profileFollowColor),
+                                      fontSize: 10,
+                                      color: AppColors.profileFollowColor),
                                 ),
                                 const Text(
                                   'Following',
                                   style: TextStyle(
-                                      fontSize: 8, color: AppColors.profileFollowColor),
+                                      fontSize: 8,
+                                      color: AppColors.profileFollowColor),
                                 ),
                               ],
                             ),
@@ -194,12 +196,14 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                                 Text(
                                   '${widget.user.followers_count}',
                                   style: const TextStyle(
-                                      fontSize: 10, color: AppColors.profileFollowColor),
+                                      fontSize: 10,
+                                      color: AppColors.profileFollowColor),
                                 ),
                                 const Text(
                                   'Followers',
                                   style: TextStyle(
-                                      fontSize: 8, color: AppColors.profileFollowColor),
+                                      fontSize: 8,
+                                      color: AppColors.profileFollowColor),
                                 ),
                               ],
                             ),
@@ -212,12 +216,14 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                             Text(
                               '3.8m',
                               style: TextStyle(
-                                  fontSize: 10, color: AppColors.profileFollowColor),
+                                  fontSize: 10,
+                                  color: AppColors.profileFollowColor),
                             ),
                             Text(
                               'Views',
                               style: TextStyle(
-                                  fontSize: 8, color: AppColors.profileFollowColor),
+                                  fontSize: 8,
+                                  color: AppColors.profileFollowColor),
                             ),
                           ],
                         ),
@@ -233,7 +239,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => EditProfileScreen(),
-                                  settings: RouteSettings(arguments: widget.user),
+                                  settings:
+                                      RouteSettings(arguments: widget.user),
                                 ),
                               );
                             },
@@ -274,24 +281,25 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Builder(builder: (context) {
-                            var provider = context.watch<FollowerRequestProvider>();
+                            var provider =
+                                context.watch<FollowerRequestProvider>();
                             return provider.isLoading
                                 ? Center(
                                     child: CircularProgressIndicator.adaptive(),
                                   )
-                                  // :InkWell(
-                                  //   onTap: ,
-                                  //   child: Container(
-                                  //     padding: EdgeInsets.all(5),
-                                  //     decoration: BoxDecoration(
-                                  //       color: AppColors.profileButtonColor,
-                                  //       borderRadius: BorderRadius.circular(8)
-                                  //     ),
-                                  //     child: Icon(CupertinoIcons.person_crop_circle,
-                                  //              color: Color(0xFF4A4A4B),
-                                  //              size: 20,weight: 1,),
-                                  //   ),
-                                  // );
+                                // :InkWell(
+                                //   onTap: ,
+                                //   child: Container(
+                                //     padding: EdgeInsets.all(5),
+                                //     decoration: BoxDecoration(
+                                //       color: AppColors.profileButtonColor,
+                                //       borderRadius: BorderRadius.circular(8)
+                                //     ),
+                                //     child: Icon(CupertinoIcons.person_crop_circle,
+                                //              color: Color(0xFF4A4A4B),
+                                //              size: 20,weight: 1,),
+                                //   ),
+                                // );
                                 : GestureDetector(
                                     onTap: provider.status == 'pending'
                                         ? () {}
@@ -299,62 +307,66 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                                                 provider.status == 'rejected'
                                             ? _handleFollow
                                             : _handleunfollow,
-                                       child:Container(
-                         padding: EdgeInsets.symmetric(
-                                          vertical:
-                                              provider.status == 'accepted' ? 6 : 6,
-                                          horizontal: provider.status == 'accepted'
-                                              ? 6
-                                              : 25),
-                                         decoration:BoxDecoration (
-                                 
-                                      color: provider.status == 'pending'
-                                          ? Colors.grey
-                                          : provider.status == 'initial' ||
-                                                  provider.status == 'rejected'
-                                              ? Colors.blueAccent
-                                              : AppColors.profileButtonColor,
-                                      
-                                        borderRadius: BorderRadius.circular(8),
-                                      
-                                    ),
-                                    child: provider.status == "accepted"
-                                        ? Icon(
-                                            CupertinoIcons.person_crop_circle,
-                                            color: AppColors.profileTextBlackColor,
-                                            size: 20,
-                                          )
-                                        : Text(
-                                            provider.status == 'pending'
-                                                ? 'Pending'
-                                                : provider.status == 'initial' ||
-                                                        provider.status ==
-                                                            'rejected'
-                                                    ? 'Follow'
-                                                    : 'Unfollow',
-                                            style: const TextStyle(
-                                                color: AppColors.whiteColor),
-                                          )
-                                          )
-                                          );
-                                
+                                    child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical:
+                                                provider.status == 'accepted'
+                                                    ? 6
+                                                    : 6,
+                                            horizontal:
+                                                provider.status == 'accepted'
+                                                    ? 6
+                                                    : 25),
+                                        decoration: BoxDecoration(
+                                          color: provider.status == 'pending'
+                                              ? Colors.grey
+                                              : provider.status == 'initial' ||
+                                                      provider.status ==
+                                                          'rejected'
+                                                  ? Colors.blueAccent
+                                                  : AppColors
+                                                      .profileButtonColor,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: provider.status == "accepted"
+                                            ? Icon(
+                                                CupertinoIcons
+                                                    .person_crop_circle,
+                                                color: AppColors
+                                                    .profileTextBlackColor,
+                                                size: 20,
+                                              )
+                                            : Text(
+                                                provider.status == 'pending'
+                                                    ? 'Pending'
+                                                    : provider.status ==
+                                                                'initial' ||
+                                                            provider.status ==
+                                                                'rejected'
+                                                        ? 'Follow'
+                                                        : 'Unfollow',
+                                                style: const TextStyle(
+                                                    color:
+                                                        AppColors.whiteColor),
+                                              )));
                           }),
-                         
-                           const SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.profileButtonColor,
                               padding: const EdgeInsets.symmetric(
                                   vertical: 8, horizontal: 15),
-                                  
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
                             child: const Text(
                               'Message',
-                              style: TextStyle(color: AppColors.profileTextBlackColor,fontSize: 10),
+                              style: TextStyle(
+                                  color: AppColors.profileTextBlackColor,
+                                  fontSize: 10),
                             ),
                           ),
                         ],
@@ -373,64 +385,59 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            // widget.user.description ?? 
-                             "Lorem ipsum dolor sit amet,consectetuer adipiscing elit,sed diaexerci tation",
+                            // widget.user.description ??
+                            "Lorem ipsum dolor sit amet,consectetuer adipiscing elit,sed diaexerci tation",
                             style: TextStyle(
-                              
-                                color: AppColors.lightGrey,
-                                fontSize: 10),
-                                textAlign: TextAlign.center,
+                                color: AppColors.lightGrey, fontSize: 10),
+                            textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 10),
-                        
                         ],
                       ),
                     )
                   ],
                 ),
               ),
-             Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Row(
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
                   children: [
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.profileButtonColor,
-                        // Grey border
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        'Category Name',
-                        style: TextStyle(fontSize: 10),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                  DottedBorder(
-                    strokeWidth: 0.5,
-                    dashPattern: [11, 6],
-                    radius: Radius.circular(12),
-                    padding: EdgeInsets.symmetric(
-                            vertical: 5, horizontal: 40),
-                    color: Color(0xFFBABABA),
-                      child:  const Center(
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.blue,
-                            size: 17,
+                    Row(
+                      children: [
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.profileButtonColor,
+                            // Grey border
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            'Category Name',
+                            style: TextStyle(fontSize: 10),
                           ),
                         ),
-                      
+                        SizedBox(width: 10),
+                        DottedBorder(
+                          strokeWidth: 0.5,
+                          dashPattern: [11, 6],
+                          radius: Radius.circular(12),
+                          padding:
+                              EdgeInsets.symmetric(vertical: 5, horizontal: 40),
+                          color: Color(0xFFBABABA),
+                          child: const Center(
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.blue,
+                              size: 17,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-            
+              ),
             ],
           );
         } else {
@@ -446,7 +453,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       String img, fullName, JobType, address, city, country) {
     return Center(
       child: Container(
-       // padding: EdgeInsets.all(5),
+        // padding: EdgeInsets.all(5),
         child: Column(
           children: [
             InkWell(
@@ -463,7 +470,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                   ),
                 );
               },
-              child:ClipRRect(
+              child: ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(18)),
                 child: Image.network(
                   img,
@@ -494,18 +501,15 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             ),
             Text(
               fullName,
-              style: TextStyle(
-                  color: AppColors.profileTextColor, fontSize: 10),
+              style: TextStyle(color: AppColors.profileTextColor, fontSize: 10),
             ),
             Text(
               JobType ?? '',
-              style: TextStyle(
-                  color: AppColors.profileTextColor, fontSize: 10),
+              style: TextStyle(color: AppColors.profileTextColor, fontSize: 10),
             ),
             Text(
               "${address} ${city}${country}",
-              style: TextStyle(
-                  color: AppColors.profileTextColor, fontSize: 8),
+              style: TextStyle(color: AppColors.profileTextColor, fontSize: 8),
             )
           ],
         ),

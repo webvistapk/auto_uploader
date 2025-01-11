@@ -48,7 +48,7 @@ class ChatController extends ChangeNotifier {
         _isLoading = false;
         notifyListeners();
         UserProfile? userProfile = await UserPreferences().getCurrentUser();
-        ToastNotifier.showSuccessToast(context, "Successfully Created Chat");
+        //ToastNotifier.showSuccessToast(context, "Successfully Created Chat");
         Navigator.push(
             context,
             CupertinoDialogRoute(
@@ -59,7 +59,7 @@ class ChatController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
       _isLoading = false;
       notifyListeners();
     }

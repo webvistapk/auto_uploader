@@ -34,20 +34,20 @@ class ProviderManager {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        ToastNotifier.showSuccessToast(context, "Login Successfully");
+        //ToastNotifier.showSuccessToast(context, "Login Successfully");
         return data;
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final message = data['message'] ?? 'Unauthorized access';
-        ToastNotifier.showErrorToast(context, message);
+        //ToastNotifier.showErrorToast(context, message);
         return null;
       } else {
-        ToastNotifier.showErrorToast(
-            context, 'Unexpected error: ${response.statusCode}');
+        //ToastNotifier.showErrorToast(
+        // context, 'Unexpected error: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       log('Error: $e');
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
       return null;
     }
   }
@@ -92,46 +92,46 @@ class ProviderManager {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        ToastNotifier.showSuccessToast(context, "Registration Successful");
+        //ToastNotifier.showSuccessToast(context, "Registration Successful");
         return data;
       } else if (response.statusCode == 400) {
         // Show separate error messages for each field
         if (data.containsKey('email')) {
-          ToastNotifier.showErrorToast(context, "Email: ${data['email'][0]}");
+          //ToastNotifier.showErrorToast(context, "Email: ${data['email'][0]}");
         }
         if (data.containsKey('phone_number')) {
-          ToastNotifier.showErrorToast(
-              context, "Phone Number: ${data['phone_number'][0]}");
+          //ToastNotifier.showErrorToast(
+          // context, "Phone Number: ${data['phone_number'][0]}");
         }
         if (data.containsKey('password')) {
-          ToastNotifier.showErrorToast(
-              context, "Password: ${data['password'][0]}");
+          //ToastNotifier.showErrorToast(
+          // context, "Password: ${data['password'][0]}");
         }
         if (data.containsKey('username')) {
-          ToastNotifier.showErrorToast(
-              context, "Username: ${data['username'][0]}");
+          //ToastNotifier.showErrorToast(
+          // context, "Username: ${data['username'][0]}");
         }
         if (data.containsKey('first_name')) {
-          ToastNotifier.showErrorToast(
-              context, "First Name: ${data['first_name'][0]}");
+          //ToastNotifier.showErrorToast(
+          // context, "First Name: ${data['first_name'][0]}");
         }
         if (data.containsKey('last_name')) {
-          ToastNotifier.showErrorToast(
-              context, "Last Name: ${data['last_name'][0]}");
+          //ToastNotifier.showErrorToast(
+          // context, "Last Name: ${data['last_name'][0]}");
         }
         return null;
       } else if (response.statusCode == 403) {
         final message = data['message'] ?? 'Registration failed';
-        ToastNotifier.showErrorToast(context, message);
+        //ToastNotifier.showErrorToast(context, message);
         return null;
       } else {
-        ToastNotifier.showErrorToast(
-            context, 'Unexpected error: ${response.statusCode}');
+        //ToastNotifier.showErrorToast(
+        // context, 'Unexpected error: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       log('Error: $e');
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
       return null;
     }
   }

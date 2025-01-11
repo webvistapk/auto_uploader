@@ -14,16 +14,16 @@ class ProfileProvider extends ChangeNotifier {
       if (response != null) {
         isLoading = false;
         notifyListeners();
-        ToastNotifier.showSuccessToast(context, "Successfully Profile Updated");
+        //ToastNotifier.showSuccessToast(context, "Successfully Profile Updated");
       } else {
         isLoading = false;
         notifyListeners();
-        ToastNotifier.showErrorToast(context, "Error !");
+        //ToastNotifier.showErrorToast(context, "Error !");
       }
     } catch (e) {
       isLoading = false;
       notifyListeners();
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
     }
   }
 }

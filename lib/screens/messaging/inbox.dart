@@ -73,7 +73,7 @@ class _InboxScreenState extends State<InboxScreen> {
         _scrollToBottom();
       }
     } catch (error) {
-      ToastNotifier.showErrorToast(context, 'Error loading messages: $error');
+      //ToastNotifierer.showErrorToast(context, 'Error loading messages: $error');
       setState(() {
         isLoading = false;
         moreLoading = false;
@@ -280,7 +280,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                 Duration(seconds: 1), _scrollToBottom);
                           }
                         } catch (e) {
-                          ToastNotifier.showErrorToast(context, e.toString());
+                          //ToastNotifier.showErrorToast(context, e.toString());
                         }
                       },
                       chatModel: widget.chatModel,

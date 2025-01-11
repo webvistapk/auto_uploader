@@ -14,7 +14,7 @@ class FollowerProvider extends ChangeNotifier {
         return data;
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
       return null;
     }
   }

@@ -69,8 +69,8 @@ class AuthProvider extends ChangeNotifier {
               (route) => false,
             );
           } else {
-            ToastNotifier.showErrorToast(
-                context, "Failed to retrieve user profile");
+            //ToastNotifier.showErrorToast(
+            // context, "Failed to retrieve user profile");
           }
         } else {
           Navigator.push(
@@ -91,7 +91,7 @@ class AuthProvider extends ChangeNotifier {
       // debugger();
       isLoading = false;
       notifyListeners();
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
     }
   }
 
@@ -117,8 +117,8 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         isLoading = false;
         notifyListeners();
-        ToastNotifier.showSuccessToast(
-            context, "User Register successfully $email");
+        //ToastNotifier.showSuccessToast(
+        //  context, "User Register successfully $email");
         Navigator.push(
             context,
             CupertinoDialogRoute(
@@ -135,7 +135,7 @@ class AuthProvider extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      ToastNotifier.showErrorToast(context, e.toString());
+      ////ToastNotifier.showErrorToast(context, e.toString());
     }
   }
 
@@ -154,7 +154,7 @@ class AuthProvider extends ChangeNotifier {
         return data;
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
       isLoading = false;
       notifyListeners();
     }
@@ -174,7 +174,7 @@ class AuthProvider extends ChangeNotifier {
           isLoading = false;
           notifyListeners();
           final message = result['status'] + '\n' + result['message'];
-          ToastNotifier.showErrorToast(context, message);
+          //ToastNotifier.showErrorToast(context, message);
         } else {
           // debugger();
           final message = result['status'] + '\n' + result['message'];
@@ -189,7 +189,7 @@ class AuthProvider extends ChangeNotifier {
           notifyListeners();
           // debugger();
           if (token == null) {
-            ToastNotifier.showSuccessToast(context, message);
+            //ToastNotifier.showSuccessToast(context, message);
 
             Navigator.pushAndRemoveUntil(
                 context,
@@ -210,7 +210,7 @@ class AuthProvider extends ChangeNotifier {
               await userPrefs.saveCurrentUser(userProfile);
               notifyListeners();
             }
-            ToastNotifier.showSuccessToast(context, message);
+            //ToastNotifier.showSuccessToast(context, message);
 
             Navigator.pushAndRemoveUntil(
                 context,
@@ -223,7 +223,7 @@ class AuthProvider extends ChangeNotifier {
                     context: context),
                 (route) => false);
           }
-          ToastNotifier.showSuccessToast(context, message);
+          //ToastNotifier.showSuccessToast(context, message);
 
           Navigator.pushAndRemoveUntil(
               context,
@@ -241,7 +241,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       isLoading = false;
       notifyListeners();
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
     }
   }
 
@@ -250,13 +250,13 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final data = await ProviderManager.renewEmailVerified(email);
-      ToastNotifier.showSuccessToast(context, data);
+      //ToastNotifier.showSuccessToast(context, data);
       isResend = false;
       notifyListeners();
     } catch (e) {
       isResend = false;
       notifyListeners();
-      ToastNotifier.showErrorToast(context, e.toString());
+      //ToastNotifier.showErrorToast(context, e.toString());
     }
   }
 }

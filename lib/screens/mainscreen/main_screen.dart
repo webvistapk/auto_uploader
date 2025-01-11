@@ -78,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
       if (result) {
         // Use the provider to check email verification
       } else {
-        ToastNotifier.showErrorToast(
+        //ToastNotifier.showErrorToast(
             context, "Please verify your Email First!");
         // Handle case where user email is not found (if needed)
         Navigator.pushReplacement(
@@ -125,8 +125,8 @@ class _MainScreenState extends State<MainScreen> {
                               )
                             : widget.selectedIndex == 3
                                 ? ChatScreen(
-                            userProfile: widget.userProfile!,
-                          )
+                                    userProfile: widget.userProfile!,
+                                  )
                                 : widget.selectedIndex == 4
                                     ? ProfileScreen(
                                         id: widget.userProfile.id,
@@ -141,7 +141,8 @@ class _MainScreenState extends State<MainScreen> {
                     selectedItemColor: AppColors.white,
                     selectedColorOpacity: 0,
                     currentIndex: widget.selectedIndex,
-                    itemPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 12),
+                    itemPadding:
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     onTap: (index) {
                       // if(index==1){
                       // showSearch(context: context, delegate: CustomSearchDelegate());
@@ -151,7 +152,7 @@ class _MainScreenState extends State<MainScreen> {
                       setState(() {
                         widget.selectedIndex = index;
                       });
-                     // }
+                      // }
                     },
                     items: [
                       /// Home
@@ -200,20 +201,24 @@ class _MainScreenState extends State<MainScreen> {
         alignment: Alignment.bottomCenter,
         clipBehavior: Clip.none,
         children: [
-          Image.asset(icon,height: 20,),
+          Image.asset(
+            icon,
+            height: 20,
+          ),
           if (isSelected)
             Positioned(
               bottom: -12, // Adjust the position for the indicator
-              
-              child:SizedBox(
+
+              child: SizedBox(
                 width: 140, // Width of the line
-                  height: 5,
+                height: 5,
                 child: Container(
-                   // Height of the line
+                  // Height of the line
                   decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(2), // Rounded edges
-                ),),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(2), // Rounded edges
+                  ),
+                ),
               ),
             ),
         ],

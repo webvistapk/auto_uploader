@@ -109,7 +109,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final token = Prefrences.getAuthToken();
       await pro.updateProfile(context, updatedUser);
       await UserPreferences().saveCurrentUser(updatedUser);
-      ToastNotifier.showSuccessToast(context, 'Profile updated successfully.');
+      //ToastNotifier.showSuccessToast(context, 'Profile updated successfully.');
 
       Navigator.pushAndRemoveUntil(
           context,
@@ -121,7 +121,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   )),
           (route) => false);
     } catch (e) {
-      ToastNotifier.showErrorToast(context, 'Failed to update profile: $e');
+      //ToastNotifier.showErrorToast(context, 'Failed to update profile: $e');
     }
   }
 

@@ -102,8 +102,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 //   }
 // }
 
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -120,8 +118,8 @@ class _SideBarState extends State<SideBar> {
     return Drawer(
       backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
-    borderRadius: BorderRadius.zero, // Removes any border radius
-  ),
+        borderRadius: BorderRadius.zero, // Removes any border radius
+      ),
       width: MediaQuery.of(context).size.width * .85,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,14 +133,17 @@ class _SideBarState extends State<SideBar> {
               children: [
                 // Circular avatar
                 ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(20)),
-                  child: Image.network(AppUtils.userImage,width: 80,),
+                  borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  child: Image.network(
+                    AppUtils.userImage,
+                    width: 80,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 // User details
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children:  [
+                  children: [
                     const Text(
                       'First Last',
                       style: TextStyle(
@@ -153,10 +154,10 @@ class _SideBarState extends State<SideBar> {
                     ),
                     const SizedBox(height: 4),
                     InkWell(
-                      onTap:(){
-                         Navigator.pushReplacementNamed(context, '/profile');
-                         print("View Profile");
-                      } ,
+                      onTap: () {
+                        Navigator.pushReplacementNamed(context, '/profile');
+                        print("View Profile");
+                      },
                       child: const Text(
                         'View Profile',
                         style: TextStyle(
@@ -202,7 +203,7 @@ class _SideBarState extends State<SideBar> {
                     Navigator.pushReplacementNamed(context, '/');
                   },
                 ),
-                
+
                 ListTile(
                   title: const Text(
                     'Settings',
@@ -211,7 +212,6 @@ class _SideBarState extends State<SideBar> {
                   onTap: () {
                     // Navigate to Settings Screen
                     Navigator.pop(context);
-                    
                   },
                 ),
                 //const Divider(thickness: 1, height: 1),
@@ -222,25 +222,25 @@ class _SideBarState extends State<SideBar> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
-                    
                     ),
                   ),
-                  onTap: ()async {
+                  onTap: () async {
                     // Handle Logout
                     SharedPreferences removeUser =
-                  await SharedPreferences.getInstance();
-              await Prefrences.removeAuthToken();
-              await removeUser.remove(Prefrences.authToken);
-              await UserPreferences().clearCurrentUser();
-              await removeUser.remove(UserPreferences.userKey);
-              await removeUser.clear();
-              ToastNotifier.showSuccessToast(
-                  context, "Logout user Successfully");
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  CupertinoDialogRoute(
-                      builder: (_) => const LoginScreen(), context: context),
-                  (route) => false);
+                        await SharedPreferences.getInstance();
+                    await Prefrences.removeAuthToken();
+                    await removeUser.remove(Prefrences.authToken);
+                    await UserPreferences().clearCurrentUser();
+                    await removeUser.remove(UserPreferences.userKey);
+                    await removeUser.clear();
+                    // ToastNotifier.showSuccessToast(
+                    //     context, "Logout user Successfully");
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        CupertinoDialogRoute(
+                            builder: (_) => const LoginScreen(),
+                            context: context),
+                        (route) => false);
                   },
                 ),
               ],
@@ -251,4 +251,3 @@ class _SideBarState extends State<SideBar> {
     );
   }
 }
-

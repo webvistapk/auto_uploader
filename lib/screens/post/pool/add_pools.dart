@@ -251,7 +251,7 @@ class _AddPollScreenState extends State<AddPollScreen> {
                                 postDescription: widget.postDescription);
 
                             if (response != null) {
-                              ToastNotifier.showSuccessToast(
+                              //ToastNotifier.showSuccessToast(
                                   context, "Post Successfully posted!");
                               setState(() {
                                 isLoading = false;

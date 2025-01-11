@@ -329,8 +329,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         setState(() {
                           isLoading = false;
                         });
-                        ToastNotifier.showErrorToast(
-                            context, "Post  is required!");
+                        //ToastNotifier.showErrorToast(
+                            // context, "Post  is required!");
                       } else {
                         setState(() {
                           isLoading = false;
@@ -355,7 +355,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         setState(() {
                           isLoading = false;
                         });
-                        ToastNotifier.showErrorToast(
+                        //ToastNotifier.showErrorToast(
                             context, "Post Title / Descritption is required!");
                       } else {
                         setState(() {
@@ -381,7 +381,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         setState(() {
                           isLoading = false;
                         });
-                        ToastNotifier.showErrorToast(
+                        //ToastNotifier.showErrorToast(
                             context, "Post  is required!");
                       } else {
                         setState(() {
@@ -407,7 +407,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         setState(() {
                           isLoading = false;
                         });
-                        ToastNotifier.showErrorToast(
+                        //ToastNotifier.showErrorToast(
                             context, "Post Title / Descritption is required!");
                       } else {
                         final response = await pro.createNewPost(context,
@@ -419,7 +419,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             interactions: interactionSheetOptions);
 
                         if (response != null) {
-                          ToastNotifier.showSuccessToast(
+                          //ToastNotifier.showSuccessToast(
                               context, "Post Successfully posted!");
                           setState(() {
                             isLoading = false;
@@ -437,7 +437,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           setState(() {
                             isLoading = false;
                           });
-                          ToastNotifier.showErrorToast(
+                          //ToastNotifier.showErrorToast(
                               context, "Network Problem. Try again.");
                         }
                       }
@@ -450,7 +450,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           mediaFiles: widget.mediFiles);
 
                       if (response != null) {
-                        ToastNotifier.showSuccessToast(
+                        //ToastNotifier.showSuccessToast(
                             context, "Reel Successfully posted!");
                         setState(() {
                           isLoading = false;
@@ -468,7 +468,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         setState(() {
                           isLoading = false;
                         });
-                        ToastNotifier.showErrorToast(
+                        //ToastNotifier.showErrorToast(
                             context, "Something went wrong. Try again.");
                       }
                     }

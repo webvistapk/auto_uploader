@@ -35,8 +35,10 @@ class _SplashScreenState extends State<SplashScreen> {
     bool? isLoginInfo = await Prefrences.getLoginInfoSave() ?? null;
     final data = await Prefrences.getAuthToken();
 
-    // debugger();
-    if (isLoginInfo != null && isCommunity != null && isCommunity == true) {
+    if (isLoginInfo != null &&
+        isCommunity != null &&
+        isCommunity == true &&
+        isLoginInfo == true) {
       ChatProvider().setAccessToken(data);
       final email = await Prefrences.getUserEmail();
       UserPreferences userPreferences = UserPreferences();

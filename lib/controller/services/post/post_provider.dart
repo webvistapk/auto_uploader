@@ -78,7 +78,7 @@ class PostProvider extends ChangeNotifier {
       }
     } catch (e) {
       setIsLoading(false);
-      ToastNotifier.showErrorToast(context, "Error: $e");
+      //ToastNotifier.showErrorToast(context, "Error: $e");
       print("Error fetching follower posts: $e");
       return []; // Return an empty list on error
     } finally {
@@ -253,7 +253,7 @@ class PostProvider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      //ToastNotifier.showErrorToast(context, "There is an Error: $e");
       print(e);
       return [];
     } finally {
@@ -306,7 +306,7 @@ class PostProvider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      //ToastNotifier.showErrorToast(context, "There is an Error: $e");
       print(e);
       return []; // Return an empty list on exception
     } finally {
@@ -359,7 +359,7 @@ class PostProvider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      //ToastNotifier.showErrorToast(context, "There is an Error: $e");
       print(e);
       return []; // Return an empty list on exception
     } finally {
@@ -386,18 +386,18 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         // Show success message
-        ToastNotifier.showSuccessToast(context, "Post deleted successfully");
+        //ToastNotifier.showSuccessToast(context, "Post deleted successfully");
         //getPost(context);
         setIsLoading(false);
       } else {
         // Show error message if deletion failed
-        ToastNotifier.showErrorToast(
+        //ToastNotifier.showErrorToast(
             context, "Sorry post is not deleted. Please Try Again!");
 
         setIsLoading(false);
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      //ToastNotifier.showErrorToast(context, "There is an Error: $e");
 
       setIsLoading(false);
     }
@@ -473,7 +473,7 @@ class PostProvider extends ChangeNotifier {
 
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
-      } 
+      }
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error: $e");
       print(e);
@@ -508,15 +508,15 @@ class PostProvider extends ChangeNotifier {
         final postIndex = _posts!.indexWhere((post) => post.id == postId);
         if (postIndex != -1) {
           print("Post Index ${postIndex}");
-          final currentPost=_posts?[postIndex];
-          currentPost!.likesCount =(currentPost!.likesCount <0)? currentPost!.likesCount -1:0;
-          currentPost!.isLiked =
-              false; // Assuming you want to mark it as liked
+          final currentPost = _posts?[postIndex];
+          currentPost!.likesCount =
+              (currentPost!.likesCount < 0) ? currentPost!.likesCount - 1 : 0;
+          currentPost!.isLiked = false; // Assuming you want to mark it as liked
           //ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
-        } 
+        }
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
-      } 
+      }
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error: $e");
       print(e);
@@ -546,9 +546,9 @@ class PostProvider extends ChangeNotifier {
 
         // Notify listeners to update UI
         notifyListeners();
-      } 
+      }
     } catch (e) {
-     // ToastNotifier.showErrorToast(context, "Error liking the post: $e");
+      // ToastNotifier.showErrorToast(context, "Error liking the post: $e");
       print(e);
     }
   }
@@ -572,13 +572,14 @@ class PostProvider extends ChangeNotifier {
       print("API HITTED");
       if (response.statusCode == 200) {
         // _reels?[reelIndex].isLiked = true;
-        final currentReel=_reels?[reelIndex];
-        currentReel!.likesCount = (currentReel!.likesCount<0)?currentReel!.likesCount- 1:0;
-        currentReel.isLiked = false; 
+        final currentReel = _reels?[reelIndex];
+        currentReel!.likesCount =
+            (currentReel!.likesCount < 0) ? currentReel!.likesCount - 1 : 0;
+        currentReel.isLiked = false;
 
         // Notify listeners to update UI
         notifyListeners();
-      } 
+      }
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error disliking the post: $e");
       print(e);

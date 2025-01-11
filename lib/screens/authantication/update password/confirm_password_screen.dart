@@ -58,7 +58,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
       );
       // debugger();
       if (response.statusCode == 200) {
-        ToastNotifier.showSuccessToast(
+        //ToastNotifier.showSuccessToast(
             context, "Password Changed Successfully");
         SharedPreferences removeUser = await SharedPreferences.getInstance();
         await Prefrences.removeAuthToken();
@@ -69,7 +69,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
         setState(() {
           isLoading = false;
         });
-        ToastNotifier.showSuccessToast(context, "Logout user Successfully");
+        //ToastNotifier.showSuccessToast(context, "Logout user Successfully");
         Navigator.pushAndRemoveUntil(
             context,
             CupertinoDialogRoute(
@@ -84,7 +84,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
       setState(() {
         isLoading = false;
       });
-      ToastNotifier.showErrorToast(context, "There is an Error occured:${e}");
+      //ToastNotifier.showErrorToast(context, "There is an Error occured:${e}");
     }
     // Call your API to update the password here
     // On success, navigate to the profile screen or show success message
@@ -108,7 +108,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
                         context, widget.oldPassword, widget.newPassword);
                   } else {
                     // Show error message if passwords do not match
-                    ToastNotifier.showErrorToast(
+                    //ToastNotifier.showErrorToast(
                         context, "Password does not match");
                   }
                 },

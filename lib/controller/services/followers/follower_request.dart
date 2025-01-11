@@ -59,7 +59,7 @@ class FollowerRequestProvider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
+      //ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
       print("Exception: No Record Available");
       print(e);
       return [];
@@ -106,7 +106,7 @@ class FollowerRequestProvider extends ChangeNotifier {
     } catch (e) {
       print("Exception: Error ${e}");
       print(e);
-      ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
+      //ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
       setisLoading(false);
     }
   }
@@ -192,12 +192,12 @@ class FollowerRequestProvider extends ChangeNotifier {
       } else {
         setisLoading(false);
         setisFollowLoading(false);
-        ToastNotifier.showErrorToast(
+        //ToastNotifier.showErrorToast(
             context, "There is an Error : ${response.statusCode}");
         //print("This is Error body: ${response.body}");
       }
     } catch (e) {
-      ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
+      //ToastNotifier.showErrorToast(context, "There is an Error : ${e}");
       setisFollowLoading(false);
     }
   }

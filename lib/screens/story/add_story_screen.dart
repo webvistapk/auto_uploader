@@ -215,7 +215,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                           mediaFiles: widget.mediFiles!);
 
                       if (response != null) {
-                        ToastNotifier.showSuccessToast(
+                        //ToastNotifier.showSuccessToast(
                             context, "Story Successfully Shared!");
                         setState(() {
                           isLoading = false;
@@ -233,7 +233,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                         setState(() {
                           isLoading = false;
                         });
-                        ToastNotifier.showErrorToast(
+                        //ToastNotifier.showErrorToast(
                             context, "Something went wrong. Try again.");
                       }
                     }
