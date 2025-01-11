@@ -155,8 +155,8 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                       buttonText: 'Send Verification Text',
                       onPressed: () async {
                         if (completeNumber!.isEmpty || completeNumber == null) {
-                          ToastNotifier.showErrorToast(
-                              context, "Phone Number is Required");
+                          // ToastNotifier.showErrorToast(
+                          //     context, "Phone Number is Required");
                         } else {
                           FocusScope.of(context).unfocus();
                           print(

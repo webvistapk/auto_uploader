@@ -38,8 +38,8 @@ class _CreateUsernameScreenState extends State<CreateUsernameScreen> {
                   buttonText: "Continue",
                   onPressed: () {
                     if (usernameController.text.isEmpty) {
-                      ToastNotifier.showErrorToast(
-                          context, "Please Enter username");
+                      // ToastNotifier.showErrorToast(
+                      //     context, "Please Enter username");
                     } else {
                       Navigator.push(
                           context,

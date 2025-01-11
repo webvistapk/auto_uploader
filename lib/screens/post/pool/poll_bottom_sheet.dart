@@ -22,7 +22,7 @@ postVote(int postId, String authToken, context) async {
       return true;
     } else {
       //ToastNotifier.showErrorToast(
-          context, 'Failed to post vote: ${response.statusCode}');
+      // context, 'Failed to post vote: ${response.statusCode}');
       return false;
     }
   } catch (e) {

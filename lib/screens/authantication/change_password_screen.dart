@@ -84,7 +84,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         return data;
       } else {
         //ToastNotifier.showErrorToast(
-            context, "Your Current Password is incorrect");
+        // context, "Your Current Password is incorrect");
       }
     } catch (e) {
       log('Error: $e');
@@ -114,13 +114,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         //ToastNotifier.showSuccessToast(
-            context, "Your password changed successfully");
+        // context, "Your password changed successfully");
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => ProfileScreen(id: userid)));
         return data;
       } else {
         //ToastNotifier.showErrorToast(
-            context, "Your Current Password is incorrect");
+        // context, "Your Current Password is incorrect");
       }
     } catch (e) {
       // debugger();

@@ -278,8 +278,8 @@ class _MediaMessagingScreenState extends State<MediaMessagingScreen> {
                               Navigator.pop(context, true);
                               // _scrollToBottom();
                             } catch (e) {
-                              ToastNotifier.showErrorToast(
-                                  context, e.toString());
+                              // ToastNotifier.showErrorToast(
+                              //     context, e.toString());
                             }
 
                             _messageController.clear();

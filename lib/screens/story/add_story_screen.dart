@@ -216,7 +216,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
 
                       if (response != null) {
                         //ToastNotifier.showSuccessToast(
-                            context, "Story Successfully Shared!");
+                        // context, "Story Successfully Shared!");
                         setState(() {
                           isLoading = false;
                         });
@@ -234,7 +234,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                           isLoading = false;
                         });
                         //ToastNotifier.showErrorToast(
-                            context, "Something went wrong. Try again.");
+                        // context, "Something went wrong. Try again.");
                       }
                     }
                   },

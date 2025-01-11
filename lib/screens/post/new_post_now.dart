@@ -134,7 +134,7 @@ class _NewPostNowState extends State<NewPostNow> {
 
                         if (response != null) {
                           //ToastNotifier.showSuccessToast(
-                              context, "Post Successfully posted!");
+                          // context, "Post Successfully posted!");
                           setState(() {
                             isLoading = false;
                           });
@@ -154,7 +154,7 @@ class _NewPostNowState extends State<NewPostNow> {
                             isLoading = false;
                           });
                           //ToastNotifier.showErrorToast(
-                              context, "Network Problem. Try again.");
+                          // context, "Network Problem. Try again.");
                         }
                         // Clear fields after submission
 

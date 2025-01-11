@@ -360,7 +360,7 @@ class CommentProvider extends ChangeNotifier {
       } else {
         // Show error message if deletion failed
         //ToastNotifier.showErrorToast(
-            context, "Sorry comment is not deleted. Please Try Again!");
+        // context, "Sorry comment is not deleted. Please Try Again!");
 
         notifyListeners();
       }
@@ -652,7 +652,7 @@ class ReplyProvider extends ChangeNotifier {
       final response = await request.send();
       if (response.statusCode == 201) {
         //ToastNotifier.showSuccessToast(
-            context, "Comment reply added successfully");
+        // context, "Comment reply added successfully");
         //debugger();
         final commentProvider =
             Provider.of<CommentProvider>(context, listen: false);
@@ -695,7 +695,7 @@ class ReplyProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         // Show success message
         //ToastNotifier.showSuccessToast(
-            context, "comment reply deleted successfully");
+        // context, "comment reply deleted successfully");
         fetchReplies(commentId);
         Comment comment =
             comments.firstWhere((comment) => comment.id == commentId);
@@ -707,7 +707,7 @@ class ReplyProvider extends ChangeNotifier {
       } else {
         // Show error message if deletion failed
         //ToastNotifier.showErrorToast(
-            context, "Sorry comment reply is not deleted. Please Try Again!");
+        // context, "Sorry comment reply is not deleted. Please Try Again!");
 
         notifyListeners();
       }

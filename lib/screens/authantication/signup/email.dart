@@ -61,11 +61,11 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
                 buttonText: "Continue",
                 onPressed: () {
                   if (emailController.text.isEmpty) {
-                    ToastNotifier.showErrorToast(
-                        context, "Email Field Required");
+                    // ToastNotifier.showErrorToast(
+                    //     context, "Email Field Required");
                   } else if (!emailController.text.contains('@')) {
-                    ToastNotifier.showErrorToast(
-                        context, "Enter Your Correct Email");
+                    // ToastNotifier.showErrorToast(
+                    //     context, "Enter Your Correct Email");
                   } else {
                     Navigator.push(
                       context,

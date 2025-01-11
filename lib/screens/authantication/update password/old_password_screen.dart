@@ -56,7 +56,7 @@ class _OldPasswordScreenState extends State<OldPasswordScreen> {
           isLoading = false;
         });
         //ToastNotifier.showErrorToast(
-            context, "Your Current Password is incorrect");
+        // context, "Your Current Password is incorrect");
       }
     } catch (e) {
       setState(() {

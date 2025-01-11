@@ -193,7 +193,7 @@ class FollowerRequestProvider extends ChangeNotifier {
         setisLoading(false);
         setisFollowLoading(false);
         //ToastNotifier.showErrorToast(
-            context, "There is an Error : ${response.statusCode}");
+        // context, "There is an Error : ${response.statusCode}");
         //print("This is Error body: ${response.body}");
       }
     } catch (e) {

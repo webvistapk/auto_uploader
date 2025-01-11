@@ -79,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
         // Use the provider to check email verification
       } else {
         //ToastNotifier.showErrorToast(
-            context, "Please verify your Email First!");
+        // context, "Please verify your Email First!");
         // Handle case where user email is not found (if needed)
         Navigator.pushReplacement(
           context,

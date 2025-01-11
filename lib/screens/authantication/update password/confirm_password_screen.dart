@@ -59,7 +59,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
       // debugger();
       if (response.statusCode == 200) {
         //ToastNotifier.showSuccessToast(
-            context, "Password Changed Successfully");
+        // context, "Password Changed Successfully");
         SharedPreferences removeUser = await SharedPreferences.getInstance();
         await Prefrences.removeAuthToken();
         await Prefrences.removeLoginInfo();
@@ -109,7 +109,7 @@ class _ConfirmPasswordScreenState extends State<ConfirmPasswordScreen> {
                   } else {
                     // Show error message if passwords do not match
                     //ToastNotifier.showErrorToast(
-                        context, "Password does not match");
+                    // context, "Password does not match");
                   }
                 },
                 controller: confirmPasswordController,

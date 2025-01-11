@@ -28,15 +28,14 @@ class _SearchWidgetState extends State<SearchWidget>
   bool isLoading = false;
 
   Map<String, List<UserProfile>> data = {
-  'Content': [],
-  'People': [],
-  'Business': [],
-  'Jobs': [],
-  'Events': [],
-  'Clubs': [],
-  'Recents': [],
-  
-};
+    'Content': [],
+    'People': [],
+    'Business': [],
+    'Jobs': [],
+    'Events': [],
+    'Clubs': [],
+    'Recents': [],
+  };
 
   String? token;
   getAuthToken() async {
@@ -159,9 +158,9 @@ class _SearchWidgetState extends State<SearchWidget>
 
   @override
   Widget build(BuildContext context) {
-   // debugger();
+    // debugger();
     final results = _searchUsers(selectedCategory);
-    
+
     //final recommended=_searchUsers("")
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,19 +175,15 @@ class _SearchWidgetState extends State<SearchWidget>
           padding: EdgeInsets.symmetric(horizontal: 20),
           isScrollable: true,
           labelStyle: GoogleFonts.publicSans(
-            textStyle: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff18181)
-            )
-          ),
+              textStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xff18181))),
           unselectedLabelStyle: GoogleFonts.publicSans(
-            textStyle: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Color(0xff848484)
-            )
-          ), 
+              textStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xff848484))),
           tabs: const [
             Tab(child: Text('Content')),
             Tab(child: Text('People')),
@@ -227,52 +222,52 @@ class _SearchWidgetState extends State<SearchWidget>
         Expanded(
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  itemCount: results.length,
-                  itemBuilder: (context, index) {
-                    final user = results[index];
-                    return ListTile(
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                       child: Image.network(
-                            user.profileUrl==''?user.profileUrl.toString():AppUtils.userImage,
-                            width: 38,
-                          height: 38,
+              : results.isEmpty
+                  ? Center(
+                      child: Text("No Result Found!"),
+                    )
+                  : ListView.builder(
+                      itemCount: results.length,
+                      itemBuilder: (context, index) {
+                        final user = results[index];
+                        return ListTile(
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              user.profileUrl == ''
+                                  ? user.profileUrl.toString()
+                                  : AppUtils.userImage,
+                              width: 38,
+                              height: 38,
                             ),
-                            
-                      ),
-                      title: Text(
-                        user.username!,
-                        style: GoogleFonts.publicSans(
-                          textStyle: TextStyle(
-                            color: Color(0xff34342F),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16
-                          )
-                        ),
-                      ),
-                      subtitle: Text('${user.firstName} ${user.lastName}',
-                      style: GoogleFonts.publicSans(
-                          textStyle: TextStyle(
-                            color: Color(0xff34342F),
-                            fontWeight: FontWeight.normal,
-                            fontSize: 14
-                          ))),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.close ,size:10,color: Color(0xffB5B5B5)),
-                        onPressed: () {
-                          _removeUser(index);
-                        },
-                      ),
-                      onTap: () => _navigateToProfile(
-                          context, user.id), // Navigate to profile on tap
-                    );
-                  },
-                ),
+                          ),
+                          title: Text(
+                            user.username!,
+                            style: GoogleFonts.publicSans(
+                                textStyle: TextStyle(
+                                    color: Color(0xff34342F),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16)),
+                          ),
+                          subtitle: Text('${user.firstName} ${user.lastName}',
+                              style: GoogleFonts.publicSans(
+                                  textStyle: TextStyle(
+                                      color: Color(0xff34342F),
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 14))),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.close,
+                                size: 10, color: Color(0xffB5B5B5)),
+                            onPressed: () {
+                              _removeUser(index);
+                            },
+                          ),
+                          onTap: () => _navigateToProfile(
+                              context, user.id), // Navigate to profile on tap
+                        );
+                      },
+                    ),
         ),
-      
-      
-      
       ],
     );
   }

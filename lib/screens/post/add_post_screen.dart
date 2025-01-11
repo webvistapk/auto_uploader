@@ -330,7 +330,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           isLoading = false;
                         });
                         //ToastNotifier.showErrorToast(
-                            // context, "Post  is required!");
+                        // context, "Post  is required!");
                       } else {
                         setState(() {
                           isLoading = false;
@@ -356,7 +356,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           isLoading = false;
                         });
                         //ToastNotifier.showErrorToast(
-                            context, "Post Title / Descritption is required!");
+                        // context, "Post Title / Descritption is required!");
                       } else {
                         setState(() {
                           isLoading = false;
@@ -382,7 +382,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           isLoading = false;
                         });
                         //ToastNotifier.showErrorToast(
-                            context, "Post  is required!");
+                        // context, "Post  is required!");
                       } else {
                         setState(() {
                           isLoading = false;
@@ -408,7 +408,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           isLoading = false;
                         });
                         //ToastNotifier.showErrorToast(
-                            context, "Post Title / Descritption is required!");
+                        // context, "Post Title / Descritption is required!");
                       } else {
                         final response = await pro.createNewPost(context,
                             postField: titleController.text.trim(),
@@ -420,7 +420,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
                         if (response != null) {
                           //ToastNotifier.showSuccessToast(
-                              context, "Post Successfully posted!");
+                          // context, "Post Successfully posted!");
                           setState(() {
                             isLoading = false;
                           });
@@ -438,7 +438,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             isLoading = false;
                           });
                           //ToastNotifier.showErrorToast(
-                              context, "Network Problem. Try again.");
+                          // context, "Network Problem. Try again.");
                         }
                       }
                     } else {
@@ -451,7 +451,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
                       if (response != null) {
                         //ToastNotifier.showSuccessToast(
-                            context, "Reel Successfully posted!");
+                        // context, "Reel Successfully posted!");
                         setState(() {
                           isLoading = false;
                         });
@@ -469,7 +469,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           isLoading = false;
                         });
                         //ToastNotifier.showErrorToast(
-                            context, "Something went wrong. Try again.");
+                        // context, "Something went wrong. Try again.");
                       }
                     }
                   },
