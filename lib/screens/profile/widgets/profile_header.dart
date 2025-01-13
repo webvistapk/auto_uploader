@@ -150,15 +150,12 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       children: [
                         InkWell(
                           onTap: () async {
-                             final int? currentUserId = await _getUserIdFromToken();
                             Navigator.push(
                                 context,
                                 CupertinoDialogRoute(
                                     builder: (_) => FollowingScreen(
                                         token: widget.token??'',
-                                        userProfile: widget.user,
-                                        id: currentUserId,
-                                        ),
+                                        userProfile: widget.user),
                                     context: context));
                           },
                           child: Container(
