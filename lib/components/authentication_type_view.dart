@@ -1,7 +1,4 @@
-
-
 import 'package:flutter/material.dart';
-import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/components/authentication_type_item.dart';
 
 class AuthenticationTypeView extends StatelessWidget {
@@ -16,9 +13,9 @@ class AuthenticationTypeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   var size = MediaQuery.of(context).size;
+    var size = MediaQuery.of(context).size;
     return Container(
-     width: size.width*0.8,
+      width: size.width * 0.8,
       decoration: BoxDecoration(
         color: Color(0xffdcdedc),
         borderRadius: BorderRadius.circular(50),

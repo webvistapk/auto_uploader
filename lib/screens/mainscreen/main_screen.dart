@@ -7,6 +7,7 @@ import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/models/ReelPostModel.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/authantication/community/discover_community.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/messaging/chat_screen.dart';
 import 'package:mobile/screens/notification/notificationScreen.dart';
@@ -28,12 +29,13 @@ class MainScreen extends StatefulWidget {
   final UserProfile userProfile;
   final String authToken;
   int selectedIndex;
-  MainScreen(
-      {super.key,
-      this.email,
-      required this.userProfile,
-      required this.authToken,
-      this.selectedIndex = 0});
+  MainScreen({
+    super.key,
+    this.email,
+    required this.userProfile,
+    required this.authToken,
+    this.selectedIndex = 0,
+  });
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -55,10 +57,31 @@ class _MainScreenState extends State<MainScreen> {
   ];
   int? userID;
   UserProfile? userProfile;
+  int selectedItem = 0;
   @override
   void initState() {
     super.initState();
-    _checkEmailVerification(); // Trigger the email verification check
+    initFunctions();
+    selectedItem = widget.selectedIndex;
+    // Trigger the email verification check
+  }
+
+  initFunctions() async {
+    bool? isCommunity = await Prefrences.getDiscoverCommunity() ?? null;
+    if (isCommunity != null && isCommunity) {
+      _checkEmailVerification();
+    } else {
+      Navigator.pushAndRemoveUntil(
+          context,
+          CupertinoDialogRoute(
+              builder: (_) => DiscoverCommunityScreen(
+                    userProfile: widget.userProfile,
+                    authToken: widget.authToken,
+                    email: widget.email,
+                  ),
+              context: context),
+          (route) => false);
+    }
   }
 
   Future<void> _checkEmailVerification() async {
@@ -111,36 +134,38 @@ class _MainScreenState extends State<MainScreen> {
                 body: Center(child: CircularProgressIndicator()),
               )
             : Scaffold(
-                body: widget.selectedIndex == 0
+                body: selectedItem == 0
                     ? HomeScreen(
                         userProfile: widget.userProfile,
                         token: widget.authToken,
                       )
-                    : widget.selectedIndex == 1
-                        ? SearchScreen()
-                        : widget.selectedIndex == 2
+                    : selectedItem == 1
+                        ? SearchScreen(
+                            authToken: widget.authToken,
+                          )
+                        : selectedItem == 2
                             ? CreatePostScreen(
                                 token: widget.authToken,
                                 userProfile: widget.userProfile,
                               )
-                            : widget.selectedIndex == 3
+                            : selectedItem == 3
                                 ? ChatScreen(
                                     userProfile: widget.userProfile!,
                                   )
-                                : widget.selectedIndex == 4
+                                : selectedItem == 4
                                     ? ProfileScreen(
                                         id: widget.userProfile.id,
                                         userProfile: widget.userProfile,
                                         authToken: widget.authToken,
                                       )
-                                    : _pages[widget.selectedIndex],
+                                    : _pages[selectedItem],
                 bottomNavigationBar: SafeArea(
                   child: SalomonBottomBar(
                     backgroundColor: AppColors.deepdarkgreyColor,
                     unselectedItemColor: AppColors.white,
                     selectedItemColor: AppColors.white,
                     selectedColorOpacity: 0,
-                    currentIndex: widget.selectedIndex,
+                    currentIndex: selectedItem,
                     itemPadding:
                         EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     onTap: (index) {
@@ -150,7 +175,7 @@ class _MainScreenState extends State<MainScreen> {
                       // else{
 
                       setState(() {
-                        widget.selectedIndex = index;
+                        selectedItem = index;
                       });
                       // }
                     },
@@ -158,31 +183,31 @@ class _MainScreenState extends State<MainScreen> {
                       /// Home
                       _buildBottomBarItem(
                         icon: AppIcons.home,
-                        isSelected: widget.selectedIndex == 0,
+                        isSelected: selectedItem == 0,
                       ),
 
                       /// Search
                       _buildBottomBarItem(
                         icon: AppIcons.search,
-                        isSelected: widget.selectedIndex == 1,
+                        isSelected: selectedItem == 1,
                       ),
 
                       /// Add
                       _buildBottomBarItem(
                         icon: AppIcons.add_item,
-                        isSelected: widget.selectedIndex == 2,
+                        isSelected: selectedItem == 2,
                       ),
 
                       /// Messages
                       _buildBottomBarItem(
                         icon: AppIcons.message,
-                        isSelected: widget.selectedIndex == 3,
+                        isSelected: selectedItem == 3,
                       ),
 
                       /// Profile
                       _buildBottomBarItem(
                         icon: AppIcons.profile,
-                        isSelected: widget.selectedIndex == 4,
+                        isSelected: selectedItem == 4,
                       ),
                     ],
                   ),

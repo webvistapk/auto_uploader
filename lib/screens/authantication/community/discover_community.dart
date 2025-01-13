@@ -2,18 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/custom_continue_button.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/authantication/sign_up_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 
-class DiscoverCommunityScreen extends StatelessWidget {
-  const DiscoverCommunityScreen({Key? key}) : super(key: key);
+class DiscoverCommunityScreen extends StatefulWidget {
+  final email;
+  final UserProfile userProfile;
+  final String authToken;
+  const DiscoverCommunityScreen(
+      {Key? key,
+      this.email,
+      required this.userProfile,
+      required this.authToken})
+      : super(key: key);
 
+  @override
+  State<DiscoverCommunityScreen> createState() =>
+      _DiscoverCommunityScreenState();
+}
+
+class _DiscoverCommunityScreenState extends State<DiscoverCommunityScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: AppColors.black,
+        backgroundColor: AppColors.white,
         // appBar: AppBar(
         //   backgroundColor: AppColors.black,
         //   elevation: 0,
@@ -36,7 +50,7 @@ class DiscoverCommunityScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: AppTextStyles.poppinsBold(
                     fontSize: 24,
-                    color: AppColors.white,
+                    color: AppColors.black,
                     fontWeight: FontWeight.normal),
               ),
               const SizedBox(height: 30),
@@ -45,7 +59,7 @@ class DiscoverCommunityScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: AppTextStyles.poppinsMedium(
                   fontSize: 16,
-                  color: Colors.white70,
+                  color: Colors.black87,
                 ).copyWith(
                   height: 1.5,
                 ),
@@ -57,9 +71,16 @@ class DiscoverCommunityScreen extends StatelessWidget {
                   await Prefrences.setDiscoverCommunity(true);
 
                   Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => SignupScreen()),
-                      (route) => false);
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MainScreen(
+                        email: widget.email ?? "",
+                        userProfile: widget.userProfile!,
+                        authToken: widget.authToken.toString(),
+                      ),
+                    ),
+                    (route) => false,
+                  );
                 },
                 isPressed: true,
               ),

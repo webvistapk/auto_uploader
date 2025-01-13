@@ -8,7 +8,7 @@ class AppColors {
   static const blue = Color.fromARGB(255, 0x3e, 0x40, 0x95);
   static const lightGrey = Color(0xFF757575);
   static const darkGrey = Color(0xFF464747);
-  static const black = Color(0xFF33332F);
+  static const black = Colors.black;
   static Color themeYellow = const Color(0xFFEFC13F);
   static Color lightRed = const Color(0xffFFD4D4);
   static Color unReadColor = const Color(0xffFFE1C8);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_icons.dart';
@@ -79,95 +81,91 @@ class CustomSearchDelegate extends SearchDelegate {
   }
 }
 
-
-
 class SearchScreen extends StatefulWidget {
+  final String authToken;
+
+  SearchScreen({Key? key, required this.authToken}) : super(key: key);
+
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  String query = '';
-  List<String> searchTerms = [
-    "Apple",
-    "Banana",
-    "Mango",
-    "Pear",
-    "Watermelons",
-    "Blueberries",
-    "Pineapples",
-    "Strawberries"
-  ];
+  final FocusNode _searchFocusNode = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+  Timer? _debounce;
 
-  List<String> get filteredResults {
-    return searchTerms
-        .where((term) => term.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+  @override
+  void initState() {
+    super.initState();
+    _searchFocusNode
+        .requestFocus(); // Automatically focus on search field when the screen opens
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _query = value;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
-       titleSpacing: 0,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 0,
         title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10,),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
-            onTap: (){},
-            child: Icon(Icons.arrow_back_ios,size: 15,),
-          ),
+                // onTap: () => Navigator.pop(context),
+                child: Icon(Icons.arrow_back_ios, size: 18, color: Colors.grey),
+              ),
               Expanded(
                 child: Container(
-                  margin: EdgeInsets.only(right: 20),
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  margin: EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
-                color: Color.fromRGBO(234, 232, 232, 1), 
-                borderRadius: BorderRadius.circular(8.0),
-                      ),
-                  child: TextFormField(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextField(
+                    focusNode: _searchFocusNode,
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
                     decoration: InputDecoration(
-                      icon: Image.asset(AppIcons.search,width: 20,color: Color(0xffB0B0B0),),
+                      prefixIcon: Icon(Icons.search, color: Colors.grey),
                       hintText: 'Search...',
-                      hintStyle: GoogleFonts.publicSans(
-                        textStyle: TextStyle(
-                          fontSize: 10
-                        )
-                      ),
                       border: InputBorder.none,
-                      
+                      hintStyle: GoogleFonts.publicSans(fontSize: 14),
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        query = value;
-                      });
-                      
-                    },
                   ),
                 ),
               ),
-
-               GestureDetector(
-          onTap: (){},
-          child: Image.asset(AppIcons.filter,width: 20,),
-        ),
+              GestureDetector(
+                onTap: () {
+                  // Handle filter or additional actions if required
+                },
+                child: Icon(Icons.filter_list, color: Colors.grey),
+              ),
             ],
           ),
         ),
-        
-      
       ),
-      body:  SearchWidget(query: query.toLowerCase(),
-      authToken: Prefrences.getAuthToken().toString(),)
+      body: SearchWidget(query: _query, authToken: widget.authToken),
     );
   }
 }
-
-
-
-
-

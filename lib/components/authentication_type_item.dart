@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
 
@@ -16,12 +15,11 @@ class AuthenticationTypeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
+    // var size = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        
         padding:
             const EdgeInsets.only(top: 15, bottom: 15, left: 20, right: 20),
         decoration: BoxDecoration(
@@ -41,12 +39,12 @@ class AuthenticationTypeItem extends StatelessWidget {
           child: Text(
             text,
             style: AppTextStyles.poppinsMedium().copyWith(
-                  color: isActive ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: isActive ? Colors.white : Colors.black,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
-    ); 
+    );
   }
 }
