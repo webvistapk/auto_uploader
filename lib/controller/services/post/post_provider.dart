@@ -67,8 +67,7 @@ class PostProvider extends ChangeNotifier {
         List<PostModel> followerPosts = (data['posts'] as List)
             .map((postJson) => PostModel.fromJson(postJson))
             .toList();
-        print("Response of Follower Posts: ${response.body}");
-
+        
         // Update the list of posts and notify listeners
         setPost(followerPosts);
 
@@ -78,8 +77,8 @@ class PostProvider extends ChangeNotifier {
       }
     } catch (e) {
       setIsLoading(false);
-      //ToastNotifier.showErrorToast(context, "Error: $e");
-      print("Error fetching follower posts: $e");
+      ToastNotifier.showErrorToast(context, "Error: $e");
+     // print("Error fetching follower posts: $e");
       return []; // Return an empty list on error
     } finally {
       setIsLoading(
@@ -132,7 +131,7 @@ class PostProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      print(e.toString());
+      //print(e.toString());
       return null;
     }
   }
@@ -170,7 +169,7 @@ class PostProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      print(e.toString());
+     // print(e.toString());
       return null;
     }
   }
@@ -204,14 +203,14 @@ class PostProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      print(e.toString());
+    //  print(e.toString());
       return null;
     }
   }
 
   Future<List<PostModel>> getPost(
       BuildContext context, String id, limit, offset) async {
-    print("Fetching API");
+    //print("Fetching API");
 
     final String? token = await Prefrences.getAuthToken();
     int? _loggedInUserId = JwtDecoder.decode(token.toString())['user_id'];
@@ -225,7 +224,7 @@ class PostProvider extends ChangeNotifier {
       'offset': offset.toString() // Offset for pagination
     });
 
-    print("Fetching API with URI: $uri");
+   //print("Fetching API with URI: $uri");
 
     try {
       final response = await http.get(uri, headers: {
@@ -233,13 +232,13 @@ class PostProvider extends ChangeNotifier {
         "Authorization": "Bearer $token"
       });
 
-      print("Response Data of UserPost ${response.body}");
+      //print("Response Data of UserPost ${response.body}");
 
       if (response.statusCode == 200) {
         final jsonList = jsonDecode(response.body);
 
-        print(jsonList);
-        log("Post Data: ${jsonList['posts']}");
+       // print(jsonList);
+      //  log("Post Data: ${jsonList['posts']}");
 
         List<PostModel> postList = [];
         for (var postJson in jsonList['posts']) {
@@ -253,8 +252,8 @@ class PostProvider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
-      //ToastNotifier.showErrorToast(context, "There is an Error: $e");
-      print(e);
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      //print(e);
       return [];
     } finally {
       setIsLoading(false);
@@ -278,11 +277,11 @@ class PostProvider extends ChangeNotifier {
         "Authorization": "Bearer $token"
       });
 
-      print(response.body);
+     // print(response.body);
 
       if (response.statusCode == 200) {
         final jsonList = jsonDecode(response.body);
-        print("REEL GETTED SUCCESSFULLY");
+       // print("REEL GETTED SUCCESSFULLY");
         // print(jsonList);
         //log("Reel Data: ${jsonList['reels']}"); // Log the correct data
 
@@ -298,7 +297,7 @@ class PostProvider extends ChangeNotifier {
             _reels!.addAll(reelList); // Append new data for pagination
           }
         }
-        print("PROVIDER REEL :${reelList}");
+        //print("PROVIDER REEL :${reelList}");
 
         notifyListeners();
         return reelList;
@@ -306,8 +305,8 @@ class PostProvider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
-      //ToastNotifier.showErrorToast(context, "There is an Error: $e");
-      print(e);
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      //print(e);
       return []; // Return an empty list on exception
     } finally {
       setIsLoading(false);
@@ -333,12 +332,12 @@ class PostProvider extends ChangeNotifier {
         "Authorization": "Bearer $token"
       });
 
-      print(response.body);
+      //print(response.body);
 
       if (response.statusCode == 200) {
         final jsonList = jsonDecode(response.body);
-        print("REEL FETCHED SUCCESSFULLY");
-
+       // print("REEL FETCHED SUCCESSFULLY");
+        
         // Convert JSON to ReelPostModel list
         List<ReelPostModel> reelList = [];
         for (var reelJson in jsonList['reels']) {
@@ -359,8 +358,8 @@ class PostProvider extends ChangeNotifier {
         return [];
       }
     } catch (e) {
-      //ToastNotifier.showErrorToast(context, "There is an Error: $e");
-      print(e);
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
+     // print(e);
       return []; // Return an empty list on exception
     } finally {
       setIsLoading(false);
@@ -386,18 +385,18 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         // Show success message
-        //ToastNotifier.showSuccessToast(context, "Post deleted successfully");
+        ToastNotifier.showSuccessToast(context, "Post deleted successfully");
         //getPost(context);
         setIsLoading(false);
       } else {
         // Show error message if deletion failed
-        //ToastNotifier.showErrorToast(
-        // context, "Sorry post is not deleted. Please Try Again!");
+        ToastNotifier.showErrorToast(
+            context, "Sorry post is not deleted. Please Try Again!");
 
         setIsLoading(false);
       }
     } catch (e) {
-      //ToastNotifier.showErrorToast(context, "There is an Error: $e");
+      ToastNotifier.showErrorToast(context, "There is an Error: $e");
 
       setIsLoading(false);
     }
@@ -423,7 +422,7 @@ class PostProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print("RESPONSE OF POST: ${response.body}");
+       // print("RESPONSE OF POST: ${response.body}");
         // Assign the post directly to the _post variable
         _post = PostModel.fromJson(data['posts']);
         // Optionally add to the list of posts
@@ -441,7 +440,7 @@ class PostProvider extends ChangeNotifier {
 
   Future<void> newLikes(int postId, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
-    print("POst ID is : ${postId}");
+   // print("POst ID is : ${postId}");
 
     // API endpoint to like a post
     String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}post/${postId}/";
@@ -467,22 +466,20 @@ class PostProvider extends ChangeNotifier {
           _posts?[postIndex].isLiked =
               true; // Assuming you want to mark it as liked
           notifyListeners();
-        } else {
-          print("Post index is wrong");
         }
 
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
-      }
+      } 
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error: $e");
-      print(e);
+     // print(e);
     }
   }
 
   Future<void> userDisLikes(int postId, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
-    print("POst ID is : ${postId}");
+   // print("POst ID is : ${postId}");
 
     // API endpoint to like a post
     String URL =
@@ -498,7 +495,7 @@ class PostProvider extends ChangeNotifier {
           "Authorization": "Bearer $token",
         },
       );
-      print("API HITtED");
+     // print("API HITtED");
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         // final int newLikesCount = data['likes_count']; // Extract new like count
@@ -507,19 +504,19 @@ class PostProvider extends ChangeNotifier {
 
         final postIndex = _posts!.indexWhere((post) => post.id == postId);
         if (postIndex != -1) {
-          print("Post Index ${postIndex}");
-          final currentPost = _posts?[postIndex];
-          currentPost!.likesCount =
-              (currentPost!.likesCount < 0) ? currentPost!.likesCount - 1 : 0;
-          currentPost!.isLiked = false; // Assuming you want to mark it as liked
+        //  print("Post Index ${postIndex}");
+          final currentPost=_posts?[postIndex];
+          currentPost!.likesCount =(currentPost!.likesCount <0)? currentPost!.likesCount -1:0;
+          currentPost!.isLiked =
+              false; // Assuming you want to mark it as liked
           //ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
-        }
+        } 
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
-      }
+      } 
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error: $e");
-      print(e);
+     // print(e);
     }
   }
 
@@ -538,7 +535,7 @@ class PostProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
       );
-      print("API HITTED");
+     // print("API HITTED");
       if (response.statusCode == 200) {
         // _reels?[reelIndex].isLiked = true;
         _reels?[reelIndex].likesCount += 1;
@@ -546,10 +543,10 @@ class PostProvider extends ChangeNotifier {
 
         // Notify listeners to update UI
         notifyListeners();
-      }
+      } 
     } catch (e) {
-      // ToastNotifier.showErrorToast(context, "Error liking the post: $e");
-      print(e);
+     // ToastNotifier.showErrorToast(context, "Error liking the post: $e");
+    //  print(e);
     }
   }
 
@@ -569,20 +566,19 @@ class PostProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
       );
-      print("API HITTED");
+    //  print("API HITTED");
       if (response.statusCode == 200) {
         // _reels?[reelIndex].isLiked = true;
-        final currentReel = _reels?[reelIndex];
-        currentReel!.likesCount =
-            (currentReel!.likesCount < 0) ? currentReel!.likesCount - 1 : 0;
-        currentReel.isLiked = false;
+        final currentReel=_reels?[reelIndex];
+        currentReel!.likesCount = (currentReel!.likesCount<0)?currentReel!.likesCount- 1:0;
+        currentReel.isLiked = false; 
 
         // Notify listeners to update UI
         notifyListeners();
-      }
+      } 
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error disliking the post: $e");
-      print(e);
+    //  print(e);
     }
   }
 

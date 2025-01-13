@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
@@ -48,6 +49,7 @@ class _SearchWidgetState extends State<SearchWidget>
   @override
   void initState() {
     super.initState();
+    
     _tabController = TabController(length: 6, vsync: this);
     _tabController.addListener(() {
       setState(() {
@@ -110,12 +112,13 @@ class _SearchWidgetState extends State<SearchWidget>
     });
   }
 
-  void _navigateToProfile(BuildContext context, int userId) {
+  void _navigateToProfile(BuildContext context, int userId)async {
     SearchStore.searchQuery.value = null;
+   
     Navigator.push(
         context,
         CupertinoDialogRoute(
-            builder: (_) => ProfileScreen(id: userId), context: context));
+            builder: (_) => ProfileScreen(id: userId), context: context,));
     // Navigator.of(context).pushAndRemoveUntil(
     //   MaterialPageRoute(
     //     builder: (context) => ProfileScreen(

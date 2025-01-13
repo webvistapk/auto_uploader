@@ -153,6 +153,7 @@ class _PostWidgetState extends State<PostWidget> {
                       SizedBox(
                         width: 5,
                       ),
+                      if(false)
                       Text(
                         "${widget.username} Reposted this Photo",
                         style: GoogleFonts.inter(
@@ -211,6 +212,7 @@ class _PostWidgetState extends State<PostWidget> {
                           ),
                           Row(
                             children: [
+                              if(false)
                               Text(
                                 "Senior Journalist at Fox News",
                                 style: GoogleFonts.inter(
@@ -308,6 +310,7 @@ class _PostWidgetState extends State<PostWidget> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if(false)
                     Text(
                       widget.location,
                       style: GoogleFonts.inter(
@@ -377,6 +380,7 @@ class _PostWidgetState extends State<PostWidget> {
                                   widget.scrollCommentId.toString(),
                                   scrollOffset: widget.scrollOffset,
                                   replyID: widget.scrollReplyID.toString(),
+                                  commentCount: int.parse(widget.comments),
                                 ),
                         child: _buildInteractionIcon(AppIcons.comment,
                             widget.comments //show comments count

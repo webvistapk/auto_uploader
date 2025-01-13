@@ -138,10 +138,10 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                             ? AppUtils.userImage
                             : ApiURLs.baseUrl + widget.user.profileUrl!,
                         "${widget.user.firstName.toString()} ${widget.user.lastName.toString()}",
-                        widget.user.position ?? "JobType",
-                        widget.user.address ?? 'Address',
-                        widget.user.city ?? "city",
-                        widget.user.country ?? 'country'),
+                        widget.user.position ?? "",
+                        widget.user.address ?? '',
+                        widget.user.city ?? "",
+                        widget.user.country ?? ''),
                     SizedBox(
                       height: 15,
                     ),
@@ -150,12 +150,15 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       children: [
                         InkWell(
                           onTap: () async {
+                             final int? currentUserId = await _getUserIdFromToken();
                             Navigator.push(
                                 context,
                                 CupertinoDialogRoute(
                                     builder: (_) => FollowingScreen(
-                                        token: widget.token,
-                                        userProfile: widget.user),
+                                        token: widget.token??'',
+                                        userProfile: widget.user,
+                                        id: currentUserId,
+                                        ),
                                     context: context));
                           },
                           child: Container(
@@ -186,7 +189,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                                 CupertinoDialogRoute(
                                     builder: (_) => FollowersScreen(
                                         token: widget.token,
-                                        userProfile: widget.user),
+                                        userProfile: widget?.user),
                                     context: context));
                           },
                           child: Container(
@@ -194,7 +197,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                  '${widget.user.followers_count}',
+                                  '${widget.user?.followers_count}',
                                   style: const TextStyle(
                                       fontSize: 10,
                                       color: AppColors.profileFollowColor),
@@ -214,7 +217,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              '3.8m',
+                              "0",
                               style: TextStyle(
                                   fontSize: 10,
                                   color: AppColors.profileFollowColor),
@@ -311,11 +314,11 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                                         padding: EdgeInsets.symmetric(
                                             vertical:
                                                 provider.status == 'accepted'
-                                                    ? 6
-                                                    : 6,
+                                                    ? 10
+                                                    : 10,
                                             horizontal:
                                                 provider.status == 'accepted'
-                                                    ? 6
+                                                    ? 10
                                                     : 25),
                                         decoration: BoxDecoration(
                                           color: provider.status == 'pending'
@@ -377,7 +380,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       child: Column(
                         children: [
                           Text(
-                            widget.user.website ?? 'www.website.com',
+                            widget.user.website ?? '',
                             style: TextStyle(
                                 color: Colors.blueAccent,
                                 fontWeight: FontWeight.w100,
@@ -386,7 +389,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           const SizedBox(height: 10),
                           Text(
                             // widget.user.description ??
-                            "Lorem ipsum dolor sit amet,consectetuer adipiscing elit,sed diaexerci tation",
+                            widget.user.description??'',
                             style: TextStyle(
                                 color: AppColors.lightGrey, fontSize: 10),
                             textAlign: TextAlign.center,

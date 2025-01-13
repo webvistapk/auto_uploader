@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/controller/endpoints.dart';
@@ -12,13 +14,15 @@ import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 
 class FollowingScreen extends StatefulWidget {
-  final String token;
+  final String? token;
   final UserProfile? userProfile;
+  final int? id;
 
   const FollowingScreen({
     Key? key,
-    required this.token,
-    required this.userProfile,
+     this.token,
+    this.userProfile,
+    required this.id
   }) : super(key: key);
 
   @override
@@ -33,6 +37,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
   @override
   void initState() {
     super.initState();
+    
     loadFollowings();
   }
 
@@ -52,12 +57,13 @@ class _FollowingScreenState extends State<FollowingScreen> {
       });
     } else {
       // If no data in shared preferences, fetch from API
-      await fetchFollowings(widget.token, widget.userProfile!.id);
+      await fetchFollowings(widget.token??'', widget.id??0);
     }
   }
 
   Future<void> fetchFollowings(String authtoken, int userID) async {
-    final String token = authtoken;
+    final token = await Prefrences.getAuthToken();
+   // final String token = authtoken;
     String url = "${ApiURLs.baseUrl}${ApiURLs.fetch_peoples_endpoint}$userID/";
 
     try {

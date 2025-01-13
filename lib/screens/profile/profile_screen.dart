@@ -28,7 +28,7 @@ class ProfileScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final authToken;
   const ProfileScreen(
-      {super.key, required this.id, this.userProfile, this.authToken});
+      {super.key, required this.id,  this.userProfile, this.authToken});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -47,6 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
+    
     // _getUserIdFromToken();
     _initializeData();
     /* _fetchPosts();*/
@@ -161,8 +162,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //debugger();
     return Builder(builder: (context) {
-      print(_loggedInUserId);
+      //print(_loggedInUserId);
       return SafeArea(
         child: Scaffold(
           appBar:
@@ -173,12 +175,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      if(false)
                       Text(
-                        '@userName',
+                        "@userName",
                         style: const TextStyle(
                             fontSize: 12, color: AppColors.greyColor),
                       ),
                       SizedBox(width: 2,),
+                      if(false)
                       Image.asset(AppIcons.drop_down,width: 8,),
                        SizedBox(width: 2,),
                     ],
@@ -197,12 +201,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      if(false)
                       Text(
                         '@userName',
                         style: const TextStyle(
                             fontSize: 12, color: AppColors.greyColor),
                       ),
                       SizedBox(width: 2,),
+                      if(false)
                       Image.asset(AppIcons.drop_down,width: 8,),
                        SizedBox(width: 2,),
                     ],
