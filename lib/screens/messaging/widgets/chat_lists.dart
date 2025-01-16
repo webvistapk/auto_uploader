@@ -142,6 +142,16 @@ class _ChatListState extends State<ChatList> {
     );
   }
 
+  String formatDateTime(String isoDate) {
+    // Parse the ISO date string to a DateTime object
+    DateTime dateTime = DateTime.parse(isoDate);
+
+    // Format the DateTime to the desired format
+    String formattedDate = DateFormat('yyyy-MM-dd hh:mm a').format(dateTime);
+
+    return formattedDate;
+  }
+
   String formatMessageDate(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

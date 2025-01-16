@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 import 'package:mobile/screens/messaging/create_message/new_message_screen.dart';
-import 'package:mobile/screens/messaging/message_request_screen.dart';
 import 'package:mobile/screens/messaging/widgets/chat_lists.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +23,8 @@ class _ChatScreenState extends State<ChatScreen> {
         _selectedTab = index;
       });
   }
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -55,6 +56,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
                             const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -67,11 +71,14 @@ class _ChatScreenState extends State<ChatScreen> {
                                 Icon(Icons.arrow_drop_down),
                               ],
                             ),
-                            GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Icon(Icons.arrow_back)),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            // GestureDetector(
+                            //     onTap: () {
+                            //       Navigator.pop(context);
+                            //     },
+                            //     child: const Icon(Icons.arrow_back)),
                             Padding(
                               padding: const EdgeInsets.only(
                                   left: 8, right: 30, top: 5, bottom: 5),
@@ -81,6 +88,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                     child: SizedBox(
                                       height: 36,
                                       child: TextField(
+                                        controller: _searchController,
+                                        // onChanged: (value) =>
+                                        //     pro.filterChats(value),
                                         decoration: InputDecoration(
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius:
@@ -127,47 +137,51 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ],
                               ),
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      _buildTabItem('All', 0),
-                                      _buildTabItem('Conversations', 1),
-                                      _buildTabItem('Clubs', 2),
-                                    ],
-                                  ),
-                                  Flexible(
-                                    child: InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    MessageRequestScreen(
-                                                      userProfile:
-                                                          widget.userProfile,
-                                                    )));
-                                      },
-                                      child: Container(
-                                        child: const Text(
-                                          'Requests',
-                                          style: TextStyle(
-                                            color: Colors.blue,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+
+                            // Padding(
+                            //   padding:
+                            //       const EdgeInsets.symmetric(horizontal: 16.0),
+                            //   child: Row(
+                            //     mainAxisAlignment:
+                            //         MainAxisAlignment.spaceBetween,
+                            //     children: [
+                            //       Row(
+                            //         mainAxisAlignment: MainAxisAlignment.center,
+                            //         children: [
+                            //           _buildTabItem('All', 0),
+                            //           _buildTabItem('', 1),
+                            //           _buildTabItem('', 2),
+
+                            //         ],
+                            //       ),
+                            //       Flexible(
+                            //         child: InkWell(
+                            //           onTap: () {
+                            //             Navigator.push(
+                            //                 context,
+                            //                 MaterialPageRoute(
+                            //                     builder: (context) =>
+                            //                         MessageRequestScreen(
+                            //                           userProfile:
+                            //                               widget.userProfile,
+                            //                         )));
+                            //           },
+                            //           child: Container(
+                            //             child: const Text(
+                            //               'Requests',
+                            //               style: TextStyle(
+                            //                 color: Colors.blue,
+                            //                 fontWeight: FontWeight.bold,
+                            //               ),
+                            //               overflow: TextOverflow.ellipsis,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+
+                            //     ],
+                            //   ),
+                            // ),
                             const SizedBox(
                               height: 10,
                             ),

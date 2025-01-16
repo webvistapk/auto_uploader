@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/widgets/input_message.dart';
 import 'package:provider/provider.dart';
@@ -14,8 +17,10 @@ class InboxScreen extends StatefulWidget {
   final ChatModel chatModel;
   final chatName;
   final participantImage;
+  bool isCreated;
   InboxScreen(
       {Key? key,
+      this.isCreated = false,
       required this.userProfile,
       required this.chatModel,
       this.chatName,
@@ -147,9 +152,24 @@ class _InboxScreenState extends State<InboxScreen> {
                         children: [
                           Row(
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  Navigator.pop(context);
+                              GestureDetector(
+                                onTap: () async {
+                                  if (widget.isCreated) {
+                                    final authToken =
+                                        await Prefrences.getAuthToken();
+                                    Navigator.push(
+                                        context,
+                                        CupertinoDialogRoute(
+                                            builder: (_) => MainScreen(
+                                                  userProfile:
+                                                      widget.userProfile,
+                                                  authToken: authToken,
+                                                  selectedIndex: 3,
+                                                ),
+                                            context: context));
+                                  } else {
+                                    Navigator.pop(context);
+                                  }
                                 },
                                 child: const Icon(Icons.arrow_back),
                               ),
@@ -175,14 +195,24 @@ class _InboxScreenState extends State<InboxScreen> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    widget.chatName ?? 'Unknown',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                  if (widget.chatName == null) ...[
+                                    Text(
+                                      widget.chatModel.participants[0].username,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
+                                  ] else
+                                    Text(
+                                      widget.chatName ?? 'Unknown',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                 ],
                               ),
                               const Spacer(),
@@ -225,9 +255,7 @@ class _InboxScreenState extends State<InboxScreen> {
                               child: CircularProgressIndicator.adaptive(),
                             )
                           : chatController.messages.isEmpty
-                              ? Center(
-                                  child: Text(
-                                      "Say Hello ${widget.chatModel.name}"))
+                              ? Center(child: Text("Say Hello"))
                               : ListView.builder(
                                   controller: _scrollController,
                                   padding: const EdgeInsets.all(16),

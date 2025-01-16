@@ -165,17 +165,6 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                     trailing: Icon(Icons.arrow_forward_ios_rounded,
                         color: Colors.grey, size: 17),
                   ),
-                  ListTile(
-                    onTap: () {},
-                    leading: Icon(Icons.bubble_chart_outlined, size: 25),
-                    title: Text(
-                      "Interactions",
-                      style:
-                          AppTextStyles.poppinsRegular().copyWith(fontSize: 14),
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios_rounded,
-                        color: Colors.grey.shade300, size: 17),
-                  ),
                   SizedBox(height: 20),
                 ],
               ),

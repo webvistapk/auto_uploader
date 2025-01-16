@@ -44,16 +44,21 @@ class ChatController extends ChangeNotifier {
 
       if (response != null) {
         final chat = response['chat'];
+        // debugger();
         ChatModel userNewChat = ChatModel.fromJson(chat);
         _isLoading = false;
         notifyListeners();
         UserProfile? userProfile = await UserPreferences().getCurrentUser();
         //ToastNotifier.showSuccessToast(context, "Successfully Created Chat");
+        log("Chat Model : $userNewChat");
         Navigator.push(
             context,
             CupertinoDialogRoute(
                 builder: (_) => InboxScreen(
-                    userProfile: userProfile!, chatModel: userNewChat),
+                    isCreated: true,
+                    chatName: name,
+                    userProfile: userProfile!,
+                    chatModel: userNewChat),
                 context: context));
       }
       _isLoading = false;

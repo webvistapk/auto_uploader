@@ -12,11 +12,13 @@ class ChatProvider with ChangeNotifier {
   final String baseUrl = "http://147.79.117.253:8001";
   String? accessToken;
   List<ChatModel> _chats = [];
+  List<ChatModel> _filteredChats = [];
   List<MessageModel> _messages = [];
   int? _currentChatId;
   bool _isLoading = false;
 
   List<ChatModel> get chats => _chats;
+  List<ChatModel> get filteredChats => _filteredChats;
   List<MessageModel> get messages => _messages;
   int? get currentChatId => _currentChatId;
   bool get isLoading => _isLoading;
@@ -59,7 +61,7 @@ class ChatProvider with ChangeNotifier {
             }
             return ChatModel.fromJson(chat);
           }).toList();
-
+          _filteredChats = [];
           notifyListeners();
         } else {
           _isLoading = false; // Set loading to true when the fetch starts
@@ -80,6 +82,22 @@ class ChatProvider with ChangeNotifier {
       _isLoading = false; // Set loading to false after the fetch is complete
       notifyListeners();
     }
+  }
+
+  void filterChats(String query) {
+    if (query.isEmpty) {
+      _filteredChats = [];
+    } else {
+      _filteredChats = _chats
+          .where((chat) => (chat.isGroup
+              ? (chat.name?.toLowerCase() ?? '').contains(query.toLowerCase())
+              : chat.participants.any((participant) =>
+                  '${participant.firstName} ${participant.lastName}'
+                      .toLowerCase()
+                      .contains(query.toLowerCase()))))
+          .toList();
+    }
+    notifyListeners();
   }
 
   ReadMessages(int chatId) async {

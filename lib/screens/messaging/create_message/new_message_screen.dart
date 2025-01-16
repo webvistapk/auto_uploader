@@ -146,7 +146,7 @@ class _NewMessageScreenState extends State<NewMessageScreen> {
 
                     // Suggested Header
                     const Text(
-                      'Suggested',
+                      'Friends',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),

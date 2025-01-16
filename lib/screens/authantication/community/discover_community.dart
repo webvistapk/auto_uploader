@@ -2,20 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/custom_continue_button.dart';
-import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/mainscreen/main_screen.dart';
+import 'package:mobile/screens/authantication/signup/birthday_screen.dart';
 
 class DiscoverCommunityScreen extends StatefulWidget {
-  final email;
-  final UserProfile userProfile;
-  final String authToken;
-  const DiscoverCommunityScreen(
-      {Key? key,
-      this.email,
-      required this.userProfile,
-      required this.authToken})
-      : super(key: key);
+  const DiscoverCommunityScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<DiscoverCommunityScreen> createState() =>
@@ -28,17 +21,17 @@ class _DiscoverCommunityScreenState extends State<DiscoverCommunityScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.white,
-        // appBar: AppBar(
-        //   backgroundColor: AppColors.black,
-        //   elevation: 0,
-        //   leading: IconButton(
-        //     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-        //     onPressed: () {
-        //       // Handle back navigation
-        //       Navigator.pop(context);
-        //     },
-        //   ),
-        // ),
+        appBar: AppBar(
+          backgroundColor: AppColors.black,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () {
+              // Handle back navigation
+              Navigator.pop(context);
+            },
+          ),
+        ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -70,16 +63,9 @@ class _DiscoverCommunityScreenState extends State<DiscoverCommunityScreen> {
                 onPressed: () async {
                   await Prefrences.setDiscoverCommunity(true);
 
-                  Navigator.pushAndRemoveUntil(
+                  Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => MainScreen(
-                        email: widget.email ?? "",
-                        userProfile: widget.userProfile!,
-                        authToken: widget.authToken.toString(),
-                      ),
-                    ),
-                    (route) => false,
+                    MaterialPageRoute(builder: (_) => BirthdayScreen()),
                   );
                 },
                 isPressed: true,

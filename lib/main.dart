@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
@@ -20,6 +21,10 @@ import 'controller/services/StatusProvider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent, // Transparent status bar
+    statusBarIconBrightness: Brightness.dark, // Dark icons for the status bar
+  ));
   runApp(MyApp());
 }
 
