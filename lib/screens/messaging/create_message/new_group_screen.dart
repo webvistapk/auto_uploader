@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_styles.dart';
-import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/models/post/tag_people.dart';
 import 'package:mobile/screens/messaging/create_message/widget/profile_tile_widget.dart';
 

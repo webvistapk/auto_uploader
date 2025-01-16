@@ -179,6 +179,9 @@ class MediaProvider with ChangeNotifier {
       //debugger();
       print("API HITTED");
       if (response.statusCode == 200) {
+        _statuses.removeWhere((element) => element.id == storyId);
+
+        debugger();
         // _reels?[reelIndex].isLiked = true;
         // //ToastNotifier.showErrorToast(context, "Story Deleted");
         // Notify listeners to update UI

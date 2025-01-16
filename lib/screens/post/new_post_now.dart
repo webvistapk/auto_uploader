@@ -55,162 +55,174 @@ class _NewPostNowState extends State<NewPostNow> {
       ),
       body: Builder(builder: (context) {
         var pro = context.watch<PostProvider>();
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Post Title',
-                    border: OutlineInputBorder(),
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Post Title',
+                      border: OutlineInputBorder(),
+                    ),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Post Title is required';
+                      }
+                      return null;
+                    },
                   ),
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Post Title is required';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Post Description',
-                    border: OutlineInputBorder(),
+                  SizedBox(height: 16.0),
+                  TextFormField(
+                    controller: _descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Post Description',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 5,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Post Description is required';
+                      }
+                      return null;
+                    },
                   ),
-                  maxLines: 5,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Post Description is required';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 24.0),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      // Logic to handle post submission
-                      setState(() {
-                        isLoading = true;
-                      });
-                      final title = _titleController.text.trim();
-                      final description = _descriptionController.text.trim();
+                  SizedBox(height: 24.0),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        // Logic to handle post submission
+                        setState(() {
+                          isLoading = true;
+                        });
+                        final title = _titleController.text.trim();
+                        final description = _descriptionController.text.trim();
 
-                      print("Post Title: $title");
-                      print("Post Description: $description");
-                      if (widget.isPoll) {
-                        Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => AddPollScreen(
-                                      postField: widget.postField,
-                                      selectedTagUsers: widget.peopleTags,
-                                      keywordList: widget.keywordsList,
-                                      privacyPolicy: widget.privacyPost,
-                                      mediaFiles: widget.mediaFiles,
-                                      userProfile: widget.userProfile,
-                                      interactions: widget.interactions,
-                                      postTitle: title,
-                                      postDescription: description,
-                                    ),
-                                context: context));
-                      } else {
-                        final response = await pro.createNewPost(context,
-                            postField: widget.postField,
-                            peopleTags: widget.peopleTags,
-                            keywordsList: widget.keywordsList,
-                            privacyPost: widget.privacyPost,
-                            mediaFiles: widget.mediaFiles,
-                            postTitle: title,
-                            postDescription: description,
-                            interactions: widget.interactions);
-
-                        if (response != null) {
-                          //ToastNotifier.showSuccessToast(
-                          // context, "Post Successfully posted!");
+                        print("Post Title: $title");
+                        print("Post Description: $description");
+                        if (widget.isPoll) {
                           setState(() {
                             isLoading = false;
                           });
-                          _titleController.clear();
-                          _descriptionController.clear();
-                          final token = await Prefrences.getAuthToken();
-                          Navigator.pushAndRemoveUntil(
+
+                          Navigator.push(
                               context,
                               CupertinoDialogRoute(
-                                  builder: (_) => MainScreen(
-                                      userProfile: widget.userProfile!,
-                                      authToken: token),
-                                  context: context),
-                              (route) => false);
+                                  builder: (_) => AddPollScreen(
+                                        postField: widget.postField,
+                                        selectedTagUsers: widget.peopleTags,
+                                        keywordList: widget.keywordsList,
+                                        privacyPolicy: widget.privacyPost,
+                                        mediaFiles: widget.mediaFiles,
+                                        userProfile: widget.userProfile,
+                                        interactions: widget.interactions,
+                                        postTitle: title,
+                                        postDescription: description,
+                                      ),
+                                  context: context));
                         } else {
-                          setState(() {
-                            isLoading = false;
-                          });
-                          //ToastNotifier.showErrorToast(
-                          // context, "Network Problem. Try again.");
+                          final response = await pro.createNewPost(context,
+                              postField: widget.postField,
+                              peopleTags: widget.peopleTags,
+                              keywordsList: widget.keywordsList,
+                              privacyPost: widget.privacyPost,
+                              mediaFiles: widget.mediaFiles,
+                              postTitle: title,
+                              postDescription: description,
+                              interactions: widget.interactions);
+
+                          if (response != null) {
+                            //ToastNotifier.showSuccessToast(
+                            // context, "Post Successfully posted!");
+                            setState(() {
+                              isLoading = false;
+                            });
+                            _titleController.clear();
+                            _descriptionController.clear();
+                            final token = await Prefrences.getAuthToken();
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                CupertinoDialogRoute(
+                                    builder: (_) => MainScreen(
+                                        userProfile: widget.userProfile!,
+                                        authToken: token),
+                                    context: context),
+                                (route) => false);
+                          } else {
+                            setState(() {
+                              isLoading = false;
+                            });
+                            //ToastNotifier.showErrorToast(
+                            // context, "Network Problem. Try again.");
+                          }
+                          // Clear fields after submission
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Post submitted successfully!')),
+                          );
                         }
-                        // Clear fields after submission
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('Post submitted successfully!')),
-                        );
                       }
-                    }
 
-                    // Handle button press logic here
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets
-                        .zero, // Remove default padding for custom styling
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      // Handle button press logic here
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets
+                          .zero, // Remove default padding for custom styling
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                  ),
-                  child: Container(
-                    height: 60,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.red, // Default color for the button
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: isLoading
-                          ? [
-                              CircularProgressIndicator.adaptive(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            ]
-                          : [
-                              Icon(
-                                Icons
-                                    .arrow_upward, // Default icon for the button
-                                size: 20,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                "Post Now", // Default text for the button
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                    child: Container(
+                      height: 60,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: widget.isPoll
+                            ? Colors.blue
+                            : Colors.red, // Default color for the button
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: isLoading
+                            ? [
+                                CircularProgressIndicator.adaptive(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              ]
+                            : [
+                                Icon(
+                                  widget.isPoll
+                                      ? Icons.arrow_circle_right_outlined
+                                      : Icons
+                                          .arrow_upward, // Default icon for the button
+                                  size: 20,
                                   color: Colors.white,
                                 ),
-                              ),
-                            ],
+                                SizedBox(width: 5),
+                                Text(
+                                  widget.isPoll
+                                      ? "Next"
+                                      : "Post Now", // Default text for the button
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

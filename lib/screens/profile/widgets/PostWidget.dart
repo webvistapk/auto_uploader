@@ -48,36 +48,35 @@ class PostWidget extends StatefulWidget {
   final String? postDescription;
   final String? privacy;
 
-  const PostWidget({
-    super.key,
-    required this.postId,
-    required this.username,
-    required this.location,
-    required this.date,
-    required this.caption,
-    required this.mediaUrls,
-    required this.profileImageUrl,
-    required this.isVideo,
-    required this.likes,
-    required this.comments,
-    required this.shares,
-    required this.saved,
-    required this.refresh,
-    this.showCommentSection = false,
-    this.isInteractive = false,
-    required this.isUserPost,
-    required this.onPressed,
-    required this.onPressLiked,
-    required this.isLiked,
-    this.scrollCommentId,
-    this.scrollReplyID,
-    this.scrollOffset,
-    required this.postModel,
-    this.isSinglePost = false,
-    this.postTitle,
-    this.postDescription,
-    this.privacy
-  });
+  const PostWidget(
+      {super.key,
+      required this.postId,
+      required this.username,
+      required this.location,
+      required this.date,
+      required this.caption,
+      required this.mediaUrls,
+      required this.profileImageUrl,
+      required this.isVideo,
+      required this.likes,
+      required this.comments,
+      required this.shares,
+      required this.saved,
+      required this.refresh,
+      this.showCommentSection = false,
+      this.isInteractive = false,
+      required this.isUserPost,
+      required this.onPressed,
+      required this.onPressLiked,
+      required this.isLiked,
+      this.scrollCommentId,
+      this.scrollReplyID,
+      this.scrollOffset,
+      required this.postModel,
+      this.isSinglePost = false,
+      this.postTitle,
+      this.postDescription,
+      this.privacy});
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
@@ -124,7 +123,7 @@ class _PostWidgetState extends State<PostWidget> {
           'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg';
     }
     date = formatWithOrdinalSuffix(DateTime.parse(widget.date));
-  //debugger();
+    //debugger();
     return SingleChildScrollView(
       physics: const ScrollPhysics(),
       child: Column(
@@ -138,8 +137,7 @@ class _PostWidgetState extends State<PostWidget> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ClipRRect(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(14)),
+                      borderRadius: const BorderRadius.all(Radius.circular(14)),
                       child: Image.network(
                         widget.profileImageUrl == ''
                             ? AppUtils.userImage
@@ -151,14 +149,14 @@ class _PostWidgetState extends State<PostWidget> {
                     SizedBox(
                       width: 5,
                     ),
-                    if(false)
-                    Text(
-                      "${widget.username} Reposted this Photo",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.black,
+                    if (false)
+                      Text(
+                        "${widget.username} Reposted this Photo",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.black,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 SizedBox(
@@ -192,61 +190,60 @@ class _PostWidgetState extends State<PostWidget> {
                           children: [
                             Text(
                               widget.username,
-                              style:TextStyle(
-                                fontSize: 11,
-                                color: AppColors.black,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Greycliff CF'
-                              ),
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Greycliff CF'),
                             ),
                             const SizedBox(
                               width: 7,
                             ),
-                            if(false)
-                            Text(
-                              date!,
-                              style: TextStyle(
+                            if (false)
+                              Text(
+                                date!,
+                                style: TextStyle(
                                   fontSize: 7,
                                   color: AppColors.darkGrey,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 16,),
-                        
-                        if(false)
-                        Row(
-                          children: [
-                            
-                            Text(
-                              "Senior Journalist at Fox News",
-                              style:TextStyle(
-                                  fontSize: 8,
-                                  color: AppColors.darkGrey,
-                                  ),
-                            ),
-                            if (false) ...[
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 2, horizontal: 8),
-                                decoration: BoxDecoration(
-                                    color: AppColors.iconredColor,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(3))),
-                                child: Text(
-                                  "Chess with the best",
-                                  style: TextStyle(
-                                      fontSize: 5,
-                                      color: AppColors.white,
-                                      ),
                                 ),
                               ),
-                            ]
                           ],
                         ),
+                        SizedBox(
+                          height: 16,
+                        ),
+                        if (false)
+                          Row(
+                            children: [
+                              Text(
+                                "Senior Journalist at Fox News",
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  color: AppColors.darkGrey,
+                                ),
+                              ),
+                              if (false) ...[
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 2, horizontal: 8),
+                                  decoration: BoxDecoration(
+                                      color: AppColors.iconredColor,
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(3))),
+                                  child: Text(
+                                    "Chess with the best",
+                                    style: TextStyle(
+                                      fontSize: 5,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                ),
+                              ]
+                            ],
+                          ),
                       ],
                     ),
                     Column(
@@ -263,19 +260,16 @@ class _PostWidgetState extends State<PostWidget> {
                         ),
                         Row(
                           children: [
-                            if(false)...[
-                            Image.asset(AppIcons.eyes),
-      
+                            if (false) ...[
+                              Image.asset(AppIcons.eyes),
                             ],
                             SizedBox(
                               width: 5,
                             ),
                             Text(
-                              widget.privacy??'',
+                              widget.privacy ?? '',
                               style: TextStyle(
-                                
-                                    fontSize: 7, color: AppColors.lightGrey),
-                              
+                                  fontSize: 7, color: AppColors.lightGrey),
                             ),
                           ],
                         ),
@@ -315,7 +309,7 @@ class _PostWidgetState extends State<PostWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: EdgeInsets.symmetric( horizontal: 8),
+                padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,12 +325,14 @@ class _PostWidgetState extends State<PostWidget> {
                     const SizedBox(height: 5),
                     RichText(
                       text: TextSpan(
-                        style: TextStyle(
-                            color: Colors.black, fontSize: 10),
+                        style: TextStyle(color: Colors.black, fontSize: 10),
                         children: [
                           TextSpan(
                             text: '${widget.username}',
-                            style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'Greycliff CF'),
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Greycliff CF'),
                           ),
                         ],
                       ),
@@ -355,17 +351,16 @@ class _PostWidgetState extends State<PostWidget> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (widget.isSinglePost)
-                  if(false)...[
-                    _buildInteractionIcon(AppIcons.star, widget.shares),
-                  const SizedBox(width: 10),
-                  _buildInteractionIcon(AppIcons.repost, widget.shares),
-                  const SizedBox(width: 10),
-                  _buildInteractionIcon(AppIcons.share, widget.shares),
-                  const SizedBox(width: 10),
-                  
-                  _buildInteractionIcon(AppIcons.favorite, widget.saved),
-                  const SizedBox(width: 10),
-                  ],
+                    if (false) ...[
+                      _buildInteractionIcon(AppIcons.star, widget.shares),
+                      const SizedBox(width: 10),
+                      _buildInteractionIcon(AppIcons.repost, widget.shares),
+                      const SizedBox(width: 10),
+                      _buildInteractionIcon(AppIcons.share, widget.shares),
+                      const SizedBox(width: 10),
+                      _buildInteractionIcon(AppIcons.favorite, widget.saved),
+                      const SizedBox(width: 10),
+                    ],
                   GestureDetector(
                       onTap: widget
                           .onPressLiked, // Call _likePost when the like icon is clicked
@@ -380,12 +375,10 @@ class _PostWidgetState extends State<PostWidget> {
                                 widget.isLiked ? Colors.red : AppColors.black,
                           ),
                           // Icon(icon, size: 20),
-                          Text(widget.likes,
-                              style: TextStyle(fontSize: 9)),
+                          Text(widget.likes, style: TextStyle(fontSize: 9)),
                         ],
                       )),
-                  if (!widget.postModel.interactions!
-                      .contains('comments')) ...[
+                  if (!widget.postModel.interactions!.contains('comments')) ...[
                     const SizedBox(width: 10),
                     GestureDetector(
                       onTap: widget.showCommentSection
@@ -408,6 +401,7 @@ class _PostWidgetState extends State<PostWidget> {
                     const SizedBox(width: 10),
                     GestureDetector(
                         onTap: () {
+                          // debugger();
                           widget.postModel.polls!
                                   .any((element) => element.isVoted == true)
                               ? showPercentageResult(
@@ -439,11 +433,10 @@ class _PostWidgetState extends State<PostWidget> {
                 Text(
                   "${widget.caption}",
                   style: TextStyle(
-                    fontSize: 9,
-                    color: AppColors.darkGrey,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Greycliff CF'
-                  ),
+                      fontSize: 9,
+                      color: AppColors.darkGrey,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Greycliff CF'),
                 ),
                 const SizedBox(height: 8),
                 widget.isSinglePost
@@ -451,32 +444,34 @@ class _PostWidgetState extends State<PostWidget> {
                         ? CommentWidget(
                             postId: widget.postId,
                             isReelScreen: false,
-                            commentIdToHighlight: widget.scrollCommentId.toString(),
-                            replyIdToHighlight: widget.scrollCommentId.toString(),
+                            commentIdToHighlight:
+                                widget.scrollCommentId.toString(),
+                            replyIdToHighlight:
+                                widget.scrollCommentId.toString(),
                             scrollOffset: widget.scrollOffset,
                             isSinglePost: widget.isSinglePost,
                           )
                         : Text(
                             'Comments are disabled for this post',
-                            style: TextStyle(
-                                color: AppColors.black, fontSize: 11),
+                            style:
+                                TextStyle(color: AppColors.black, fontSize: 11),
                           )
-      
-                    :!widget.postModel.interactions!.contains('comments')?
-                     InkWell(
-                        onTap: () {
-                          showComments(widget.postId, false, context,
-                              widget.scrollCommentId.toString(),
-                              replyID: widget.scrollCommentId.toString(),
-                              scrollOffset: widget.scrollOffset,
-                              commentCount: int.parse(widget.comments),
-                              isSinglePost: widget.isSinglePost);
-                        },
-                        child: Text(
-                          'View all ${widget.comments} comments',
-                          style: TextStyle(color: Colors.grey, fontSize: 8),
-                        ),
-                      ):Container(),
+                    : !widget.postModel.interactions!.contains('comments')
+                        ? InkWell(
+                            onTap: () {
+                              showComments(widget.postId, false, context,
+                                  widget.scrollCommentId.toString(),
+                                  replyID: widget.scrollCommentId.toString(),
+                                  scrollOffset: widget.scrollOffset,
+                                  commentCount: int.parse(widget.comments),
+                                  isSinglePost: widget.isSinglePost);
+                            },
+                            child: Text(
+                              'View all ${widget.comments} comments',
+                              style: TextStyle(color: Colors.grey, fontSize: 8),
+                            ),
+                          )
+                        : Container(),
               ],
             ),
           ),
@@ -538,7 +533,7 @@ class _PostWidgetState extends State<PostWidget> {
               ),
             ),
             // The caption container
-            if (widget.postTitle!=null)
+            if (widget.postTitle != null)
               Positioned(
                 bottom: 5,
                 left: 5,
@@ -572,7 +567,7 @@ class _PostWidgetState extends State<PostWidget> {
               ),
             if (!widget.isSinglePost) ...[
               Positioned(
-                bottom: widget.postTitle==null?5:85,
+                bottom: widget.postTitle == null ? 5 : 85,
                 left: 5,
                 //right: 0,
                 child: Column(
@@ -624,25 +619,24 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
-   Widget ScreenIconBuild(String image,labelText){
-            return Container(
-                      padding: EdgeInsets.only(left: 2,right: 20,top: 2,bottom: 2),
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(83, 0, 0, 0)
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Image.asset(image, height: 14),
-                          SizedBox(width: 4,),
-                          Text(labelText,style: TextStyle(
-                            fontSize: 8,
-                            color: AppColors.white
-                          ),)
-                        ],
-                      )
-                      );
-          }
+  Widget ScreenIconBuild(String image, labelText) {
+    return Container(
+        padding: EdgeInsets.only(left: 2, right: 20, top: 2, bottom: 2),
+        decoration: BoxDecoration(color: Color.fromARGB(83, 0, 0, 0)),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Image.asset(image, height: 14),
+            SizedBox(
+              width: 4,
+            ),
+            Text(
+              labelText,
+              style: TextStyle(fontSize: 8, color: AppColors.white),
+            )
+          ],
+        ));
+  }
 
   Widget _buildImageIndicator(int itemCount) {
     return itemCount < 2
@@ -669,7 +663,6 @@ class _PostWidgetState extends State<PostWidget> {
               );
             }),
           );
-
   }
 
   void _showOptionsMenu(BuildContext context, GlobalKey key) {
@@ -716,8 +709,8 @@ class _PostWidgetState extends State<PostWidget> {
     ).then((value) async {
       if (value == 'delete') {
         // Call the deletePost method and wait for its completion
-        
-         Provider.of<PostProvider>(context, listen: false)
+
+        Provider.of<PostProvider>(context, listen: false)
             .deletePost(widget.postId, context, false);
 
         // Trigger the refresh callback to update the UI
@@ -748,7 +741,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    _initializeVideo();
+      _initializeVideo();
     });
   }
 
@@ -762,7 +755,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         });
       }
     } catch (e) {
-
       if (mounted) {
         setState(() {
           _isError = true;

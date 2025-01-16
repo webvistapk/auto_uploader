@@ -2,7 +2,7 @@ class Userstatus {
   Userstatus({
     String? status,
     List<Stories>? stories,
-    num? totalCount,
+    int? totalCount,
     bool? hasNextPage,
     dynamic nextOffset,
   }) {
@@ -28,14 +28,14 @@ class Userstatus {
 
   String? _status;
   List<Stories>? _stories;
-  num? _totalCount;
+  int? _totalCount;
   bool? _hasNextPage;
   dynamic _nextOffset;
 
   Userstatus copyWith({
     String? status,
     List<Stories>? stories,
-    num? totalCount,
+    int? totalCount,
     bool? hasNextPage,
     dynamic nextOffset,
   }) =>
@@ -49,7 +49,7 @@ class Userstatus {
 
   String? get status => _status;
   List<Stories>? get stories => _stories;
-  num? get totalCount => _totalCount;
+  int? get totalCount => _totalCount;
   bool? get hasNextPage => _hasNextPage;
   dynamic get nextOffset => _nextOffset;
 
@@ -60,7 +60,7 @@ class Userstatus {
       map['stories'] = _stories?.map((v) => v.toJson()).toList();
     }
     map['total_count'] = _totalCount;
-    map['has_next_page'] = _hasNextPage??0;
+    map['has_next_page'] = _hasNextPage ?? 0;
     map['next_offset'] = _nextOffset;
     return map;
   }
@@ -68,14 +68,14 @@ class Userstatus {
 
 class Stories {
   Stories({
-    num? id,
+    int? id,
     List<dynamic>? tags,
     List<Media>? media,
     User? user,
     String? privacy,
     String? createdAt,
     String? updatedAt,
-    num? seenCount,
+    int? seenCount,
   }) {
     _id = id;
     _tags = tags;
@@ -103,24 +103,24 @@ class Stories {
     _seenCount = json['seen_count'];
   }
 
-  num? _id;
+  int? _id;
   List<dynamic>? _tags;
   List<Media>? _media;
   User? _user;
   String? _privacy;
   String? _createdAt;
   String? _updatedAt;
-  num? _seenCount;
+  int? _seenCount;
 
   Stories copyWith({
-    num? id,
+    int? id,
     List<dynamic>? tags,
     List<Media>? media,
     User? user,
     String? privacy,
     String? createdAt,
     String? updatedAt,
-    num? seenCount,
+    int? seenCount,
   }) =>
       Stories(
         id: id ?? _id,
@@ -133,14 +133,14 @@ class Stories {
         seenCount: seenCount ?? _seenCount,
       );
 
-  num? get id => _id;
+  int? get id => _id;
   List<dynamic>? get tags => _tags;
   List<Media>? get media => _media;
   User? get user => _user;
   String? get privacy => _privacy;
   String? get createdAt => _createdAt;
   String? get updatedAt => _updatedAt;
-  num? get seenCount => _seenCount;
+  int? get seenCount => _seenCount;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -162,7 +162,7 @@ class Stories {
 
 class User {
   User({
-    num? id,
+    int? id,
     String? username,
     String? firstName,
     String? lastName,
@@ -183,14 +183,14 @@ class User {
     _profileImage = json['profile_image'];
   }
 
-  num? _id;
+  int? _id;
   String? _username;
   String? _firstName;
   String? _lastName;
   String? _profileImage;
 
   User copyWith({
-    num? id,
+    int? id,
     String? username,
     String? firstName,
     String? lastName,
@@ -204,7 +204,7 @@ class User {
         profileImage: profileImage ?? _profileImage,
       );
 
-  num? get id => _id;
+  int? get id => _id;
   String? get username => _username;
   String? get firstName => _firstName;
   String? get lastName => _lastName;
@@ -223,7 +223,7 @@ class User {
 
 class Media {
   Media({
-    num? id,
+    int? id,
     String? mediaType,
     String? file,
   }) {
@@ -238,12 +238,12 @@ class Media {
     _file = json['file'];
   }
 
-  num? _id;
+  int? _id;
   String? _mediaType;
   String? _file;
 
   Media copyWith({
-    num? id,
+    int? id,
     String? mediaType,
     String? file,
   }) =>
@@ -253,7 +253,7 @@ class Media {
         file: file ?? _file,
       );
 
-  num? get id => _id;
+  int? get id => _id;
   String? get mediaType => _mediaType;
   String? get file => _file;
 

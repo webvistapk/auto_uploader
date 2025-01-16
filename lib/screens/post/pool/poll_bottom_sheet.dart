@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:mobile/prefrences/prefrences.dart';
 
 postVote(int postId, String authToken, context) async {
+  // debugger();
   final url = 'http://147.79.117.253:8001/api/posts/vote/new/$postId/';
   final headers = {
     'Authorization': 'Bearer $authToken',
@@ -16,7 +17,7 @@ postVote(int postId, String authToken, context) async {
 
   try {
     final response = await http.post(Uri.parse(url), headers: headers);
-
+    // debugger();
     if (response.statusCode == 201) {
       print('Vote posted successfully');
       return true;
