@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/custom_social_button.dart';
+import 'package:mobile/screens/authantication/community/discover_community.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/authantication/signup/birthday_screen.dart';
 import 'package:mobile/screens/authantication/signup/phone/phone_input.dart';
@@ -42,9 +43,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 textTitle: 'Continue with Email',
                 onPressed: () {
                   Navigator.push(
-                      context,
-                      CupertinoDialogRoute(
-                          builder: (_) => BirthdayScreen(), context: context));
+                    context,
+                    CupertinoDialogRoute(
+                        builder: (_) => DiscoverCommunityScreen(),
+                        context: context),
+                  );
                 },
               ),
               CustomSocialButton(

@@ -16,6 +16,24 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
   DateTime? selectedBirthDate;
   String? formattedBirthDate;
 
+  // Function to calculate the date based on the child's age
+  DateTime _calculateInitialDate() {
+    DateTime today = DateTime.now();
+
+    // Subtract years, months, and days manually
+    DateTime initialDate = DateTime(
+      today.year - 7, // Subtract 7 years
+      today.month - 7 > 0
+          ? today.month - 7
+          : today.month - 7 + 12, // Subtract 7 months, adjusting for the year
+      today.day - 7 > 0
+          ? today.day - 7
+          : today.day - 7 + 30, // Subtract 7 days, adjusting for the month
+    );
+
+    return initialDate;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -53,7 +71,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                 height: 300,
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.date,
-                  initialDateTime: DateTime(2000, 1, 1),
+                  initialDateTime: _calculateInitialDate(),
                   onDateTimeChanged: (DateTime newDateTime) {
                     setState(() {
                       selectedBirthDate = newDateTime;

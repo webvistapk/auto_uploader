@@ -22,6 +22,7 @@ class AddPostScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final List<File> mediFiles;
   final type;
+
   const AddPostScreen({
     super.key,
     required this.userProfile,

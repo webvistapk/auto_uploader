@@ -1,37 +1,32 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
-import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
-import 'package:mobile/models/ReelPostModel.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/authantication/community/discover_community.dart';
 import 'package:mobile/screens/authantication/otp_screen.dart';
 import 'package:mobile/screens/messaging/chat_screen.dart';
-import 'package:mobile/screens/notification/notificationScreen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
-import 'package:mobile/screens/post/widgets/add_post_screen.dart';
-import 'package:mobile/screens/profile/UserReelScreen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
 import 'package:mobile/screens/profile/request_screen/request_sereen.dart';
-import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:mobile/screens/search/widget/search_screen.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
-  final email;
+  final String email;
   final UserProfile userProfile;
   final String authToken;
   int selectedIndex;
   MainScreen({
     super.key,
-    this.email,
+    this.email = '',
     required this.userProfile,
     required this.authToken,
     this.selectedIndex = 0,
@@ -61,28 +56,23 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    initFunctions();
+    _checkEmailVerification();
+    // initFunctions();
     selectedItem = widget.selectedIndex;
     // Trigger the email verification check
   }
 
-  initFunctions() async {
-    bool? isCommunity = await Prefrences.getDiscoverCommunity() ?? null;
-    if (isCommunity != null && isCommunity) {
-      _checkEmailVerification();
-    } else {
-      Navigator.pushAndRemoveUntil(
-          context,
-          CupertinoDialogRoute(
-              builder: (_) => DiscoverCommunityScreen(
-                    userProfile: widget.userProfile,
-                    authToken: widget.authToken,
-                    email: widget.email,
-                  ),
-              context: context),
-          (route) => false);
-    }
-  }
+  // initFunctions() async {
+  //   bool? isCommunity = await Prefrences.getDiscoverCommunity() ?? null;
+  //   if (isCommunity != null && isCommunity) {
+  //   } else {
+  //     Navigator.pushAndRemoveUntil(
+  //         context,
+  //         CupertinoDialogRoute(
+  //             builder: (_) => DiscoverCommunityScreen(), context: context),
+  //         (route) => false);
+  //   }
+  // }
 
   Future<void> _checkEmailVerification() async {
     if (mounted) {
@@ -149,7 +139,7 @@ class _MainScreenState extends State<MainScreen> {
                             )
                           : selectedItem == 3
                               ? ChatScreen(
-                                  userProfile: widget.userProfile!,
+                                  userProfile: widget.userProfile,
                                 )
                               : selectedItem == 4
                                   ? ProfileScreen(
@@ -158,56 +148,58 @@ class _MainScreenState extends State<MainScreen> {
                                       authToken: widget.authToken,
                                     )
                                   : _pages[selectedItem],
-              bottomNavigationBar: SalomonBottomBar(
-                backgroundColor: AppColors.deepdarkgreyColor,
-                unselectedItemColor: AppColors.white,
-                selectedItemColor: AppColors.white,
-                selectedColorOpacity: 0,
-                currentIndex: selectedItem,
-                itemPadding:
-                    EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                onTap: (index) {
-                  // if(index==1){
-                  // showSearch(context: context, delegate: CustomSearchDelegate());
-                  // }
-                  // else{
-                  
-                  setState(() {
-                    selectedItem = index;
-                  });
-                  // }
-                },
-                items: [
-                  /// Home
-                  _buildBottomBarItem(
-                    icon: AppIcons.home,
-                    isSelected: selectedItem == 0,
-                  ),
-                  
-                  /// Search
-                  _buildBottomBarItem(
-                    icon: AppIcons.search,
-                    isSelected: selectedItem == 1,
-                  ),
-                  
-                  /// Add
-                  _buildBottomBarItem(
-                    icon: AppIcons.add_item,
-                    isSelected: selectedItem == 2,
-                  ),
-                  
-                  /// Messages
-                  _buildBottomBarItem(
-                    icon: AppIcons.message,
-                    isSelected: selectedItem == 3,
-                  ),
-                  
-                  /// Profile
-                  _buildBottomBarItem(
-                    icon: AppIcons.profile,
-                    isSelected: selectedItem == 4,
-                  ),
-                ],
+              bottomNavigationBar: SafeArea(
+                child: SalomonBottomBar(
+                  backgroundColor: AppColors.deepdarkgreyColor,
+                  unselectedItemColor: AppColors.white,
+                  selectedItemColor: AppColors.white,
+                  selectedColorOpacity: 0,
+                  currentIndex: selectedItem,
+                  itemPadding:
+                      EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  onTap: (index) {
+                    // if(index==1){
+                    // showSearch(context: context, delegate: CustomSearchDelegate());
+                    // }
+                    // else{
+
+                    setState(() {
+                      selectedItem = index;
+                    });
+                    // }
+                  },
+                  items: [
+                    /// Home
+                    _buildBottomBarItem(
+                      icon: AppIcons.home,
+                      isSelected: selectedItem == 0,
+                    ),
+
+                    /// Search
+                    _buildBottomBarItem(
+                      icon: AppIcons.search,
+                      isSelected: selectedItem == 1,
+                    ),
+
+                    /// Add
+                    _buildBottomBarItem(
+                      icon: AppIcons.add_item,
+                      isSelected: selectedItem == 2,
+                    ),
+
+                    /// Messages
+                    _buildBottomBarItem(
+                      icon: AppIcons.message,
+                      isSelected: selectedItem == 3,
+                    ),
+
+                    /// Profile
+                    _buildBottomBarItem(
+                      icon: AppIcons.profile,
+                      isSelected: selectedItem == 4,
+                    ),
+                  ],
+                ),
               ),
             );
     });

@@ -5,6 +5,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
@@ -228,27 +229,29 @@ class _PostAndReelsState extends State<PostAndReels>
                                                 : "reel",
                                           )));
                             }
-                          : () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => AddPostScreen(
-                                            mediFiles: mediaFiles,
-                                            userProfile: widget.userProfile,
-                                            type: "post",
-                                          )));
-                            }
+                          : null
+                      // () {
+                      //     Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //             builder: (_) => AddPostScreen(
+                      //                   mediFiles: mediaFiles,
+                      //                   userProfile: widget.userProfile,
+                      //                   type: "post",
+                      //                 )));
+                      //   }
                       : selectedReel.isEmpty
-                          ? () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => AddPostScreen(
-                                            mediFiles: selectedReel,
-                                            userProfile: widget.userProfile,
-                                            type: "post",
-                                          )));
-                            }
+                          ? null
+                          // () {
+                          //     Navigator.push(
+                          //         context,
+                          //         MaterialPageRoute(
+                          //             builder: (_) => AddPostScreen(
+                          //                   mediFiles: selectedReel,
+                          //                   userProfile: widget.userProfile,
+                          //                   type: "post",
+                          //                 )));
+                          //   }
                           : () {
                               Navigator.push(
                                   context,
@@ -263,8 +266,15 @@ class _PostAndReelsState extends State<PostAndReels>
                                                 : "reel",
                                           )));
                             },
-                  child:
-                      const Text('Next', style: TextStyle(color: Colors.blue)),
+                  child: Text('Next',
+                      style: AppTextStyles.poppinsMedium(
+                          color:
+                              _tabController.index == 0 && mediaFiles.isNotEmpty
+                                  ? Colors.blue
+                                  : _tabController.index == 1 &&
+                                          selectedReel.isNotEmpty
+                                      ? Colors.blue
+                                      : Colors.grey)),
                 ),
               ],
             ),

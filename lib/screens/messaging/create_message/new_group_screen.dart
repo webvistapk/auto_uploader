@@ -126,7 +126,7 @@ class _NewGroupScreenState extends State<NewGroupScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                'Suggested',
+                'Friends',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
