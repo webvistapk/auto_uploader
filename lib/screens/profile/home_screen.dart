@@ -382,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 builder: (context) => StatusView(
                                   statuses: userMediaFiles,
                                   initialIndex: 0,
-                                  isVideo: false,
+                                  // isVideo: false,
                                   userProfile: widget.userProfile,
                                   isUser: false,
                                   token: widget.token.toString(),

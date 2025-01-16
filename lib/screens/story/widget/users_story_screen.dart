@@ -59,7 +59,7 @@ class _UsersStoryScreenState extends State<UsersStoryScreen> {
                       builder: (context) => StatusView(
                         statuses: allMediaFiles,
                         initialIndex: 0,
-                        isVideo: false,
+                        // isVideo: false,
                         viewers: [],
                         userProfile: widget.userProfile,
                         token: widget.token,
