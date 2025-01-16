@@ -124,6 +124,7 @@ class Reply {
   final String replierImage;
   bool isReplyLiked;
   int replyLikeCount;
+  final String timeAgo;
 
   Reply({
     required this.id,
@@ -131,7 +132,8 @@ class Reply {
     required this.replierName,
     required this.replierImage,
     required this.isReplyLiked,
-    required this.replyLikeCount
+    required this.replyLikeCount,
+    required this.timeAgo
 
   });
 
@@ -142,7 +144,9 @@ class Reply {
       replierName: json['user']['username'],
       replierImage: json['user']['profile_image']??'',
       replyLikeCount: json['likes_count'],
-      isReplyLiked: json['is_liked']
+      isReplyLiked: json['is_liked'],
+      timeAgo: json['created_at']
+
 
     );
   }

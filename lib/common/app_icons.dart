@@ -9,7 +9,7 @@ class AppIcons{
   static const String circle ="assets/icons/dual_circle.png";
   static const String event_link ="assets/icons/eventlink.png";
   static const String eyes ="assets/icons/eyes.png";
-  static const String service_link ="assets/icons/servicelink.png";
+  static const String service_link ="assets/icons/serviceLink.png";
   static const String group_name ="assets/icons/groupname.png";
   static const String three_dot ="assets/icons/three_dot.png";
 static const String bell ="assets/icons/bell.png";

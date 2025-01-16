@@ -150,7 +150,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       prefixIcon: Icon(Icons.search, color: Colors.grey),
                       hintText: 'Search...',
                       border: InputBorder.none,
-                      hintStyle: GoogleFonts.publicSans(fontSize: 14),
+                      hintStyle:TextStyle(fontSize: 14),
                     ),
                   ),
                 ),

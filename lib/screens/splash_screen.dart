@@ -71,19 +71,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: const Scaffold(
-        backgroundColor: AppColors.mainBgColor, // Set greyish background color
-        body: Center(
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AppLogo(width: 80, height: 80),
-              ],
-            ),
+    return const Scaffold(
+      backgroundColor: AppColors.mainBgColor, // Set greyish background color
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AppLogo(width: 80, height: 80),
+            ],
           ),
         ),
       ),

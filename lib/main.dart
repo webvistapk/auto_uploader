@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               //  useMaterial3: false,
               primarySwatch: Colors.green,
-              textTheme: GoogleFonts.interTextTheme(),
+              fontFamily: 'Greycliff CF'
             ),
             home: SplashScreen()));
   }

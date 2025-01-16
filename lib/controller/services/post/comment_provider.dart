@@ -21,8 +21,10 @@ class CommentProvider extends ChangeNotifier {
   int _nextOffset = 0;
   int _previousOffset = 0;
   int _replyNextOffset = 0;
+  int _commentCount=0;
 
   bool get isLoading => _isLoading;
+  int get commentCount => _commentCount;
   bool get isCommentLoading => _isCommentLoading;
   bool get isUpdatePreviousOffset => _isUpdatePreviousOffset;
   List<Comment> get comments => _comments;
@@ -39,30 +41,15 @@ class CommentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  setCommentCount(int value) {
+    _commentCount = value;
+    notifyListeners();
+  }
+
   setCommentLoadin(bool value) {
     _isCommentLoading = value;
     notifyListeners();
   }
-
-  toggleReplyVisibility(int commentId) {
-    int commentIndex =
-        _comments.indexWhere((comment) => comment.id == commentId);
-    //debugger();
-
-    if (commentIndex != -1) {
-      Comment comment = _comments[commentIndex];
-      comment.isReplyVisible = !comment.isReplyVisible;
-      notifyListeners();
-
-      // Fetch replies if not already loaded
-      if (comment.isReplyVisible && !comment.isReplyLoaded) {
-        fetchReplies(commentId);
-      }
-    }
-  }
-
-  List<Comment> tempCommentList =
-      []; // Temporary list for fetching comments only for a specific offset
   initializeComments(
     String postId,
     bool isReelScreen, {
@@ -162,8 +149,9 @@ class CommentProvider extends ChangeNotifier {
           _commentKeys[comment.id] = GlobalKey();
         }
 
+        setCommentCount(commentResponse.totalCount);
         print("comment Key of 1 ${_commentKeys[34]!.currentContext}");
-
+        
         // Notify listeners to update UI
         notifyListeners();
       } else {
@@ -180,80 +168,6 @@ class CommentProvider extends ChangeNotifier {
     return _comments;
   }
 
-  Future<void> fetchReplies(int commentId, {int limit = 10, offset = 0}) async {
-    setCommentLoadin(true);
-    print("Comment ID: ${commentId}");
-    final String? token = await Prefrences.getAuthToken();
-    final url =
-        "${ApiURLs.baseUrl}${ApiURLs.post_comment_reply_fetch}${commentId.toString()}/";
-
-    try {
-      final response = await http.get(
-        Uri.parse(url).replace(queryParameters: {
-          'limit': limit.toString(),
-          'offset': offset.toString(),
-        }),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-      print("API HITTED SUCCESSFULLY");
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print("Replies List1: ${response.body}");
-
-        ReplyModel replyResponse = ReplyModel.fromJson(data);
-        print("COmments Length ${_comments}");
-
-        // If offset is 0, clear the existing comments and load new ones
-        if (offset == 0) {
-          _replies = replyResponse.reply;
-          _replyNextOffset = replyResponse.nextOffset ?? 0;
-        } else {
-          _replies.addAll(replyResponse.reply); // Append new comments
-          _replyNextOffset = replyResponse.nextOffset ?? _replyNextOffset;
-        }
-        // If there are no more comments, set the nextOffset to -1
-        //debugger();
-        if (!replyResponse.hasNextPage) {
-          _replyNextOffset = -1;
-        }
-
-        // _replies = (data['reply'] as List)
-        //     .map((reply) => Reply.fromJson(reply))
-        //     .toList();
-
-        print("Replies List: ${response.body}");
-
-        final index =
-            _comments.indexWhere((comment) => comment.id == commentId);
-        if (index != -1) {
-          final currentComment = _comments[index];
-          _comments[index] = Comment(
-              id: currentComment.id,
-              username: currentComment.username,
-              avatarUrl: currentComment.avatarUrl,
-              commentText: currentComment.commentText,
-              replies: _replies, // Update the replies
-              timeAgo: currentComment.timeAgo,
-              isLiked: currentComment.isLiked,
-              likeCount: currentComment.likeCount,
-              replyCount: currentComment.replyCount,
-              isReplyVisible: currentComment.isReplyVisible,
-              isReplyLoaded: currentComment.isReplyLoaded);
-          notifyListeners(); // Notify listeners for UI update
-        }
-      } else {
-        throw Exception("Failed to fetch replies");
-      }
-    } catch (error) {
-      print("Error fetching replies: $error");
-      rethrow;
-    } finally {
-      setCommentLoadin(false);
-    }
-  }
 
   void loadPreviousComments(String postId, int commentIdToHighlight, int limit,
       {bool isReel = false}) async {
@@ -445,7 +359,9 @@ class ReplyProvider extends ChangeNotifier {
   int _previousOffset = 0;
   int _replyNextOffset = 0;
   bool _isUpdatePreviousOffset = true;
+  int _replyCount = 0;
 
+  int get replyCount => _replyCount;
   bool get isLoading => _isLoading;
   bool get isCommentLoading => _isCommentLoading;
   List<Comment> get comments => _comments;
@@ -463,12 +379,17 @@ class ReplyProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  setReplyCount(int value) {
+    _replyCount = value;
+    notifyListeners();
+  }
+
   setCommentLoadin(bool value) {
     _isCommentLoading = value;
     notifyListeners();
   }
 
-  Future<void> fetchReplies(int commentId,
+  Future<void> fetchReplies(int commentId, BuildContext context,
       {int limit = 10,
       offset = 0,
       bool isReel = false,
@@ -536,6 +457,14 @@ class ReplyProvider extends ChangeNotifier {
             _previousOffset = 0;
             hasPreviousPage = false;
           }
+          debugger();
+          final commentProvider =
+            Provider.of<CommentProvider>(context, listen: false);
+        int commentIndex = commentProvider.comments
+            .indexWhere((comment) => comment.id == commentId);
+        _comments = commentProvider.comments;
+        Comment comment = _comments[commentIndex];
+          setReplyCount(comment.replyCount);
         }
       } else {
         throw Exception("Failed to fetch replies");
@@ -548,11 +477,12 @@ class ReplyProvider extends ChangeNotifier {
     }
   }
 
-  initializeReply(int commentId, bool isReelScreen,
+  initializeReply(int commentId, bool isReelScreen, BuildContext context,
       {int limit = 10, int? offset = 0}) async {
     _replies = [];
     await fetchReplies(
       commentId,
+      context,
       isReel: isReelScreen,
       limit: 10,
       offset: offset,
@@ -561,7 +491,7 @@ class ReplyProvider extends ChangeNotifier {
 
   toggleReplyVisibility(int commentId, BuildContext context) {
     //debugger();
-    fetchReplies(commentId);
+    fetchReplies(commentId,context);
     // Find the index of the comment
     final commentProvider =
         Provider.of<CommentProvider>(context, listen: false);
@@ -576,14 +506,14 @@ class ReplyProvider extends ChangeNotifier {
 
       // Fetch replies if the replies are not loaded and visibility is enabled
       if (comment.isReplyVisible && !comment.isReplyLoaded) {
-        fetchReplies(commentId);
+        fetchReplies(commentId, context);
         comment.isReplyLoaded = true; // Mark replies as loaded after fetching
       }
     }
     notifyListeners();
   }
 
-  void loadNextReply(int commentId, {bool isReel = false}) async {
+  void loadNextReply(int commentId,BuildContext context, {bool isReel = false}) async {
     // Ensure no duplicate or unnecessary fetches
     if (nextOffset == -1) {
       print("No more comments to load.");
@@ -595,6 +525,7 @@ class ReplyProvider extends ChangeNotifier {
       int newNextOffset = _nextOffset;
       await fetchReplies(
         commentId,
+        context,
         isReel: isReel, // Assuming this is for a post and not a reel
         limit: 10, // Fetch only 10 comments
         offset: newNextOffset, // Use the current next offset
@@ -604,7 +535,7 @@ class ReplyProvider extends ChangeNotifier {
     }
   }
 
-  void loadPreviousReply(int commentId, int limit,
+  void loadPreviousReply(int commentId, int limit, BuildContext context,
       {bool isReel = false}) async {
     int previousOffset = _previousOffset - limit;
     if (previousOffset < 0) {
@@ -613,7 +544,7 @@ class ReplyProvider extends ChangeNotifier {
 
     try {
       // Fetch previous comments
-      await fetchReplies(commentId,
+      await fetchReplies(commentId, context,
           isReel: isReel, limit: limit, offset: previousOffset, isNext: true);
     } catch (error) {
       print("Error loading previous replies: $error");
@@ -661,8 +592,7 @@ class ReplyProvider extends ChangeNotifier {
         _comments = commentProvider.comments;
         Comment comment = _comments[commentIndex];
         comment.replyCount++;
-        await fetchReplies(commentId);
-
+        await fetchReplies(commentId,context);
         setCommentLoadin(false);
         notifyListeners();
       } else {
@@ -696,7 +626,7 @@ class ReplyProvider extends ChangeNotifier {
         // Show success message
         //ToastNotifier.showSuccessToast(
         // context, "comment reply deleted successfully");
-        fetchReplies(commentId);
+        fetchReplies(commentId,context);
         Comment comment =
             comments.firstWhere((comment) => comment.id == commentId);
         comment.replyCount--;

@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:keyboard_avoider/keyboard_avoider.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/message_toast.dart';
@@ -99,7 +100,7 @@ class _CommentWidgetState extends State<CommentWidget> {
 
   void _fetchAndScrollToRely(int commentId) async {
     // Determine the offset/page where the comment resides
-    await replyProvider!.initializeReply(commentId, widget.isReelScreen,
+    await replyProvider!.initializeReply(commentId, widget.isReelScreen, context,
         limit: _limit, offset: widget.scrollOffset!);
 
     await replyProvider!.toggleReplyVisibility(commentId, context);
@@ -190,7 +191,7 @@ class _CommentWidgetState extends State<CommentWidget> {
   void loadReplies(int commentId) async {
     try {
       await Provider.of<ReplyProvider>(context, listen: false)
-          .fetchReplies(commentId, limit: _limit, offset: _replyOffset);
+          .fetchReplies(commentId,context, limit: _limit, offset: _replyOffset);
       print("Replies fetched successfully!");
     } catch (e) {
       print("Error loading replies: $e");
@@ -213,6 +214,8 @@ class _CommentWidgetState extends State<CommentWidget> {
             media: _mediaFile,
             context: context,
             widget.isReelScreen);
+            commentProvider!.fetchComments(widget.postId, widget.isReelScreen);
+            
       } else {
         // Its a new comment
         commentProvider!.addComment(
@@ -235,6 +238,35 @@ class _CommentWidgetState extends State<CommentWidget> {
         });
     }
   }
+
+  String formatDate(String date) {
+    DateTime parsedDate = DateTime.parse(date);
+    String formattedDate = DateFormat('MM-dd-yy').format(parsedDate);
+    return formattedDate;
+  }
+
+
+  String getTimeAgo(String date) {
+    DateTime parsedDate = DateTime.parse(date);
+    Duration difference = DateTime.now().difference(parsedDate);
+
+    if (difference.inDays > 1) {
+      return "${difference.inDays} days ago";
+    } else if (difference.inDays == 1) {
+      return "1 day ago";
+    } else if (difference.inHours > 1) {
+      return "${difference.inHours} hours ago";
+    } else if (difference.inHours == 1) {
+      return "1 hour ago";
+    } else if (difference.inMinutes > 1) {
+      return "${difference.inMinutes} minutes ago";
+    } else if (difference.inMinutes == 1) {
+      return "1 minute ago";
+    } else {
+      return "Just now";
+    }
+  }
+
 
   void _replyToComment(int commentId, String username) {
     if (mounted)
@@ -295,13 +327,14 @@ class _CommentWidgetState extends State<CommentWidget> {
               children: [
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if(false)
                           Container(
                             height: 30,
                             width: 30,
@@ -310,50 +343,57 @@ class _CommentWidgetState extends State<CommentWidget> {
                           SizedBox(
                             width: 5,
                           ),
+                          if(false)
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 "London",
-                                style: GoogleFonts.inter(
-                                    textStyle: TextStyle(
+                                style: TextStyle(
+                                    
                                         fontSize: 10,
                                         color: AppColors.blackColor,
-                                        fontWeight: FontWeight.bold)),
+                                        fontWeight: FontWeight.bold,fontFamily: 'Greycliff CF',),
                               ),
                               Text("740k posts about this place",
-                                  style: GoogleFonts.inter(
-                                      textStyle: TextStyle(
+                                  style: TextStyle(
+                                     
                                           fontSize: 8,
-                                          color: AppColors.lightGreyColor,
-                                          fontWeight: FontWeight.normal)))
+                                          color: AppColors.lightGreyColor,))
                             ],
                           ),
                         ],
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(
-                          CupertinoIcons.xmark,
-                          size: 10,
-                          weight: 25,
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        child: GestureDetector(
+                          onTap: () {
+                            
+                            Navigator.pop(context);
+                          },
+                          child: const Icon(
+                            CupertinoIcons.xmark,
+                            size: 16,
+                            weight: 25,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Center(
-                  child: Text(
-                    "${widget.commentCount} Comments",
-                    style: GoogleFonts.inter(
-                        textStyle: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.blackColor,
-                            fontWeight: FontWeight.bold)),
-                  ),
+                Builder(
+                  builder: (context) {
+                    return Center(
+                      child: Text(
+                        "${Provider.of<CommentProvider>(context,listen: true).commentCount} Comments",
+                        style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.blackColor,fontFamily: 'Greycliff CF',
+                                fontWeight: FontWeight.bold),
+                      ),
+                    );
+                  }
                 ),
                 const Divider(thickness: 1, color: Colors.grey),
               ],
@@ -404,13 +444,12 @@ class _CommentWidgetState extends State<CommentWidget> {
                                           color: AppColors.greyColor)
                                       : Text(
                                           'Show Previous Comments',
-                                          style: GoogleFonts.publicSans(
-                                            textStyle: TextStyle(
+                                          style:  TextStyle(
                                               color: AppColors
                                                   .viewMoreCommentColor,
                                               fontSize: 8,
                                             ),
-                                          ),
+                                          
                                         )),
                             );
                           }
@@ -434,11 +473,10 @@ class _CommentWidgetState extends State<CommentWidget> {
                                       color: AppColors.greyColor)
                                   : Text(
                                       'Show More Comments',
-                                      style: GoogleFonts.publicSans(
-                                        textStyle: TextStyle(
+                                      style: TextStyle(
                                           color: AppColors.viewMoreCommentColor,
                                           fontSize: 8,
-                                        ),
+                                        
                                       ),
                                     ),
                             ));
@@ -491,7 +529,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                         11,
                                                                     fontWeight:
                                                                         FontWeight
-                                                                            .bold,
+                                                                            .w500,fontFamily: 'Greycliff CF',
                                                                     color: AppColors
                                                                         .blackColor),
                                                               )),
@@ -499,8 +537,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                             width: 5,
                                                           ),
                                                           Text(
-                                                              comment.timeAgo ??
-                                                                  '',
+                                                            formatDate(comment.timeAgo),
                                                               style: GoogleFonts
                                                                   .publicSans(
                                                                 textStyle: const TextStyle(
@@ -520,7 +557,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                               fontSize: 12,
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .w300,
+                                                                      .w300,fontFamily: 'Greycliff CF',
                                                               color: AppColors
                                                                   .black,
                                                             ),
@@ -541,7 +578,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                     fontSize: 8,
                                                                     fontWeight:
                                                                         FontWeight
-                                                                            .bold,
+                                                                            .bold,fontFamily: 'Greycliff CF',
                                                                     color: AppColors
                                                                         .commentReplyColor,
                                                                   ),
@@ -592,13 +629,16 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                             width:
                                                                                 2,
                                                                           ),
-                                                                          Text(
-                                                                            "View Reply ${comment.replyCount.toString()}",
-                                                                            style: GoogleFonts.publicSans(
-                                                                                textStyle: TextStyle(
-                                                                              color: AppColors.viewMoreCommentColor,
-                                                                              fontSize: 8,
-                                                                            )),
+                                                                          Builder(
+                                                                            builder: (context) {
+                                                                              return Text(
+                                                                                "View Reply ${comment.replyCount}",
+                                                                                style:  TextStyle(
+                                                                                  color: AppColors.viewMoreCommentColor,
+                                                                                  fontSize: 8,
+                                                                                )
+                                                                              );
+                                                                            }
                                                                           ),
                                                                         ],
                                                                       ),
@@ -725,7 +765,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                             .loadPreviousReply(
                                                                 int.parse(widget
                                                                     .commentIdToHighlight),
-                                                                10,
+                                                                10,context,
                                                                 isReel: widget
                                                                     .isReelScreen);
                                                       },
@@ -774,11 +814,8 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                 replyProvider
                                                                     .loadNextReply(
                                                                         comment
-                                                                            .id);
-                                                                // replyProvider.fetchReplies(
-                                                                //   comment.id,
-                                                                //   offset: nextOffset,
-                                                                // );
+                                                                            .id,context);
+                                                               
                                                               },
                                                               child: replyProvider
                                                                       .isCommentLoading
@@ -805,13 +842,12 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                         Text(
                                                                           'View more replies',
                                                                           style:
-                                                                              GoogleFonts.publicSans(
-                                                                            textStyle:
+                                                                              
                                                                                 TextStyle(
                                                                               color: AppColors.viewMoreCommentColor,
                                                                               fontSize: 8,
                                                                             ),
-                                                                          ),
+                                                                          
                                                                         ),
                                                                       ],
                                                                     ),
@@ -823,47 +859,50 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                         ],
                                                        
                                                         comment.isReplyVisible
-                                                            ? GestureDetector(
-                                                                onTap:
-                                                                    () async {
-                                                                  Provider.of<ReplyProvider>(
-                                                                          context,
-                                                                          listen:
-                                                                              false)
-                                                                      .toggleReplyVisibility(
-                                                                          comment
-                                                                              .id,
-                                                                          context);
-                                                                  // final replyProvider =
-                                                                  //     Provider.of<
-                                                                  //             ReplyProvider>(
-                                                                  //         context,
-                                                                  //         listen:
-                                                                  //             false);
-                                                                  // replyProvider
-                                                                  //     .fetchReplies(
-                                                                  //         comment
-                                                                  //             .id);
-                                                                  // setState(() {
-                                                                  //   comment.isReplyVisible =
-                                                                  //       !comment
-                                                                  //           .isReplyVisible;
-                                                                  // });
-                                                                  setState(
-                                                                      () {});
-                                                                },
-                                                                child: Text(
-                                                                  "Hide",
-                                                                  style: GoogleFonts
-                                                                      .publicSans(
-                                                                          textStyle:
-                                                                              TextStyle(
-                                                                    color: AppColors
-                                                                        .commentReplyColor,
-                                                                    fontSize: 8,
-                                                                  )),
+                                                            ? Padding(
+                                                              padding: const EdgeInsets.only(left:10.0),
+                                                              child: GestureDetector(
+                                                                  onTap:
+                                                                      () async {
+                                                                    Provider.of<ReplyProvider>(
+                                                                            context,
+                                                                            listen:
+                                                                                false)
+                                                                        .toggleReplyVisibility(
+                                                                            comment
+                                                                                .id,
+                                                                            context);
+                                                                    // final replyProvider =
+                                                                    //     Provider.of<
+                                                                    //             ReplyProvider>(
+                                                                    //         context,
+                                                                    //         listen:
+                                                                    //             false);
+                                                                    // replyProvider
+                                                                    //     .fetchReplies(
+                                                                    //         comment
+                                                                    //             .id);
+                                                                    // setState(() {
+                                                                    //   comment.isReplyVisible =
+                                                                    //       !comment
+                                                                    //           .isReplyVisible;
+                                                                    // });
+                                                                    setState(
+                                                                        () {});
+                                                                  },
+                                                                  child: Text(
+                                                                    "Hide",
+                                                                    style: GoogleFonts
+                                                                        .publicSans(
+                                                                            textStyle:
+                                                                                TextStyle(
+                                                                      color: AppColors
+                                                                          .commentReplyColor,
+                                                                      fontSize: 8,
+                                                                    )),
+                                                                  ),
                                                                 ),
-                                                              )
+                                                            )
                                                             : Container()
                                                       ],
                                                     ),
@@ -886,29 +925,31 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                       const EdgeInsets.only(
                                                           left: 50.0, top: 10),
                                                   child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
+                                                    crossAxisAlignment:CrossAxisAlignment.start,
                                                             mainAxisAlignment: MainAxisAlignment.start,
                                                     children: [
-                                                      CircleAvatar(
-                                                        radius: 10,
-                                                        backgroundImage: NetworkImage(
-                                                            reply.replierImage ==
-                                                                    null
-                                                                ? reply
-                                                                    .replierImage
-                                                                : AppUtils
-                                                                    .userImage),
+                                                      Padding(
+                                                        padding: const EdgeInsets.only(top: 3),
+                                                        child: CircleAvatar(
+                                                          radius: 10,
+                                                          backgroundImage: NetworkImage(
+                                                              reply.replierImage ==
+                                                                      null
+                                                                  ? reply
+                                                                      .replierImage
+                                                                  : AppUtils
+                                                                      .userImage),
+                                                        ),
                                                       ),
                                                       const SizedBox(width: 10),
                                                       Expanded(
                                                         child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
+                                                          crossAxisAlignment:CrossAxisAlignment.start,
+                                                                  mainAxisAlignment: MainAxisAlignment.start,
                                                           children: [
                                                             Row(
+                                                             // crossAxisAlignment: CrossAxisAlignment.start,
+                                                              mainAxisAlignment: MainAxisAlignment.start,
                                                               children: [
                                                                 Text(
                                                                   reply
@@ -918,9 +959,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                     textStyle: const TextStyle(
                                                                         fontSize:
                                                                             11,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .bold,
+                                                                        
                                                                         color: AppColors
                                                                             .blackColor),
                                                                   ),
@@ -928,7 +967,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                 SizedBox(
                                                                   width: 10,
                                                                 ),
-                                                                Text('6H',
+                                                                Text(getTimeAgo(reply.timeAgo),
                                                                     style: GoogleFonts
                                                                         .publicSans(
                                                                       textStyle: const TextStyle(
@@ -946,9 +985,8 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                 textStyle:
                                                                     TextStyle(
                                                                   fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
+                                                                 fontWeight: FontWeight.w300,
+                                                                 fontFamily: 'Greycliff CF',
                                                                   color:
                                                                       AppColors
                                                                           .black,
@@ -977,7 +1015,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                         () {
                                                                       replyProvider
                                                                           .fetchReplies(
-                                                                              comment.id);
+                                                                              comment.id,context);
                                                                     });
                                                                   } else {
                                                                     await replyProvider.dislikeReply(
@@ -990,7 +1028,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                                         () {
                                                                       replyProvider
                                                                           .fetchReplies(
-                                                                              comment.id);
+                                                                              comment.id,context);
                                                                     });
                                                                   }
                                                                   print(
@@ -1101,7 +1139,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                     decoration: InputDecoration(
                       hintText: "Add a comment...",
                       hintStyle:
-                          TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 10, fontWeight: FontWeight.bold,fontFamily: 'Greycliff CF',),
                       contentPadding:
                           EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                       border: OutlineInputBorder(

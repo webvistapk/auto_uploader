@@ -127,332 +127,360 @@ class _PostWidgetState extends State<PostWidget> {
   //debugger();
     return SingleChildScrollView(
       physics: const ScrollPhysics(),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            if (widget.isSinglePost)
-              Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(10)),
-                        child: Image.network(
-                          widget.profileImageUrl == ''
-                              ? AppUtils.userImage
-                              : widget.profileImageUrl,
-                          width: 28,
-                          height: 28,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      if(false)
-                      Text(
-                        "${widget.username} Reposted this Photo",
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: AppColors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                ],
-              ),
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (widget.isSinglePost)
+            Column(
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  child: Image.network(
-                    widget.profileImageUrl == ''
-                        ? AppUtils.userImage
-                        : widget.profileImageUrl,
-                    width: 35,
-                    height: 35,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                widget.username,
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 7,
-                              ),
-                              Text(
-                                date!,
-                                style: GoogleFonts.inter(
-                                    fontSize: 7,
-                                    color: AppColors.darkGrey,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              if(false)
-                              Text(
-                                "Senior Journalist at Fox News",
-                                style: GoogleFonts.inter(
-                                    fontSize: 8,
-                                    color: AppColors.darkGrey,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                              if (false) ...[
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 2, horizontal: 8),
-                                  decoration: BoxDecoration(
-                                      color: AppColors.iconredColor,
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(3))),
-                                  child: Text(
-                                    "Chess with the best",
-                                    style: GoogleFonts.inter(
-                                        fontSize: 5,
-                                        color: AppColors.white,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                ),
-                              ]
-                            ],
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          if (!widget.isUserPost)
-                            Image.asset(
-                              AppIcons.three_dot,
-                              width: 15,
-                            ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            children: [
-                              Image.asset(AppIcons.eyes),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                widget.privacy??'',
-                                style: GoogleFonts.inter(
-                                  textStyle: TextStyle(
-                                      fontSize: 7, color: AppColors.lightGrey),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                if (widget.isUserPost == true)
-                  GestureDetector(
-                    key: iconKey, // Unique key for dynamic positioning
-                    onTap: () {
-                      _showOptionsMenu(
-                        context,
-                        iconKey,
-                      );
-                    },
-                    child: const Icon(Icons.more_vert, size: 20),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: widget.onPressed,
-              child: widget.isVideo
-                  ? _buildVideoPlayer(widget.mediaUrls[0])
-                  : Column(
-                      children: [
-                        _buildImageCarousel(widget.mediaUrls),
-                        //const SizedBox(height: 8),
-                      ],
-                    ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    ClipRRect(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(14)),
+                      child: Image.network(
+                        widget.profileImageUrl == ''
+                            ? AppUtils.userImage
+                            : widget.profileImageUrl,
+                        width: 28,
+                        height: 28,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
                     if(false)
                     Text(
-                      widget.location,
-                      style: GoogleFonts.inter(
-                        fontSize: 7,
-                        color: AppColors.darkGrey,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.inter(
-                            color: Colors.black, fontSize: 10),
-                        children: [
-                          TextSpan(
-                            text: '${widget.username}',
-                            style: GoogleFonts.publicSans(fontSize: 7),
-                          ),
-                        ],
+                      "${widget.username} Reposted this Photo",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.black,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(
-                  width: 5,
-                ),
-                Center(child: _buildImageIndicator(widget.mediaUrls.length)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (widget.isSinglePost)
-                      _buildInteractionIcon(AppIcons.star, widget.shares),
-                    const SizedBox(width: 10),
-                    _buildInteractionIcon(AppIcons.repost, widget.shares),
-                    const SizedBox(width: 10),
-                    _buildInteractionIcon(AppIcons.share, widget.shares),
-                    const SizedBox(width: 10),
-                    _buildInteractionIcon(AppIcons.favorite, widget.saved),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                        onTap: widget
-                            .onPressLiked, // Call _likePost when the like icon is clicked
-                        child: Column(
-                          children: [
-                            ImageIcon(
-                              AssetImage(widget.isLiked
-                                  ? AppIcons.heart_filled
-                                  : AppIcons.heart),
-                              size: 18,
-                              color:
-                                  widget.isLiked ? Colors.red : AppColors.black,
-                            ),
-                            // Icon(icon, size: 20),
-                            Text(widget.likes,
-                                style: GoogleFonts.inter(fontSize: 9)),
-                          ],
-                        )),
-                    if (!widget.postModel.interactions!
-                        .contains('comments')) ...[
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: widget.showCommentSection
-                            ? null
-                            : () => showComments(
-                                  widget.postId,
-                                  false,
-                                  context,
-                                  widget.scrollCommentId.toString(),
-                                  scrollOffset: widget.scrollOffset,
-                                  replyID: widget.scrollReplyID.toString(),
-                                  commentCount: int.parse(widget.comments),
-                                ),
-                        child: _buildInteractionIcon(AppIcons.comment,
-                            widget.comments //show comments count
-                            ),
-                      ),
-                    ],
-                    if (widget.postModel.interactions!.contains('polls')) ...[
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                          onTap: () {
-                            widget.postModel.polls!
-                                    .any((element) => element.isVoted == true)
-                                ? showPercentageResult(
-                                    context, widget.postModel.polls!)
-                                : showPollModal(
-                                    context,
-                                    widget.postModel.polls ?? [],
-                                    widget.postModel.pollTitle ?? '',
-                                    widget.postModel.pollDescription ?? '');
-                          },
-                          child: const Icon(
-                            Icons.poll_outlined,
-                            size: 20,
-                            color: Colors.black,
-                          )),
-                    ],
-                  ],
+                  height: 10,
                 ),
               ],
             ),
-            SizedBox(
-              height: 5,
-            ),
-            Text(
-              "${widget.caption}",
-              style: GoogleFonts.publicSans(
-                fontSize: 10,
-                color: AppColors.darkGrey,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                child: Image.network(
+                  widget.profileImageUrl == ''
+                      ? AppUtils.userImage
+                      : widget.profileImageUrl,
+                  width: 35,
+                  height: 35,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            widget.isSinglePost
-                ? !widget.postModel.interactions!.contains('comments')
-                    ? CommentWidget(
-                        postId: widget.postId,
-                        isReelScreen: false,
-                        commentIdToHighlight: widget.scrollCommentId.toString(),
-                        replyIdToHighlight: widget.scrollCommentId.toString(),
-                        scrollOffset: widget.scrollOffset,
-                        isSinglePost: widget.isSinglePost,
-                      )
-                    : Text(
-                        'Comments are disabled for this post',
-                        style: GoogleFonts.publicSans(
-                            color: AppColors.black, fontSize: 11),
-                      )
-                : InkWell(
-                    onTap: () {
-                      showComments(widget.postId, false, context,
-                          widget.scrollCommentId.toString(),
-                          replyID: widget.scrollCommentId.toString(),
-                          scrollOffset: widget.scrollOffset,
-                          commentCount: int.parse(widget.comments),
-                          isSinglePost: widget.isSinglePost);
-                    },
-                    child: Text(
-                      'View all ${widget.comments} comments',
-                      style: GoogleFonts.inter(color: Colors.grey, fontSize: 8),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              widget.username,
+                              style:TextStyle(
+                                fontSize: 11,
+                                color: AppColors.black,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Greycliff CF'
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 7,
+                            ),
+                            if(false)
+                            Text(
+                              date!,
+                              style: TextStyle(
+                                  fontSize: 7,
+                                  color: AppColors.darkGrey,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 16,),
+                        
+                        if(false)
+                        Row(
+                          children: [
+                            
+                            Text(
+                              "Senior Journalist at Fox News",
+                              style:TextStyle(
+                                  fontSize: 8,
+                                  color: AppColors.darkGrey,
+                                  ),
+                            ),
+                            if (false) ...[
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 2, horizontal: 8),
+                                decoration: BoxDecoration(
+                                    color: AppColors.iconredColor,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(3))),
+                                child: Text(
+                                  "Chess with the best",
+                                  style: TextStyle(
+                                      fontSize: 5,
+                                      color: AppColors.white,
+                                      ),
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
+                      ],
                     ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (widget.isUserPost)
+                          Image.asset(
+                            AppIcons.three_dot,
+                            width: 15,
+                          ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          children: [
+                            if(false)...[
+                            Image.asset(AppIcons.eyes),
+      
+                            ],
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              widget.privacy??'',
+                              style: TextStyle(
+                                
+                                    fontSize: 7, color: AppColors.lightGrey),
+                              
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // if (widget.isUserPost == true)
+              //   GestureDetector(
+              //     key: iconKey, // Unique key for dynamic positioning
+              //     onTap: () {
+              //       _showOptionsMenu(
+              //         context,
+              //         iconKey,
+              //       );
+              //     },
+              //     child: const Icon(Icons.more_vert, size: 20),
+              //   ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: widget.onPressed,
+            child: widget.isVideo
+                ? _buildVideoPlayer(widget.mediaUrls[0])
+                : Column(
+                    children: [
+                      _buildImageCarousel(widget.mediaUrls),
+                      //const SizedBox(height: 8),
+                    ],
                   ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric( horizontal: 8),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    //if(false)
+                    Text(
+                      widget.location,
+                      style: TextStyle(
+                        fontSize: 7,
+                        color: AppColors.darkGrey,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                            color: Colors.black, fontSize: 10),
+                        children: [
+                          TextSpan(
+                            text: '${widget.username}',
+                            style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'Greycliff CF'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 0,
+              ),
+              Center(child: _buildImageIndicator(widget.mediaUrls.length)),
+              SizedBox(
+                width: 35,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (widget.isSinglePost)
+                  if(false)...[
+                    _buildInteractionIcon(AppIcons.star, widget.shares),
+                  const SizedBox(width: 10),
+                  _buildInteractionIcon(AppIcons.repost, widget.shares),
+                  const SizedBox(width: 10),
+                  _buildInteractionIcon(AppIcons.share, widget.shares),
+                  const SizedBox(width: 10),
+                  
+                  _buildInteractionIcon(AppIcons.favorite, widget.saved),
+                  const SizedBox(width: 10),
+                  ],
+                  GestureDetector(
+                      onTap: widget
+                          .onPressLiked, // Call _likePost when the like icon is clicked
+                      child: Column(
+                        children: [
+                          ImageIcon(
+                            AssetImage(widget.isLiked
+                                ? AppIcons.heart_filled
+                                : AppIcons.heart),
+                            size: 18,
+                            color:
+                                widget.isLiked ? Colors.red : AppColors.black,
+                          ),
+                          // Icon(icon, size: 20),
+                          Text(widget.likes,
+                              style: TextStyle(fontSize: 9)),
+                        ],
+                      )),
+                  if (!widget.postModel.interactions!
+                      .contains('comments')) ...[
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: widget.showCommentSection
+                          ? null
+                          : () => showComments(
+                                widget.postId,
+                                false,
+                                context,
+                                widget.scrollCommentId.toString(),
+                                scrollOffset: widget.scrollOffset,
+                                replyID: widget.scrollReplyID.toString(),
+                                commentCount: int.parse(widget.comments),
+                              ),
+                      child: _buildInteractionIcon(AppIcons.comment,
+                          widget.comments //show comments count
+                          ),
+                    ),
+                  ],
+                  if (widget.postModel.interactions!.contains('polls')) ...[
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                        onTap: () {
+                          widget.postModel.polls!
+                                  .any((element) => element.isVoted == true)
+                              ? showPercentageResult(
+                                  context, widget.postModel.polls!)
+                              : showPollModal(
+                                  context,
+                                  widget.postModel.polls ?? [],
+                                  widget.postModel.pollTitle ?? '',
+                                  widget.postModel.pollDescription ?? '');
+                        },
+                        child: const Icon(
+                          Icons.poll_outlined,
+                          size: 20,
+                          color: Colors.black,
+                        )),
+                  ],
+                ],
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 2,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${widget.caption}",
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: AppColors.darkGrey,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Greycliff CF'
+                  ),
+                ),
+                const SizedBox(height: 8),
+                widget.isSinglePost
+                    ? !widget.postModel.interactions!.contains('comments')
+                        ? CommentWidget(
+                            postId: widget.postId,
+                            isReelScreen: false,
+                            commentIdToHighlight: widget.scrollCommentId.toString(),
+                            replyIdToHighlight: widget.scrollCommentId.toString(),
+                            scrollOffset: widget.scrollOffset,
+                            isSinglePost: widget.isSinglePost,
+                          )
+                        : Text(
+                            'Comments are disabled for this post',
+                            style: TextStyle(
+                                color: AppColors.black, fontSize: 11),
+                          )
+      
+                    :!widget.postModel.interactions!.contains('comments')?
+                     InkWell(
+                        onTap: () {
+                          showComments(widget.postId, false, context,
+                              widget.scrollCommentId.toString(),
+                              replyID: widget.scrollCommentId.toString(),
+                              scrollOffset: widget.scrollOffset,
+                              commentCount: int.parse(widget.comments),
+                              isSinglePost: widget.isSinglePost);
+                        },
+                        child: Text(
+                          'View all ${widget.comments} comments',
+                          style: TextStyle(color: Colors.grey, fontSize: 8),
+                        ),
+                      ):Container(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -468,7 +496,7 @@ class _PostWidgetState extends State<PostWidget> {
           size: 18,
         ),
         // Icon(icon, size: 20),
-        Text(count, style: GoogleFonts.inter(fontSize: 9)),
+        Text(count, style: TextStyle(fontSize: 9)),
       ],
     );
   }
@@ -525,14 +553,15 @@ class _PostWidgetState extends State<PostWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(widget.postTitle ?? '',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             color: AppColors.black,
                             fontWeight: FontWeight.w500,
+                            fontFamily: 'Greycliff CF',
                             fontSize: 18,
                           )),
                       Text(
                         widget.postDescription ?? '',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           color: AppColors.black,
                           fontSize: 10,
                         ),
@@ -550,18 +579,15 @@ class _PostWidgetState extends State<PostWidget> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image.asset(AppIcons.event_link, height: 15),
+                    ScreenIconBuild(AppIcons.event_link, "Event Link   "),
                     SizedBox(
                       height: 2,
                     ),
-                    Image.asset(AppIcons.service_link, height: 15),
+                    ScreenIconBuild(AppIcons.service_link, "Service Link"),
                     SizedBox(
                       height: 2,
                     ),
-                    Image.asset(
-                      AppIcons.group_name,
-                      height: 15,
-                    ),
+                    ScreenIconBuild(AppIcons.group_name, "Group Name"),
                   ],
                 ),
               ),
@@ -598,13 +624,33 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
+   Widget ScreenIconBuild(String image,labelText){
+            return Container(
+                      padding: EdgeInsets.only(left: 2,right: 20,top: 2,bottom: 2),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(83, 0, 0, 0)
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Image.asset(image, height: 14),
+                          SizedBox(width: 4,),
+                          Text(labelText,style: TextStyle(
+                            fontSize: 8,
+                            color: AppColors.white
+                          ),)
+                        ],
+                      )
+                      );
+          }
+
   Widget _buildImageIndicator(int itemCount) {
     return itemCount < 2
         ? Container()
         : Row(
             //  Text(
             //     '${_currentImageIndex + 1} of $itemCount', // Display "1 of 4" format
-            //     style: GoogleFonts.inter(
+            //     style: TextStyle(
             //       fontSize: 10,
             //       color: AppColors.darkGrey, // Customize color as needed
             //     ),
@@ -623,6 +669,7 @@ class _PostWidgetState extends State<PostWidget> {
               );
             }),
           );
+
   }
 
   void _showOptionsMenu(BuildContext context, GlobalKey key) {

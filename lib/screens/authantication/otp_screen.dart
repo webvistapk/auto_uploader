@@ -117,126 +117,124 @@ class _OtpScreenState extends State<OtpScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return SafeArea(
-      child: Builder(builder: (context) {
-        var pro = context.watch<AuthProvider>();
-        return Scaffold(
-          body: FocusScope(
-            // Wrap with FocusScope to manage focus properly
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20, top: 20),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            CupertinoDialogRoute(
-                              builder: (_) => LoginScreen(),
-                              context: context,
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        child: const Icon(Icons.arrow_back_ios, size: 25),
-                      ),
-                    ),
-                    SizedBox(height: size.height * 0.02),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 15, left: 30),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Enter 6-digit code",
-                            style: AppTextStyles.poppinsBold(),
+    return Builder(builder: (context) {
+      var pro = context.watch<AuthProvider>();
+      return Scaffold(
+        body: FocusScope(
+          // Wrap with FocusScope to manage focus properly
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20, top: 20),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          CupertinoDialogRoute(
+                            builder: (_) => LoginScreen(),
+                            context: context,
                           ),
-                          SizedBox(height: size.height * 0.05),
-                          Text(
-                            "Enter 6-digit code that was sent to your phone",
+                          (route) => false,
+                        );
+                      },
+                      child: const Icon(Icons.arrow_back_ios, size: 25),
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.02),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15, left: 30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Enter 6-digit code",
+                          style: AppTextStyles.poppinsBold(),
+                        ),
+                        SizedBox(height: size.height * 0.05),
+                        Text(
+                          "Enter 6-digit code that was sent to your phone",
+                          style: AppTextStyles.poppinsSemiBold(
+                              color: AppColors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.05),
+                  Center(
+                    child: Pinput(
+                      length: 6,
+                      controller: _otpController,
+                      autofocus: true,
+                      keyboardType: TextInputType.number,
+                      defaultPinTheme: PinTheme(
+                        width: 40,
+                        height: 55,
+                        textStyle: Theme.of(context).textTheme.titleLarge,
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: AppColors.grey,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        otp = value;
+                      },
+                      onCompleted: (pin) async {
+                        FocusScope.of(context).unfocus(); // Unfocus here
+                        await _submitOtp(pin, pro);
+                      },
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.05),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30),
+                    child: _start == 0
+                        ? TextButton(
+                            onPressed: () {
+                              FocusScope.of(context).unfocus();
+                              _resendOtp();
+                            },
+                            child: Text(
+                              "Resend code",
+                              style: AppTextStyles.poppinsSemiBold(
+                                  color: AppColors.primary),
+                            ),
+                          )
+                        : Text(
+                            "Resend code in $_start s",
                             style: AppTextStyles.poppinsSemiBold(
                                 color: AppColors.grey),
                           ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: size.height * 0.05),
-                    Center(
-                      child: Pinput(
-                        length: 6,
-                        controller: _otpController,
-                        autofocus: true,
-                        keyboardType: TextInputType.number,
-                        defaultPinTheme: PinTheme(
-                          width: 40,
-                          height: 55,
-                          textStyle: Theme.of(context).textTheme.titleLarge,
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: AppColors.grey,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                        onChanged: (value) {
-                          otp = value;
-                        },
-                        onCompleted: (pin) async {
-                          FocusScope.of(context).unfocus(); // Unfocus here
-                          await _submitOtp(pin, pro);
-                        },
-                      ),
-                    ),
-                    SizedBox(height: size.height * 0.05),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30),
-                      child: _start == 0
-                          ? TextButton(
-                              onPressed: () {
-                                FocusScope.of(context).unfocus();
-                                _resendOtp();
-                              },
-                              child: Text(
-                                "Resend code",
-                                style: AppTextStyles.poppinsSemiBold(
-                                    color: AppColors.primary),
-                              ),
-                            )
-                          : Text(
-                              "Resend code in $_start s",
-                              style: AppTextStyles.poppinsSemiBold(
-                                  color: AppColors.grey),
-                            ),
-                    ),
-                    if (pro.isLoading)
-                      const Center(
-                        child: SpinKitCircle(
-                          color: AppColors.primary,
-                          size: 60.0,
-                        ),
-                      ),
-                  ],
-                ),
-                if (pro.isResend)
-                  Container(
-                    color: Colors.black.withOpacity(0.5),
-                    child: const Center(
+                  ),
+                  if (pro.isLoading)
+                    const Center(
                       child: SpinKitCircle(
-                        color: AppColors.blue,
+                        color: AppColors.primary,
                         size: 60.0,
                       ),
                     ),
+                ],
+              ),
+              if (pro.isResend)
+                Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: const Center(
+                    child: SpinKitCircle(
+                      color: AppColors.blue,
+                      size: 60.0,
+                    ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
-        );
-      }),
-    );
+        ),
+      );
+    });
   }
 }

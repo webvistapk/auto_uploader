@@ -42,148 +42,161 @@ class _ChatScreenState extends State<ChatScreen> {
       var pro = context.watch<ChatProvider>();
       return DefaultTabController(
         length: 4,
-        child: SafeArea(
-          child: Scaffold(
-            body: Stack(
-              children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Column(
-                    children: [
-                      Material(
-                        elevation: 0.3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Account name',
+                                style: TextStyle(fontFamily: 'Greycliff CF',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16),
+                              ),
+                              Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                          centerTitle: true,
+          ),
+          body: Stack(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 5),
+                child: Column(
+                  children: [
+                    Material(
+                      elevation: 0.3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // const Row(
+                          //   mainAxisAlignment: MainAxisAlignment.center,
+                          //   children: [
+                          //     Text(
+                          //       'Account name',
+                          //       style: TextStyle(
+                          //           fontWeight: FontWeight.bold,
+                          //           fontSize: 16),
+                          //     ),
+                          //     Icon(Icons.arrow_drop_down),
+                          //   ],
+                          // ),
+                          // GestureDetector(
+                          //     onTap: () {
+                          //       Navigator.pop(context);
+                          //     },
+                          //     child: const Icon(Icons.arrow_back)),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 8, right: 30, top: 5, bottom: 5),
+                            child: Row(
                               children: [
-                                Text(
-                                  'Account name',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                                Icon(Icons.arrow_drop_down),
-                              ],
-                            ),
-                            GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Icon(Icons.arrow_back)),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 8, right: 30, top: 5, bottom: 5),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: SizedBox(
-                                      height: 36,
-                                      child: TextField(
-                                        decoration: InputDecoration(
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            borderSide: const BorderSide(
-                                                color: Colors.blue),
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            borderSide: const BorderSide(
-                                                color: Colors.grey),
-                                          ),
-                                          filled: true,
-                                          fillColor: Colors.white,
-                                          prefixIcon: const Icon(
-                                              Icons.search_rounded,
-                                              color: Colors.grey),
-                                          hintText: 'Search',
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  vertical: 8.0),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 36,
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          borderSide: const BorderSide(
+                                              color: Colors.blue),
                                         ),
-                                        style: const TextStyle(fontSize: 14),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          borderSide: const BorderSide(
+                                              color: Colors.grey),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        prefixIcon: const Icon(
+                                            Icons.search_rounded,
+                                            color: Colors.grey),
+                                        hintText: 'Search',
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                vertical: 8.0),
                                       ),
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   ),
-                                  const SizedBox(width: 25),
-                                  GestureDetector(
+                                ),
+                                const SizedBox(width: 25),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        CupertinoDialogRoute(
+                                            builder: (_) => NewMessageScreen(
+                                                showCheckbox: false),
+                                            context: context));
+                                  },
+                                  child: const Image(
+                                      width: 28,
+                                      height: 28,
+                                      image: AssetImage(
+                                          'assets/images/edit-button.png')),
+                                )
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    _buildTabItem('All', 0),
+                                    _buildTabItem('Conversations', 1),
+                                    _buildTabItem('Clubs', 2),
+                                  ],
+                                ),
+                                Flexible(
+                                  child: InkWell(
                                     onTap: () {
                                       Navigator.push(
                                           context,
-                                          CupertinoDialogRoute(
-                                              builder: (_) => NewMessageScreen(
-                                                  showCheckbox: false),
-                                              context: context));
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MessageRequestScreen(
+                                                    userProfile:
+                                                        widget.userProfile,
+                                                  )));
                                     },
-                                    child: const Image(
-                                        width: 28,
-                                        height: 28,
-                                        image: AssetImage(
-                                            'assets/images/edit-button.png')),
-                                  )
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      _buildTabItem('All', 0),
-                                      _buildTabItem('Conversations', 1),
-                                      _buildTabItem('Clubs', 2),
-                                    ],
-                                  ),
-                                  Flexible(
-                                    child: InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    MessageRequestScreen(
-                                                      userProfile:
-                                                          widget.userProfile,
-                                                    )));
-                                      },
-                                      child: Container(
-                                        child: const Text(
-                                          'Requests',
-                                          style: TextStyle(
-                                            color: Colors.blue,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
+                                    child: Container(
+                                      child: const Text(
+                                        'Requests',
+                                        style: TextStyle(
+                                          color: Colors.blue,fontFamily: 'Greycliff CF',
+                                          fontWeight: FontWeight.bold,
                                         ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            // Add chat list or other components below
-                          ],
-                        ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          // Add chat list or other components below
+                        ],
                       ),
-                      ChatList(
-                        userProfile: widget.userProfile,
-                        chatProvider: pro,
-                      ),
-                    ],
-                  ),
+                    ),
+                    ChatList(
+                      userProfile: widget.userProfile,
+                      chatProvider: pro,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
@@ -198,7 +211,7 @@ class _ChatScreenState extends State<ChatScreen> {
         padding: const EdgeInsets.only(right: 30.0),
         child: Text(
           title,
-          style: TextStyle(
+          style: TextStyle(fontFamily: 'Greycliff CF',
             fontWeight:
                 _selectedTab == index ? FontWeight.bold : FontWeight.normal,
             color: _selectedTab == index ? Colors.black : Colors.grey,

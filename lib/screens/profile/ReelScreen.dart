@@ -21,6 +21,7 @@ class ReelScreen extends StatefulWidget {
   String? commentHightlightId;
   String? replyHighlightId;
   final bool isUserScreen;
+  final String? commentCount;
 
    ReelScreen({
     Key? key,
@@ -32,6 +33,7 @@ class ReelScreen extends StatefulWidget {
     this.commentHightlightId,
     this.replyHighlightId,
     required this.isUserScreen,
+    this.commentCount,
   }) : super(key: key);
 
   @override
@@ -67,7 +69,7 @@ class _ReelScreenState extends State<ReelScreen> {
     if (widget.isNotificationReel == true && widget.reelId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(seconds: 1), () {
-          showComments(widget.reelId!,true,context,'');
+          showComments(widget.reelId!,true,context,'',commentCount: int.parse(widget?.commentCount??'0'));
         });
       });
     }
@@ -189,7 +191,7 @@ class _ReelScreenState extends State<ReelScreen> {
                       },
                       itemBuilder: (BuildContext context, int index) {
                         //debugger();
-                        print("RELL URL : ${reels![index].file}");
+                        //print("RELL URL : ${reels![index].file}");
                         return ReelPost(
                           src: reels![index].file,
                         );
@@ -236,7 +238,7 @@ class _ReelScreenState extends State<ReelScreen> {
                               onTap: () {
                 //                debugger();
                                 showComments(
-                                    _reels[_currentIndex].id.toString(),true,context,widget.commentHightlightId.toString(),replyID: widget.replyHighlightId);
+                                    _reels[_currentIndex].id.toString(),true,context,widget.commentHightlightId.toString(),replyID: widget.replyHighlightId, commentCount:  _reels[_currentIndex].commentsCount);
                               },
                               child: Icon(
                                 Icons.messenger,

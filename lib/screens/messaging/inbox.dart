@@ -133,173 +133,162 @@ class _InboxScreenState extends State<InboxScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Consumer<ChatController>(
-          builder: (context, chatController, child) {
-            return Stack(
-              children: [
-                Column(
-                  children: [
-                    Material(
-                      elevation: 0.3,
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Icon(Icons.arrow_back),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Container(
-                                  width: 35,
-                                  height: 35,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey),
-                                  ),
-                                  child: Image(
-                                    width: 28,
-                                    height: 28,
-                                    image: NetworkImage(
-                                      widget.participantImage ??
-                                          "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg",
-                                    ),
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.chatName ?? 'Unknown',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              Container(
-                                decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey)),
-                                child: const Padding(
-                                    padding: EdgeInsets.all(5.0),
-                                    child: Icon(
-                                      Icons.phone,
-                                      size: 18,
-                                    )),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey)),
-                                  child: const Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: Icon(
-                                        Icons.video_call,
-                                        size: 18,
-                                      )),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Chat List
-                    Expanded(
-                      child: chatController.isMessageLoading &&
-                              chatController.messages.isEmpty
-                          ? Center(
-                              child: CircularProgressIndicator.adaptive(),
-                            )
-                          : chatController.messages.isEmpty
-                              ? Center(
-                                  child: Text(
-                                      "Say Hello ${widget.chatModel.name}"))
-                              : ListView.builder(
-                                  controller: _scrollController,
-                                  padding: const EdgeInsets.all(16),
-                                  itemCount: chatController.messages.length,
-                                  itemBuilder: (context, index) {
-                                    final message =
-                                        chatController.messages[index];
-                                    bool isOwnMessage =
-                                        message.senderUsername ==
-                                            widget.userProfile.username;
-
-                                    final formatDate =
-                                        formatDateString(message.createdAt);
-                                    final formatTime =
-                                        formatDateString(message.createdAt);
-                                    if (isOwnMessage) {
-                                      return OwnMessage(
-                                        text: message.content,
-                                        timestampDate: formatDate,
-                                        timestampTime: formatTime,
-                                        mediaList: message.media,
-                                      );
-                                    } else {
-                                      return buildUserMessage(
-                                        timestamp: formatDate,
-                                        userProfile: widget.userProfile,
-                                        messageModel: message,
-                                      );
-                                    }
-                                  },
-                                ),
-                    ),
-                    // Input Field
-                    ChatInputField(
-                      messageController: messageController,
-                      onPressedSend: () async {
-                        try {
-                          await chatController.sendMessage(
-                            messageController.text.trim(),
-                            widget.chatModel.id,
-                            [],
-                          );
-
-                          // Clear the input field and scroll to the bottom
-                          if (mounted) {
-                            setState(() {
-                              messageController.clear();
-                            });
-                            Future.delayed(
-                                Duration(seconds: 1), _scrollToBottom);
-                          }
-                        } catch (e) {
-                          //ToastNotifier.showErrorToast(context, e.toString());
-                        }
-                      },
-                      chatModel: widget.chatModel,
-                    ),
-                  ],
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            InkWell(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(Icons.arrow_back),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                width: 35,
+                height: 35,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
                 ),
-                if (moreLoading)
-                  Positioned(
-                    top: 30, // Aligns the loader at the top
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                child: Image(
+                  width: 28,
+                  height: 28,
+                  image: NetworkImage(
+                    widget.participantImage ??
+                        "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg",
                   ),
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.chatName ?? 'Unknown',
+                  style: TextStyle(fontFamily: 'Greycliff CF',
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
-            );
-          },
+            ),
+          ],
         ),
+        centerTitle: false,
+        actions: [
+          Container(
+            decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+            child: const Padding(
+                padding: EdgeInsets.all(5.0),
+                child: Icon(
+                  Icons.phone,
+                  size: 18,
+                )),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Container(
+              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+              child: const Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Icon(
+                    Icons.video_call,
+                    size: 18,
+                  )),
+            ),
+          ),
+        ],
+      ),
+      body: Consumer<ChatController>(
+        builder: (context, chatController, child) {
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  // Chat List
+                  Expanded(
+                    child: chatController.isMessageLoading &&
+                            chatController.messages.isEmpty
+                        ? Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          )
+                        : chatController.messages.isEmpty
+                            ? Center(
+                                child:
+                                    Text("Say Hello ${widget.chatModel.name}"))
+                            : ListView.builder(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.all(16),
+                                itemCount: chatController.messages.length,
+                                itemBuilder: (context, index) {
+                                  final message =
+                                      chatController.messages[index];
+                                  bool isOwnMessage = message.senderUsername ==
+                                      widget.userProfile.username;
+
+                                  final formatDate =
+                                      formatDateString(message.createdAt);
+                                  final formatTime =
+                                      formatDateString(message.createdAt);
+                                  if (isOwnMessage) {
+                                    return OwnMessage(
+                                      text: message.content,
+                                      timestampDate: formatDate,
+                                      timestampTime: formatTime,
+                                      mediaList: message.media,
+                                    );
+                                  } else {
+                                    return buildUserMessage(
+                                      timestamp: formatDate,
+                                      userProfile: widget.userProfile,
+                                      messageModel: message,
+                                    );
+                                  }
+                                },
+                              ),
+                  ),
+                  // Input Field
+                  ChatInputField(
+                    messageController: messageController,
+                    onPressedSend: () async {
+                      try {
+                        await chatController.sendMessage(
+                          messageController.text.trim(),
+                          widget.chatModel.id,
+                          [],
+                        );
+
+                        // Clear the input field and scroll to the bottom
+                        if (mounted) {
+                          setState(() {
+                            messageController.clear();
+                          });
+                          Future.delayed(Duration(seconds: 1), _scrollToBottom);
+                        }
+                      } catch (e) {
+                        //ToastNotifier.showErrorToast(context, e.toString());
+                      }
+                    },
+                    chatModel: widget.chatModel,
+                  ),
+                ],
+              ),
+              if (moreLoading)
+                Positioned(
+                  top: 30, // Aligns the loader at the top
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

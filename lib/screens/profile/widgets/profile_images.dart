@@ -156,12 +156,11 @@ class _ProfileImagesState extends State<ProfileImages> {
   Widget tabText(String text){
     return Text(text,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.publicSans(
-                      textStyle: TextStyle(
+                    style: TextStyle(
                           fontSize: 10,
                           color: Color(0XFF010101)
                       )
-                    ),
+                    
                   );
   }
 }

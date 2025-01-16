@@ -70,7 +70,7 @@ class _profile_infoState extends State<profile_info> {
               message,
               style: TextStyle(
                   color: AppColors.greyColor,
-                  fontSize: paragraph * 0.35,
+                  fontSize: paragraph * 0.35,fontFamily: 'Greycliff CF',
                   fontWeight: FontWeight.normal),
             ),
           )

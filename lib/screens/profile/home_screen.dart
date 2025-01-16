@@ -10,6 +10,7 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/endpoints.dart';
+import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/models/UserProfile/userstatus.dart';
@@ -129,8 +130,7 @@ if(mounted)
           padding: const EdgeInsets.all(8.0),
           child: Image.asset(
             AppIcons.calender,
-            height: 24,
-            width: 24,
+            width: 25,
           ),
         ),
         bottom: PreferredSize(
@@ -147,24 +147,24 @@ if(mounted)
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 40,bottom: 0),
-                  child: Container(
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: AppColors.darkGrey,
-                      borderRadius: BorderRadius.circular(10)
-                    ),
-                    child: Image.asset(
-                            AppIcons.addIcon, // Small "+" icon
-                            height: 5,
-                            color: AppColors.white,
-                          ),
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.only(left: 40,bottom: 0),
+                //   child: Container(
+                //     padding: EdgeInsets.all(2),
+                //     decoration: BoxDecoration(
+                //       color: AppColors.darkGrey,
+                //       borderRadius: BorderRadius.circular(10)
+                //     ),
+                //     child: Image.asset(
+                //             AppIcons.addIcon, // Small "+" icon
+                //             height: 5,
+                //             color: AppColors.white,
+                //           ),
+                //   ),
+                // ),
                 TabBar(
                   controller: _tabController,
-                  padding: EdgeInsets.only(bottom: 0,top: 0),
+                  padding: EdgeInsets.symmetric(horizontal: 45,vertical: 0),
                   tabs: const [
                     Tab(child: Text('Content')),
                     Tab(child: Text('Disclosure')),
@@ -176,7 +176,7 @@ if(mounted)
         ),
         actions: [
           IconButton(
-            icon: Image.asset(AppIcons.bell,color: AppColors.black,),
+            icon: Image.asset(AppIcons.bell,color: AppColors.black,width: 25,),
             onPressed: () {
               Navigator.push(
                   context,
@@ -266,15 +266,8 @@ if(mounted)
                   //         }),
                   //       ),
                   //       const Divider(thickness: 1),
-                        _posts.isEmpty
-                            ? Center(
-                                child: Text(
-                                  "No Post Available Right Now",
-                                  style: AppTextStyles.poppinsBold(),
-                                ),
-                              )
-                            : Padding(
-                                padding: const EdgeInsets.all(8.0),
+                        Padding(
+                                padding: const EdgeInsets.all(4.0),
                                 child: Consumer<PostProvider>(
                                     builder: (context, postProvider, child) {
                                   return ListView.builder(
@@ -542,9 +535,9 @@ Widget _UserStory() {
     return PostWidget(
       postId: post.id.toString(),
       username: post.user.username,
-      location: 'Location',
+      location: '',
       date: post.createdAt,
-      caption: '',
+      caption: post.post,
       mediaUrls: fullMediaUrls,
       profileImageUrl: post.user.profileImage != null
           ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
@@ -552,9 +545,9 @@ Widget _UserStory() {
       isVideo:
           post.media.any((media) => media.mediaType == 'video') ? true : false,
       likes: post.likesCount.toString(),
-      comments: post.commentsCount.toString(),
-      shares: "50",
-      saved: "50",
+      comments: Provider.of<CommentProvider>(context,listen: false).commentCount.toString(),
+      shares: "",
+      saved: "",
       refresh: () {},
       showCommentSection: false,
       isInteractive: true,
@@ -758,159 +751,157 @@ if(mounted)
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            Center(
-              child: _isLoading
-                  ? CircularProgressIndicator()
-                  : widget.isVideo &&
-                          _videoController != null &&
-                          _videoController!.value.isInitialized
-                      ? AspectRatio(
-                          aspectRatio: _videoController!.value.aspectRatio,
-                          child: VideoPlayer(_videoController!),
-                        )
-                      : Image.network(
-                          '${ApiURLs.baseUrl2}${widget.statuses[_currentIndex]}',
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Icon(Icons.error, color: Colors.white),
-                          height: MediaQuery.of(context).size.height,
-                          width: MediaQuery.of(context).size.width,
-                        ),
-            ),
-            GestureDetector(
-              onTapUp: (details) {
-                final screenWidth = MediaQuery.of(context).size.width;
-                if (details.globalPosition.dx < screenWidth / 2) {
-                  if (_currentIndex > 0) _onPreviousStatus();
-                } else {
-                  if (_currentIndex < widget.statuses.length - 1) {
-                    _onNextStatus();
-                  } else {
-                    Navigator.of(context).pop();
-                  }
-                }
-              },
-              onLongPressStart: (_) {
-                _animationController.stop();
-                _timer?.cancel();
-                _videoController?.pause();
-              },
-              onLongPressEnd: (_) {
-                _animationController.forward();
-                _timer = Timer(
-                    _animationController.duration! *
-                        (1.0 - _animationController.value),
-                    _onNextStatus);
-                _videoController?.play();
-              },
-            ),
-            Positioned(
-              top: 40,
-              left: 20,
-              child: IconButton(
-                icon: Icon(Icons.close, color: Colors.white, size: 30),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-            Positioned(
-              top: 10,
-              left: 10,
-              right: 10,
-              child: Row(
-                children: List.generate(
-                  widget.statuses.length,
-                  (index) => Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      child: Stack(
-                        children: [
-                          Container(
-                            height: 3,
-                            color: Colors.grey.shade400,
-                          ),
-                          index == _currentIndex
-                              ? AnimatedBuilder(
-                                  animation: _animationController,
-                                  builder: (context, child) {
-                                    return Container(
-                                      height: 3,
-                                      width: MediaQuery.of(context).size.width *
-                                          _animationController.value,
-                                      color: Colors.white,
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  height: 3,
-                                  color: index < _currentIndex
-                                      ? Colors.white
-                                      : Colors.transparent,
-                                ),
-                        ],
+      body: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          Center(
+            child: _isLoading
+                ? CircularProgressIndicator()
+                : widget.isVideo &&
+                        _videoController != null &&
+                        _videoController!.value.isInitialized
+                    ? AspectRatio(
+                        aspectRatio: _videoController!.value.aspectRatio,
+                        child: VideoPlayer(_videoController!),
+                      )
+                    : Image.network(
+                        '${ApiURLs.baseUrl2}${widget.statuses[_currentIndex]}',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Icon(Icons.error, color: Colors.white),
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
                       ),
+          ),
+          GestureDetector(
+            onTapUp: (details) {
+              final screenWidth = MediaQuery.of(context).size.width;
+              if (details.globalPosition.dx < screenWidth / 2) {
+                if (_currentIndex > 0) _onPreviousStatus();
+              } else {
+                if (_currentIndex < widget.statuses.length - 1) {
+                  _onNextStatus();
+                } else {
+                  Navigator.of(context).pop();
+                }
+              }
+            },
+            onLongPressStart: (_) {
+              _animationController.stop();
+              _timer?.cancel();
+              _videoController?.pause();
+            },
+            onLongPressEnd: (_) {
+              _animationController.forward();
+              _timer = Timer(
+                  _animationController.duration! *
+                      (1.0 - _animationController.value),
+                  _onNextStatus);
+              _videoController?.play();
+            },
+          ),
+          Positioned(
+            top: 40,
+            left: 20,
+            child: IconButton(
+              icon: Icon(Icons.close, color: Colors.white, size: 30),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+          Positioned(
+            top: 10,
+            left: 10,
+            right: 10,
+            child: Row(
+              children: List.generate(
+                widget.statuses.length,
+                (index) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 3,
+                          color: Colors.grey.shade400,
+                        ),
+                        index == _currentIndex
+                            ? AnimatedBuilder(
+                                animation: _animationController,
+                                builder: (context, child) {
+                                  return Container(
+                                    height: 3,
+                                    width: MediaQuery.of(context).size.width *
+                                        _animationController.value,
+                                    color: Colors.white,
+                                  );
+                                },
+                              )
+                            : Container(
+                                height: 3,
+                                color: index < _currentIndex
+                                    ? Colors.white
+                                    : Colors.transparent,
+                              ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
-            widget.isUser
-                ? Positioned(
-                    bottom: 40,
-                    child: GestureDetector(
-                      onTap: _showViewers,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                              onTap: () {
-                                Provider.of<MediaProvider>(context,listen: false).deleteUserStories(widget.statusId![_currentIndex]!.toInt(), context);
-                              },
-                              child: Icon(
-                                Icons.delete,
-                                size: 27,
-                                color: Colors.white,
-                              )),
-                          SizedBox(width: 15),
-                          Icon(Icons.remove_red_eye, color: Colors.white),
-                          SizedBox(width: 5),
-                          Text(
-                            '${widget.viewers.length}',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                          SizedBox(width: 10),
-                          GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                Navigator.push(
-                                    context,
-                                    CupertinoDialogRoute(
-                                        builder: (_) => StoryScreen(
-                                              userProfile: widget.userProfile,
-                                              token: widget.token,
-                                            ),
-                                        context: context));
-                              },
-                              child: Icon(
-                                Icons.add_circle_outline,
-                                size: 27,
-                                color: Colors.white,
-                              )),
-
-
-                        ],
-                      ),
+          ),
+          widget.isUser
+              ? Positioned(
+                  bottom: 40,
+                  child: GestureDetector(
+                    onTap: _showViewers,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                            onTap: () {
+                              Provider.of<MediaProvider>(context,listen: false).deleteUserStories(widget.statusId![_currentIndex]!.toInt(), context);
+                            },
+                            child: Icon(
+                              Icons.delete,
+                              size: 27,
+                              color: Colors.white,
+                            )),
+                        SizedBox(width: 15),
+                        Icon(Icons.remove_red_eye, color: Colors.white),
+                        SizedBox(width: 5),
+                        Text(
+                          '${widget.viewers.length}',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                        SizedBox(width: 10),
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(
+                                  context,
+                                  CupertinoDialogRoute(
+                                      builder: (_) => StoryScreen(
+                                            userProfile: widget.userProfile,
+                                            token: widget.token,
+                                          ),
+                                      context: context));
+                            },
+                            child: Icon(
+                              Icons.add_circle_outline,
+                              size: 27,
+                              color: Colors.white,
+                            )),
+      
+      
+                      ],
                     ),
-                  )
-                : Container(),
-          ],
-        ),
+                  ),
+                )
+              : Container(),
+        ],
       ),
     );
   }
@@ -937,7 +928,7 @@ if(mounted)
             children: [
               Text(
                 'Viewers',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18,fontFamily: 'Greycliff CF', fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
               Expanded(

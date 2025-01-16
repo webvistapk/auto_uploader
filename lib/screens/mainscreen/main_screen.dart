@@ -126,95 +126,91 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Builder(builder: (context) {
-        var pro = context.watch<AuthProvider>();
-        return pro.isLoading
-            ? Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              )
-            : Scaffold(
-                body: selectedItem == 0
-                    ? HomeScreen(
-                        userProfile: widget.userProfile,
-                        token: widget.authToken,
-                      )
-                    : selectedItem == 1
-                        ? SearchScreen(
-                            authToken: widget.authToken,
-                          )
-                        : selectedItem == 2
-                            ? CreatePostScreen(
-                                token: widget.authToken,
-                                userProfile: widget.userProfile,
-                              )
-                            : selectedItem == 3
-                                ? ChatScreen(
-                                    userProfile: widget.userProfile!,
-                                  )
-                                : selectedItem == 4
-                                    ? ProfileScreen(
-                                        id: widget.userProfile.id,
-                                        userProfile: widget.userProfile,
-                                        authToken: widget.authToken,
-                                      )
-                                    : _pages[selectedItem],
-                bottomNavigationBar: SafeArea(
-                  child: SalomonBottomBar(
-                    backgroundColor: AppColors.deepdarkgreyColor,
-                    unselectedItemColor: AppColors.white,
-                    selectedItemColor: AppColors.white,
-                    selectedColorOpacity: 0,
-                    currentIndex: selectedItem,
-                    itemPadding:
-                        EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    onTap: (index) {
-                      // if(index==1){
-                      // showSearch(context: context, delegate: CustomSearchDelegate());
-                      // }
-                      // else{
-
-                      setState(() {
-                        selectedItem = index;
-                      });
-                      // }
-                    },
-                    items: [
-                      /// Home
-                      _buildBottomBarItem(
-                        icon: AppIcons.home,
-                        isSelected: selectedItem == 0,
-                      ),
-
-                      /// Search
-                      _buildBottomBarItem(
-                        icon: AppIcons.search,
-                        isSelected: selectedItem == 1,
-                      ),
-
-                      /// Add
-                      _buildBottomBarItem(
-                        icon: AppIcons.add_item,
-                        isSelected: selectedItem == 2,
-                      ),
-
-                      /// Messages
-                      _buildBottomBarItem(
-                        icon: AppIcons.message,
-                        isSelected: selectedItem == 3,
-                      ),
-
-                      /// Profile
-                      _buildBottomBarItem(
-                        icon: AppIcons.profile,
-                        isSelected: selectedItem == 4,
-                      ),
-                    ],
+    return Builder(builder: (context) {
+      var pro = context.watch<AuthProvider>();
+      return pro.isLoading
+          ? Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            )
+          : Scaffold(
+              body: selectedItem == 0
+                  ? HomeScreen(
+                      userProfile: widget.userProfile,
+                      token: widget.authToken,
+                    )
+                  : selectedItem == 1
+                      ? SearchScreen(
+                          authToken: widget.authToken,
+                        )
+                      : selectedItem == 2
+                          ? CreatePostScreen(
+                              token: widget.authToken,
+                              userProfile: widget.userProfile,
+                            )
+                          : selectedItem == 3
+                              ? ChatScreen(
+                                  userProfile: widget.userProfile!,
+                                )
+                              : selectedItem == 4
+                                  ? ProfileScreen(
+                                      id: widget.userProfile.id,
+                                      userProfile: widget.userProfile,
+                                      authToken: widget.authToken,
+                                    )
+                                  : _pages[selectedItem],
+              bottomNavigationBar: SalomonBottomBar(
+                backgroundColor: AppColors.deepdarkgreyColor,
+                unselectedItemColor: AppColors.white,
+                selectedItemColor: AppColors.white,
+                selectedColorOpacity: 0,
+                currentIndex: selectedItem,
+                itemPadding:
+                    EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                onTap: (index) {
+                  // if(index==1){
+                  // showSearch(context: context, delegate: CustomSearchDelegate());
+                  // }
+                  // else{
+                  
+                  setState(() {
+                    selectedItem = index;
+                  });
+                  // }
+                },
+                items: [
+                  /// Home
+                  _buildBottomBarItem(
+                    icon: AppIcons.home,
+                    isSelected: selectedItem == 0,
                   ),
-                ),
-              );
-      }),
-    );
+                  
+                  /// Search
+                  _buildBottomBarItem(
+                    icon: AppIcons.search,
+                    isSelected: selectedItem == 1,
+                  ),
+                  
+                  /// Add
+                  _buildBottomBarItem(
+                    icon: AppIcons.add_item,
+                    isSelected: selectedItem == 2,
+                  ),
+                  
+                  /// Messages
+                  _buildBottomBarItem(
+                    icon: AppIcons.message,
+                    isSelected: selectedItem == 3,
+                  ),
+                  
+                  /// Profile
+                  _buildBottomBarItem(
+                    icon: AppIcons.profile,
+                    isSelected: selectedItem == 4,
+                  ),
+                ],
+              ),
+            );
+    });
   }
 
   SalomonBottomBarItem _buildBottomBarItem({

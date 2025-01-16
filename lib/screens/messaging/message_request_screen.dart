@@ -39,70 +39,85 @@ class _MessageRequestScreenState extends State<MessageRequestScreen> {
       var pro = context.watch<ChatProvider>();
       return DefaultTabController(
         length: 4,
-        child: SafeArea(
-          child: Scaffold(
-            body: Stack(
+        child: Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Row(
+            
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Column(
-                    children: [
-                      Material(
-                        elevation: 0.3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Message Request',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                                Icon(Icons.arrow_drop_down),
-                              ],
-                            ),
-                            InkWell(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Icon(Icons.arrow_back)),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                _buildTabItem('All', 0),
-                                _buildTabItem('Conversations', 1),
-                                _buildTabItem('Clubs', 2),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            // Add chat list or other components below
-                          ],
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          customContainer('Hidden', 0),
-                          customContainer('Date Posted', 1),
-                          customContainer('Promotions', 2),
-                        ],
-                      ),
-                      ChatList(
-                        userProfile: widget.userProfile,
-                        chatProvider: pro,
-                      ),
-                    ],
-                  ),
-                ),
-                // Bottom Navigation Bar
+                 InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Icon(Icons.arrow_back)),
+                const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Message Request',
+                                    style: TextStyle(fontFamily: 'Greycliff CF',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
+                                  ),
+                                  Icon(Icons.arrow_drop_down),
+                                ],
+                              ),
+                              SizedBox()
               ],
             ),
+                          centerTitle: true,
+          ),
+          body: Stack(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 5),
+                child: Column(
+                  children: [
+                    Material(
+                      elevation: 0.3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          
+                          // InkWell(
+                          //     onTap: () {
+                          //       Navigator.pop(context);
+                          //     },
+                          //     child: const Icon(Icons.arrow_back)),
+        
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildTabItem('All', 0),
+                              _buildTabItem('Conversations', 1),
+                              _buildTabItem('Clubs', 2),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          // Add chat list or other components below
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        customContainer('Hidden', 0),
+                        customContainer('Date Posted', 1),
+                        customContainer('Promotions', 2),
+                      ],
+                    ),
+                    ChatList(
+                      userProfile: widget.userProfile,
+                      chatProvider: pro,
+                    ),
+                  ],
+                ),
+              ),
+              // Bottom Navigation Bar
+            ],
           ),
         ),
       );
@@ -150,7 +165,7 @@ class _MessageRequestScreenState extends State<MessageRequestScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Text(
           title,
-          style: TextStyle(
+          style: TextStyle(fontFamily: 'Greycliff CF',
             fontWeight:
                 _selectedTab == index ? FontWeight.bold : FontWeight.normal,
             color: _selectedTab == index ? Colors.black : Colors.grey,

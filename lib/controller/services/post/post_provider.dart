@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/controller/services/post_manager.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 
@@ -12,6 +13,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/models/UserProfile/SinglePostModel.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:provider/provider.dart';
 import '../../../common/message_toast.dart';
 import '../../../models/ReelPostModel.dart';
 import '../../../models/UserProfile/CommentModel.dart';
@@ -26,8 +28,16 @@ class PostProvider extends ChangeNotifier {
   PostModel? get post => _post;
   List<PostModel>? get posts => _posts;
   List<ReelPostModel>? _reels;
+  int _commentCount=0;
+  int get commentCount => _commentCount;
 
   List<ReelPostModel>? get reels => _reels;
+
+  setCommentCount(int value) {
+    _commentCount = value;
+    notifyListeners();
+  }
+
   setIsLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -70,7 +80,6 @@ class PostProvider extends ChangeNotifier {
         
         // Update the list of posts and notify listeners
         setPost(followerPosts);
-
         return followerPosts;
       } else {
         throw Exception("Failed to fetch follower posts");

@@ -72,7 +72,6 @@ class _SinglePostState extends State<SinglePost> {
 
   @override
   Widget build(BuildContext context) {
-    print("NOtification Comment ID: ${widget.commentId}");
     return Scaffold(
         appBar: AppBar(
           leading: InkWell(
@@ -89,66 +88,69 @@ class _SinglePostState extends State<SinglePost> {
 
             final post = postProvider.post!;
             var mediaList = post.media.map((media) => "${media.file}").toList();
-            return PostWidget(
-              postId: post.id.toString(),
-              username: post.user.username,
-              location: "Location",
-              date: post.createdAt.toString(),
-              caption: post.post,
-              mediaUrls: mediaList,
-              profileImageUrl: post.user.profileImage != null
-                  ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
-                  : AppUtils.userImage,
-              isVideo: post.media[0].mediaType == 'video',
-              likes: post.likesCount.toString(),
-              comments: post.commentsCount.toString(),
-              shares: "100",
-              saved: '100',
-              showCommentSection: true,
-              scrollCommentId: widget.commentId,
-              scrollReplyID: widget.replyID,
-              scrollOffset: widget.offset,
-              refresh: () => postProvider.getSinglePost(widget.postId),
-              isUserPost: isUserPost,
-              onPressed: () {
-                //debugger();
-                if (post.media[0].mediaType == 'video') {
-                  Navigator.push(
-                    context,
-                    CupertinoDialogRoute(
-                      builder: (_) => FullscreenVideoPlayer(
-                        videoUrl: "${mediaList[0]}",
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: PostWidget(
+                postId: post.id.toString(),
+                username: post.user.username,
+                location: "Location",
+                date: post.createdAt.toString(),
+                caption: post.post,
+                mediaUrls: mediaList,
+                profileImageUrl: post.user.profileImage != null
+                    ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+                    : AppUtils.userImage,
+                isVideo: post.media[0].mediaType == 'video',
+                likes: post.likesCount.toString(),
+                comments: post.commentsCount.toString(),
+                shares: "100",
+                saved: '100',
+                showCommentSection: true,
+                scrollCommentId: widget.commentId,
+                scrollReplyID: widget.replyID,
+                scrollOffset: widget.offset,
+                refresh: () => postProvider.getSinglePost(widget.postId),
+                isUserPost: isUserPost,
+                onPressed: () {
+                  //debugger();
+                  if (post.media[0].mediaType == 'video') {
+                    Navigator.push(
+                      context,
+                      CupertinoDialogRoute(
+                        builder: (_) => FullscreenVideoPlayer(
+                          videoUrl: "${mediaList[0]}",
+                        ),
+                        context: context,
                       ),
-                      context: context,
-                    ),
-                  );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          postFullScreen(mediaUrls: mediaList, initialIndex: 0),
-                    ),
-                  );
-                }
-              },
-              onPressLiked: () {
-                // Toggle like status
-                if (post.isLiked == false) {
-                  postProvider.newLikes(post.id, context);
-                } else {
-                  postProvider.userDisLikes(
-                    post.id,
-                    context,
-                  );
-                }
-              },
-              isLiked:
-                  post.isLiked, // Use the actual 'isLiked' value from the post
-              postModel: post,
-              isSinglePost: true,
-              postTitle: post.pollTitle,
-              postDescription: post.postDescription,
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            postFullScreen(mediaUrls: mediaList, initialIndex: 0),
+                      ),
+                    );
+                  }
+                },
+                onPressLiked: () {
+                  // Toggle like status
+                  if (post.isLiked == false) {
+                    postProvider.newLikes(post.id, context);
+                  } else {
+                    postProvider.userDisLikes(
+                      post.id,
+                      context,
+                    );
+                  }
+                },
+                isLiked:
+                    post.isLiked, // Use the actual 'isLiked' value from the post
+                postModel: post,
+                isSinglePost: true,
+                postTitle: post.pollTitle,
+                postDescription: post.postDescription,
+              ),
             );
           },
         ));

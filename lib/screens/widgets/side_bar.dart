@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
@@ -113,6 +114,24 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
+@override
+String UserName='';
+  void initState(){
+    // TODO: implement initState
+    super.initState();
+      getUserDetail();
+      
+  }
+
+  getUserDetail()async{
+UserPreferences userPreferences = UserPreferences();
+      UserProfile? userProfile = await userPreferences.getCurrentUser();
+      UserName="${userProfile!.firstName.toString()} " + "${userProfile.lastName.toString()}";
+      setState(() {
+        
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -144,19 +163,21 @@ class _SideBarState extends State<SideBar> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'First Last',
+                     Text(
+                      UserName??'',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'Greycliff CF',
                         color: Colors.black,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    InkWell(
+                    GestureDetector(
                       onTap: () {
                         Navigator.pushReplacementNamed(context, '/profile');
                         print("View Profile");
+                        debugPrint("View Profile");
                       },
                       child: const Text(
                         'View Profile',
@@ -196,7 +217,7 @@ class _SideBarState extends State<SideBar> {
                 ListTile(
                   title: const Text(
                     'Home',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16,fontFamily: 'Greycliff CF', fontWeight: FontWeight.bold),
                   ),
                   onTap: () {
                     // Navigate to Home Screen
@@ -207,7 +228,7 @@ class _SideBarState extends State<SideBar> {
                 ListTile(
                   title: const Text(
                     'Settings',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16,fontFamily: 'Greycliff CF', fontWeight: FontWeight.bold),
                   ),
                   onTap: () {
                     // Navigate to Settings Screen
@@ -220,7 +241,7 @@ class _SideBarState extends State<SideBar> {
                     'Logout',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.bold,fontFamily: 'Greycliff CF',
                       color: Colors.black,
                     ),
                   ),

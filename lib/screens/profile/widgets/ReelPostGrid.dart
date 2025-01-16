@@ -75,7 +75,7 @@ class _ReelPostGridState extends State<ReelPostGrid> {
 
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => ReelScreen(
-       // reels: _reels,
+        commentCount: _reels[index].commentsCount.toString(),
         initialIndex: index, // Pass the index of the selected video
         showEditDeleteOptions: true,
         isUserScreen: true,

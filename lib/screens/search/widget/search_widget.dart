@@ -177,16 +177,14 @@ class _SearchWidgetState extends State<SearchWidget>
           dividerHeight: 0,
           padding: EdgeInsets.symmetric(horizontal: 20),
           isScrollable: true,
-          labelStyle: GoogleFonts.publicSans(
-              textStyle: TextStyle(
-                  fontSize: 12,
+          labelStyle: TextStyle(
+                  fontSize: 12,fontFamily: 'Greycliff CF',
                   fontWeight: FontWeight.bold,
-                  color: Color(0xff18181))),
-          unselectedLabelStyle: GoogleFonts.publicSans(
-              textStyle: TextStyle(
+                  color: Color(0xff18181)),
+          unselectedLabelStyle:  TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xff848484))),
+                  fontWeight: FontWeight.w500,fontFamily: 'Greycliff CF',
+                  color: Color(0xff848484)),
           tabs: const [
             Tab(child: Text('Content')),
             Tab(child: Text('People')),
@@ -246,18 +244,16 @@ class _SearchWidgetState extends State<SearchWidget>
                           ),
                           title: Text(
                             user.username!,
-                            style: GoogleFonts.publicSans(
-                                textStyle: TextStyle(
-                                    color: Color(0xff34342F),
+                            style: TextStyle(
+                                    color: Color(0xff34342F),fontFamily: 'Greycliff CF',
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16)),
+                                    fontSize: 16),
                           ),
                           subtitle: Text('${user.firstName} ${user.lastName}',
-                              style: GoogleFonts.publicSans(
-                                  textStyle: TextStyle(
+                              style: TextStyle(
                                       color: Color(0xff34342F),
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 14))),
+                                     
+                                      fontSize: 14)),
                           trailing: IconButton(
                             icon: const Icon(Icons.close,
                                 size: 10, color: Color(0xffB5B5B5)),

@@ -381,6 +381,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                             style: TextStyle(
                                 color: Colors.blueAccent,
                                 fontWeight: FontWeight.w100,
+                                fontFamily: 'Greycliff CF',
                                 fontSize: paragraph * 0.32),
                           ),
                           const SizedBox(height: 10),
