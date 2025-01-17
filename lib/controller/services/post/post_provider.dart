@@ -22,11 +22,11 @@ import 'package:http/http.dart' as http;
 
 class PostProvider extends ChangeNotifier {
   PostModel? _post;
-  List<PostModel>? _posts;
+  List<PostModel> _posts=[];
   bool _isLoading = false;
   bool get isLoading => _isLoading;
   PostModel? get post => _post;
-  List<PostModel>? get posts => _posts;
+  List<PostModel> get posts => _posts;
   List<ReelPostModel>? _reels;
   int _commentCount=0;
   int get commentCount => _commentCount;
@@ -48,7 +48,17 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<PostModel>> fetchFollowerPost(BuildContext context,
+  void updateCommentCount(int postId, int newCommentCount) {
+    setIsLoading(true);
+    int postIndex = posts
+            .indexWhere((post) => post.id == postId);
+      _posts[postIndex]?.commentsCount = newCommentCount;
+      //notifyListeners();
+      setIsLoading(false);
+    
+  }
+
+  fetchFollowerPost(BuildContext context,
       {int limit = 10, int offset = 0}) async {
     setIsLoading(true);
 
@@ -73,14 +83,15 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         List<PostModel> followerPosts = (data['posts'] as List)
             .map((postJson) => PostModel.fromJson(postJson))
             .toList();
-        
+            //_posts=followerPosts;
+          
+        posts.addAll(followerPosts);
         // Update the list of posts and notify listeners
-        setPost(followerPosts);
-        return followerPosts;
+        //setPost(followerPosts);
+        
       } else {
         throw Exception("Failed to fetch follower posts");
       }

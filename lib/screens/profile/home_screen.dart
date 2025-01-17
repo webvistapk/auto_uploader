@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen>
   Map<int, int> _currentIndexMap = {};
   int _offset = 0; // Pagination offset
   bool _isLoadingMore = false; // Indicator for loading more posts
-  List<PostModel> _posts = []; // List to hold all loaded posts
+  
   List<Stories> _stories = [];
   @override
   void initState() {
@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen>
     // Fetch posts from the provider after the fetch operation
     if (mounted)
       setState(() {
-        _posts.addAll(postProvider.posts!); // Add posts from provider to _posts
+       // postProvider.posts.(postProvider.posts!); // Add posts from provider to _posts
         _offset += 10;
         _isLoadingMore = false;
       });
@@ -270,13 +270,14 @@ class _HomeScreenState extends State<HomeScreen>
                           padding: const EdgeInsets.all(4.0),
                           child: Consumer<PostProvider>(
                               builder: (context, postProvider, child) {
+                                final posts=postProvider.posts??[];
                             return ListView.builder(
-                              itemCount: _posts.length,
+                              itemCount: posts.length,
                               shrinkWrap: true, // Prevents unbounded height
                               physics:
                                   NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
                               itemBuilder: (context, index) {
-                                final post = _posts[index];
+                                final post = posts[index];
                                 return _buildPostCard(post, () {
                                   Navigator.push(
                                       context,
@@ -548,9 +549,7 @@ class _HomeScreenState extends State<HomeScreen>
       isVideo:
           post.media.any((media) => media.mediaType == 'video') ? true : false,
       likes: post.likesCount.toString(),
-      comments: Provider.of<CommentProvider>(context, listen: false)
-          .commentCount
-          .toString(),
+      comments: post.commentsCount.toString(),
       shares: "",
       saved: "",
       refresh: () {},

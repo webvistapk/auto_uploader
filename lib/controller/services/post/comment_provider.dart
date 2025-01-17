@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/message_toast.dart';
@@ -241,9 +242,13 @@ class CommentProvider extends ChangeNotifier {
       if (response.statusCode == 201) {
         //ToastNotifier.showSuccessToast(context, "Comment added successfully");
         fetchComments(postId, isReelScreen);
-      } else {
-        //ToastNotifier.showErrorToast(context, "Failed to add comment");
-      }
+
+       
+            Provider.of<PostProvider>(context, listen: false).updateCommentCount(int.parse(postId), commentCount);
+
+        notifyListeners();
+        //Comment comment = _comments[commentIndex];
+      } 
     } catch (error) {
       //ToastNotifier.showErrorToast(context, "Error: $error");
     }
