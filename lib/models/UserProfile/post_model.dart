@@ -1,3 +1,4 @@
+
 class PostModel {
   final int id;
   final String post;
