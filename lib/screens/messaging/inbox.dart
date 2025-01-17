@@ -168,7 +168,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                                 ),
                                             context: context));
                                   } else {
-                                    Navigator.pop(context);
+                                    Navigator.pop(context, true);
                                   }
                                 },
                                 child: const Icon(Icons.arrow_back),

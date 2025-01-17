@@ -17,8 +17,7 @@ class ChatProvider with ChangeNotifier {
   int? _currentChatId;
   bool _isLoading = false;
 
-  List<ChatModel> get chats => _chats;
-  List<ChatModel> get filteredChats => _filteredChats;
+  List<ChatModel> get chats => _filteredChats;
   List<MessageModel> get messages => _messages;
   int? get currentChatId => _currentChatId;
   bool get isLoading => _isLoading;
@@ -61,7 +60,7 @@ class ChatProvider with ChangeNotifier {
             }
             return ChatModel.fromJson(chat);
           }).toList();
-          _filteredChats = [];
+          _filteredChats = _chats;
           notifyListeners();
         } else {
           _isLoading = false; // Set loading to true when the fetch starts
@@ -86,16 +85,18 @@ class ChatProvider with ChangeNotifier {
 
   void filterChats(String query) {
     if (query.isEmpty) {
-      _filteredChats = [];
+      _filteredChats = _chats; // Reset to original list
     } else {
-      _filteredChats = _chats
-          .where((chat) => (chat.isGroup
-              ? (chat.name?.toLowerCase() ?? '').contains(query.toLowerCase())
-              : chat.participants.any((participant) =>
-                  '${participant.firstName} ${participant.lastName}'
-                      .toLowerCase()
-                      .contains(query.toLowerCase()))))
-          .toList();
+      _filteredChats = _chats.where((chat) {
+        final name = chat.name?.toLowerCase() ?? '';
+        final participantNames = chat.participants
+            .map((p) =>
+                '${p.firstName.toLowerCase()} ${p.lastName.toLowerCase()}')
+            .join(' ');
+
+        return name.contains(query.toLowerCase()) ||
+            participantNames.contains(query.toLowerCase());
+      }).toList();
     }
     notifyListeners();
   }

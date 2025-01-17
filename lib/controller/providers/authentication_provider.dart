@@ -15,6 +15,7 @@ import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
   bool isResend = false;
+  String errorMessage = '';
 
   loginUser(context, String email, String password) async {
     isLoading = true;
@@ -24,7 +25,7 @@ class AuthProvider extends ChangeNotifier {
       // Perform the login and get tokens
       final data = await ProviderManager.login(context, email, password);
 
-      if (data != null) {
+      if (data != null && data.containsKey('status') == false) {
         final accessToken = data['access'];
         ChatProvider().setAccessToken(accessToken);
         // Save the access token and email
@@ -85,13 +86,24 @@ class AuthProvider extends ChangeNotifier {
       } else {
         isLoading = false;
         notifyListeners();
+        errorMessage = data['status'] + ' ' + data['message'];
+        notifyListeners();
+        log("Error Message: $errorMessage");
       }
     } catch (e) {
       // debugger();
       isLoading = false;
       notifyListeners();
+      errorMessage = e.toString();
+      notifyListeners();
+      log("Error Message: $errorMessage");
       //ToastNotifier.showErrorToast(context, e.toString());
     }
+  }
+
+  setErrorMessageEmpty() {
+    errorMessage = '';
+    notifyListeners();
   }
 
   registerUser(

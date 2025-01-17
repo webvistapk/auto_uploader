@@ -360,8 +360,9 @@ class _HomeScreenState extends State<HomeScreen>
                   if (index == users.length) {
                     return const Center(child: CircularProgressIndicator());
                   }
-
                   final user = users[index];
+
+                  log("Users: $user");
                   return Padding(
                     padding: const EdgeInsets.only(top: 10, left: 5),
                     child: Column(

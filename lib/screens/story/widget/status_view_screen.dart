@@ -355,23 +355,23 @@
 //                             style: TextStyle(color: Colors.white, fontSize: 16),
 //                           ),
 //                           SizedBox(width: 10),
-//                           GestureDetector(
-//                               onTap: () {
-//                                 Navigator.of(context).pop();
-//                                 Navigator.push(
-//                                     context,
-//                                     CupertinoDialogRoute(
-//                                         builder: (_) => StoryScreen(
-//                                               userProfile: widget.userProfile,
-//                                               token: widget.token,
-//                                             ),
-//                                         context: context));
-//                               },
-//                               child: Icon(
-//                                 Icons.add_circle_outline,
-//                                 size: 27,
-//                                 color: Colors.white,
-//                               )),
+// GestureDetector(
+//     onTap: () {
+//       Navigator.of(context).pop();
+//       Navigator.push(
+//           context,
+//           CupertinoDialogRoute(
+//               builder: (_) => StoryScreen(
+//                     userProfile: widget.userProfile,
+//                     token: widget.token,
+//                   ),
+//               context: context));
+//     },
+//     child: Icon(
+//       Icons.add_circle_outline,
+//       size: 27,
+//       color: Colors.white,
+//     )),
 //                         ],
 //                       ),
 //                     ),
@@ -393,44 +393,46 @@
 //     }
 //   }
 
-//   void _showViewers() {
-//     showModalBottomSheet(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return Container(
-//           padding: EdgeInsets.all(16),
-//           height: 300,
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Text(
-//                 'Viewers',
-//                 style: TextStyle(
-//                     fontSize: 18,
-//                     fontFamily: 'Greycliff CF',
-//                     fontWeight: FontWeight.bold),
+// void _showViewers() {
+//   showModalBottomSheet(
+//     context: context,
+//     builder: (BuildContext context) {
+//       return Container(
+//         padding: EdgeInsets.all(16),
+//         height: 300,
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(
+//               'Viewers',
+//               style: TextStyle(
+//                   fontSize: 18,
+//                   fontFamily: 'Greycliff CF',
+//                   fontWeight: FontWeight.bold),
+//             ),
+//             SizedBox(height: 10),
+//             Expanded(
+//               child: ListView.builder(
+//                 itemCount: widget.viewers.length,
+//                 itemBuilder: (context, index) {
+//                   return ListTile(
+//                     leading: Icon(Icons.person),
+//                     title: Text(widget.viewers[index]),
+//                   );
+//                 },
 //               ),
-//               SizedBox(height: 10),
-//               Expanded(
-//                 child: ListView.builder(
-//                   itemCount: widget.viewers.length,
-//                   itemBuilder: (context, index) {
-//                     return ListTile(
-//                       leading: Icon(Icons.person),
-//                       title: Text(widget.viewers[index]),
-//                     );
-//                   },
-//                 ),
-//               ),
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
+//             ),
+//           ],
+//         ),
+//       );
+//     },
+//   );
 // }
+// }
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/screens/story/create_story_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:story_view/controller/story_controller.dart';
 import 'package:story_view/utils.dart';
@@ -439,7 +441,6 @@ import 'package:story_view/widgets/story_view.dart';
 import '../../../controller/endpoints.dart';
 import '../../../controller/services/StatusProvider.dart';
 import '../../../models/UserProfile/userprofile.dart';
-import '../create_story_screen.dart';
 
 class StatusView extends StatefulWidget {
   final List<Object?> statuses;
@@ -504,6 +505,7 @@ class _StatusViewState extends State<StatusView> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
+              Navigator.of(context).pop();
               context
                   .read<MediaProvider>()
                   .deleteUserStories(
@@ -519,59 +521,164 @@ class _StatusViewState extends State<StatusView> {
     );
   }
 
+  void _onViewStory() {
+    // Placeholder: Add functionality to view story details.
+    print('View story tapped');
+  }
+
+  void _onAddStory() {
+    // Placeholder: Navigate to the add story screen or functionality.
+    print('Add story tapped');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : StoryView(
-              controller: _storyController,
-              storyItems: widget.statuses.map((status) {
-                if (status is String && status.contains('.mp4')) {
-                  return StoryItem.pageVideo(
-                    '${ApiURLs.baseUrl2}$status',
-                    controller: _storyController,
-                    caption: Text(
-                      'Video Story',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                } else {
-                  return StoryItem.pageImage(
-                    url: '${ApiURLs.baseUrl2}$status',
-                    controller: _storyController,
-                    caption: Text(
-                      'Image Story',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                }
-              }).toList(),
-              onComplete: () {
-                if (_hasMore) {
-                  setState(() {
-                    _offset += _limit;
-                    _isLoading = true;
-                  });
-                  _loadStatuses();
-                } else {
-                  Navigator.of(context).pop();
-                }
-              },
-              onVerticalSwipeComplete: (direction) {
-                if (direction == Direction.down) {
-                  Navigator.of(context).pop();
-                }
-              },
+          : Stack(
+              children: [
+                StoryView(
+                  controller: _storyController,
+                  storyItems: widget.statuses.map((status) {
+                    if (status is String && status.contains('.mp4')) {
+                      return StoryItem.pageVideo(
+                        '${ApiURLs.baseUrl2}$status',
+                        controller: _storyController,
+                        caption: Text(
+                          'Video Story',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    } else {
+                      return StoryItem.pageImage(
+                        url: '${ApiURLs.baseUrl2}$status',
+                        controller: _storyController,
+                        caption: Text(
+                          'Image Story',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }
+                  }).toList(),
+                  onComplete: () {
+                    if (_hasMore) {
+                      setState(() {
+                        _offset += _limit;
+                        _isLoading = true;
+                      });
+                      _loadStatuses();
+                    } else {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  onVerticalSwipeComplete: (direction) {
+                    if (direction == Direction.down) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+                widget.isUser
+                    ? Positioned(
+                        bottom: 40,
+                        right: 0,
+                        left: 0,
+                        child: GestureDetector(
+                          onTap: _showViewers,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                  onTap: _onDeleteStory,
+                                  child: Icon(
+                                    Icons.delete,
+                                    size: 27,
+                                    color: Colors.white,
+                                  )),
+                              SizedBox(width: 15),
+                              Icon(Icons.remove_red_eye, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                '${widget.viewers.length}',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                              SizedBox(width: 10),
+                              GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.push(
+                                        context,
+                                        CupertinoDialogRoute(
+                                            builder: (_) => StoryScreen(
+                                                  userProfile:
+                                                      widget.userProfile,
+                                                  token: widget.token,
+                                                ),
+                                            context: context));
+                                  },
+                                  child: Icon(
+                                    Icons.add_circle_outline,
+                                    size: 27,
+                                    color: Colors.white,
+                                  )),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(),
+              ],
             ),
-      floatingActionButton: widget.isUser
-          ? FloatingActionButton(
-              backgroundColor: Colors.red,
-              onPressed: _onDeleteStory,
-              child: Icon(Icons.delete),
-            )
-          : null,
+      // floatingActionButton: widget.isUser
+      //     ? Column(
+      //         mainAxisAlignment: MainAxisAlignment.center,
+      //         children: [
+      //           Row(
+      //             children: [
+      //               FloatingActionButton(
+      //                 backgroundColor: Colors.blue,
+      //                 onPressed: _showViewers,
+      //                 child: Icon(
+      //                   Icons.visibility,
+      //                   color: Colors.white,
+      //                 ),
+      //                 heroTag: 'view',
+      //               ),
+      //               SizedBox(width: 10),
+      //               GestureDetector(
+      //                 onTap: () {
+      //                   Navigator.of(context).pop();
+      //                   Navigator.push(
+      //                       context,
+      //                       CupertinoDialogRoute(
+      //                           builder: (_) => StoryScreen(
+      //                                 userProfile: widget.userProfile,
+      //                                 token: widget.token,
+      //                               ),
+      //                           context: context));
+      //                 },
+      //                 child: Icon(
+      //                   Icons.add_circle_outline,
+      //                   size: 27,
+      //                   color: Colors.white,
+      //                 ),
+      //               ),
+      //               SizedBox(width: 10),
+      //               FloatingActionButton(
+      //                 backgroundColor: Colors.red,
+      //                 onPressed: _onDeleteStory,
+      //                 child: Icon(
+      //                   Icons.delete,
+      //                   color: Colors.white,
+      //                 ),
+      //                 heroTag: 'delete',
+      //               ),
+      //             ],
+      //           ),
+      //         ],
+      //       )
+      //     : null,
     );
   }
 
@@ -579,5 +686,41 @@ class _StatusViewState extends State<StatusView> {
   void dispose() {
     _storyController.dispose();
     super.dispose();
+  }
+
+  void _showViewers() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          height: 300,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Viewers',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'Greycliff CF',
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: widget.viewers.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: Icon(Icons.person),
+                      title: Text(widget.viewers[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

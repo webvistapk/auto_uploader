@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/inbox.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
+import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:provider/provider.dart'; // Import the provider
 
 class ChatList extends StatefulWidget {
@@ -57,7 +58,9 @@ class _ChatListState extends State<ChatList> {
                         profileImage = participant.profileImage ??
                             'https://images.pexels.com/photos/940585/pexels-photo-940585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Default group image
                       }
+
                       final String updateAt = formatMessageDate(chat.updatedAt);
+
                       return InkWell(
                         onTap: () async {
                           // Navigate to the Inbox screen when a chat is tapped
@@ -65,17 +68,29 @@ class _ChatListState extends State<ChatList> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => InboxScreen(
-                                  userProfile: widget.userProfile,
-                                  chatModel: chat,
-                                  chatName: chatName,
-                                  participantImage: profileImage),
+                                userProfile: widget.userProfile,
+                                chatModel: chat,
+                                chatName: chatName,
+                                participantImage: profileImage,
+                              ),
                             ),
                           );
-                          //refresh the indicator messaging point
 
-                          if (result) {
-                            widget.chatProvider.fetchChats();
-                            if (mounted) setState(() {});
+                          // If the user returns from the InboxScreen
+                          if (result == true) {
+                            if (mounted)
+                              setState(() {
+                                // Set the unreadMessages property to false for this chat
+                                chatProvider.chats[index] = ChatModel(
+                                  id: chat.id,
+                                  name: chat.name,
+                                  participants: chat.participants,
+                                  isGroup: chat.isGroup,
+                                  unReadMessages: false, // Mark as read
+                                  createdAt: chat.createdAt,
+                                  updatedAt: chat.updatedAt,
+                                );
+                              });
                           }
                         },
                         child: ListTile(
@@ -94,11 +109,6 @@ class _ChatListState extends State<ChatList> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  // Text(
-                                  //   chat.createdAt.toIso8601String(),
-                                  //   style: const TextStyle(
-                                  //       color: Colors.grey, fontSize: 12),
-                                  // ),
                                   if (chat.unReadMessages)
                                     const Icon(
                                       Icons.circle,

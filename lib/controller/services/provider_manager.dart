@@ -39,11 +39,11 @@ class ProviderManager {
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final message = data['message'] ?? 'Unauthorized access';
         //ToastNotifier.showErrorToast(context, message);
-        return null;
+        return data;
       } else {
         //ToastNotifier.showErrorToast(
         // context, 'Unexpected error: ${response.statusCode}');
-        return null;
+        return data;
       }
     } catch (e) {
       log('Error: $e');

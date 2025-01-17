@@ -89,8 +89,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                       height: 36,
                                       child: TextField(
                                         controller: _searchController,
-                                        // onChanged: (value) =>
-                                        //     pro.filterChats(value),
+                                        onChanged: (value) => pro.filterChats(
+                                            value), // Dynamically filter chats
                                         decoration: InputDecoration(
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius:

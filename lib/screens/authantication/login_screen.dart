@@ -78,6 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             validator: (value) {
                               if (value!.isEmpty) {
                                 return "Please enter the password";
+                              } else if (pro.errorMessage.isNotEmpty) {
+                                return pro.errorMessage;
                               }
                               return null;
                             },
@@ -109,8 +111,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       horizontal: 16.0),
                                   child: ElevatedButton(
                                     onPressed: () async {
+                                      pro.setErrorMessageEmpty();
                                       if (formKey.currentState!.validate()) {
                                         FocusScope.of(context).unfocus();
+
                                         await pro.loginUser(
                                           context,
                                           _usernameController.text.trim(),
@@ -123,8 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       minimumSize:
                                           const Size(double.infinity, 50),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(50),
+                                        borderRadius: BorderRadius.circular(50),
                                       ),
                                     ),
                                     child: const Text('Log in',
@@ -150,19 +153,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     .textTheme
                                     .titleMedium!
                                     .copyWith(
-                                      color: Colors.black,fontFamily: 'Greycliff CF',
+                                      color: Colors.black,
+                                      fontFamily: 'Greycliff CF',
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),
                             ),
                           ),
                           const SizedBox(height: 30),
-                          CustomSocialButton(
-                              textTitle: 'Continue with Phone'),
-                          CustomSocialButton(
-                              textTitle: 'Continue with Apple'),
-                          CustomSocialButton(
-                              textTitle: 'Continue with Google'),
+                          CustomSocialButton(textTitle: 'Continue with Phone'),
+                          CustomSocialButton(textTitle: 'Continue with Apple'),
+                          CustomSocialButton(textTitle: 'Continue with Google'),
                           const SizedBox(height: 30),
                           TextButton(
                             onPressed: () {
@@ -182,7 +183,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Text(
                               'Create account',
                               style: TextStyle(
-                                  color: Colors.blue,),
+                                color: Colors.blue,
+                              ),
                             ),
                           ),
                         ],
