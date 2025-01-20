@@ -87,12 +87,12 @@ class PostManager {
 
         return jsonDecode(response.body);
       } else {
-        debugger();
+        // debugger();
         log('Failed to create post: ${response.statusCode}, ${response.body}');
         return null;
       }
     } catch (error) {
-      debugger();
+      // debugger();
       print('Error occurred: $error');
       return null;
     }
