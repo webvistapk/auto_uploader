@@ -262,7 +262,7 @@ class _PostWidgetState extends State<PostWidget> {
                           children: [
                             if (false) ...[
                               Image.asset(AppIcons.eyes),
-                            ],
+                            
                             SizedBox(
                               width: 5,
                             ),
@@ -271,6 +271,7 @@ class _PostWidgetState extends State<PostWidget> {
                               style: TextStyle(
                                   fontSize: 7, color: AppColors.lightGrey),
                             ),
+                            ],
                           ],
                         ),
                       ],
@@ -475,6 +476,7 @@ class _PostWidgetState extends State<PostWidget> {
               ],
             ),
           ),
+          SizedBox(height: 30,)
         ],
       ),
     );

@@ -240,7 +240,7 @@ class PostProvider extends ChangeNotifier {
 
     // Add query parameters for pagination (limit and offpage)
     Uri uri = Uri.parse(URL).replace(queryParameters: {
-      'limit': limit.toString(), // How many posts per page
+      'limit': "9", // How many posts per page
       'offset': offset.toString() // Offset for pagination
     });
 
