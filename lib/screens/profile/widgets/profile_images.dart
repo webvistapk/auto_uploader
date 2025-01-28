@@ -99,7 +99,7 @@ class _ProfileImagesState extends State<ProfileImages> {
          
           SingleChildScrollView(
             child: SizedBox(
-              height: 500, // Adjust height as needed
+              height: 350, // Adjust height as needed
               child: TabBarView(
                 // physics: NeverScrollableScrollPhysics(),
 

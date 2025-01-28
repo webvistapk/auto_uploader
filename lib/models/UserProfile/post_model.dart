@@ -1,3 +1,24 @@
+class PostResponse {
+  final String? totalcount;
+  final bool? has_next_page;
+  final int? next_offset;
+  List<PostModel>? postModel;
+
+  PostResponse(
+      {this.totalcount, this.has_next_page, this.next_offset, this.postModel});
+
+  factory PostResponse.fromJson(Map<String, dynamic> json) {
+    return PostResponse(
+      totalcount: json["total_count"] ?? '',
+      has_next_page: json['has_next_page'] ?? false,
+      next_offset: json['next_offset'] ?? 0,
+      postModel: (json['posts'] as List)
+          .map((item) => PostModel.fromJson(item))
+          .toList(),
+    );
+  }
+}
+
 class PostModel {
   final int id;
   final String post;

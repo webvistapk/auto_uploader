@@ -998,7 +998,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                                                       ),
                                                       Row(
                                                         children: [
-                                                          Row(
+                                                          Column(
                                                             children: [
                                                               GestureDetector(
                                                                 onTap:
