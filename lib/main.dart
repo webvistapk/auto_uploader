@@ -9,6 +9,9 @@ import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
+import 'package:mobile/screens/authantication/signup/phone/phone_input.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 import 'package:mobile/screens/notification/controller/notificationProvider.dart';
@@ -52,10 +55,9 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
             title: 'Fillet Social Media App',
             theme: ThemeData(
-              //  useMaterial3: false,
-              primarySwatch: Colors.green,
-              fontFamily: 'Greycliff CF'
-            ),
+                //  useMaterial3: false,
+                primarySwatch: Colors.green,
+                fontFamily: 'Greycliff CF'),
             home: SplashScreen()));
   }
 }

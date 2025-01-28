@@ -148,7 +148,7 @@ void showPollModal(BuildContext context, List<Poll> pollPost, String pollTitle,
                             });
                             Navigator.pop(context);
 
-                            showPercentageResult(context, pollPost);
+                            showPercentageResult(context, pollPost, true);
                           }
                           setState(() {
                             isLoadingPoll = false;
@@ -174,7 +174,24 @@ void showPollModal(BuildContext context, List<Poll> pollPost, String pollTitle,
   );
 }
 
-void showPercentageResult(BuildContext context, List<Poll> pollData) {
+void showPercentageResult(
+    BuildContext context, List<Poll> pollData, bool isAdd) {
+  // Update the vote count if `isAdd` is true
+  if (isAdd && selectedPollOption != null) {
+    final selectedOptionIndex =
+        pollData.indexWhere((poll) => poll.id == selectedPollOption!.id);
+
+    if (selectedOptionIndex != -1) {
+      pollData[selectedOptionIndex] = Poll(
+        id: selectedPollOption!.id,
+        poll: selectedPollOption!.poll,
+        voteCount: selectedPollOption!.voteCount + 1,
+        isVoted: true,
+      );
+    }
+  }
+
+  // Calculate the total votes after updating the selected poll option
   final totalVotes = calculateTotalVotes(pollData);
   log("Poll Calculate Vote: $totalVotes");
 
@@ -197,20 +214,21 @@ void showPercentageResult(BuildContext context, List<Poll> pollData) {
             ),
             child: Center(
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Poll Results",
-                      style: AppTextStyles.poppinsBold(color: Colors.white),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Here are the results based on votes.",
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.poppinsRegular(color: Colors.white),
-                    ),
-                  ]),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Poll Results",
+                    style: AppTextStyles.poppinsBold(color: Colors.white),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Here are the results based on votes.",
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.poppinsRegular(color: Colors.white),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),

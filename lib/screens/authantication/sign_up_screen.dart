@@ -45,8 +45,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Navigator.push(
                     context,
                     CupertinoDialogRoute(
-                        builder: (_) => DiscoverCommunityScreen(),
-                        context: context),
+                        builder: (_) => BirthdayScreen(), context: context),
                   );
                 },
               ),

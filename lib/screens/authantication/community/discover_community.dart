@@ -3,11 +3,19 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/common/custom_continue_button.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/authantication/check_login_info.dart';
+import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:mobile/screens/authantication/signup/birthday_screen.dart';
 
+import '../../../models/UserProfile/userprofile.dart';
+
 class DiscoverCommunityScreen extends StatefulWidget {
+  final UserProfile userProfile;
+  final String authToken;
   const DiscoverCommunityScreen({
     Key? key,
+    required this.userProfile,
+    required this.authToken,
   }) : super(key: key);
 
   @override
@@ -65,7 +73,11 @@ class _DiscoverCommunityScreenState extends State<DiscoverCommunityScreen> {
 
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => BirthdayScreen()),
+                    MaterialPageRoute(
+                        builder: (_) => CheckLoginInfoScreen(
+                              userProfile: widget.userProfile,
+                              authToken: widget.authToken,
+                            )),
                   );
                 },
                 isPressed: true,

@@ -1,23 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
-import 'package:mobile/common/message_toast.dart';
-import 'package:mobile/screens/authantication/signup/phone/phone_input.dart';
+import 'package:mobile/screens/authantication/signup/email.dart';
 
 class PasswordInputScreen extends StatefulWidget {
   final String username;
   final String firstName;
   final String lastName;
-  final String email;
   final String dateOfBirth;
-  const PasswordInputScreen(
-      {Key? key,
-      required this.username,
-      required this.firstName,
-      required this.lastName,
-      required this.email,
-      required this.dateOfBirth})
-      : super(key: key);
+
+  const PasswordInputScreen({
+    Key? key,
+    required this.username,
+    required this.firstName,
+    required this.lastName,
+    required this.dateOfBirth,
+  }) : super(key: key);
 
   @override
   State<PasswordInputScreen> createState() => _PasswordInputScreenState();
@@ -27,9 +25,11 @@ class _PasswordInputScreenState extends State<PasswordInputScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  bool x = true;
-  bool y = true;
-  var formKey = GlobalKey<FormState>();
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+  bool isPressed = false;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -37,16 +37,20 @@ class _PasswordInputScreenState extends State<PasswordInputScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
-            key: formKey,
+            key: _formKey,
+            onChanged:
+                _updateIsPressed, // Update button state when form changes
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       "Set Your Password",
@@ -54,112 +58,72 @@ class _PasswordInputScreenState extends State<PasswordInputScreen> {
                           TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
-                    // TextField(
-                    //   obscureText: true,
-                    // decoration: InputDecoration(
-                    //   labelText: "Password",
-                    //   border: OutlineInputBorder(),
-                    // ),
-                    // ),
-                    TextFormField(
+                    _buildPasswordField(
+                      controller: _passwordController,
+                      label: "Password",
+                      hint: "Enter password",
+                      isPasswordVisible: _isPasswordVisible,
+                      onVisibilityToggle: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
                       validator: (value) {
-                        if (value!.isEmpty) {
+                        if (value == null || value.isEmpty) {
                           return "Enter your password";
                         }
-
-                        if (_passwordController.text.length < 8) {
-                          return "Password should must be 8 characters or above";
+                        if (value.length < 8) {
+                          return "Password must be at least 8 characters";
                         }
                         return null;
                       },
-                      controller: _passwordController,
-                      // labelText: 'Password',
-
-                      obscureText: x,
-                      decoration: InputDecoration(
-                        hintText: "Enter password",
-                        suffixIcon: GestureDetector(
-                            onTap: () {
-                              x = !x;
-                              setState(() {});
-                            },
-                            child: x
-                                ? Icon(
-                                    Icons.visibility_off,
-                                    color: Colors.black,
-                                  )
-                                : Icon(
-                                    Icons.visibility,
-                                    color: Colors.black,
-                                  )),
-                        labelText: "Password",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
                     ),
-
                     const SizedBox(height: 16),
-                    TextFormField(
+                    _buildPasswordField(
+                      controller: _confirmPasswordController,
+                      label: "Confirm Password",
+                      hint: "Re-enter password",
+                      isPasswordVisible: _isConfirmPasswordVisible,
+                      onVisibilityToggle: () {
+                        setState(() {
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible;
+                        });
+                      },
                       validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Enter your confirm password';
-                        } else if (_passwordController.text !=
-                            _confirmPasswordController.text) {
-                          return "Password did not match";
+                        if (value == null || value.isEmpty) {
+                          return "Enter your confirm password";
+                        }
+                        if (value != _passwordController.text) {
+                          return "Passwords do not match";
                         }
                         return null;
                       },
-                      controller: _confirmPasswordController,
-                      // labelText: 'Confirm Password',
-
-                      obscureText: y,
-                      decoration: InputDecoration(
-                        suffixIcon: GestureDetector(
-                            onTap: () {
-                              y = !y;
-                              setState(() {});
-                            },
-                            child: y
-                                ? Icon(Icons.visibility_off)
-                                : Icon(Icons.visibility)),
-                        hintText: "Enter confirm password",
-                        labelText: "Confirm Password",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
                     ),
-
-                    // TextField(
-                    //   obscureText: true,
-                    // decoration: InputDecoration(
-                    //   labelText: "Confirm Password",
-                    //   border: OutlineInputBorder(),
-                    // ),
-                    // ),
                   ],
                 ),
                 CustomContinueButton(
-                  buttonText: "Submit",
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      Navigator.push(
-                          context,
-                          CupertinoDialogRoute(
-                              builder: (_) => PhoneInputScreen(
-                                    username: widget.username,
-                                    email: widget.email,
-                                    firstName: widget.firstName,
-                                    lastName: widget.lastName,
-                                    password: _passwordController.text.trim(),
-                                    dateOfBirth: widget.dateOfBirth,
-                                  ),
-                              context: context));
-                    }
-                    // Perform submission logic here
-                  },
-                  isPressed: true,
+                  buttonText: "Continue",
+                  onPressed: isPressed
+                      ? () {
+                          if (_formKey.currentState!.validate()) {
+                            Navigator.push(
+                              context,
+                              CupertinoDialogRoute(
+                                builder: (_) => EmailInputScreen(
+                                  username: widget.username,
+                                  firstName: widget.firstName,
+                                  lastName: widget.lastName,
+                                  password: _passwordController.text.trim(),
+                                  dateOfBirth: widget.dateOfBirth,
+                                ),
+                                context: context,
+                              ),
+                            );
+                          }
+                        }
+                      : null, // Disable the button if not pressed
+                  isPressed: isPressed,
                 ),
               ],
             ),
@@ -167,5 +131,56 @@ class _PasswordInputScreenState extends State<PasswordInputScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required bool isPasswordVisible,
+    required VoidCallback onVisibilityToggle,
+    required String? Function(String?) validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: controller,
+          obscureText: !isPasswordVisible,
+          decoration: InputDecoration(
+            labelText: label,
+            hintText: hint,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            suffixIcon: GestureDetector(
+              onTap: onVisibilityToggle,
+              child: Icon(
+                isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          validator: validator,
+        ),
+        const SizedBox(height: 8), // Space between the field and error message
+        Builder(
+          builder: (context) {
+            final error =
+                (Form.of(context).validate() as FormFieldState?)?.errorText;
+            return error != null
+                ? Text(
+                    error,
+                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                  )
+                : const SizedBox.shrink();
+          },
+        ),
+      ],
+    );
+  }
+
+  void _updateIsPressed() {
+    setState(() {
+      isPressed = _formKey.currentState?.validate() ?? false;
+    });
   }
 }

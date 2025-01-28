@@ -53,4 +53,15 @@ class ApiURLs {
 
   //Vote New
   static const String voteNew = "posts/vote/new/";
+
+  // Phone Verification
+
+  static const String check_phone_verified =
+      "userprofile/users/check_phone_verified/";
+  static const String renew_phone_verified =
+      "userprofile/users/renew_phone_verified/";
+  static const String update_phone_verified =
+      "userprofile/users/update_phone_verified/";
+  static const String update_phone_number =
+      "userprofile/users/update_phone_number/";
 }

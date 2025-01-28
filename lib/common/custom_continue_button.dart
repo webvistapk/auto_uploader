@@ -16,7 +16,7 @@ class CustomContinueButton extends StatelessWidget {
       width: double.infinity,
       child: TextButton(
         style: TextButton.styleFrom(
-          backgroundColor: isPressed ? Colors.grey.shade300 : Color(0xfa35373D),
+          backgroundColor: isPressed ? Color(0xfa35373D) : Colors.grey.shade300,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -27,7 +27,7 @@ class CustomContinueButton extends StatelessWidget {
           buttonText,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.black,
+            color: isPressed ? Colors.white : Colors.black,
           ),
         ),
       ),

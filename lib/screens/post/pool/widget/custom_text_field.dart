@@ -4,10 +4,12 @@ class CustomTextFormField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final maxLength;
+  final validator;
   const CustomTextFormField({
     super.key,
     required this.controller,
     required this.hintText,
+    this.validator,
     this.maxLength,
   });
 
@@ -17,12 +19,14 @@ class CustomTextFormField extends StatelessWidget {
         ? TextFormField(
             controller: controller,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (val) {
-              if (val!.isEmpty) {
-                return "Please fill the field";
-              }
-              return null;
-            },
+            validator: validator != null
+                ? validator
+                : (val) {
+                    if (val!.isEmpty) {
+                      return "Please enter $hintText";
+                    }
+                    return null;
+                  },
             decoration: InputDecoration(
               hintText: hintText,
               border: const OutlineInputBorder(

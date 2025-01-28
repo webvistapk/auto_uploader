@@ -7,7 +7,7 @@ import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/authantication/otp_screen.dart';
+import 'package:mobile/screens/authantication/email_otp_screen.dart';
 import 'package:mobile/screens/messaging/chat_screen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/profile/home_screen.dart';
@@ -97,7 +97,7 @@ class _MainScreenState extends State<MainScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => OtpScreen(
+              builder: (context) => EmailOtpScreen(
                     userEmail: userEmail,
                   )),
         );

@@ -163,7 +163,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           const Text(
                             'Edit Profile',
                             style: TextStyle(
-                              fontSize: 28,fontFamily: 'Greycliff CF',
+                              fontSize: 28,
+                              fontFamily: 'Greycliff CF',
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
@@ -246,24 +247,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       style: AppStyles.buttonTextStyle),
                                 ),
                           const SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => OldPasswordScreen()));
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              minimumSize: const Size(double.infinity, 50),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                            ),
-                            child: const Text('Change Password',
-                                style: AppStyles.buttonTextStyle),
-                          ),
-                          const SizedBox(height: 10),
+
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
-import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/screens/authantication/signup/fisrt_last_name.dart';
 
 class CreateUsernameScreen extends StatefulWidget {
@@ -15,6 +14,26 @@ class CreateUsernameScreen extends StatefulWidget {
 
 class _CreateUsernameScreenState extends State<CreateUsernameScreen> {
   TextEditingController usernameController = TextEditingController();
+  var formKey = GlobalKey<FormState>();
+  bool isButtonEnabled = false; // Button state
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to changes in the text field
+    usernameController.addListener(() {
+      setState(() {
+        isButtonEnabled = usernameController.text.trim().isNotEmpty;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose(); // Clean up the controller
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,30 +49,35 @@ class _CreateUsernameScreenState extends State<CreateUsernameScreen> {
           width: double.infinity,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                createUsername(context, usernameController),
-                CustomContinueButton(
-                  buttonText: "Continue",
-                  onPressed: () {
-                    if (usernameController.text.isEmpty) {
-                      // ToastNotifier.showErrorToast(
-                      //     context, "Please Enter username");
-                    } else {
-                      Navigator.push(
-                          context,
-                          CupertinoDialogRoute(
-                              builder: (_) => FirstNameLastNameScreen(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  createUsername(context, usernameController),
+                  CustomContinueButton(
+                    buttonText: "Continue",
+                    onPressed: isButtonEnabled
+                        ? () {
+                            if (formKey.currentState!.validate()) {
+                              Navigator.push(
+                                context,
+                                CupertinoDialogRoute(
+                                  builder: (_) => FirstNameLastNameScreen(
                                     dateOfBirth: widget.dateOfBirth,
                                     username: usernameController.text.trim(),
+                                    formKey: formKey,
                                   ),
-                              context: context));
-                    }
-                  },
-                  isPressed: true,
-                ),
-              ],
+                                  context: context,
+                                ),
+                              );
+                            }
+                          }
+                        : null, // Disable the button when username is empty
+                    isPressed: isButtonEnabled,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -73,12 +97,17 @@ class _CreateUsernameScreenState extends State<CreateUsernameScreen> {
           ),
         ),
         const SizedBox(height: 16),
-
         Container(
           width: MediaQuery.of(context).size.width * 0.80,
-          height: 40,
-          child: TextField(
+          child: TextFormField(
             controller: username,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: (val) {
+              if (usernameController.text.isEmpty) {
+                return "Please enter a username";
+              }
+              return null;
+            },
             textAlign: TextAlign.center, // Align input text to the center
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -90,13 +119,6 @@ class _CreateUsernameScreenState extends State<CreateUsernameScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        // const Text(
-        //   "Available",
-        //   style: TextStyle(
-        //     color: Colors.green,
-        //     fontSize: 14,
-        //   ),
-        // ),
         const SizedBox(height: 16),
         const Text(
           "This can be changed later",

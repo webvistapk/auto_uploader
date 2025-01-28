@@ -15,10 +15,22 @@ class Prefrences {
   static const String statusPermissionKey = "statusKey";
   static const String communityKey = "communityKey";
   static const String loginInfoKey = "InfoSaveKey";
+  static const String phoneVerified = "phone_verify";
+  static const String emailVerified = "email_verify";
 
   static setAuthToken(String accessToken) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(authToken, accessToken);
+  }
+
+  static setPhoneVerify(bool verify) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(phoneVerified, verify);
+  }
+
+  static setEmaileVerify(bool verify) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(emailVerified, verify);
   }
 
   static setDiscoverCommunity(bool community) async {
@@ -39,6 +51,16 @@ class Prefrences {
   static getLoginInfoSave() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool(loginInfoKey);
+  }
+
+  static getPhoneVerify() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(phoneVerified) ?? false;
+  }
+
+  static getEmailVerify() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(emailVerified) ?? false;
   }
 
   static getAuthToken() async {

@@ -78,8 +78,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             validator: (value) {
                               if (value!.isEmpty) {
                                 return "Please enter the password";
-                              } else if (pro.errorMessage.isNotEmpty) {
-                                return pro.errorMessage;
                               }
                               return null;
                             },
@@ -101,6 +99,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             obscureText: !visible,
                           ),
+                          if (pro.errorMessage.isNotEmpty) ...[
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              pro.errorMessage,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.poppinsRegular(
+                                  fontSize: 14, color: AppColors.red),
+                            )
+                          ],
                           const SizedBox(height: 20),
                           pro.isLoading
                               ? const Center(

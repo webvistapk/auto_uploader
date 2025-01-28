@@ -30,7 +30,9 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
           ? today.day - 7
           : today.day - 7 + 30, // Subtract 7 days, adjusting for the month
     );
-
+    setState(() {
+      selectedBirthDate = initialDate;
+    });
     return initialDate;
   }
 
@@ -68,7 +70,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
               ),
               const Spacer(),
               SizedBox(
-                height: 300,
+                height: 200,
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.date,
                   initialDateTime: _calculateInitialDate(),
@@ -86,6 +88,8 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                 buttonText: "Continue",
                 onPressed: selectedBirthDate != null
                     ? () {
+                        formattedBirthDate =
+                            DateFormat('yyyy-MM-dd').format(selectedBirthDate!);
                         // Log or use the formatted date
                         print("Selected Birth Date: $formattedBirthDate");
 

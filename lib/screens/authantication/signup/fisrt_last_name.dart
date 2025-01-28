@@ -1,16 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/custom_continue_button.dart';
-import 'package:mobile/common/message_toast.dart';
-import 'package:mobile/screens/authantication/signup/email.dart';
+import 'package:mobile/screens/authantication/signup/password.dart';
 import 'package:mobile/screens/post/pool/widget/custom_text_field.dart';
 
 // Screen 1: First Name and Last Name
 class FirstNameLastNameScreen extends StatefulWidget {
   final String username;
   final String dateOfBirth;
+  final GlobalKey<FormState> formKey;
   const FirstNameLastNameScreen(
-      {Key? key, required this.username, required this.dateOfBirth})
+      {Key? key,
+      required this.username,
+      required this.dateOfBirth,
+      required this.formKey})
       : super(key: key);
 
   @override
@@ -23,6 +26,32 @@ class _FirstNameLastNameScreenState extends State<FirstNameLastNameScreen> {
   final TextEditingController _lastNameController = TextEditingController();
 
   var formKey = GlobalKey<FormState>();
+  bool isButtonPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Add listeners to both controllers
+    _firstNameController.addListener(_updateButtonState);
+    _lastNameController.addListener(_updateButtonState);
+  }
+
+  void _updateButtonState() {
+    // Check if both fields are not empty
+    setState(() {
+      isButtonPressed = _firstNameController.text.isNotEmpty &&
+          _lastNameController.text.isNotEmpty;
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controllers
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,35 +77,38 @@ class _FirstNameLastNameScreenState extends State<FirstNameLastNameScreen> {
                     ),
                     const SizedBox(height: 16),
                     CustomTextFormField(
-                        controller: _firstNameController,
-                        hintText: "First Name"),
+                      controller: _firstNameController,
+                      hintText: "First Name",
+                    ),
                     const SizedBox(height: 16),
                     CustomTextFormField(
-                        controller: _lastNameController, hintText: "Last Name")
+                      controller: _lastNameController,
+                      hintText: "Last Name",
+                    ),
                   ],
                 ),
                 CustomContinueButton(
-                    buttonText: "Continue",
-                    onPressed: () {
-                      if (_firstNameController.text.isEmpty ||
-                          _lastNameController.text.isEmpty) {
-                        //ToastNotifier.showErrorToast(
-                        // context, "Please Enter the field required");
-                      } else {
-                        Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => EmailInputScreen(
-                                      dateOfBirth: widget.dateOfBirth,
-                                      username: widget.username,
-                                      firstName:
-                                          _firstNameController.text.trim(),
-                                      lastName: _lastNameController.text.trim(),
-                                    ),
-                                context: context));
-                      }
-                    },
-                    isPressed: true),
+                  buttonText: "Continue",
+                  onPressed: isButtonPressed
+                      ? () {
+                          if (formKey.currentState!.validate()) {
+                            Navigator.push(
+                              context,
+                              CupertinoDialogRoute(
+                                builder: (_) => PasswordInputScreen(
+                                  dateOfBirth: widget.dateOfBirth,
+                                  username: widget.username,
+                                  firstName: _firstNameController.text.trim(),
+                                  lastName: _lastNameController.text.trim(),
+                                ),
+                                context: context,
+                              ),
+                            );
+                          }
+                        }
+                      : null, // Disable button if not pressed
+                  isPressed: isButtonPressed,
+                ),
               ],
             ),
           ),

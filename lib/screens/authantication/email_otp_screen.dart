@@ -10,17 +10,17 @@ import 'package:mobile/screens/authantication/login_screen.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
-class OtpScreen extends StatefulWidget {
+class EmailOtpScreen extends StatefulWidget {
   final String userEmail;
   final userID; // Corrected type for userEmail
-  const OtpScreen({Key? key, required this.userEmail, this.userID})
+  const EmailOtpScreen({Key? key, required this.userEmail, this.userID})
       : super(key: key);
 
   @override
-  State<OtpScreen> createState() => _OtpScreenState();
+  State<EmailOtpScreen> createState() => _EmailOtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> {
+class _EmailOtpScreenState extends State<EmailOtpScreen> {
   String otp = "";
   late Timer _timer;
   int _start = 30; // Countdown start time
@@ -63,17 +63,14 @@ class _OtpScreenState extends State<OtpScreen> {
   // Function to handle OTP submission
   Future<void> _submitOtp(String pin, AuthProvider pro) async {
     setState(() {
-      _isLoading = true; // Show loading indicator for OTP verification
+      _isLoading = true;
     });
 
     try {
-      await pro.updateEmailVerfied(context, widget.userEmail, otp,
+      await pro.updateEmailVerfied(context, widget.userEmail, pin,
           id: widget.userID);
-
-      // Clear OTP field after successful submission
+      log("OTP verified successfully");
       _otpController.clear();
-
-      // Handle success (e.g., navigate to MainScreen)
     } catch (e) {
       log("Error verifying OTP: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +78,7 @@ class _OtpScreenState extends State<OtpScreen> {
       );
     } finally {
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
     }
   }
@@ -89,18 +86,15 @@ class _OtpScreenState extends State<OtpScreen> {
   // Function to resend OTP
   Future<void> _resendOtp() async {
     setState(() {
-      _isResending = true; // Show loading indicator for OTP resend
+      _isResending = true;
     });
 
     try {
       await Provider.of<AuthProvider>(context, listen: false)
           .resendEmailVerified(context, widget.userEmail);
-
-      // Reset the timer and clear OTP field after resend
-      startTimer();
-      _otpController.clear();
-
-      log("Resent OTP to ${widget.userEmail}");
+      log("OTP resent successfully");
+      startTimer(); // Restart timer
+      _otpController.clear(); // Clear input
     } catch (e) {
       log("Error resending OTP: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +102,7 @@ class _OtpScreenState extends State<OtpScreen> {
       );
     } finally {
       setState(() {
-        _isResending = false; // Hide loading indicator
+        _isResending = false;
       });
     }
   }
@@ -131,14 +125,14 @@ class _OtpScreenState extends State<OtpScreen> {
                     padding: const EdgeInsets.only(left: 20, top: 20),
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          CupertinoDialogRoute(
-                            builder: (_) => LoginScreen(),
-                            context: context,
-                          ),
-                          (route) => false,
-                        );
+                        // Navigator.pushAndRemoveUntil(
+                        //   context,
+                        //   CupertinoDialogRoute(
+                        //     builder: (_) => LoginScreen(),
+                        //     context: context,
+                        //   ),
+                        //   (route) => false,
+                        // );
                       },
                       child: const Icon(Icons.arrow_back_ios, size: 25),
                     ),
@@ -212,13 +206,29 @@ class _OtpScreenState extends State<OtpScreen> {
                                 color: AppColors.grey),
                           ),
                   ),
-                  if (pro.isLoading)
-                    const Center(
-                      child: SpinKitCircle(
-                        color: AppColors.primary,
-                        size: 60.0,
-                      ),
-                    ),
+                  if (_isLoading)
+                    const Center(child: CircularProgressIndicator.adaptive()
+                        // SpinKitCircle(
+                        //   color: AppColors.primary,
+                        //   size: 60.0,
+                        // ),
+                        ),
+                  if (pro.errorMessage.isNotEmpty) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          pro.errorMessage,
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.poppinsRegular(
+                              fontSize: 14, color: AppColors.red),
+                        )
+                      ],
+                    )
+                  ]
                 ],
               ),
               if (pro.isResend)

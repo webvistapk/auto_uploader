@@ -8,6 +8,8 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/authantication/login_screen.dart';
+import 'package:mobile/screens/authantication/signup/phone/phone_input.dart';
+import 'package:mobile/screens/authantication/update%20password/old_password_screen.dart';
 import 'package:mobile/screens/profile/FollowerReelScreen.dart';
 import 'package:mobile/screens/profile/ReelScreen.dart';
 import 'package:mobile/screens/profile/post_screen.dart';
@@ -114,22 +116,19 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
-@override
-String UserName='';
-  void initState(){
+  @override
+  UserProfile? _userProfile;
+  void initState() {
     // TODO: implement initState
     super.initState();
-      getUserDetail();
-      
+    getUserDetail();
   }
 
-  getUserDetail()async{
-UserPreferences userPreferences = UserPreferences();
-      UserProfile? userProfile = await userPreferences.getCurrentUser();
-      UserName="${userProfile!.firstName.toString()} " + "${userProfile.lastName.toString()}";
-      setState(() {
-        
-      });
+  getUserDetail() async {
+    UserPreferences userPreferences = UserPreferences();
+    UserProfile? userProfile = await userPreferences.getCurrentUser();
+    _userProfile = userProfile;
+    setState(() {});
   }
 
   @override
@@ -163,8 +162,10 @@ UserPreferences userPreferences = UserPreferences();
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                     Text(
-                      UserName??'',
+                    Text(
+                      "${_userProfile!.firstName.toString()} " +
+                              "${_userProfile!.lastName.toString()}" ??
+                          '',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -217,7 +218,10 @@ UserPreferences userPreferences = UserPreferences();
                 ListTile(
                   title: const Text(
                     'Home',
-                    style: TextStyle(fontSize: 16,fontFamily: 'Greycliff CF', fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Greycliff CF',
+                        fontWeight: FontWeight.bold),
                   ),
                   onTap: () {
                     // Navigate to Home Screen
@@ -227,8 +231,63 @@ UserPreferences userPreferences = UserPreferences();
 
                 ListTile(
                   title: const Text(
+                    'Change Password',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Greycliff CF',
+                        fontWeight: FontWeight.bold),
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_outlined,
+                  ),
+                  onTap: () {
+                    // Navigate to Home Screen
+                    Navigator.push(
+                        context,
+                        CupertinoDialogRoute(
+                            builder: (_) => OldPasswordScreen(),
+                            context: context));
+                  },
+                ),
+                ListTile(
+                  title: const Text(
+                    'Update Password',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Greycliff CF',
+                        fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    _userProfile?.phoneNumber ?? '',
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontFamily: 'Greycliff CF',
+                        fontWeight: FontWeight.bold),
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_outlined,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        CupertinoDialogRoute(
+                            builder: (_) => PhoneInputScreen(
+                                authToken: '',
+                                userId: _userProfile!.id,
+                                isUpdatePhone: true),
+                            context: context));
+                    // Navigate to Home Screen
+                  },
+                ),
+
+                ListTile(
+                  title: const Text(
                     'Settings',
-                    style: TextStyle(fontSize: 16,fontFamily: 'Greycliff CF', fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Greycliff CF',
+                        fontWeight: FontWeight.bold),
                   ),
                   onTap: () {
                     // Navigate to Settings Screen
@@ -241,7 +300,8 @@ UserPreferences userPreferences = UserPreferences();
                     'Logout',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,fontFamily: 'Greycliff CF',
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Greycliff CF',
                       color: Colors.black,
                     ),
                   ),

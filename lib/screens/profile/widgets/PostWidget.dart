@@ -405,7 +405,7 @@ class _PostWidgetState extends State<PostWidget> {
                           widget.postModel.polls!
                                   .any((element) => element.isVoted == true)
                               ? showPercentageResult(
-                                  context, widget.postModel.polls!)
+                                  context, widget.postModel.polls!, false)
                               : showPollModal(
                                   context,
                                   widget.postModel.polls ?? [],

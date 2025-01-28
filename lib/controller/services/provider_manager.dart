@@ -12,6 +12,7 @@ import 'package:mobile/models/post/tag_people.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 
 class ProviderManager {
+  static String registrationError = '';
   static Future login(context, String email, String password) async {
     try {
       final completeUrl = Uri.parse(ApiURLs.baseUrl + ApiURLs.login_endpoint);
@@ -58,7 +59,7 @@ class ProviderManager {
       String email,
       String firstName,
       String lastName,
-      String phoneNumber,
+      // String phoneNumber,
       String password,
       String dateOfBirth) async {
     try {
@@ -71,7 +72,7 @@ class ProviderManager {
         "email": email,
         "first_name": firstName,
         "last_name": lastName,
-        "phone_number": phoneNumber,
+        // "phone_number": phoneNumber,
         "password": password,
         "birthday": dateOfBirth,
       };
@@ -97,40 +98,49 @@ class ProviderManager {
       } else if (response.statusCode == 400) {
         // Show separate error messages for each field
         if (data.containsKey('email')) {
+          registrationError = data['email'][0];
           //ToastNotifier.showErrorToast(context, "Email: ${data['email'][0]}");
         }
         if (data.containsKey('phone_number')) {
+          registrationError = data['phone_number'][0];
           //ToastNotifier.showErrorToast(
           // context, "Phone Number: ${data['phone_number'][0]}");
         }
         if (data.containsKey('password')) {
+          registrationError = data['password'][0];
+          log("Error: $registrationError");
           //ToastNotifier.showErrorToast(
           // context, "Password: ${data['password'][0]}");
         }
         if (data.containsKey('username')) {
+          registrationError = data['username'][0];
           //ToastNotifier.showErrorToast(
           // context, "Username: ${data['username'][0]}");
         }
         if (data.containsKey('first_name')) {
+          registrationError = data['first_name'][0];
           //ToastNotifier.showErrorToast(
           // context, "First Name: ${data['first_name'][0]}");
         }
         if (data.containsKey('last_name')) {
+          registrationError = data['last_name'][0];
           //ToastNotifier.showErrorToast(
           // context, "Last Name: ${data['last_name'][0]}");
         }
         return null;
       } else if (response.statusCode == 403) {
-        final message = data['message'] ?? 'Registration failed';
+        registrationError = data['message'] ?? 'Registration failed';
         //ToastNotifier.showErrorToast(context, message);
         return null;
       } else {
+        registrationError = 'Unexpected error: ${response.statusCode}';
         //ToastNotifier.showErrorToast(
         // context, 'Unexpected error: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       log('Error: $e');
+      registrationError = 'Error: $e';
       //ToastNotifier.showErrorToast(context, e.toString());
       return null;
     }
@@ -181,6 +191,104 @@ class ProviderManager {
       return null;
     } catch (e) {
       return e.toString();
+    }
+  }
+
+////Phone Verification
+
+  static checkPhoneVerified(context, String email) async {
+    final response = await http
+        .get(Uri.parse(ApiURLs.baseUrl + ApiURLs.check_phone_verified + email));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data;
+    }
+    return null;
+  }
+
+  static Future<String> renewPhoneVerified(String email) async {
+    try {
+      final response = await http.get(
+          Uri.parse(ApiURLs.baseUrl + ApiURLs.renew_phone_verified + email));
+      var data;
+      if (response.statusCode == 200) {
+        data = jsonDecode(response.body);
+      }
+      return data['status'];
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  static updatePhoneVerified(String email, String verificationCode) async {
+    try {
+      final response = await http.patch(
+        Uri.parse(ApiURLs.baseUrl + ApiURLs.update_phone_verified + email),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'phone_verification_code': verificationCode}),
+      );
+      var data;
+      // debugger();
+      if (response.statusCode == 200) {
+        data = jsonDecode(response.body);
+        return data;
+      } else if (response.statusCode == 400) {
+        data = jsonDecode(response.body);
+        return data;
+      }
+
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  static updatePhoneNumber(
+    int userId,
+    String phoneNumber,
+  ) async {
+    final String? token = await Prefrences.getAuthToken();
+    // Define the API endpoint
+    final url =
+        Uri.parse('${ApiURLs.baseUrl}${ApiURLs.update_phone_number}$userId');
+
+    // Define the headers
+
+    final headers = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+
+    // Define the request body
+    final body = jsonEncode({
+      'phone_number': phoneNumber,
+    });
+
+    try {
+      // Make the PUT request
+      final response = await http.put(
+        url,
+        headers: headers,
+        body: body,
+      );
+      final data = jsonDecode(response.body);
+      // Check the response
+      // debugger();
+      if (response.statusCode == 200) {
+        log('Phone number updated successfully.');
+
+        return data;
+      } else {
+        log('Failed to update phone number. Status code: ${response.statusCode}');
+        log('Response body: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error: $e');
+      return null;
     }
   }
 

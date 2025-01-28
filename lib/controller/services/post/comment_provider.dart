@@ -22,7 +22,7 @@ class CommentProvider extends ChangeNotifier {
   int _nextOffset = 0;
   int _previousOffset = 0;
   int _replyNextOffset = 0;
-  int _commentCount=0;
+  int _commentCount = 0;
 
   bool get isLoading => _isLoading;
   int get commentCount => _commentCount;
@@ -51,6 +51,7 @@ class CommentProvider extends ChangeNotifier {
     _isCommentLoading = value;
     notifyListeners();
   }
+
   initializeComments(
     String postId,
     bool isReelScreen, {
@@ -152,7 +153,7 @@ class CommentProvider extends ChangeNotifier {
 
         setCommentCount(commentResponse.totalCount);
         print("comment Key of 1 ${_commentKeys[34]!.currentContext}");
-        
+
         // Notify listeners to update UI
         notifyListeners();
       } else {
@@ -168,7 +169,6 @@ class CommentProvider extends ChangeNotifier {
 
     return _comments;
   }
-
 
   void loadPreviousComments(String postId, int commentIdToHighlight, int limit,
       {bool isReel = false}) async {
@@ -243,12 +243,12 @@ class CommentProvider extends ChangeNotifier {
         //ToastNotifier.showSuccessToast(context, "Comment added successfully");
         fetchComments(postId, isReelScreen);
 
-       
-            Provider.of<PostProvider>(context, listen: false).updateCommentCount(int.parse(postId), commentCount);
+        Provider.of<PostProvider>(context, listen: false)
+            .updateCommentCount(int.parse(postId), commentCount);
 
         notifyListeners();
         //Comment comment = _comments[commentIndex];
-      } 
+      }
     } catch (error) {
       //ToastNotifier.showErrorToast(context, "Error: $error");
     }
@@ -462,13 +462,13 @@ class ReplyProvider extends ChangeNotifier {
             _previousOffset = 0;
             hasPreviousPage = false;
           }
-          debugger();
+          // debugger();
           final commentProvider =
-            Provider.of<CommentProvider>(context, listen: false);
-        int commentIndex = commentProvider.comments
-            .indexWhere((comment) => comment.id == commentId);
-        _comments = commentProvider.comments;
-        Comment comment = _comments[commentIndex];
+              Provider.of<CommentProvider>(context, listen: false);
+          int commentIndex = commentProvider.comments
+              .indexWhere((comment) => comment.id == commentId);
+          _comments = commentProvider.comments;
+          Comment comment = _comments[commentIndex];
           setReplyCount(comment.replyCount);
         }
       } else {
@@ -496,7 +496,7 @@ class ReplyProvider extends ChangeNotifier {
 
   toggleReplyVisibility(int commentId, BuildContext context) {
     //debugger();
-    fetchReplies(commentId,context);
+    fetchReplies(commentId, context);
     // Find the index of the comment
     final commentProvider =
         Provider.of<CommentProvider>(context, listen: false);
@@ -518,7 +518,8 @@ class ReplyProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void loadNextReply(int commentId,BuildContext context, {bool isReel = false}) async {
+  void loadNextReply(int commentId, BuildContext context,
+      {bool isReel = false}) async {
     // Ensure no duplicate or unnecessary fetches
     if (nextOffset == -1) {
       print("No more comments to load.");
@@ -597,7 +598,7 @@ class ReplyProvider extends ChangeNotifier {
         _comments = commentProvider.comments;
         Comment comment = _comments[commentIndex];
         comment.replyCount++;
-        await fetchReplies(commentId,context);
+        await fetchReplies(commentId, context);
         setCommentLoadin(false);
         notifyListeners();
       } else {
@@ -631,7 +632,7 @@ class ReplyProvider extends ChangeNotifier {
         // Show success message
         //ToastNotifier.showSuccessToast(
         // context, "comment reply deleted successfully");
-        fetchReplies(commentId,context);
+        fetchReplies(commentId, context);
         Comment comment =
             comments.firstWhere((comment) => comment.id == commentId);
         comment.replyCount--;
