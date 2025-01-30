@@ -162,18 +162,18 @@ class _PasswordInputScreenState extends State<PasswordInputScreen> {
           validator: validator,
         ),
         const SizedBox(height: 8), // Space between the field and error message
-        Builder(
-          builder: (context) {
-            final error =
-                (Form.of(context).validate() as FormFieldState?)?.errorText;
-            return error != null
-                ? Text(
-                    error,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
-                  )
-                : const SizedBox.shrink();
-          },
-        ),
+        // Builder(
+        //   builder: (context) {
+        //     final error =
+        //         (Form.of(context).validate() as FormFieldState?)?.errorText;
+        //     return error != null
+        //         ? Text(
+        //             error,
+        //             style: const TextStyle(color: Colors.red, fontSize: 12),
+        //           )
+        //         : const SizedBox.shrink();
+        //   },
+        // ),
       ],
     );
   }

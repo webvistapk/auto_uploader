@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
             title: 'Fillet Social Media App',
             theme: ThemeData(
                 //  useMaterial3: false,
-                primarySwatch: Colors.green,
+                // primarySwatch: Colors.green,
                 fontFamily: 'Greycliff CF'),
             home: SplashScreen()));
   }

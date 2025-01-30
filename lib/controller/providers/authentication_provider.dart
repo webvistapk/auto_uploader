@@ -54,49 +54,45 @@ class AuthProvider extends ChangeNotifier {
           await userPrefs.saveCurrentUser(userProfile);
         }
         bool? isLoginInfo = await Prefrences.getLoginInfoSave();
+        final Phonedata =
+            await ProviderManager.checkPhoneVerified(context, email);
+        log("Data: $Phonedata");
 
-        bool? isPhoneVerify = await Prefrences.getPhoneVerify();
+        bool isPhoneVerify = Phonedata['verified'];
 
         if (isLoginInfo != null && isLoginInfo) {
-          if (userProfile != null) {
-            if (isPhoneVerify != null && isPhoneVerify == true) {
-              isLoading = false;
-              notifyListeners();
-              Navigator.pushAndRemoveUntil(
-                context,
-                CupertinoDialogRoute(
-                  builder: (_) => MainScreen(
-                    email: email,
-                    userProfile: userProfile!,
-                    authToken: accessToken, // Safe since it's not null here
-                  ),
-                  context: context,
+          if (isPhoneVerify == true) {
+            isLoading = false;
+            notifyListeners();
+            Navigator.pushAndRemoveUntil(
+              context,
+              CupertinoDialogRoute(
+                builder: (_) => MainScreen(
+                  email: email,
+                  userProfile: userProfile!,
+                  authToken: accessToken, // Safe since it's not null here
                 ),
-                (route) => false,
-              );
-            } else {
-              isLoading = false;
-              notifyListeners();
-              Navigator.pushAndRemoveUntil(
-                context,
-                CupertinoDialogRoute(
-                  builder: (_) => PhoneInputScreen(
-                    userId: userProfile!.id,
-                    authToken: accessToken, // Safe since it's not null here
-                  ),
-                  context: context,
-                ),
-                (route) => false,
-              );
-            }
+                context: context,
+              ),
+              (route) => false,
+            );
           } else {
             isLoading = false;
             notifyListeners();
-            //ToastNotifier.showErrorToast(
-            // context, "Failed to retrieve user profile");
+            Navigator.pushAndRemoveUntil(
+              context,
+              CupertinoDialogRoute(
+                builder: (_) => PhoneInputScreen(
+                  userId: userProfile!.id,
+                  authToken: accessToken, // Safe since it's not null here
+                ),
+                context: context,
+              ),
+              (route) => false,
+            );
           }
         } else {
-          if (isPhoneVerify != null && isPhoneVerify == true) {
+          if (isPhoneVerify == true) {
             isLoading = false;
             notifyListeners();
             Navigator.push(

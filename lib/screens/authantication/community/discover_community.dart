@@ -26,7 +26,8 @@ class DiscoverCommunityScreen extends StatefulWidget {
 class _DiscoverCommunityScreenState extends State<DiscoverCommunityScreen> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
       child: Scaffold(
         backgroundColor: AppColors.white,
         appBar: AppBar(
@@ -40,50 +41,52 @@ class _DiscoverCommunityScreenState extends State<DiscoverCommunityScreen> {
             },
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 16),
-              Text(
-                "Discover Community",
-                textAlign: TextAlign.center,
-                style: AppTextStyles.poppinsBold(
-                    fontSize: 24,
-                    color: AppColors.black,
-                    fontWeight: FontWeight.normal),
-              ),
-              const SizedBox(height: 30),
-              Text(
-                "Add photos, find friends, and join clubs to make the most of Pine.\n\nYour feed will populate with friends and club member content alongside curated picks just for you.",
-                textAlign: TextAlign.center,
-                style: AppTextStyles.poppinsMedium(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ).copyWith(
-                  height: 1.5,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  "Discover Community",
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.poppinsBold(
+                      fontSize: 24,
+                      color: AppColors.black,
+                      fontWeight: FontWeight.normal),
                 ),
-              ),
-              const Spacer(),
-              CustomContinueButton(
-                buttonText: 'Enter Pine',
-                onPressed: () async {
-                  await Prefrences.setDiscoverCommunity(true);
+                const SizedBox(height: 30),
+                Text(
+                  "Add photos, find friends, and join clubs to make the most of Pine.\n\nYour feed will populate with friends and club member content alongside curated picks just for you.",
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.poppinsMedium(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ).copyWith(
+                    height: 1.5,
+                  ),
+                ),
+                const Spacer(),
+                CustomContinueButton(
+                  buttonText: 'Enter Pine',
+                  onPressed: () async {
+                    await Prefrences.setDiscoverCommunity(true);
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => CheckLoginInfoScreen(
-                              userProfile: widget.userProfile,
-                              authToken: widget.authToken,
-                            )),
-                  );
-                },
-                isPressed: true,
-              ),
-              const SizedBox(height: 24),
-            ],
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => CheckLoginInfoScreen(
+                                userProfile: widget.userProfile,
+                                authToken: widget.authToken,
+                              )),
+                    );
+                  },
+                  isPressed: true,
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

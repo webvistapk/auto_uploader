@@ -34,10 +34,11 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AuthProvider>();
+    context.read<AuthProvider>().errorMessage = '';
+
     emailController.addListener(() {
       setState(() {
-        isButtonEnabled = emailController.text.trim().isNotEmpty;
+        isButtonEnabled = formKey.currentState!.validate() ?? false;
       });
     });
   }
@@ -83,7 +84,7 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
                           validator: (val) {
                             if (val.isEmpty) {
                               return "Email Field Required";
-                            } else if (!val.contains('@')) {
+                            } else if (!val.contains('@gmail.com')) {
                               return "Enter a valid email";
                             }
                             return null;
