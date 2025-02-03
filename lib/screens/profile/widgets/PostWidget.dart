@@ -139,11 +139,12 @@ class _PostWidgetState extends State<PostWidget> {
                     ClipRRect(
                       borderRadius: const BorderRadius.all(Radius.circular(14)),
                       child: Image.network(
-                        widget.profileImageUrl == ''
+                        widget.profileImageUrl == null
                             ? AppUtils.userImage
                             : widget.profileImageUrl,
                         width: 28,
                         height: 28,
+                        fit: BoxFit.cover,
                       ),
                     ),
                     SizedBox(
@@ -168,15 +169,16 @@ class _PostWidgetState extends State<PostWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                child: Image.network(
-                  widget.profileImageUrl == ''
-                      ? AppUtils.userImage
-                      : widget.profileImageUrl,
-                  width: 35,
-                  height: 35,
-                ),
-              ),
+  borderRadius: BorderRadius.all(Radius.circular(14)),
+  child: SizedBox(
+    width: 28,
+    height: 28,
+    child: Image.network(
+      widget.profileImageUrl.isEmpty ? AppUtils.userImage : widget.profileImageUrl,
+      fit: BoxFit.cover, // Ensures the image covers the container without distortion
+    ),
+  ),
+),
               const SizedBox(width: 10),
               Expanded(
                 child: Row(
@@ -400,24 +402,29 @@ class _PostWidgetState extends State<PostWidget> {
                   ],
                   if (widget.postModel.interactions!.contains('polls')) ...[
                     const SizedBox(width: 10),
-                    GestureDetector(
-                        onTap: () {
-                          // debugger();
-                          widget.postModel.polls!
-                                  .any((element) => element.isVoted == true)
-                              ? showPercentageResult(
-                                  context, widget.postModel.polls!, false)
-                              : showPollModal(
-                                  context,
-                                  widget.postModel.polls ?? [],
-                                  widget.postModel.pollTitle ?? '',
-                                  widget.postModel.pollDescription ?? '');
-                        },
-                        child: const Icon(
-                          Icons.poll_outlined,
-                          size: 20,
-                          color: Colors.black,
-                        )),
+                   Column(
+                      children: [
+                        GestureDetector(
+                            onTap: () {
+                              // debugger();
+                              widget.postModel.polls!
+                                      .any((element) => element.isVoted == true)
+                                  ? showPercentageResult(
+                                      context, widget.postModel.polls!, false)
+                                  : showPollModal(
+                                      context,
+                                      widget.postModel.polls ?? [],
+                                      widget.postModel.pollTitle ?? '',
+                                      widget.postModel.pollDescription ?? '');
+                            },
+                            child: const Icon(
+                              Icons.poll_outlined,
+                              size: 20,
+                              color: Colors.black,
+                            )),
+                        Text("0", style: TextStyle(fontSize: 9))
+                      ],
+                    ),
                   ],
                 ],
               ),
@@ -568,7 +575,7 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
               ),
             if (!widget.isSinglePost) ...[
-              Positioned(
+             if(false)...[ Positioned(
                 bottom: widget.postTitle == null ? 5 : 85,
                 left: 5,
                 //right: 0,
@@ -587,7 +594,7 @@ class _PostWidgetState extends State<PostWidget> {
                     ScreenIconBuild(AppIcons.group_name, "Group Name"),
                   ],
                 ),
-              ),
+              ),],
               Positioned(
                 bottom: 10,
                 right: 10,

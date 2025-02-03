@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
@@ -24,7 +26,7 @@ class UsersStoryScreen extends StatefulWidget {
 class _UsersStoryScreenState extends State<UsersStoryScreen> {
   @override
   Widget build(BuildContext context) {
-    //debugger();
+   
     return Padding(
         padding: const EdgeInsets.all(10),
         child: Consumer<MediaProvider>(
@@ -38,11 +40,12 @@ class _UsersStoryScreenState extends State<UsersStoryScreen> {
             final profileImageUrl = (stories != null &&
                     stories.isNotEmpty &&
                     stories.first.user?.profileImage != null)
-                ? '${ApiURLs.baseUrl2}${stories.first.user!.profileImage}'
+                ? '${stories.first.user!.profileImage}'
                 : AppUtils.userImage; // Fallback URL for profile image
-
+          print("Profile Image :${profileImageUrl}");
             if (stories != null && stories.isNotEmpty) {
               final List<Object?> allMediaFiles = stories.expand((story) {
+                //debugger();
                 return story.media!
                     .map((media) => media.file)
                     .whereType<String>();
@@ -50,7 +53,7 @@ class _UsersStoryScreenState extends State<UsersStoryScreen> {
 
               final List<int?> storyIds =
                   stories.map((story) => story.id).whereType<int>().toList();
-
+                  
               return InkWell(
                 onTap: () {
                   Navigator.push(
@@ -73,7 +76,9 @@ class _UsersStoryScreenState extends State<UsersStoryScreen> {
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundImage: NetworkImage(profileImageUrl),
+                      backgroundImage: NetworkImage(widget.userProfile.profileUrl==null?
+                      "${AppUtils.userImage.toString()}":"${ApiURLs.baseUrl.replaceAll("/api/", '')}${widget.userProfile.profileUrl.toString()}"),
+                      
                     ),
                     Positioned(
                         bottom: 0,
@@ -106,7 +111,8 @@ class _UsersStoryScreenState extends State<UsersStoryScreen> {
                 },
                 child: CircleAvatar(
                   radius: 20,
-                  backgroundImage: NetworkImage(profileImageUrl),
+                  backgroundImage: NetworkImage(widget.userProfile.profileUrl==null?
+                      "${AppUtils.userImage.toString()}":"${ApiURLs.baseUrl.replaceAll("/api/", '')}${widget.userProfile.profileUrl.toString()}"),
                 ),
               );
             }

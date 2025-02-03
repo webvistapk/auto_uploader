@@ -98,7 +98,7 @@ class _SinglePostState extends State<SinglePost> {
                 caption: post.post,
                 mediaUrls: mediaList,
                 profileImageUrl: post.user.profileImage != null
-                    ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+                    ? "${post.user.profileImage}"
                     : AppUtils.userImage,
                 isVideo: post.media[0].mediaType == 'video',
                 likes: post.likesCount.toString(),

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
@@ -133,6 +134,7 @@ class _SideBarState extends State<SideBar> {
 
   @override
   Widget build(BuildContext context) {
+    print("userS ${_userProfile!.profileUrl}");
     return Drawer(
       backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
@@ -153,7 +155,7 @@ class _SideBarState extends State<SideBar> {
                 ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(20)),
                   child: Image.network(
-                    AppUtils.userImage,
+                    _userProfile?.profileUrl!=null?ApiURLs.baseUrl.replaceAll("/api/", "")+_userProfile!.profileUrl.toString():AppUtils.userImage,
                     width: 80,
                   ),
                 ),
@@ -251,7 +253,7 @@ class _SideBarState extends State<SideBar> {
                 ),
                 ListTile(
                   title: const Text(
-                    'Update Password',
+                    'Update Phone Number',
                     style: TextStyle(
                         fontSize: 16,
                         fontFamily: 'Greycliff CF',
