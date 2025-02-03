@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:mobile/screens/messaging/model/message_model.dart';
 
@@ -25,6 +26,26 @@ class ChatProvider with ChangeNotifier {
   void setAccessToken(String token) {
     accessToken = token;
     notifyListeners();
+  }
+
+  void markChatAsRead(int chatId) async {
+    int index = chats.indexWhere((chat) => chat.id == chatId);
+    if (index != -1) {
+      chats[index] = ChatModel(
+        id: chats[index].id,
+        name: chats[index].name,
+        participants: chats[index].participants,
+        isGroup: chats[index].isGroup,
+        unReadMessages: false, // Mark as read
+        createdAt: chats[index].createdAt,
+        updatedAt: chats[index].updatedAt,
+      );
+      await ChatController().ReadMessages(
+        chats[index].id,
+      );
+
+      notifyListeners(); // Notify UI of the change
+    }
   }
 
   Future<void> fetchChats() async {
