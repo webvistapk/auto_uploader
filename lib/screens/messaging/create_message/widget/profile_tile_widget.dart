@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/controller/endpoints.dart';
 
 class ProfileTile extends StatelessWidget {
   final String? profileImage; // Null for default avatar
@@ -33,20 +35,28 @@ class ProfileTile extends StatelessWidget {
             Row(
               children: [
                 // Profile Image
-                CircleAvatar(
-                  radius: 25,
-                  backgroundImage:
-                      profileImage != null ? NetworkImage(profileImage!) : null,
-                  backgroundColor: Colors.grey[300],
-                  child: profileImage == null
-                      ? const Center(
-                          child: Icon(
-                            Icons.person,
-                            color: Colors.grey,
+                profileImage != null && profileImage!.isNotEmpty
+                    ? CircleAvatar(
+                        radius: 22,
+                        backgroundImage: NetworkImage(
+                          ApiURLs.baseUrl2 + profileImage!,
+                        ),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                            10), // Ensure the image fits properly
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.mode(
+                            AppColors
+                                .greyColor, // Change this to any color you want
+                            BlendMode.srcIn,
                           ),
-                        )
-                      : null,
-                ),
+                          child: Image.asset(
+                            'assets/icons/profile.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
                 const SizedBox(width: 16),
 
                 // User Details

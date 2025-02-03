@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_text_styles.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/model/message_model.dart';
 import 'package:mobile/screens/messaging/widgets/media_item.dart';
@@ -75,7 +77,7 @@ class UnifiedMessage extends StatelessWidget {
               ),
               child: Text(
                 text,
-                style: const TextStyle(fontSize: 14),
+                style: AppTextStyles.poppinsRegular(color: AppColors.white),
                 softWrap: true,
               ),
             ),
