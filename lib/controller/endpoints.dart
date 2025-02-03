@@ -64,4 +64,8 @@ class ApiURLs {
       "userprofile/users/update_phone_verified/";
   static const String update_phone_number =
       "userprofile/users/update_phone_number/";
+
+  //Notification Firebase
+  static const String fCMTokenSave = "firebasenotification/new/";
+  static const String fCMTokenDelete = "firebasenotification/delete/";
 }

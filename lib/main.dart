@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_size.dart';
+import 'package:mobile/controller/firebase_notification/notification_provider.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/controller/services/followers/follower_provider.dart';
@@ -9,9 +9,6 @@ import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
-import 'package:mobile/models/UserProfile/userprofile.dart';
-import 'package:mobile/prefrences/user_prefrences.dart';
-import 'package:mobile/screens/authantication/signup/phone/phone_input.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 import 'package:mobile/screens/notification/controller/notificationProvider.dart';
@@ -21,9 +18,14 @@ import 'package:mobile/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'controller/services/StatusProvider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // Transparent status bar
     statusBarIconBrightness: Brightness.dark, // Dark icons for the status bar
@@ -51,6 +53,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => CommentProvider()),
           ChangeNotifierProvider(create: (_) => NotificationProvider()),
           ChangeNotifierProvider(create: (_) => ReplyProvider()),
+          ChangeNotifierProvider(create: (_) => FirebaseNotificationProvider()),
         ],
         child: MaterialApp(
             title: 'Fillet Social Media App',

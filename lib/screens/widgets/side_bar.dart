@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
+import 'package:mobile/controller/firebase_notification/notification_provider.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
@@ -13,6 +14,7 @@ import 'package:mobile/screens/authantication/update%20password/old_password_scr
 import 'package:mobile/screens/profile/FollowerReelScreen.dart';
 import 'package:mobile/screens/profile/ReelScreen.dart';
 import 'package:mobile/screens/profile/post_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // class SideBar extends StatelessWidget {
@@ -307,6 +309,10 @@ class _SideBarState extends State<SideBar> {
                   ),
                   onTap: () async {
                     // Handle Logout
+
+                    await Provider.of<FirebaseNotificationProvider>(context,
+                            listen: false)
+                        .deleteNotificationToken();
                     SharedPreferences removeUser =
                         await SharedPreferences.getInstance();
                     await Prefrences.removeAuthToken();
@@ -314,6 +320,7 @@ class _SideBarState extends State<SideBar> {
                     await UserPreferences().clearCurrentUser();
                     await removeUser.remove(UserPreferences.userKey);
                     await removeUser.clear();
+
                     // ToastNotifier.showSuccessToast(
                     //     context, "Logout user Successfully");
                     Navigator.pushAndRemoveUntil(

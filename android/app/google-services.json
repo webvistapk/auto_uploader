@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "766561124548",
+    "project_id": "pine-ef3b7",
+    "storage_bucket": "pine-ef3b7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:766561124548:android:bde7bfae8b2c7d73dec991",
+        "android_client_info": {
+          "package_name": "com.example.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8hurrTRgcluqa7Ed0PvUd4eW9ofFEPEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

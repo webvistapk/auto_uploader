@@ -17,6 +17,7 @@ class Prefrences {
   static const String loginInfoKey = "InfoSaveKey";
   static const String phoneVerified = "phone_verify";
   static const String emailVerified = "email_verify";
+  static const String fcmToken = "FcmTokenKey";
 
   static setAuthToken(String accessToken) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -46,6 +47,21 @@ class Prefrences {
   static setLoginInfoSave(bool loginInfo) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool(loginInfoKey, loginInfo);
+  }
+
+  static setFcmToken(String? token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(fcmToken, token!);
+  }
+
+  static getFcmToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(fcmToken);
+  }
+
+  static deleteFcmToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(fcmToken);
   }
 
   static getLoginInfoSave() async {
