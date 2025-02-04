@@ -65,9 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           CustomAppTextField(
                             validator: (value) {
-                              if (value!.isEmpty) {
-                                return "Please enter the email or username or phone#";
-                              }
                               return null;
                             },
                             controller: _usernameController,
@@ -76,9 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 20),
                           CustomAppTextField(
                             validator: (value) {
-                              if (value!.isEmpty) {
-                                return "Please enter the password";
-                              }
                               return null;
                             },
                             controller: _passwordController,
