@@ -230,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen>
                               userProfile: widget.userProfile!,
                               token: widget.token!,
                             ),
+                            
                             // Spacer(),
                             //SizedBox(width: 10),
                             Flexible(
@@ -364,6 +365,7 @@ class _HomeScreenState extends State<HomeScreen>
                   final user = users[index];
 
                   log("Users: $user");
+                  print("IMage: ${user!.profileImage}");
                   return Padding(
                     padding: const EdgeInsets.only(top: 10, left: 5),
                     child: Column(
@@ -397,8 +399,12 @@ class _HomeScreenState extends State<HomeScreen>
                           child: CircleAvatar(
                             radius: 20,
                             backgroundImage: NetworkImage(
-                              user?.profileImage ?? AppUtils.userImage,
+                              user!.profileImage!=null?
+                               ApiURLs.baseUrl.replaceAll("/api/", '')+user!.profileImage.toString()
+                               : AppUtils.userImage,
+                            
                             ),
+                            
                             onBackgroundImageError: (_, __) =>
                                 const Icon(Icons.person, size: 45),
                             backgroundColor: Colors.transparent,
@@ -430,50 +436,53 @@ class _HomeScreenState extends State<HomeScreen>
       final file = media.file;
       return file;
     }).toList();
-
-    return PostWidget(
-      postId: post.id.toString(),
-      username: post.user.username,
-      location: '',
-      date: post.createdAt,
-      caption: post.post,
-      mediaUrls: fullMediaUrls,
-      profileImageUrl: post.user.profileImage != null
-          ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
-          : AppUtils.userImage,
-      isVideo:
-          post.media.any((media) => media.mediaType == 'video') ? true : false,
-      likes: post.likesCount.toString(),
-      comments: post.commentsCount.toString(),
-      shares: "",
-      saved: "",
-      refresh: () {},
-      showCommentSection: false,
-      isInteractive: true,
-      isUserPost: false,
-      onPressed: onPressed,
-      onPressLiked: () async {
-        final postProvider = Provider.of<PostProvider>(context, listen: false);
-
-        if (post.isLiked == false) {
-          // Like the post
-          await postProvider.newLikes(
-            post.id,
-            context,
-          );
-        } else {
-          // Dislike the post
-          await postProvider.userDisLikes(
-            post.id,
-            context,
-          );
-        }
-      },
-      isLiked: post.isLiked, // Use the post's `isLiked`
-      postModel: post,
-      postTitle: post.pollTitle,
-      postDescription: post.postDescription,
-      privacy: post.privacy,
+    
+    return Container(
+      padding: EdgeInsets.only(bottom:8 ),
+      child: PostWidget(
+        postId: post.id.toString(),
+        username: post.user.username,
+        location: '',
+        date: post.createdAt,
+        caption: post.post,
+        mediaUrls: fullMediaUrls,
+        profileImageUrl: post.user.profileImage != null
+            ? "${post.user.profileImage}"
+            : AppUtils.userImage,
+        isVideo:
+            post.media.any((media) => media.mediaType == 'video') ? true : false,
+        likes: post.likesCount.toString(),
+        comments: post.commentsCount.toString(),
+        shares: "",
+        saved: "",
+        refresh: () {},
+        showCommentSection: false,
+        isInteractive: true,
+        isUserPost: false,
+        onPressed: onPressed,
+        onPressLiked: () async {
+          final postProvider = Provider.of<PostProvider>(context, listen: false);
+      
+          if (post.isLiked == false) {
+            // Like the post
+            await postProvider.newLikes(
+              post.id,
+              context,
+            );
+          } else {
+            // Dislike the post
+            await postProvider.userDisLikes(
+              post.id,
+              context,
+            );
+          }
+        },
+        isLiked: post.isLiked, // Use the post's `isLiked`
+        postModel: post,
+        postTitle: post.pollTitle,
+        postDescription: post.postDescription,
+        privacy: post.privacy,
+      ),
     );
   }
 }

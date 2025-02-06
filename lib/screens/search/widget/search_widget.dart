@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
@@ -163,7 +164,7 @@ class _SearchWidgetState extends State<SearchWidget>
   Widget build(BuildContext context) {
     // debugger();
     final results = _searchUsers(selectedCategory);
-
+    //debugger();
     //final recommended=_searchUsers("")
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,8 +236,8 @@ class _SearchWidgetState extends State<SearchWidget>
                           leading: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
-                              user.profileUrl == ''
-                                  ? user.profileUrl.toString()
+                              user.profileUrl != null
+                                  ? ApiURLs.baseUrl.replaceAll("/api/",'')+user.profileUrl.toString()
                                   : AppUtils.userImage,
                               width: 38,
                               height: 38,
@@ -252,7 +253,6 @@ class _SearchWidgetState extends State<SearchWidget>
                           subtitle: Text('${user.firstName} ${user.lastName}',
                               style: TextStyle(
                                       color: Color(0xff34342F),
-                                     
                                       fontSize: 14)),
                           trailing: IconButton(
                             icon: const Icon(Icons.close,

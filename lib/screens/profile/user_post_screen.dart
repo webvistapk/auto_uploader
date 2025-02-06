@@ -156,74 +156,77 @@ class _UserPostScreenState extends State<UserPostScreen> {
                       : [""];
           
                   return SingleChildScrollView(
-                    child: PostWidget(
-                      isInteractive: true,
-                      postId: post.id.toString(),
-                      username: post.user.username.toString(),
-                      location: "Location",
-                      date: post.createdAt.toString(),
-                      caption: post.post.toString(),
-                      mediaUrls: post.media.isNotEmpty
-                          ? post.media
-                              .map((media) => "${media.file}")
-                              .toList()
-                          : [],
-                      profileImageUrl: post.user.profileImage != null
-                          ? "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
-                          : AppUtils.userImage,
-                      isVideo: post.media.isNotEmpty &&
-                          post.media[0].mediaType == 'video',
-                      likes: post.likesCount.toString(),
-                      comments: post.commentsCount.toString(),
-                      shares: "100",
-                      saved: '100',
-                      showCommentSection: false,
-                      refresh: () => _deletePost(post.id.toString()),
-                      isUserPost: true,
-                      onPressed: () {
-                        if (post.media[0].mediaType == 'video') {
-                          Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                              builder: (_) => FullscreenVideoPlayer(
-                                videoUrl: "${mediaList[0]}",
-                              ),
-                              context: context,
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
+                    child: Container(
+                      padding: EdgeInsets.only(bottom: 4),
+                      child: PostWidget(
+                        isInteractive: true,
+                        postId: post.id.toString(),
+                        username: post.user.username.toString(),
+                        location: "Location",
+                        date: post.createdAt.toString(),
+                        caption: post.post.toString(),
+                        mediaUrls: post.media.isNotEmpty
+                            ? post.media
+                                .map((media) => "${media.file}")
+                                .toList()
+                            : [],
+                        profileImageUrl: post.user.profileImage != null
+                            ? "${post.user.profileImage}"
+                            : AppUtils.userImage,
+                        isVideo: post.media.isNotEmpty &&
+                            post.media[0].mediaType == 'video',
+                        likes: post.likesCount.toString(),
+                        comments: post.commentsCount.toString(),
+                        shares: "100",
+                        saved: '100',
+                        showCommentSection: false,
+                        refresh: () => _deletePost(post.id.toString()),
+                        isUserPost: true,
+                        onPressed: () {
+                          if (post.media[0].mediaType == 'video') {
+                            Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => SinglePost(
-                                    postId: post.id.toString(),
-                                    onPostUpdated: () => _fetchPosts()),
-                              ));
-                        }
-                      },
-                      onPressLiked: () async {
-                        // Check if post is already liked or not
-                        if (post.isLiked) {
-                          await postProvider.userDisLikes(
-                            post.id,
-                            context,
-                          );
-                          setState(() {
-                            post.likesCount--;
-                            post.isLiked = false;
-                          });
-                        } else {
-                          await postProvider.newLikes(post.id, context);
-                          setState(() {
-                            post.likesCount++;
-                            post.isLiked = true;
-                          });
-                        }
-                      },
-                      isLiked: post.isLiked,
-                      postModel: post,
-                      postTitle: post.pollTitle,
-                                  postDescription: post.postDescription
+                              CupertinoDialogRoute(
+                                builder: (_) => FullscreenVideoPlayer(
+                                  videoUrl: "${mediaList[0]}",
+                                ),
+                                context: context,
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SinglePost(
+                                      postId: post.id.toString(),
+                                      onPostUpdated: () => _fetchPosts()),
+                                ));
+                          }
+                        },
+                        onPressLiked: () async {
+                          // Check if post is already liked or not
+                          if (post.isLiked) {
+                            await postProvider.userDisLikes(
+                              post.id,
+                              context,
+                            );
+                            setState(() {
+                              post.likesCount--;
+                              post.isLiked = false;
+                            });
+                          } else {
+                            await postProvider.newLikes(post.id, context);
+                            setState(() {
+                              post.likesCount++;
+                              post.isLiked = true;
+                            });
+                          }
+                        },
+                        isLiked: post.isLiked,
+                        postModel: post,
+                        postTitle: post.pollTitle,
+                                    postDescription: post.postDescription
+                      ),
                     ),
                   );
                 },

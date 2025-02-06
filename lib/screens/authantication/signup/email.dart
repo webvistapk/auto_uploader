@@ -112,7 +112,7 @@ class _EmailInputScreenState extends State<EmailInputScreen> {
                             onPressed: () async {
                               if (formKey.currentState!.validate()) {
                                 FocusScope.of(context).unfocus();
-                                pro.setErrorMessageEmpty();
+                                pro.setErrorMessage('');
                                 await pro.registerUser(
                                   context,
                                   widget.username,

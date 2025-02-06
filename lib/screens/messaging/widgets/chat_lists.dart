@@ -20,9 +20,12 @@ class ChatList extends StatefulWidget {
 class _ChatListState extends State<ChatList> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChatProvider>(
-      builder: (context, chatProvider, child) {
-        if (chatProvider.isLoading && chatProvider.chats.isEmpty) {
+    return Selector<ChatProvider, bool>(
+      selector: (_, chatProvider) =>
+          chatProvider.isLoading && chatProvider.chats.isEmpty,
+      builder: (context, isLoading, child) {
+        var chatProvider = context.watch<ChatProvider>();
+        if (isLoading) {
           // Show loading indicator when fetching data
           return Center(child: CircularProgressIndicator());
         } else {
@@ -46,8 +49,7 @@ class _ChatListState extends State<ChatList> {
 
                       if (chat.isGroup) {
                         chatName = chat.name ?? 'Unknown';
-                        profileImage =
-                            'https://images.pexels.com/photos/940585/pexels-photo-940585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Default group image
+                        profileImage = ''; // Default group image
                       } else {
                         final participant = chat.participants.firstWhere(
                           (participant) =>
@@ -55,8 +57,7 @@ class _ChatListState extends State<ChatList> {
                         );
                         chatName =
                             '${participant.firstName} ${participant.lastName}';
-                        profileImage = participant.profileImage ??
-                            'https://images.pexels.com/photos/940585/pexels-photo-940585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Default group image
+                        profileImage = participant.profileImage;
                       }
 
                       final String updateAt = formatMessageDate(chat.updatedAt);
@@ -78,26 +79,35 @@ class _ChatListState extends State<ChatList> {
 
                           // If the user returns from the InboxScreen
                           if (result == true) {
-                            if (mounted)
-                              setState(() {
-                                // Set the unreadMessages property to false for this chat
-                                chatProvider.chats[index] = ChatModel(
-                                  id: chat.id,
-                                  name: chat.name,
-                                  participants: chat.participants,
-                                  isGroup: chat.isGroup,
-                                  unReadMessages: false, // Mark as read
-                                  createdAt: chat.createdAt,
-                                  updatedAt: chat.updatedAt,
-                                );
-                              });
+                            if (result == true) {
+                              chatProvider.markChatAsRead(chat.id);
+                            }
                           }
                         },
                         child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(profileImage),
-                            radius: 20,
-                          ),
+                          leading:
+                              profileImage != null && profileImage.isNotEmpty
+                                  ? CircleAvatar(
+                                      radius: 22,
+                                      backgroundImage: NetworkImage(
+                                        profileImage,
+                                      ),
+                                    )
+                                  : ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                          50), // Ensure the image fits properly
+                                      child: ColorFiltered(
+                                        colorFilter: const ColorFilter.mode(
+                                          Colors
+                                              .grey, // Change this to any color you want
+                                          BlendMode.srcIn,
+                                        ),
+                                        child: Image.asset(
+                                          'assets/icons/profile.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

@@ -136,7 +136,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     profileContainer(
                         widget.user.profileUrl == null
                             ? AppUtils.userImage
-                            : ApiURLs.baseUrl + widget.user.profileUrl!,
+                            : ApiURLs.baseUrl.replaceAll("/api/", '')+ widget.user.profileUrl!,
                         "${widget.user.firstName.toString()} ${widget.user.lastName.toString()}",
                         widget.user.position ?? "",
                         widget.user.address ?? '',
@@ -452,6 +452,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   //First Profile Container
   Widget profileContainer(
       String img, fullName, JobType, address, city, country) {
+        
     return Center(
       child: Container(
         // padding: EdgeInsets.all(5),
@@ -472,30 +473,40 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                 );
               },
               child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(18)),
-                child: Image.network(
-                  img,
-                  fit: BoxFit.cover,
-                  width: 50,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Container(
-                        width: header5 * 2,
-                        height: header5 * 2,
-                        color: Colors.white,
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.error,
-                    color: Colors.red,
-                    size: header5,
-                  ),
-                ),
-              ),
+  borderRadius: BorderRadius.all(Radius.circular(18)),
+  child: SizedBox(
+    width: 50,
+    height: 50,
+    child: Image.network(
+      img,
+      fit: BoxFit.cover, // Ensures the image fills the given size while maintaining aspect ratio
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            width: 50, // Ensures the shimmer effect matches the image size
+            height: 50,
+            color: Colors.white,
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) => Container(
+        width: 50,
+        height: 50,
+        alignment: Alignment.center,
+        color: Colors.grey[300], // Placeholder background color
+        child: Icon(
+          Icons.error,
+          color: Colors.red,
+          size: 24, // Adjust size to fit within the container
+        ),
+      ),
+    ),
+  ),
+),
+
             ),
             const SizedBox(
               height: 12,

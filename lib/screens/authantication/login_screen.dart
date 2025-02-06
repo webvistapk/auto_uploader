@@ -65,9 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           CustomAppTextField(
                             validator: (value) {
-                              if (value!.isEmpty) {
-                                return "Please enter the email or username or phone#";
-                              }
                               return null;
                             },
                             controller: _usernameController,
@@ -76,9 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 20),
                           CustomAppTextField(
                             validator: (value) {
-                              if (value!.isEmpty) {
-                                return "Please enter the password";
-                              }
                               return null;
                             },
                             controller: _passwordController,
@@ -120,8 +114,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       horizontal: 16.0),
                                   child: ElevatedButton(
                                     onPressed: () async {
-                                      pro.setErrorMessageEmpty();
-                                      if (formKey.currentState!.validate()) {
+                                      pro.setErrorMessage('');
+                                      if (_usernameController.text.isEmpty) {
+                                        pro.setErrorMessage(
+                                            'Username or Email is required');
+                                      } else if (_passwordController
+                                          .text.isEmpty) {
+                                        pro.setErrorMessage(
+                                            'Please enter password field');
+                                      } else if (formKey.currentState!
+                                          .validate()) {
                                         FocusScope.of(context).unfocus();
 
                                         await pro.loginUser(

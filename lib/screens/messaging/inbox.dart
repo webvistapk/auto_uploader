@@ -15,26 +15,27 @@ import 'widgets/own_message.dart';
 class InboxScreen extends StatefulWidget {
   final UserProfile userProfile;
   final ChatModel chatModel;
-  final chatName;
-  final participantImage;
+  final String? chatName;
+  final String? participantImage;
   bool isCreated;
-  InboxScreen(
-      {Key? key,
-      this.isCreated = false,
-      required this.userProfile,
-      required this.chatModel,
-      this.chatName,
-      this.participantImage})
-      : super(key: key);
+
+  InboxScreen({
+    Key? key,
+    this.isCreated = false,
+    required this.userProfile,
+    required this.chatModel,
+    this.chatName,
+    this.participantImage,
+  }) : super(key: key);
 
   @override
   State<InboxScreen> createState() => _InboxScreenState();
 }
 
 class _InboxScreenState extends State<InboxScreen> {
-  TextEditingController messageController = TextEditingController();
-  ScrollController _scrollController = ScrollController();
-  late ChatController chatController;
+  final TextEditingController messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  ChatController? chatController;
   bool isLoading = false;
   int offset = 0;
   final int limit = 10;
@@ -44,68 +45,37 @@ class _InboxScreenState extends State<InboxScreen> {
   void initState() {
     super.initState();
     chatController = Provider.of<ChatController>(context, listen: false);
-    chatController.connectWebSocket(widget.chatModel.id);
-
+    chatController?.connectWebSocket(widget.chatModel.id);
     fetching(widget.chatModel.id);
 
-    // Add scroll listener for pagination
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.minScrollExtent &&
           !isLoading) {
-        // Trigger loading more messages when scrolled to the top
         loadMoreMessages();
       }
     });
   }
 
   Future<void> fetching(int chatID) async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-
-      await chatController.ReadMessages(widget.chatModel.id);
-      await chatController.loadMessages(chatID, offset: offset, limit: limit);
-
-      setState(() {
-        isLoading = false;
-        moreLoading = false;
-      });
-
-      // Scroll to the bottom for initial load
-      if (offset == 0) {
-        _scrollToBottom();
-      }
-    } catch (error) {
-      //ToastNotifierer.showErrorToast(context, 'Error loading messages: $error');
-      setState(() {
-        isLoading = false;
-        moreLoading = false;
-      });
-    }
+    setState(() => isLoading = true);
+    await chatController?.loadMessages(chatID, offset: offset, limit: limit);
+    setState(() {
+      isLoading = false;
+      if (mounted) _scrollToBottom();
+    });
   }
 
   Future<void> loadMoreMessages() async {
     if (!moreLoading) {
-      setState(() {
-        moreLoading = true;
-      });
-
-      // Save the current scroll offset
+      setState(() => moreLoading = true);
       final double previousScrollHeight =
           _scrollController.position.maxScrollExtent;
-
-      offset += limit; // Increase offset to load the next set of messages
-
-      await chatController.loadMessages(widget.chatModel.id,
+      offset += limit;
+      await chatController?.loadMessages(widget.chatModel.id,
           offset: offset, limit: limit);
+      setState(() => moreLoading = false);
 
-      setState(() {
-        moreLoading = false;
-      });
-
-      // Restore the scroll position after loading messages
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
           final double newScrollHeight =
@@ -118,13 +88,12 @@ class _InboxScreenState extends State<InboxScreen> {
 
   @override
   void dispose() {
-    chatController.disconnect(); // Close WebSocket connection
+    chatController?.disconnect();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _scrollToBottom() {
-    setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -136,221 +105,171 @@ class _InboxScreenState extends State<InboxScreen> {
     });
   }
 
+  String formatDateString(String dateString) {
+    try {
+      return DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(dateString));
+    } catch (e) {
+      debugPrint("Error parsing date: $e");
+      return 'Invalid date';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Consumer<ChatController>(
-          builder: (context, chatController, child) {
-            return Stack(
-              children: [
-                Column(
-                  children: [
-                    Material(
-                      elevation: 0.3,
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () async {
-                                  if (widget.isCreated) {
-                                    final authToken =
-                                        await Prefrences.getAuthToken();
-                                    Navigator.push(
-                                        context,
-                                        CupertinoDialogRoute(
-                                            builder: (_) => MainScreen(
-                                                  userProfile:
-                                                      widget.userProfile,
-                                                  authToken: authToken,
-                                                  selectedIndex: 3,
-                                                ),
-                                            context: context));
-                                  } else {
-                                    Navigator.pop(context, true);
-                                  }
-                                },
-                                child: const Icon(Icons.arrow_back),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Container(
-                                  width: 35,
-                                  height: 35,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey),
+    return WillPopScope(
+      onWillPop: () async {
+        if (widget.isCreated) {
+          final authToken = await Prefrences.getAuthToken();
+          Navigator.pushReplacement(
+            context,
+            CupertinoPageRoute(
+              builder: (_) => MainScreen(
+                userProfile: widget.userProfile,
+                authToken: authToken,
+                selectedIndex: 3,
+              ),
+            ),
+          );
+          return false;
+        } else {
+          return true;
+        }
+      },
+      child: SafeArea(
+        child: Scaffold(
+          body: Consumer<ChatController>(
+            builder: (context, chatController, child) {
+              return Stack(
+                children: [
+                  Column(
+                    children: [
+                      _buildHeader(),
+                      Expanded(
+                        child: chatController.isMessageLoading &&
+                                chatController.messages.isEmpty
+                            ? Center(child: CircularProgressIndicator())
+                            : chatController.messages.isEmpty
+                                ? Center(child: Text("Say Hello"))
+                                : ListView.builder(
+                                    controller: _scrollController,
+                                    padding: const EdgeInsets.all(16),
+                                    itemCount: chatController.messages.length,
+                                    itemBuilder: (context, index) {
+                                      final message =
+                                          chatController.messages[index];
+                                      return message.senderUsername ==
+                                              widget.userProfile.username
+                                          ? OwnMessage(
+                                              text: message.content,
+                                              timestampDate: formatDateString(
+                                                  message.createdAt),
+                                              timestampTime: formatDateString(
+                                                  message.createdAt),
+                                              mediaList: message.media,
+                                            )
+                                          : buildUserMessage(
+                                              timestamp: formatDateString(
+                                                  message.createdAt),
+                                              userProfile: widget.userProfile,
+                                              messageModel: message,
+                                            );
+                                    },
                                   ),
-                                  child: Image(
-                                    width: 28,
-                                    height: 28,
-                                    image: NetworkImage(
-                                      widget.participantImage ??
-                                          "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-image-182145777.jpg",
-                                    ),
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (widget.chatName == null) ...[
-                                    Text(
-                                      widget.chatModel.participants[0].username,
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ] else
-                                    Text(
-                                      widget.chatName ?? 'Unknown',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const Spacer(),
-                              Container(
-                                decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey)),
-                                child: const Padding(
-                                    padding: EdgeInsets.all(5.0),
-                                    child: Icon(
-                                      Icons.phone,
-                                      size: 18,
-                                    )),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey)),
-                                  child: const Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: Icon(
-                                        Icons.video_call,
-                                        size: 18,
-                                      )),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                        ],
                       ),
-                    ),
-                    // Chat List
-                    Expanded(
-                      child: chatController.isMessageLoading &&
-                              chatController.messages.isEmpty
-                          ? Center(
-                              child: CircularProgressIndicator.adaptive(),
-                            )
-                          : chatController.messages.isEmpty
-                              ? Center(child: Text("Say Hello"))
-                              : ListView.builder(
-                                  controller: _scrollController,
-                                  padding: const EdgeInsets.all(16),
-                                  itemCount: chatController.messages.length,
-                                  itemBuilder: (context, index) {
-                                    final message =
-                                        chatController.messages[index];
-                                    bool isOwnMessage =
-                                        message.senderUsername ==
-                                            widget.userProfile.username;
-
-                                    final formatDate =
-                                        formatDateString(message.createdAt);
-                                    final formatTime =
-                                        formatDateString(message.createdAt);
-                                    if (isOwnMessage) {
-                                      return OwnMessage(
-                                        text: message.content,
-                                        timestampDate: formatDate,
-                                        timestampTime: formatTime,
-                                        mediaList: message.media,
-                                      );
-                                    } else {
-                                      return buildUserMessage(
-                                        timestamp: formatDate,
-                                        userProfile: widget.userProfile,
-                                        messageModel: message,
-                                      );
-                                    }
-                                  },
-                                ),
-                    ),
-                    // Input Field
-                    ChatInputField(
-                      messageController: messageController,
-                      onPressedSend: () async {
-                        try {
-                          await chatController.sendMessage(
-                            messageController.text.trim(),
-                            widget.chatModel.id,
-                            [],
-                          );
-
-                          // Clear the input field and scroll to the bottom
-                          if (mounted) {
-                            setState(() {
-                              messageController.clear();
-                            });
+                      ChatInputField(
+                        messageController: messageController,
+                        onPressedSend: () async {
+                          try {
+                            await chatController.sendMessage(
+                              messageController.text.trim(),
+                              widget.chatModel.id,
+                              [],
+                            );
+                            setState(() => messageController.clear());
                             Future.delayed(
-                                Duration(seconds: 1), _scrollToBottom);
-                          }
-                        } catch (e) {
-                          //ToastNotifier.showErrorToast(context, e.toString());
-                        }
-                      },
-                      chatModel: widget.chatModel,
-                    ),
-                  ],
-                ),
-                if (moreLoading)
-                  Positioned(
-                    top: 30, // Aligns the loader at the top
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                                Duration(milliseconds: 300), _scrollToBottom);
+                          } catch (_) {}
+                        },
+                        chatModel: widget.chatModel,
+                      ),
+                    ],
                   ),
-              ],
-            );
-          },
+                  if (moreLoading)
+                    Positioned(
+                      top: 30,
+                      left: 0,
+                      right: 0,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
-  String formatDateString(String dateString) {
-    try {
-      DateTime dateTime = DateTime.parse(dateString);
-      final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
-      return formatter.format(dateTime);
-    } catch (e) {
-      print('Error parsing date: $e');
-      return 'Invalid date';
-    }
-  }
-
-  String formatTimeString(String dateString) {
-    try {
-      DateTime dateTime = DateTime.parse(dateString);
-      final DateFormat formatter = DateFormat('HH:mm');
-      return formatter.format(dateTime);
-    } catch (e) {
-      print('Error parsing date: $e');
-      return 'Invalid date';
-    }
+  Widget _buildHeader() {
+    return Material(
+      elevation: 0.3,
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () async {
+              if (widget.isCreated) {
+                final authToken = await Prefrences.getAuthToken();
+                Navigator.pushReplacement(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (_) => MainScreen(
+                      userProfile: widget.userProfile,
+                      authToken: authToken,
+                      selectedIndex: 3,
+                    ),
+                  ),
+                );
+              } else {
+                Navigator.pop(context, true);
+              }
+            },
+          ),
+          CircleAvatar(
+            backgroundImage: widget.participantImage != null &&
+                    widget.participantImage!.isNotEmpty
+                ? NetworkImage(
+                    widget.participantImage!,
+                  )
+                : AssetImage('assets/icons/profile.png') as ImageProvider,
+          ),
+          SizedBox(width: 10),
+          Text(widget.chatName ?? widget.chatModel.participants[0].username,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Spacer(),
+          Container(
+            decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+            child: const Padding(
+                padding: EdgeInsets.all(5.0),
+                child: Icon(
+                  Icons.phone,
+                  size: 18,
+                )),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Container(
+              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+              child: const Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Icon(
+                    Icons.video_call,
+                    size: 18,
+                  )),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
