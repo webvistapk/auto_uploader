@@ -138,8 +138,8 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  setErrorMessageEmpty() {
-    errorMessage = '';
+  setErrorMessage(String val) {
+    errorMessage = val;
     notifyListeners();
   }
 
@@ -319,7 +319,7 @@ class AuthProvider extends ChangeNotifier {
   resendEmailVerified(context, String email) async {
     isResend = true;
     notifyListeners();
-    setErrorMessageEmpty();
+    setErrorMessage('');
     notifyListeners();
     try {
       final data = await ProviderManager.renewEmailVerified(email);
@@ -475,7 +475,7 @@ class AuthProvider extends ChangeNotifier {
   resendPhoneVerified(context, String email) async {
     isResend = true;
     notifyListeners();
-    setErrorMessageEmpty();
+    setErrorMessage('');
     notifyListeners();
     try {
       final data = await ProviderManager.renewPhoneVerified(email);
@@ -497,7 +497,7 @@ class AuthProvider extends ChangeNotifier {
   updatePhoneNumber(context, int userId, String phoneNumber) async {
     isLoading = true;
     notifyListeners();
-    setErrorMessageEmpty();
+    setErrorMessage('');
     notifyListeners();
     try {
       final data = await ProviderManager.updatePhoneNumber(userId, phoneNumber);

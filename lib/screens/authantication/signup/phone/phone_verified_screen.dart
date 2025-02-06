@@ -92,7 +92,7 @@ class _PhoneVerifiedScreenState extends State<PhoneVerifiedScreen> {
     });
 
     try {
-      pro.setErrorMessageEmpty();
+      pro.setErrorMessage('');
       await pro.updatePhoneVerfied(context, email, otp);
 
       // Clear OTP field after successful submission
@@ -118,7 +118,7 @@ class _PhoneVerifiedScreenState extends State<PhoneVerifiedScreen> {
     });
 
     try {
-      Provider.of<AuthProvider>(context, listen: false).setErrorMessageEmpty();
+      Provider.of<AuthProvider>(context, listen: false).setErrorMessage('');
       await Provider.of<AuthProvider>(context, listen: false)
           .resendPhoneVerified(context, email);
 
