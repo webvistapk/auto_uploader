@@ -22,12 +22,13 @@ import 'package:provider/provider.dart';
 
 import 'controller/services/StatusProvider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // Transparent status bar
     statusBarIconBrightness: Brightness.dark, // Dark icons for the status bar
   ));
+
   runApp(MyApp());
 }
 
