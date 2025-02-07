@@ -80,50 +80,50 @@ class _PostScreenState extends State<PostScreen> {
                         print(post);
                         // debugger();
                         return PostWidget(
-                          username: post.user.username.toString(),
-                          location: "Location",
-                          date: post.createdAt.toString(),
-                          caption: post.post.toString(),
-                          mediaUrls:
-                              post.media.map((media) => media.file).toList(),
-                          isVideo: post.media.isNotEmpty &&
-                              post.media[0].mediaType == 'video', // Fix here
-                          profileImageUrl: post.user.profileImage != null
-                              ? post.user.profileImage!
-                                      .contains('http://147.79.117.253:8001')
-                                  ? post.user.profileImage!
-                                  : "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
-                              : AppUtils.userImage,
-                          likes: post.likesCount.toString(),
-                          comments: post.commentsCount.toString(),
-                          shares: "100",
-                          saved: '100',
-                          postId: '',
-                          refresh: () {},
-                          isUserPost: false,
-                          isInteractive: true,
-                          onPressed: () async {
-                            final result = await Navigator.push(
-                                context,
-                                CupertinoDialogRoute(
-                                    builder: (_) => SinglePost(
-                                        postId: post.id.toString(),
-                                        onPostUpdated: () => _fetchPost()),
-                                    context: context));
+                            username: post.user.username.toString(),
+                            location: "Location",
+                            date: post.createdAt.toString(),
+                            caption: post.post.toString(),
+                            mediaUrls:
+                                post.media.map((media) => media.file).toList(),
+                            isVideo: post.media.isNotEmpty &&
+                                post.media[0].mediaType == 'video', // Fix here
+                            profileImageUrl: post.user.profileImage != null
+                                ? post.user.profileImage!
+                                        .contains('http://147.79.117.253:8001')
+                                    ? post.user.profileImage!
+                                    : "${ApiURLs.baseUrl.replaceAll("/api/", '')}${post.user.profileImage}"
+                                : AppUtils.userImage,
+                            likes: post.likesCount.toString(),
+                            comments: post.commentsCount.toString(),
+                            shares: "100",
+                            saved: '100',
+                            postId: '',
+                            refresh: () {},
+                            isUserPost: false,
+                            isInteractive: true,
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                  context,
+                                  CupertinoDialogRoute(
+                                      builder: (_) => SinglePost(
+                                          postId: post.id.toString(),
+                                          onPostUpdated: () => _fetchPost()),
+                                      context: context));
 
-                            // Check if the result indicates a need to refresh
-                            if (result == true) {
-                              setState(() {
-                                // Call the method to refresh the data
-                                // _refreshData();
-                              });
-                            }
-                          },
-                          onPressLiked: () {},
-                          isLiked: false, postModel: post,
-                          postTitle: post.pollTitle,
-              postDescription: post.postDescription
-                        );
+                              // Check if the result indicates a need to refresh
+                              if (result == true) {
+                                setState(() {
+                                  // Call the method to refresh the data
+                                  // _refreshData();
+                                });
+                              }
+                            },
+                            onPressLiked: () {},
+                            isLiked: false,
+                            postModel: post,
+                            postTitle: post.pollTitle,
+                            postDescription: post.postDescription);
                       },
                     );
                   } else {

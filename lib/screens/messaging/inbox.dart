@@ -18,15 +18,17 @@ class InboxScreen extends StatefulWidget {
   final String? chatName;
   final String? participantImage;
   bool isCreated;
+  bool isNotification;
 
-  InboxScreen({
-    Key? key,
-    this.isCreated = false,
-    required this.userProfile,
-    required this.chatModel,
-    this.chatName,
-    this.participantImage,
-  }) : super(key: key);
+  InboxScreen(
+      {Key? key,
+      this.isCreated = false,
+      required this.userProfile,
+      required this.chatModel,
+      this.chatName,
+      this.participantImage,
+      this.isNotification = false})
+      : super(key: key);
 
   @override
   State<InboxScreen> createState() => _InboxScreenState();
@@ -118,7 +120,7 @@ class _InboxScreenState extends State<InboxScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (widget.isCreated) {
+        if (widget.isCreated || widget.isNotification) {
           final authToken = await Prefrences.getAuthToken();
           Navigator.pushReplacement(
             context,
@@ -218,7 +220,7 @@ class _InboxScreenState extends State<InboxScreen> {
           IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () async {
-              if (widget.isCreated) {
+              if (widget.isCreated || widget.isNotification) {
                 final authToken = await Prefrences.getAuthToken();
                 Navigator.pushReplacement(
                   context,

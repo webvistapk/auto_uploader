@@ -1,15 +1,13 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:video_player/video_player.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ReelsScreenData extends StatefulWidget {
-  final size;
+  // final size;
   const ReelsScreenData({
     Key? key,
-    required this.size,
+    // required this.size,
   }) : super(key: key);
   @override
   _ReelsScreenDataState createState() => _ReelsScreenDataState();
@@ -100,8 +98,7 @@ class _ReelsScreenDataState extends State<ReelsScreenData> {
       itemCount: _reelList.length + (_isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= _reelList.length) {
-          return _buildShimmerEffect(
-              widget.size); // Show shimmer effect while loading more items
+          return _buildShimmerEffect(); // Show shimmer effect while loading more items
         }
 
         final media = _reelList[index];
@@ -109,7 +106,7 @@ class _ReelsScreenDataState extends State<ReelsScreenData> {
           future: media.thumbnailData, // Get a fast thumbnail
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return _buildShimmerEffect(widget.size);
+              return _buildShimmerEffect();
             }
             if (snapshot.hasData && snapshot.data != null) {
               return _buildReelThumbnail(media, snapshot.data!);
@@ -123,8 +120,8 @@ class _ReelsScreenDataState extends State<ReelsScreenData> {
   }
 
   Widget _buildShimmerEffect(
-    Size size,
-  ) {
+      // Size size,
+      ) {
     return Shimmer.fromColors(
       baseColor: Colors.grey[800]!,
       highlightColor: Colors.grey[600]!,
@@ -179,8 +176,6 @@ class _ReelsScreenDataState extends State<ReelsScreenData> {
 
   @override
   Widget build(BuildContext context) {
-    return _reelList.isNotEmpty
-        ? _buildReelsGrid()
-        : _buildShimmerEffect(widget.size);
+    return _reelList.isNotEmpty ? _buildReelsGrid() : _buildShimmerEffect();
   }
 }

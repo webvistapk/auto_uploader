@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/firebase_notification/notification_provider.dart';
+import 'package:mobile/controller/firebase_notification/notification_service.dart';
 import 'package:mobile/controller/providers/authentication_provider.dart';
 import 'package:mobile/controller/providers/profile_provider.dart';
 import 'package:mobile/controller/services/followers/follower_provider.dart';
@@ -9,6 +11,7 @@ import 'package:mobile/controller/services/followers/follower_request.dart';
 import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
+import 'package:mobile/routes/app_routes.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 import 'package:mobile/screens/notification/controller/notificationProvider.dart';
@@ -30,6 +33,7 @@ main() async {
     statusBarColor: Colors.transparent, // Transparent status bar
     statusBarIconBrightness: Brightness.dark, // Dark icons for the status bar
   ));
+  await NotificationService.initializeFCM();
   runApp(MyApp());
 }
 
@@ -40,27 +44,29 @@ class MyApp extends StatelessWidget {
     screenWidth = MediaQuery.of(context).size.width;
     screenWidth = MediaQuery.of(context).size.height;
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => FollowerRequestProvider()),
-          ChangeNotifierProvider(create: (_) => AuthProvider()),
-          ChangeNotifierProvider(create: (_) => ProfileProvider()),
-          ChangeNotifierProvider(create: (_) => PostProvider()),
-          ChangeNotifierProvider(create: (_) => TagsProvider()),
-          ChangeNotifierProvider(create: (_) => FollowerProvider()),
-          ChangeNotifierProvider(create: (_) => MediaProvider()),
-          ChangeNotifierProvider(create: (_) => ChatProvider()),
-          ChangeNotifierProvider(create: (_) => ChatController()),
-          ChangeNotifierProvider(create: (_) => CommentProvider()),
-          ChangeNotifierProvider(create: (_) => NotificationProvider()),
-          ChangeNotifierProvider(create: (_) => ReplyProvider()),
-          ChangeNotifierProvider(create: (_) => FirebaseNotificationProvider()),
-        ],
-        child: MaterialApp(
-            title: 'Fillet Social Media App',
-            theme: ThemeData(
-                //  useMaterial3: false,
-                // primarySwatch: Colors.green,
-                fontFamily: 'Greycliff CF'),
-            home: SplashScreen()));
+      providers: [
+        ChangeNotifierProvider(create: (_) => FollowerRequestProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => PostProvider()),
+        ChangeNotifierProvider(create: (_) => TagsProvider()),
+        ChangeNotifierProvider(create: (_) => FollowerProvider()),
+        ChangeNotifierProvider(create: (_) => MediaProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => ChatController()),
+        ChangeNotifierProvider(create: (_) => CommentProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ReplyProvider()),
+        ChangeNotifierProvider(create: (_) => FirebaseNotificationProvider()),
+      ],
+      child: GetMaterialApp(
+          title: 'Fillet Social Media App',
+          theme: ThemeData(
+              //  useMaterial3: false,
+              // primarySwatch: Colors.green,
+              fontFamily: 'Greycliff CF'),
+          getPages: AppRoutes.pages,
+          home: SplashScreen()),
+    );
   }
 }
