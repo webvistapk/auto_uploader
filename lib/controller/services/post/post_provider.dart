@@ -23,6 +23,7 @@ import 'package:http/http.dart' as http;
 class PostProvider extends ChangeNotifier {
   PostModel? _post;
   List<PostModel> _posts=[];
+ 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
   PostModel? get post => _post;
@@ -83,15 +84,24 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        
         List<PostModel> followerPosts = (data['posts'] as List)
             .map((postJson) => PostModel.fromJson(postJson))
             .toList();
             //_posts=followerPosts;
+
+            if(offset==0){
+              _posts.clear();
+              _posts=followerPosts;
+            }
+            else{
+              posts.addAll(followerPosts);
+            }
           
-        posts.addAll(followerPosts);
+       
         // Update the list of posts and notify listeners
         //setPost(followerPosts);
-        
+        //debugger();
       } else {
         throw Exception("Failed to fetch follower posts");
       }

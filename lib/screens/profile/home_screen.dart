@@ -91,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen>
         _offset += 10; // Increment the offset for the next request
         _isLoadingMore = false;
       });
+      print("OFFSET :${_offset}");
   }
 
   void _fetchPosts() async {
@@ -479,7 +480,7 @@ class _HomeScreenState extends State<HomeScreen>
         },
         isLiked: post.isLiked, // Use the post's `isLiked`
         postModel: post,
-        postTitle: post.pollTitle,
+        postTitle: post.postTitle,
         postDescription: post.postDescription,
         privacy: post.privacy,
       ),

@@ -253,9 +253,18 @@ class _PostWidgetState extends State<PostWidget> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if (widget.isUserPost)
-                          Image.asset(
-                            AppIcons.three_dot,
-                            width: 15,
+                          GestureDetector(
+                            key: iconKey,
+                            onTap: (){
+                              _showDeleteMenu(context,iconKey);
+                            },
+                            child: Container(
+                              child: Image.asset(
+                                AppIcons.three_dot,
+                                width: 20,
+                              ),
+                            ),
+                            
                           ),
                         SizedBox(
                           height: 8,
@@ -381,7 +390,7 @@ class _PostWidgetState extends State<PostWidget> {
                           Text(widget.likes, style: TextStyle(fontSize: 9)),
                         ],
                       )),
-                  if (!widget.postModel.interactions!.contains('comments')) ...[
+                  if (widget.postModel.interactions!.contains('comments')) ...[
                     const SizedBox(width: 10),
                     GestureDetector(
                       onTap: widget.showCommentSection
@@ -410,7 +419,7 @@ class _PostWidgetState extends State<PostWidget> {
                               widget.postModel.polls!
                                       .any((element) => element.isVoted == true)
                                   ? showPercentageResult(
-                                      context, widget.postModel.polls!, false)
+                                      context, widget.postModel.polls!, false,widget.postModel.pollTitle.toString(),widget.postModel.pollDescription.toString())
                                   : showPollModal(
                                       context,
                                       widget.postModel.polls ?? [],
@@ -674,7 +683,7 @@ class _PostWidgetState extends State<PostWidget> {
           );
   }
 
-  void _showOptionsMenu(BuildContext context, GlobalKey key) {
+  _showDeleteMenu(BuildContext context, GlobalKey key) {
     // Find the render box of the widget and calculate its position
     final RenderBox renderBox =
         key.currentContext!.findRenderObject() as RenderBox;
@@ -694,22 +703,11 @@ class _PostWidgetState extends State<PostWidget> {
       context: context,
       position: position,
       items: [
-        const PopupMenuItem(
-          value: 'edit',
-          child: Row(
-            children: [
-              Icon(Icons.edit, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Edit'),
-            ],
-          ),
-        ),
+       
         const PopupMenuItem(
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete, color: Colors.red),
-              SizedBox(width: 8),
               Text('Delete'),
             ],
           ),

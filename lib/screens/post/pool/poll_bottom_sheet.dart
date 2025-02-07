@@ -148,7 +148,7 @@ void showPollModal(BuildContext context, List<Poll> pollPost, String pollTitle,
                             });
                             Navigator.pop(context);
 
-                            showPercentageResult(context, pollPost, true);
+                            showPercentageResult(context, pollPost, true,pollTitle,pollDescription);
                           }
                           setState(() {
                             isLoadingPoll = false;
@@ -175,7 +175,7 @@ void showPollModal(BuildContext context, List<Poll> pollPost, String pollTitle,
 }
 
 void showPercentageResult(
-    BuildContext context, List<Poll> pollData, bool isAdd) {
+    BuildContext context, List<Poll> pollData, bool isAdd,String pollTitle, pollDescription) {
   // Update the vote count if `isAdd` is true
   if (isAdd && selectedPollOption != null) {
     final selectedOptionIndex =
@@ -218,12 +218,13 @@ void showPercentageResult(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Poll Results",
+                    pollTitle,
                     style: AppTextStyles.poppinsBold(color: Colors.white),
                   ),
                   const SizedBox(height: 8),
+                  
                   Text(
-                    "Here are the results based on votes.",
+                    pollDescription,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.poppinsRegular(color: Colors.white),
                   ),
