@@ -324,21 +324,24 @@ class _PostWidgetState extends State<PostWidget> {
                         _buildInteractionIcon(AppIcons.emoji, widget.saved),
                           const SizedBox(width: 10),
                           _buildInteractionIcon(AppIcons.forward, widget.shares),
-                        
+                        const SizedBox(width: 5),
                         GestureDetector(
                           onTap: widget
                               .onPressLiked, // Call _likePost when the like icon is clicked
                           child: Row(
                             children: [
-                              ImageIcon(
-                                AssetImage(widget.isLiked
+                              Image.asset(widget.isLiked
                                     ? AppIcons.heart_filled
-                                    : AppIcons.heart),
-                                size: 47.sp,
-                                color:
-                                    widget.isLiked ? Colors.red : AppColors.white,
+                                    : AppIcons.heart,width: 47.sp,),
+                              // ImageIcon(
+                              //   AssetImage(widget.isLiked
+                              //       ? AppIcons.heart_filled
+                              //       : AppIcons.heart),
+                              //   size: 47.sp,
+                              //   color:
+                              //       widget.isLiked ? Colors.red : AppColors.white,
                                 
-                              ),
+                              // ),
                               SizedBox(width: 3,),
                               Text(widget.likes, style: TextStyle(fontSize: 24.sp)),
                             ],
@@ -384,9 +387,9 @@ class _PostWidgetState extends State<PostWidget> {
                   if (widget.isSinglePost)
                     
                       const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.pin, widget.saved),
+                      _buildInteractionIcon(AppIcons.pin, "0"),
                       const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.repost, widget.shares),
+                      _buildInteractionIcon(AppIcons.repost, "0"),
                     
                 
                   if (!widget.postModel.interactions!.contains('comments')) ...[
@@ -427,10 +430,10 @@ class _PostWidgetState extends State<PostWidget> {
                             },
                             child: const Icon(
                               Icons.poll_outlined,
-                              size: 20,
+                              size: 24,
                               color: Colors.black,
                             )),
-                        Text("0", style: TextStyle(fontSize: 9))
+                        Text("0", style: TextStyle(fontSize: 24.sp))
                       ],
                     ),
                   ],
@@ -503,10 +506,11 @@ class _PostWidgetState extends State<PostWidget> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        ImageIcon(
-          AssetImage(icon),
-          size: 47.sp,
-        ),
+        Image.asset(icon, height: 47.sp),
+        // ImageIcon(
+        //   AssetImage(icon),
+        //   size: 47.sp,
+        // ),
         // Icon(icon, size: 20),
         SizedBox(width: 3,),
         Text(count, style: TextStyle(fontSize: 24.sp)),
