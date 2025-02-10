@@ -252,10 +252,18 @@ class _PostWidgetState extends State<PostWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        if (widget.isUserPost)
-                          Image.asset(
-                            AppIcons.three_dot,
-                            width: 15,
+                        //if (widget.isUserPost)
+                          GestureDetector(
+                            onTap:(){
+                              _showOptionsMenu(
+                      context,
+                      
+                    );
+                            } ,
+                            child: Image.asset(
+                              AppIcons.three_dot,
+                              width: 15,
+                            ),
                           ),
                         SizedBox(
                           height: 8,
@@ -687,62 +695,113 @@ class _PostWidgetState extends State<PostWidget> {
           );
   }
 
-  void _showOptionsMenu(BuildContext context, GlobalKey key) {
+  void _showOptionsMenu(BuildContext context) {
     // Find the render box of the widget and calculate its position
-    final RenderBox renderBox =
-        key.currentContext!.findRenderObject() as RenderBox;
-    final Offset offset = renderBox.localToGlobal(Offset.zero);
-    final Size size = renderBox.size;
+  //   final RenderBox renderBox =
+  //       key.currentContext!.findRenderObject() as RenderBox;
+  //   final Offset offset = renderBox.localToGlobal(Offset.zero);
+  //   final Size size = renderBox.size;
 
-    // Define the position for the menu
-    final RelativeRect position = RelativeRect.fromLTRB(
-      offset.dx, // Left
-      offset.dy + size.height, // Top
-      MediaQuery.of(context).size.width - offset.dx - size.width, // Right
-      MediaQuery.of(context).size.height - offset.dy, // Bottom
-    );
+  //   // Define the position for the menu
+  //   final RelativeRect position = RelativeRect.fromLTRB(
+  //     offset.dx, // Left
+  //     offset.dy + size.height, // Top
+  //     MediaQuery.of(context).size.width - offset.dx - size.width, // Right
+  //     MediaQuery.of(context).size.height - offset.dy, // Bottom
+  //   );
 
-    // Show the options menu
-    showMenu(
-      context: context,
-      position: position,
-      items: [
-        const PopupMenuItem(
-          value: 'edit',
-          child: Row(
+  //   // Show the options menu
+  //   showMenu(
+  //     context: context,
+  //     position: position,
+  //     items: [
+  //       const PopupMenuItem(
+  //         value: 'edit',
+  //         child: Row(
+  //           children: [
+  //             Icon(Icons.edit, color: Colors.blue),
+  //             SizedBox(width: 8),
+  //             Text('Edit'),
+  //           ],
+  //         ),
+  //       ),
+  //       const PopupMenuItem(
+  //         value: 'delete',
+  //         child: Row(
+  //           children: [
+  //             Icon(Icons.delete, color: Colors.red),
+  //             SizedBox(width: 8),
+  //             Text('Delete'),
+  //           ],
+  //         ),
+  //       ),
+  //     ],
+  //   ).then((value) async {
+  //     if (value == 'delete') {
+  //       // Call the deletePost method and wait for its completion
+
+  //       Provider.of<PostProvider>(context, listen: false)
+  //           .deletePost(widget.postId, context, false);
+
+  //       // Trigger the refresh callback to update the UI
+  //       widget.refresh();
+  //     } else if (value == 'edit') {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text("Edit functionality not implemented.")),
+  //       );
+  //     }
+  //   });
+
+    showModalBottomSheet(context: context, 
+     shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+      ),
+      backgroundColor: Colors.white,
+    builder: (BuildContext context){
+      
+      return Padding(
+          padding: EdgeInsets.symmetric(vertical: 65, horizontal: 20),
+          child: Column(
             children: [
-              Icon(Icons.edit, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Edit'),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: [
-              Icon(Icons.delete, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Delete'),
-            ],
-          ),
-        ),
-      ],
-    ).then((value) async {
-      if (value == 'delete') {
-        // Call the deletePost method and wait for its completion
-
-        Provider.of<PostProvider>(context, listen: false)
+              _buildBottomSheetItem(AppIcons.person, "Account Information", (){}),
+              SizedBox(height: 20,),
+              _buildBottomSheetItem(AppIcons.bookmark, "Save",(){}),
+               SizedBox(height: 20,),
+              _buildBottomSheetItem(AppIcons.share, "Share",(){}),
+               SizedBox(height: 20,),
+              _buildBottomSheetItem(AppIcons.unfollow, "Unfollow",(){}),
+               SizedBox(height: 20,),
+              _buildBottomSheetItem(AppIcons.bell, "Notifications",(){}),
+               SizedBox(height: 20,),
+              _buildBottomSheetItem(AppIcons.report, "Report",(){}),
+               SizedBox(height: 20,),
+               if(widget.isUserPost)
+               _buildBottomSheetItem(AppIcons.delete, "Delete",(){
+                Provider.of<PostProvider>(context, listen: false)
             .deletePost(widget.postId, context, false);
 
-        // Trigger the refresh callback to update the UI
-        widget.refresh();
-      } else if (value == 'edit') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Edit functionality not implemented.")),
+               } ),
+            ],
+          ),
         );
-      }
     });
+   }
+
+    Widget _buildBottomSheetItem(String icon, String text, VoidCallback action) {
+    return GestureDetector(
+      onTap: action,
+      child: Container(
+        width: double.infinity,
+        child: Row(
+          children: [
+        Image.asset(icon,width: 47.sp,),
+        SizedBox(width: 10,),
+        Text(text, style: TextStyle(fontSize: 24.sp)),
+           
+          ],
+        ),
+      ),
+    );
   }
 }
 
