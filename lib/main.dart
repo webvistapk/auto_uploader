@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/firebase_notification/notification_provider.dart';
@@ -59,14 +60,19 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ReplyProvider()),
         ChangeNotifierProvider(create: (_) => FirebaseNotificationProvider()),
       ],
-      child: GetMaterialApp(
-          title: 'Fillet Social Media App',
-          theme: ThemeData(
-              //  useMaterial3: false,
-              // primarySwatch: Colors.green,
-              fontFamily: 'Greycliff CF'),
-          getPages: AppRoutes.pages,
-          home: SplashScreen()),
+      child: ScreenUtilInit(
+         designSize: Size(889, 1940.71), // Set your Figma design size
+      minTextAdapt: true, // ✅ Prevents LateInitializationError
+      splitScreenMode: true, // ✅ Handles landscape mode better
+        child: GetMaterialApp(
+            title: 'Fillet Social Media App',
+            theme: ThemeData(
+                //  useMaterial3: false,
+                // primarySwatch: Colors.green,
+                fontFamily: 'Greycliff CF'),
+            getPages: AppRoutes.pages,
+            home: SplashScreen()),
+      ),
     );
   }
 }

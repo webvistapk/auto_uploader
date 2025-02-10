@@ -17,7 +17,7 @@ import 'package:mobile/screens/post/pool/poll_bottom_sheet.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class PostWidget extends StatefulWidget {
   final String postId;
   final String username;
@@ -193,7 +193,7 @@ class _PostWidgetState extends State<PostWidget> {
                             Text(
                               widget.username,
                               style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 24.sp,
                                   color: AppColors.black,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Greycliff CF'),
@@ -318,6 +318,33 @@ class _PostWidgetState extends State<PostWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //if(false)
+
+                    Row(
+                      children: [
+                        _buildInteractionIcon(AppIcons.emoji, widget.saved),
+                          const SizedBox(width: 10),
+                          _buildInteractionIcon(AppIcons.forward, widget.shares),
+                        
+                        GestureDetector(
+                          onTap: widget
+                              .onPressLiked, // Call _likePost when the like icon is clicked
+                          child: Row(
+                            children: [
+                              ImageIcon(
+                                AssetImage(widget.isLiked
+                                    ? AppIcons.heart_filled
+                                    : AppIcons.heart),
+                                size: 47.sp,
+                                color:
+                                    widget.isLiked ? Colors.red : AppColors.white,
+                                
+                              ),
+                              SizedBox(width: 3,),
+                              Text(widget.likes, style: TextStyle(fontSize: 24.sp)),
+                            ],
+                          )),
+                      ],
+                    ),
                     Text(
                       widget.location,
                       style: TextStyle(
@@ -333,7 +360,7 @@ class _PostWidgetState extends State<PostWidget> {
                           TextSpan(
                             text: '${widget.username}',
                             style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 24.sp,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Greycliff CF'),
                           ),
@@ -350,37 +377,18 @@ class _PostWidgetState extends State<PostWidget> {
               SizedBox(
                 width: 35,
               ),
+              
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (widget.isSinglePost)
-                    if (false) ...[
-                      _buildInteractionIcon(AppIcons.star, widget.shares),
+                    
+                      const SizedBox(width: 10),
+                      _buildInteractionIcon(AppIcons.pin, widget.saved),
                       const SizedBox(width: 10),
                       _buildInteractionIcon(AppIcons.repost, widget.shares),
-                      const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.share, widget.shares),
-                      const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.favorite, widget.saved),
-                      const SizedBox(width: 10),
-                    ],
-                  GestureDetector(
-                      onTap: widget
-                          .onPressLiked, // Call _likePost when the like icon is clicked
-                      child: Column(
-                        children: [
-                          ImageIcon(
-                            AssetImage(widget.isLiked
-                                ? AppIcons.heart_filled
-                                : AppIcons.heart),
-                            size: 18,
-                            color:
-                                widget.isLiked ? Colors.red : AppColors.black,
-                          ),
-                          // Icon(icon, size: 20),
-                          Text(widget.likes, style: TextStyle(fontSize: 9)),
-                        ],
-                      )),
+                    
+                
                   if (!widget.postModel.interactions!.contains('comments')) ...[
                     const SizedBox(width: 10),
                     GestureDetector(
@@ -402,7 +410,7 @@ class _PostWidgetState extends State<PostWidget> {
                   ],
                   if (widget.postModel.interactions!.contains('polls')) ...[
                     const SizedBox(width: 10),
-                   Column(
+                   Row(
                       children: [
                         GestureDetector(
                             onTap: () {
@@ -441,9 +449,8 @@ class _PostWidgetState extends State<PostWidget> {
                 Text(
                   "${widget.caption}",
                   style: TextStyle(
-                      fontSize: 9,
+                      fontSize: 24.sp,
                       color: AppColors.darkGrey,
-                      fontWeight: FontWeight.bold,
                       fontFamily: 'Greycliff CF'),
                 ),
                 const SizedBox(height: 8),
@@ -462,7 +469,7 @@ class _PostWidgetState extends State<PostWidget> {
                         : Text(
                             'Comments are disabled for this post',
                             style:
-                                TextStyle(color: AppColors.black, fontSize: 11),
+                                TextStyle(color: AppColors.black, fontSize: 25.sp),
                           )
                     : !widget.postModel.interactions!.contains('comments')
                         ? InkWell(
@@ -493,14 +500,16 @@ class _PostWidgetState extends State<PostWidget> {
     String icon,
     String count,
   ) {
-    return Column(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         ImageIcon(
           AssetImage(icon),
-          size: 18,
+          size: 47.sp,
         ),
         // Icon(icon, size: 20),
-        Text(count, style: TextStyle(fontSize: 9)),
+        SizedBox(width: 3,),
+        Text(count, style: TextStyle(fontSize: 24.sp)),
       ],
     );
   }
@@ -596,8 +605,8 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
               ),],
               Positioned(
-                bottom: 10,
-                right: 10,
+                top: 10,
+                left: 10,
                 //right: 0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,

@@ -2,18 +2,18 @@ class AppIcons {
   //Post Widget Icon
   static const String favorite = "assets/icons/favourite.png";
   static const String heart_filled = "assets/icons/heart_filled.png";
-  static const String heart = "assets/icons/heart.png";
+  static const String heart = "assets/icons/heart2.png";
   static const String share = "assets/icons/share.png";
-  static const String comment = "assets/icons/comment.png";
-  static const String repost = "assets/icons/repost.png";
+  static const String comment = "assets/icons/comment2.png";
+  static const String repost = "assets/icons/repeat.png";
   static const String circle = "assets/icons/dual_circle.png";
   static const String event_link = "assets/icons/eventlink.png";
   static const String eyes = "assets/icons/eyes.png";
   static const String service_link = "assets/icons/servicelink.png";
   static const String group_name = "assets/icons/groupname.png";
   static const String three_dot = "assets/icons/three_dot.png";
-  static const String bell = "assets/icons/bell.png";
-  static const String calender = "assets/icons/calender.png";
+  static const String bell = "assets/icons/bell2.png";
+  static const String calender = "assets/icons/calender2.png";
   static const String chessButton = "assets/icons/chess_with_best.png";
   static const String message = "assets/icons/message.png";
   static const String star = "assets/icons/star.png";
@@ -21,6 +21,9 @@ class AppIcons {
   static const String torch = "assets/icons/torch.png";
   static const String addIcon = "assets/icons/addIcon.png";
   static const String rectangle = "assets/icons/rectangle.png";
+  static const String emoji = "assets/icons/face.png";
+  static const String pin = "assets/icons/pin.png";
+  static const String forward = "assets/icons/forward.png";
 
   //Bottom Bar Widget Icon
   static const String home = "assets/icons/home.png";
