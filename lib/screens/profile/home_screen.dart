@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_colors.dart';
@@ -17,6 +18,7 @@ import 'package:mobile/models/UserProfile/userstatus.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/messaging/chat_screen.dart';
 import 'package:mobile/screens/notification/notificationScreen.dart';
+import 'package:mobile/screens/profile/FollowerReelScreen.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:mobile/screens/search/widget/search_screen.dart';
@@ -62,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     context.read<PostProvider>();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final mediaProvider = context.read<MediaProvider>();
       // Fetch user status on initialization
@@ -127,10 +129,10 @@ class _HomeScreenState extends State<HomeScreen>
         elevation: 0,
         toolbarHeight: 60,
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(15),
           child: Image.asset(
             AppIcons.calender,
-            width: 25,
+            width: 42.sp,
           ),
         ),
         bottom: PreferredSize(
@@ -141,6 +143,7 @@ class _HomeScreenState extends State<HomeScreen>
                 labelColor: Colors.black,
                 unselectedLabelColor: AppColors.darkGrey,
                 indicatorColor: Colors.blue,
+                
               ),
             ),
             child: Column(
@@ -165,9 +168,14 @@ class _HomeScreenState extends State<HomeScreen>
                 TabBar(
                   controller: _tabController,
                   padding: EdgeInsets.symmetric(horizontal: 45, vertical: 0),
-                  tabs: const [
-                    Tab(child: Text('Content')),
-                    Tab(child: Text('Disclosure')),
+                  labelStyle: TextStyle(
+                    fontWeight: FontWeight.bold
+                  ),
+                  indicatorColor: AppColors.black,
+                  tabs:  [
+                    Tab(child: Text('Content', style: TextStyle(fontSize: 24.sp),)),
+                    Tab(child: Text('Disclosure', style: TextStyle(fontSize: 24.sp))),
+                    Tab(child: Text('Reel', style: TextStyle(fontSize: 24.sp))),
                   ],
                 ),
               ],
@@ -179,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen>
             icon: Image.asset(
               AppIcons.bell,
               color: AppColors.black,
-              width: 25,
+              width: 42.sp,
             ),
             onPressed: () {
               Navigator.push(
@@ -318,6 +326,7 @@ class _HomeScreenState extends State<HomeScreen>
             },
           ),
           Center(child: Text('Disclosure Content Goes Here')),
+          FollowerReelScreen(),
         ],
       ),
     );
@@ -415,11 +424,10 @@ class _HomeScreenState extends State<HomeScreen>
                           user?.username ?? 'Unknown',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inder(
-                            textStyle: TextStyle(
-                                fontSize: 6, color: AppColors.darkGrey),
+                          style: TextStyle(
+                                fontSize: 9.84.sp, color: AppColors.darkGrey),
                           ),
-                        ),
+                        
                       ],
                     ),
                   );
@@ -459,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen>
         refresh: () {},
         showCommentSection: false,
         isInteractive: true,
-        isUserPost: false,
+        isUserPost: widget.userProfile!.id==post.user.id?true:false,
         onPressed: onPressed,
         onPressLiked: () async {
           final postProvider = Provider.of<PostProvider>(context, listen: false);

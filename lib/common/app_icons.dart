@@ -24,6 +24,11 @@ class AppIcons {
   static const String emoji = "assets/icons/face.png";
   static const String pin = "assets/icons/pin.png";
   static const String forward = "assets/icons/forward.png";
+  static const String person = "assets/icons/person.png";
+  static const String bookmark = "assets/icons/bookmark.png";
+  static const String unfollow = "assets/icons/unfollow.png";
+  static const String report = "assets/icons/report.png";
+  static const String delete = "assets/icons/delete.png";
 
   //Bottom Bar Widget Icon
   static const String home = "assets/icons/home.png";
