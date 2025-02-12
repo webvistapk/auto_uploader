@@ -19,6 +19,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/messaging/chat_screen.dart';
 import 'package:mobile/screens/notification/notificationScreen.dart';
 import 'package:mobile/screens/profile/FollowerReelScreen.dart';
+import 'package:mobile/screens/profile/widgets/DiscoursePost.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:mobile/screens/search/widget/search_screen.dart';
@@ -547,17 +548,26 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-// Dummy screens
-class ContentScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text("Content Screen"));
-  }
-}
 
 class DiscourseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text("Discourse Screen"));
+    return ListView.builder(
+                                itemCount: 4,
+                                shrinkWrap: true, // Prevents unbounded height
+                                physics:
+                                    NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                                itemBuilder: (context, index) {
+                                  
+                                  return DiscoursePost(
+  username: "First Lastname",
+  timestamp: "03/28/23 at 4:58 AM",
+  clubName: "Club name",
+  imageUrl: "https://example.com/image.jpg", // Replace with actual image URL
+  content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+  profileImageUrl: "https://example.com/profile.jpg", // Replace with actual profile image
+);
+                                },
+                              );;
   }
 }

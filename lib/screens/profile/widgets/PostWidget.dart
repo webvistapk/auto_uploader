@@ -18,6 +18,7 @@ import 'package:mobile/screens/post/pool/poll_bottom_sheet.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
 import 'package:mobile/screens/profile/widgets/emojiBottomSheet.dart';
 import 'package:mobile/screens/profile/widgets/messageBottomSheet.dart';
+import 'package:mobile/screens/profile/widgets/pinPost.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -428,7 +429,11 @@ class _PostWidgetState extends State<PostWidget> {
                   if (widget.isSinglePost)
                     
                       const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.pin, ""),
+                      GestureDetector(
+                        onTap: () {
+                          showPinPostSheet(context);
+                        },
+                        child: _buildInteractionIcon(AppIcons.pin, "")),
                       const SizedBox(width: 10),
                       _buildInteractionIcon(AppIcons.repost, ""),
                     
