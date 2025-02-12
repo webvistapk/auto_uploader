@@ -2,6 +2,7 @@ class AppIcons {
   //Post Widget Icon
   static const String favorite = "assets/icons/favourite.png";
   static const String heart_filled = "assets/icons/heart_filled.png";
+   static const String heart_outlined = "assets/icons/heart_outlined.png";
   static const String heart = "assets/icons/heart2.png";
   static const String share = "assets/icons/share.png";
   static const String comment = "assets/icons/comment2.png";
@@ -29,6 +30,10 @@ class AppIcons {
   static const String unfollow = "assets/icons/unfollow.png";
   static const String report = "assets/icons/report.png";
   static const String delete = "assets/icons/delete.png";
+  
+  static const String camera = "assets/icons/camera.png";
+  static const String image = "assets/icons/image.png";
+  static const String mic = "assets/icons/mic.png";
 
   //Bottom Bar Widget Icon
   static const String home = "assets/icons/home.png";

@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen>
   Map<int, int> _currentIndexMap = {};
   int _offset = 0; // Pagination offset
   bool _isLoadingMore = false; // Indicator for loading more posts
-  
+   int selectedIndex = 0; // 0: Content, 1: Discourse, 2: Reels
   List<Stories> _stories = [];
   @override
   void initState() {
@@ -124,211 +124,262 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        toolbarHeight: 60,
-        leading: Padding(
-          padding: const EdgeInsets.all(15),
-          child: Image.asset(
-            AppIcons.calender,
-            width: 42.sp,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(40),
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              tabBarTheme: TabBarTheme(
-                labelColor: Colors.black,
-                unselectedLabelColor: AppColors.darkGrey,
-                indicatorColor: Colors.blue,
-                
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Padding(
-                //   padding: const EdgeInsets.only(left: 40,bottom: 0),
-                //   child: Container(
-                //     padding: EdgeInsets.all(2),
-                //     decoration: BoxDecoration(
-                //       color: AppColors.darkGrey,
-                //       borderRadius: BorderRadius.circular(10)
-                //     ),
-                //     child: Image.asset(
-                //             AppIcons.addIcon, // Small "+" icon
-                //             height: 5,
-                //             color: AppColors.white,
-                //           ),
-                //   ),
-                // ),
-                TabBar(
-                  controller: _tabController,
-                  padding: EdgeInsets.symmetric(horizontal: 45, vertical: 0),
-                  labelStyle: TextStyle(
-                    fontWeight: FontWeight.bold
-                  ),
-                  indicatorColor: AppColors.black,
-                  tabs:  [
-                    Tab(child: Text('Content', style: TextStyle(fontSize: 24.sp),)),
-                    Tab(child: Text('Disclosure', style: TextStyle(fontSize: 24.sp))),
-                    Tab(child: Text('Reel', style: TextStyle(fontSize: 24.sp))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Image.asset(
-              AppIcons.bell,
-              color: AppColors.black,
+      appBar: selectedIndex == 2
+      ? null
+      : AppBar(
+          backgroundColor: AppColors.white,  // Set fixed color
+          elevation: 0,
+          toolbarHeight: 60,
+          leading: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Image.asset(
+              AppIcons.calender,
               width: 42.sp,
             ),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  CupertinoDialogRoute(
-                      builder: (_) => NotificationScreen(), context: context));
-            },
           ),
-          // IconButton(
-          //   icon: Icon(Icons.search, color: Colors.grey),
-          //   onPressed: () {
-          //     showSearch(context: context, delegate: CustomSearchDelegate());
-          //   },
-          // ),
-        ],
-      ),
+          actions: [
+            IconButton(
+              icon: Image.asset(
+                AppIcons.bell,
+                color: AppColors.black,
+                width: 42.sp,
+              ),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    CupertinoDialogRoute(
+                        builder: (_) => NotificationScreen(), context: context));
+              },
+            ),
+            // IconButton(
+            //   icon: Icon(Icons.search, color: Colors.grey),
+            //   onPressed: () {
+            //     showSearch(context: context, delegate: CustomSearchDelegate());
+            //   },
+            // ),
+          ],
+        ),
       drawer: const SideBar(),
-      backgroundColor: AppColors.mainBgColor,
-      body: TabBarView(
-        controller: _tabController,
-        physics: NeverScrollableScrollPhysics(), // Disable TabBarView scrolling
+      backgroundColor: AppColors.white,
+      body: Stack(
         children: [
-          ValueListenableBuilder<String?>(
-            valueListenable: SearchStore.searchQuery,
-            builder: (context, searchQuery, child) {
-              if (searchQuery == null || searchQuery.isEmpty) {
-                return NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scrollInfo) {
-                    if (scrollInfo.metrics.pixels ==
-                            scrollInfo.metrics.maxScrollExtent &&
-                        !_isLoadingMore) {
-                      _fetchPosts();
-                    }
-                    return false;
-                  },
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Integrate the horizontally scrollable story section
+          // Show Fullscreen Reels if selected
+          if (selectedIndex == 2)
+            Positioned.fill(
+              child: FollowerReelScreen(),
+            ),
 
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            UsersStoryScreen(
-                              userProfile: widget.userProfile!,
-                              token: widget.token!,
-                            ),
-                            
-                            // Spacer(),
-                            //SizedBox(width: 10),
-                            Flexible(
-                                child: Center(child: _followerStorySection())),
-                            //Spacer(),
-                          ],
-                        ), // Calls the horizontal ListView
-
-                        //  const Divider(thickness: 1),
-                        // _posts.isEmpty
-                        //     ? Center(
-                        //         child: Text(
-                        //           "No Post Available Right Now",
-                        //           style: AppTextStyles.poppinsBold(),
-                        //         ),
-                        //       )
-                        //     : Padding(
-                        //         padding: const EdgeInsets.all(8.0),
-                        //         child: Consumer<PostProvider>(
-                        //             builder: (context, postProvider, child) {
-                        //           return ListView.builder(
-                        //             itemCount: _posts.length,
-                        //             shrinkWrap: true, // Prevents unbounded height
-                        //             physics: NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                        //             itemBuilder: (context, index) {
-                        //               final post = _posts[index];
-                        //               return _buildPostCard(post, () {
-                        //                 Navigator.push(
-                        //                     context,
-                        //                     CupertinoDialogRoute(
-                        //                         builder: (_) => SinglePost(
-                        //                             postId: post.id.toString(),
-                        //                             onPostUpdated: () =>
-                        //                                 _fetchPosts()),
-                        //                         context: context));
-                        //               });
-                        //             },
-                        //           );
-                        //         }),
-                        //       ),
-                        //       const Divider(thickness: 1),
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Consumer<PostProvider>(
-                              builder: (context, postProvider, child) {
-                                final posts=postProvider.posts??[];
-                            return ListView.builder(
-                              itemCount: posts.length,
-                              shrinkWrap: true, // Prevents unbounded height
-                              physics:
-                                  NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                              itemBuilder: (context, index) {
-                                final post = posts[index];
-                                return _buildPostCard(post, () {
-                                  Navigator.push(
-                                      context,
-                                      CupertinoDialogRoute(
-                                          builder: (_) => SinglePost(
-                                              postId: post.id.toString(),
-                                              onPostUpdated: () {}),
-                                          context: context));
-                                });
-                              },
-                            );
-                          }),
-                        ),
-                        if (_isLoadingMore)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                      ],
-                    ),
+          // Tab Buttons (Always on top)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 0),
+                
+                color: selectedIndex==2? Colors.transparent:Colors.white, // Make it overlay
+                child: Column(
+                  children: [
+                     Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildTabButton("Content", 0),
+                      SizedBox(width: 118.sp,),
+                      _buildTabButton("Discourse", 1),
+                      SizedBox(width: 118.sp,),
+                      _buildTabButton("Reels", 2),
+                      
+                    ],
                   ),
-                );
-              } else {
-                return SearchWidget(
-                  query: searchQuery,
-                  authToken: Prefrences.getAuthToken().toString(),
-                );
-              }
-            },
+                 selectedIndex==2? Container():Divider()
+                  ]
+                ),
+              ),
+            ),
           ),
-          Center(child: Text('Disclosure Content Goes Here')),
-          FollowerReelScreen(),
+
+          // Show Normal Screens
+          if (selectedIndex != 2)
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 28),
+                child: _buildNormalScreen(selectedIndex),
+              ),
+            ),
         ],
       ),
+    
+    );
+  }
+
+   Widget _buildNormalScreen(int index) {
+    switch (index) {
+      case 0:
+        return ContentScreen();
+      case 1:
+        return DiscourseScreen();
+      default:
+        return Container();
+    }
+  }
+
+  Widget ContentScreen(){
+    return Container(
+      color: AppColors.white,
+      child: ValueListenableBuilder<String?>(
+              valueListenable: SearchStore.searchQuery,
+              builder: (context, searchQuery, child) {
+                if (searchQuery == null || searchQuery.isEmpty) {
+                  return NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification scrollInfo) {
+                      if (scrollInfo.metrics.pixels ==
+                              scrollInfo.metrics.maxScrollExtent &&
+                          !_isLoadingMore) {
+                        _fetchPosts();
+                      }
+                      return false;
+                    },
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Integrate the horizontally scrollable story section
+                          
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              UsersStoryScreen(
+                                userProfile: widget.userProfile!,
+                                token: widget.token!,
+                              ),
+                              
+                              // Spacer(),
+                              //SizedBox(width: 10),
+                              Flexible(
+                                  child: Center(child: _followerStorySection())),
+                              //Spacer(),
+                            ],
+                          ), // Calls the horizontal ListView
+                          
+                          //  const Divider(thickness: 1),
+                          // _posts.isEmpty
+                          //     ? Center(
+                          //         child: Text(
+                          //           "No Post Available Right Now",
+                          //           style: AppTextStyles.poppinsBold(),
+                          //         ),
+                          //       )
+                          //     : Padding(
+                          //         padding: const EdgeInsets.all(8.0),
+                          //         child: Consumer<PostProvider>(
+                          //             builder: (context, postProvider, child) {
+                          //           return ListView.builder(
+                          //             itemCount: _posts.length,
+                          //             shrinkWrap: true, // Prevents unbounded height
+                          //             physics: NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                          //             itemBuilder: (context, index) {
+                          //               final post = _posts[index];
+                          //               return _buildPostCard(post, () {
+                          //                 Navigator.push(
+                          //                     context,
+                          //                     CupertinoDialogRoute(
+                          //                         builder: (_) => SinglePost(
+                          //                             postId: post.id.toString(),
+                          //                             onPostUpdated: () =>
+                          //                                 _fetchPosts()),
+                          //                         context: context));
+                          //               });
+                          //             },
+                          //           );
+                          //         }),
+                          //       ),
+                          //       const Divider(thickness: 1),
+                          Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Consumer<PostProvider>(
+                                builder: (context, postProvider, child) {
+                                  final posts=postProvider.posts??[];
+                              return ListView.builder(
+                                itemCount: posts.length,
+                                shrinkWrap: true, // Prevents unbounded height
+                                physics:
+                                    NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                                itemBuilder: (context, index) {
+                                  final post = posts[index];
+                                  return _buildPostCard(post, () {
+                                    Navigator.push(
+                                        context,
+                                        CupertinoDialogRoute(
+                                            builder: (_) => SinglePost(
+                                                postId: post.id.toString(),
+                                                onPostUpdated: () {}),
+                                            context: context));
+                                  });
+                                },
+                              );
+                            }),
+                          ),
+                          if (_isLoadingMore)
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                } else {
+                  return SearchWidget(
+                    query: searchQuery,
+                    authToken: Prefrences.getAuthToken().toString(),
+                  );
+                }
+              },
+            ),
+    );
+  }
+
+
+  Widget _buildTabButton(String title, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedIndex = index;
+        });
+      },
+      child: Stack(
+      children: [
+        // Text widget
+        Padding(
+          padding: const EdgeInsets.only(bottom: 5),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 24.sp,
+              fontFamily: selectedIndex == index ? 'fontBold' : 'fontMedium',
+              color:selectedIndex==2? Colors.white:selectedIndex == index ? Colors.black : AppColors.darkGrey,
+            ),
+          ),
+        ),
+        // Small line under the selected tab
+        if (selectedIndex == index)
+          Positioned(
+            bottom: -1,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 2.0,  // Thickness of the line
+              color: Colors.black,  // Color of the line
+            ),
+          ),
+      ],
+    ),
     );
   }
 
@@ -493,5 +544,20 @@ class _HomeScreenState extends State<HomeScreen>
         privacy: post.privacy,
       ),
     );
+  }
+}
+
+// Dummy screens
+class ContentScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text("Content Screen"));
+  }
+}
+
+class DiscourseScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text("Discourse Screen"));
   }
 }

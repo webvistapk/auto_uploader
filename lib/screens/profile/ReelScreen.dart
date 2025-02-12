@@ -1,8 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_icons.dart';
+import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/function/commentBottomSheet.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
@@ -23,7 +26,7 @@ class ReelScreen extends StatefulWidget {
   final bool isUserScreen;
   final String? commentCount;
 
-   ReelScreen({
+  ReelScreen({
     Key? key,
     // required this.reels,
     this.initialIndex = 0,
@@ -69,7 +72,8 @@ class _ReelScreenState extends State<ReelScreen> {
     if (widget.isNotificationReel == true && widget.reelId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future.delayed(const Duration(seconds: 1), () {
-          showComments(widget.reelId!,true,context,'',commentCount: int.parse(widget?.commentCount??'0'));
+          showComments(widget.reelId!, true, context, '',
+              commentCount: int.parse(widget?.commentCount ?? '0'));
         });
       });
     }
@@ -89,7 +93,7 @@ class _ReelScreenState extends State<ReelScreen> {
     try {
       UserProfile? userProfile = await UserPreferences().getCurrentUser();
       int? userId = userProfile!.id;
-      // UserProfile? currentUserID; 
+      // UserProfile? currentUserID;
       // userProfile.then((value){
       //   currentUserID=value!;
       // });
@@ -98,34 +102,31 @@ class _ReelScreenState extends State<ReelScreen> {
         // Optionally, navigate the user to the login screen here.
         return;
       }
-    
-     // print("User REEL SCRREN: $userId");
+
+      // print("User REEL SCRREN: $userId");
 
       // List<ReelPostModel> fetchedReels =
       //     await Provider.of<PostProvider>(context, listen: false)
       //         .fetchReels(context, userId, limit, offset);
-      if(widget.isUserScreen){
+      if (widget.isUserScreen) {
         List<ReelPostModel> fetchedReels =
-           await Provider.of<PostProvider>(context, listen: false)
-               .fetchReels(context, userId.toString(), limit, offset);
-               setState(() {
-        _reels.addAll(fetchedReels);
-        offset += limit;
-        if (fetchedReels.length < limit) _hasMore = false;
-      });
+            await Provider.of<PostProvider>(context, listen: false)
+                .fetchReels(context, userId.toString(), limit, offset);
+        setState(() {
+          _reels.addAll(fetchedReels);
+          offset += limit;
+          if (fetchedReels.length < limit) _hasMore = false;
+        });
+      } else {
+        List<ReelPostModel> fetchedReels =
+            await Provider.of<PostProvider>(context, listen: false)
+                .fetchFollowersReels(context, userId);
+        setState(() {
+          _reels.addAll(fetchedReels);
+          offset += limit;
+          if (fetchedReels.length < limit) _hasMore = false;
+        });
       }
-      else{
-      List<ReelPostModel> fetchedReels = await Provider.of<PostProvider>(context, listen: false)
-          .fetchFollowersReels(context,userId);
-          setState(() {
-        _reels.addAll(fetchedReels);
-        offset += limit;
-        if (fetchedReels.length < limit) _hasMore = false;
-      });
-
-      }
-        
-      
     } catch (e) {
       print("Error fetching reels: $e");
     } finally {
@@ -164,10 +165,7 @@ class _ReelScreenState extends State<ReelScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: AppColors.black,
-          iconTheme: IconThemeData(color: AppColors.white),
-        ),
+       
         body: Consumer<PostProvider>(builder: (context, postProvider, child) {
           final reels = postProvider.reels;
           return _reels.isEmpty
@@ -203,31 +201,29 @@ class _ReelScreenState extends State<ReelScreen> {
                         child: Column(
                           children: [
                             GestureDetector(
-                              onTap: () async {
-                                if (!reels[_currentIndex].isLiked) {
-                                  await postProvider.reelLike(
-                                    reels![_currentIndex].id,
-                                    context,
-                                    _currentIndex,
-                                  );
-                                } else {
-                                  await postProvider.reelDisLike(
-                                    reels![_currentIndex].id,
-                                    context,
-                                    _currentIndex,
-                                  );
-                                }
-                              },
-                              child: Icon(
-                                reels![_currentIndex].isLiked
-                                    ? Icons.favorite
-                                    : Icons.favorite_outline,
-                                color: reels![_currentIndex].isLiked
-                                    ? Colors.red
-                                    : AppColors.white,
-                                size: 30,
-                              ),
-                            ),
+                                onTap: () async {
+                                  if (!reels[_currentIndex].isLiked) {
+                                    await postProvider.reelLike(
+                                      reels![_currentIndex].id,
+                                      context,
+                                      _currentIndex,
+                                    );
+                                  } else {
+                                    await postProvider.reelDisLike(
+                                      reels![_currentIndex].id,
+                                      context,
+                                      _currentIndex,
+                                    );
+                                  }
+                                },
+                                child: Image.asset(
+                                  reels![_currentIndex].isLiked
+                                      ? AppIcons.heart_filled
+                                      : AppIcons.heart_outlined,
+                                  width: 57.88.sp,
+                                )
+                               
+                                ),
                             Text(
                               reels[_currentIndex].likesCount.toString(),
                               style:
@@ -235,39 +231,42 @@ class _ReelScreenState extends State<ReelScreen> {
                             ),
                             SizedBox(height: 20),
                             GestureDetector(
-                              onTap: () {
-                //                debugger();
-                                showComments(
-                                    _reels[_currentIndex].id.toString(),true,context,widget.commentHightlightId.toString(),replyID: widget.replyHighlightId, commentCount:  _reels[_currentIndex].commentsCount);
-                              },
-                              child: Icon(
-                                Icons.messenger,
-                                color: AppColors.white,
-                                size: 30,
-                              ),
-                            ),
+                                onTap: () {
+                                  //                debugger();
+                                  showComments(
+                                      _reels[_currentIndex].id.toString(),
+                                      true,
+                                      context,
+                                      widget.commentHightlightId.toString(),
+                                      replyID: widget.replyHighlightId,
+                                      commentCount:
+                                          _reels[_currentIndex].commentsCount);
+                                },
+                                child: Image.asset(
+                                  AppIcons.comment,
+                                  width: 57.58.sp,
+                                  color: AppColors.white,
+                                )),
                             SizedBox(height: 20),
                             GestureDetector(
-                              onTap: () {
-                                // Handle Share Action
-                              },
-                              child: Icon(
-                                FontAwesomeIcons.share,
-                                color: AppColors.white,
-                                size: 30,
-                              ),
-                            ),
+                                onTap: () {
+                                  // Handle Share Action
+                                },
+                                child: Image.asset(
+                                  AppIcons.share,
+                                  width: 57.58.sp,
+                                  color: AppColors.white,
+                                )),
                             SizedBox(height: 20),
                             GestureDetector(
-                              onTap: () {
-                                // Handle Bookmark Action
-                              },
-                              child: Icon(
-                                Icons.bookmark_outline,
-                                color: AppColors.white,
-                                size: 30,
-                              ),
-                            ),
+                                onTap: () {
+                                  // Handle Bookmark Action
+                                },
+                                child: Image.asset(
+                                  AppIcons.bookmark,
+                                  width: 37.44.sp,
+                                  color: AppColors.white,
+                                )),
                             SizedBox(height: 20),
                             if (widget.showEditDeleteOptions)
                               PopupMenuButton<String>(
@@ -314,6 +313,105 @@ class _ReelScreenState extends State<ReelScreen> {
                               SizedBox(height: 30),
                           ],
                         )),
+                    Positioned(
+                        bottom: 10,
+                        left: 10,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4),
+                              child: Container(
+                               width: 193.09.sp, 
+                                height: 62.98.sp,
+                                decoration: BoxDecoration(
+                                color: Color(0xff212121),
+                                borderRadius: BorderRadius.circular(2)
+                              
+                                ),
+                                child: Center(
+                                  child: Text("Call to action",style: TextStyle(
+                                    fontSize: 24.sp,
+                                    color: AppColors.white
+                                  ),),
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(height: 19.18.sp,),
+
+                            Container(
+                              width: 15.29.sp,
+                              height: 2,
+                              decoration: BoxDecoration(
+                                color: AppColors.white,
+                                borderRadius: BorderRadius.circular(5)
+                              ),
+                            ),
+                            SizedBox(height: 19.18.sp,),
+
+                            Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(14)),
+                                  child: Image.network(
+                                    AppUtils.userImage,
+                                    width: 28,
+                                    height: 28,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              SizedBox(
+                                width: 25.51.sp,
+                              ),
+                            
+                              Column(
+                                children: [
+                                  Text(
+                                    "@"+ reels[_currentIndex].user.username,
+                                      style: TextStyle(
+                                        fontSize:24.sp,
+                                        color: AppColors.white,
+                                        fontFamily: 'fontBold'
+                                      ),
+                                    ),
+
+                                    Text(
+                                    "Sponsored",
+                                      style: TextStyle(
+                                        fontSize:24.sp,
+                                        color: AppColors.white,
+                                      ),
+                                    ),
+                                ],
+                                
+                              ),
+                              
+                              
+                              ],
+                            ),
+                            SizedBox(height: 21.64.sp,),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Here comes Reels Caption",
+                                  style: TextStyle(color: Colors.white,fontSize: 24.sp,fontFamily: 'Greycliff CF'),
+                                ),
+
+                                
+                              ],
+                            ),
+                          ],
+                        )),
+
+                        Positioned(
+                          bottom: 6,
+                          right: 15,
+                          child: Image.asset(AppIcons.circle,width: 60.12.sp,))
                   ],
                 );
         }));

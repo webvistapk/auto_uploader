@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile/common/app_colors.dart';
@@ -15,6 +16,8 @@ import 'package:mobile/models/UserProfile/SinglePostModel.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/screens/post/pool/poll_bottom_sheet.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
+import 'package:mobile/screens/profile/widgets/emojiBottomSheet.dart';
+import 'package:mobile/screens/profile/widgets/messageBottomSheet.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -165,6 +168,7 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
               ],
             ),
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -183,37 +187,55 @@ class _PostWidgetState extends State<PostWidget> {
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              widget.username,
-                              style: TextStyle(
-                                  fontSize: 24.sp,
-                                  color: AppColors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Greycliff CF'),
-                            ),
-                            const SizedBox(
-                              width: 7,
-                            ),
-                            if (false)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Row(
+                            children: [
                               Text(
-                                date!,
+                                widget.username,
                                 style: TextStyle(
-                                  fontSize: 7,
+                                    fontSize: 24.sp,
+                                    color: AppColors.black,
+                                    //fontWeight: FontWeight.bold,
+                                    fontFamily: 'fontBold'),
+                              ),
+                              const SizedBox(
+                                width: 7,
+                              ),
+                              Text(
+                                "@"+ widget.username.removeAllWhitespace,
+                                  style: TextStyle(
+                                    fontSize:24.sp,
+                                    color: AppColors.lightGrey,
+                                  ),
+                                ),
+                              if (false)
+                                Text(
+                                  date!,
+                                  style: TextStyle(
+                                    fontSize: 7,
+                                    color: AppColors.darkGrey,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                                "New York, NY",
+                                style: TextStyle(
+                                  fontSize: 24.sp,
                                   color: AppColors.darkGrey,
                                 ),
                               ),
-                          ],
-                        ),
                         SizedBox(
                           height: 16,
                         ),
+                        
                         if (false)
                           Row(
                             children: [
@@ -260,9 +282,12 @@ class _PostWidgetState extends State<PostWidget> {
                       
                     );
                             } ,
-                            child: Image.asset(
-                              AppIcons.three_dot,
-                              width: 15,
+                            child: Container(
+                              padding: EdgeInsets.only(top: 40,left: 20,right: 10,bottom:15),
+                              child: Image.asset(
+                                AppIcons.three_dot,
+                                width: 36.sp,
+                              ),
                             ),
                           ),
                         SizedBox(
@@ -302,7 +327,7 @@ class _PostWidgetState extends State<PostWidget> {
               //   ),
             ],
           ),
-          const SizedBox(height: 10),
+          //const SizedBox(height: 10),
           GestureDetector(
             onTap: widget.onPressed,
             child: widget.isVideo
@@ -329,9 +354,17 @@ class _PostWidgetState extends State<PostWidget> {
 
                     Row(
                       children: [
-                        _buildInteractionIcon(AppIcons.emoji, widget.saved),
+                        GestureDetector(
+                          onTap: (){
+                            showEmojiBottomSheet(context);
+                          },
+                          child: _buildInteractionIcon(AppIcons.emoji, '')),
                           const SizedBox(width: 10),
-                          _buildInteractionIcon(AppIcons.forward, widget.shares),
+                          GestureDetector(
+                            onTap:(){
+                              showMessageBottomSheet(context);
+                            },
+                            child: _buildInteractionIcon(AppIcons.forward, '')),
                         const SizedBox(width: 5),
                         GestureDetector(
                           onTap: widget
@@ -351,7 +384,7 @@ class _PostWidgetState extends State<PostWidget> {
                                 
                               // ),
                               SizedBox(width: 3,),
-                              Text(widget.likes, style: TextStyle(fontSize: 24.sp)),
+                              Text("", style: TextStyle(fontSize: 24.sp)),
                             ],
                           )),
                       ],
@@ -372,8 +405,8 @@ class _PostWidgetState extends State<PostWidget> {
                             text: '${widget.username}',
                             style: TextStyle(
                                 fontSize: 24.sp,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Greycliff CF'),
+                                
+                                fontFamily: 'fontBold'),
                           ),
                         ],
                       ),
@@ -395,9 +428,9 @@ class _PostWidgetState extends State<PostWidget> {
                   if (widget.isSinglePost)
                     
                       const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.pin, "0"),
+                      _buildInteractionIcon(AppIcons.pin, ""),
                       const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.repost, "0"),
+                      _buildInteractionIcon(AppIcons.repost, ""),
                     
                 
                   if (!widget.postModel.interactions!.contains('comments')) ...[
@@ -415,7 +448,7 @@ class _PostWidgetState extends State<PostWidget> {
                                 commentCount: int.parse(widget.comments),
                               ),
                       child: _buildInteractionIcon(AppIcons.comment,
-                          widget.comments //show comments count
+                          widget.comments==0?'':widget.comments //show comments count
                           ),
                     ),
                   ],
@@ -429,7 +462,7 @@ class _PostWidgetState extends State<PostWidget> {
                               widget.postModel.polls!
                                       .any((element) => element.isVoted == true)
                                   ? showPercentageResult(
-                                      context, widget.postModel.polls!, false)
+                                      context, widget.postModel.polls!, false,widget.postModel.pollTitle??'',widget.postModel.pollDescription??'')
                                   : showPollModal(
                                       context,
                                       widget.postModel.polls ?? [],
@@ -441,7 +474,7 @@ class _PostWidgetState extends State<PostWidget> {
                               size: 24,
                               color: Colors.black,
                             )),
-                        Text("0", style: TextStyle(fontSize: 24.sp))
+                        Text('', style: TextStyle(fontSize: 24.sp))
                       ],
                     ),
                   ],
@@ -580,15 +613,15 @@ class _PostWidgetState extends State<PostWidget> {
                       Text(widget.postTitle ?? '',
                           style: TextStyle(
                             color: AppColors.black,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: 'Greycliff CF',
-                            fontSize: 18,
+                            
+                            fontFamily: 'fontBold',
+                            fontSize: 36.sp,
                           )),
                       Text(
                         widget.postDescription ?? '',
                         style: TextStyle(
                           color: AppColors.black,
-                          fontSize: 10,
+                          fontSize: 25.sp,
                         ),
                       ),
                     ],
@@ -596,7 +629,7 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
               ),
             if (!widget.isSinglePost) ...[
-             if(false)...[ Positioned(
+             Positioned(
                 bottom: widget.postTitle == null ? 5 : 85,
                 left: 5,
                 //right: 0,
@@ -612,10 +645,10 @@ class _PostWidgetState extends State<PostWidget> {
                     SizedBox(
                       height: 2,
                     ),
-                    ScreenIconBuild(AppIcons.group_name, "Group Name"),
+                    ScreenIconBuild(AppIcons.group_name, "Group Name",padRight: 17),
                   ],
                 ),
-              ),],
+              ),
               Positioned(
                 top: 10,
                 left: 10,
@@ -649,9 +682,9 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
-  Widget ScreenIconBuild(String image, labelText) {
+  Widget ScreenIconBuild(String image, labelText, {double padRight=20}) {
     return Container(
-        padding: EdgeInsets.only(left: 2, right: 20, top: 2, bottom: 2),
+        padding: EdgeInsets.only(left: 2, right: padRight, top: 2, bottom: 2),
         decoration: BoxDecoration(color: Color.fromARGB(83, 0, 0, 0)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -696,62 +729,6 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   void _showOptionsMenu(BuildContext context) {
-    // Find the render box of the widget and calculate its position
-  //   final RenderBox renderBox =
-  //       key.currentContext!.findRenderObject() as RenderBox;
-  //   final Offset offset = renderBox.localToGlobal(Offset.zero);
-  //   final Size size = renderBox.size;
-
-  //   // Define the position for the menu
-  //   final RelativeRect position = RelativeRect.fromLTRB(
-  //     offset.dx, // Left
-  //     offset.dy + size.height, // Top
-  //     MediaQuery.of(context).size.width - offset.dx - size.width, // Right
-  //     MediaQuery.of(context).size.height - offset.dy, // Bottom
-  //   );
-
-  //   // Show the options menu
-  //   showMenu(
-  //     context: context,
-  //     position: position,
-  //     items: [
-  //       const PopupMenuItem(
-  //         value: 'edit',
-  //         child: Row(
-  //           children: [
-  //             Icon(Icons.edit, color: Colors.blue),
-  //             SizedBox(width: 8),
-  //             Text('Edit'),
-  //           ],
-  //         ),
-  //       ),
-  //       const PopupMenuItem(
-  //         value: 'delete',
-  //         child: Row(
-  //           children: [
-  //             Icon(Icons.delete, color: Colors.red),
-  //             SizedBox(width: 8),
-  //             Text('Delete'),
-  //           ],
-  //         ),
-  //       ),
-  //     ],
-  //   ).then((value) async {
-  //     if (value == 'delete') {
-  //       // Call the deletePost method and wait for its completion
-
-  //       Provider.of<PostProvider>(context, listen: false)
-  //           .deletePost(widget.postId, context, false);
-
-  //       // Trigger the refresh callback to update the UI
-  //       widget.refresh();
-  //     } else if (value == 'edit') {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text("Edit functionality not implemented.")),
-  //       );
-  //     }
-  //   });
-
     showModalBottomSheet(context: context, 
      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
@@ -760,23 +737,23 @@ class _PostWidgetState extends State<PostWidget> {
     builder: (BuildContext context){
       
       return Padding(
-          padding: EdgeInsets.symmetric(vertical: 65, horizontal: 20),
+          padding: EdgeInsets.symmetric(vertical: 162.sp, horizontal: 20),
           child: Column(
             children: [
-              _buildBottomSheetItem(AppIcons.person, "Account Information", (){}),
-              SizedBox(height: 20,),
-              _buildBottomSheetItem(AppIcons.bookmark, "Save",(){}),
-               SizedBox(height: 20,),
-              _buildBottomSheetItem(AppIcons.share, "Share",(){}),
-               SizedBox(height: 20,),
-              _buildBottomSheetItem(AppIcons.unfollow, "Unfollow",(){}),
-               SizedBox(height: 20,),
-              _buildBottomSheetItem(AppIcons.bell, "Notifications",(){}),
-               SizedBox(height: 20,),
-              _buildBottomSheetItem(AppIcons.report, "Report",(){}),
+              _buildBottomSheetItem(AppIcons.person,  "Account Information",42.87, (){}),
+              SizedBox(height: 40.99.sp,),
+              _buildBottomSheetItem(AppIcons.bookmark, "Save",26.48,(){}),
+               SizedBox(height: 100.sp,),
+              _buildBottomSheetItem(AppIcons.share, "Share",41.34,(){}),
+               SizedBox(height: 64.sp,),
+              _buildBottomSheetItem(AppIcons.unfollow, "Unfollow",38,(){}),
+               SizedBox(height: 39.16.sp,),
+              _buildBottomSheetItem(AppIcons.bell, "Notifications",42.83,(){}),
+               SizedBox(height: 28.89.sp,),
+              _buildBottomSheetItem(AppIcons.report, "Report",38.45,(){}),
                SizedBox(height: 20,),
                if(widget.isUserPost)
-               _buildBottomSheetItem(AppIcons.delete, "Delete",(){
+               _buildBottomSheetItem(AppIcons.delete, "Delete",47,(){
                 Provider.of<PostProvider>(context, listen: false)
             .deletePost(widget.postId, context, false);
 
@@ -787,14 +764,14 @@ class _PostWidgetState extends State<PostWidget> {
     });
    }
 
-    Widget _buildBottomSheetItem(String icon, String text, VoidCallback action) {
+    Widget _buildBottomSheetItem(String icon, String text,double imageSize, VoidCallback action) {
     return GestureDetector(
       onTap: action,
       child: Container(
         width: double.infinity,
         child: Row(
           children: [
-        Image.asset(icon,width: 47.sp,),
+        Image.asset(icon,width: imageSize.sp,),
         SizedBox(width: 10,),
         Text(text, style: TextStyle(fontSize: 24.sp)),
            

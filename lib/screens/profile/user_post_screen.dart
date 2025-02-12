@@ -110,8 +110,8 @@ class _UserPostScreenState extends State<UserPostScreen> {
   Widget build(BuildContext context) {
     print("UI Rebuild");
     return Scaffold(
-      backgroundColor: AppColors.mainBgColor,
-      appBar: AppBar(backgroundColor: AppColors.mainBgColor),
+      backgroundColor: AppColors.white,
+      appBar: AppBar(backgroundColor: AppColors.white),
       body: NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
           if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&

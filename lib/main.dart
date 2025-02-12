@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_size.dart';
 import 'package:mobile/controller/firebase_notification/notification_provider.dart';
 import 'package:mobile/controller/firebase_notification/notification_service.dart';
@@ -69,6 +70,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
                 //  useMaterial3: false,
                 // primarySwatch: Colors.green,
+                primaryColor: AppColors.white,
                 fontFamily: 'Greycliff CF'),
             getPages: AppRoutes.pages,
             home: SplashScreen()),
