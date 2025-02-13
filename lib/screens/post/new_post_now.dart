@@ -19,6 +19,7 @@ class NewPostNow extends StatefulWidget {
   final List<String> interactions; // Interaction options
   final UserProfile userProfile;
   final bool isPoll;
+  final String location;
   const NewPostNow({
     super.key,
     required this.postField,
@@ -29,6 +30,7 @@ class NewPostNow extends StatefulWidget {
     required this.interactions,
     required this.userProfile,
     this.isPoll = false,
+    required this.location,
   });
   @override
   _NewPostNowState createState() => _NewPostNowState();
@@ -124,6 +126,7 @@ class _NewPostNowState extends State<NewPostNow> {
                                         interactions: widget.interactions,
                                         postTitle: title,
                                         postDescription: description,
+                                        location: widget.location,
                                       ),
                                   context: context));
                         } else {
@@ -135,7 +138,8 @@ class _NewPostNowState extends State<NewPostNow> {
                               mediaFiles: widget.mediaFiles,
                               postTitle: title,
                               postDescription: description,
-                              interactions: widget.interactions);
+                              interactions: widget.interactions,
+                              location: widget.location);
 
                           if (response != null) {
                             //ToastNotifier.showSuccessToast(

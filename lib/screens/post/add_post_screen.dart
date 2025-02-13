@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
@@ -15,8 +16,10 @@ import 'package:mobile/screens/post/new_post_now.dart';
 import 'package:mobile/screens/post/pool/add_pools.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
-
+import 'package:geolocator/geolocator.dart';
 import 'component/interaction_bottom_sheet.dart'; // Add video player package for video handling
+import 'package:geocoding/geocoding.dart';
+import 'package:http/http.dart' as http;
 
 class AddPostScreen extends StatefulWidget {
   final UserProfile? userProfile;
@@ -45,6 +48,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
   void initState() {
     super.initState();
     context.read<PostProvider>();
+
+    _getCurrentLocation();
     // Initialize video controller if it's a video
     if (widget.mediFiles != null && widget.mediFiles.isNotEmpty) {
       File mediaFile = widget.mediFiles[mediaFileIndex()];
@@ -124,6 +129,84 @@ class _AddPostScreenState extends State<AddPostScreen> {
   }
 
   bool isLoading = false;
+  String _location = "Fetching location...";
+
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _location = "Fetching location...";
+    });
+    try {
+      // Check location permissions
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (serviceEnabled == false) {
+        setState(() {
+          _location = "Location services are disabled.";
+        });
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _location = "Location permissions are denied.";
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _location = "Location permissions are permanently denied.";
+        });
+        return;
+      }
+
+      // Get the current position
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      await _getAddressFromLatLng(position.latitude, position.longitude);
+      // setState(() {
+      //   _location =
+      //       "Lat: ${position.latitude}, Lon: ${position.longitude}"; // Format as needed
+      // });
+    } catch (e) {
+      setState(() {
+        _location = "Error fetching location: $e";
+      });
+    }
+  }
+
+  Future<void> _getAddressFromLatLng(double latitude, double longitude) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://nominatim.openstreetmap.org/reverse?format=json&lat=$latitude&lon=$longitude"));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        log('Location Data: $data');
+        String address = data['display_name'];
+        print("Address: $address");
+        setState(() {
+          _location = address;
+        });
+      } else {
+        print("Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Future<void> _selectNewLocation() async {
+    // Navigate to a location picker (use a package or implement Google Maps)
+    // For simplicity, simulate new location selection
+    String selectedLocation = "New Location: Lat 25.0, Lon 55.0";
+    setState(() {
+      _location = selectedLocation;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +223,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
           ),
           centerTitle: true,
           title: Text(
-            "Posting...",
+            widget.type == 'reel' ? 'Reel Posting...' : "Posting...",
             style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
@@ -174,69 +257,68 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             ),
                           ),
                         )
-                      : widget.type == 'reel'
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 250,
-                                  width: 300,
-                                  child: _buildMediaWidget(),
+                      :
+                      // widget.type == 'reel'
+                      //     ? Row(
+                      //         mainAxisAlignment: MainAxisAlignment.center,
+                      //         children: [
+                      //           Container(
+                      //             height: 250,
+                      //             width: 300,
+                      //             child: _buildMediaWidget(),
+                      //           ),
+                      //         ],
+                      //       )
+                      //     :
+                      Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 120,
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.grey[300],
                                 ),
-                              ],
-                            )
-                          : Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    height: 120,
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      color: Colors.grey[300],
-                                    ),
-                                    child: _buildMediaWidget(),
-                                  ),
-                                  SizedBox(width: 15),
-                                  Expanded(
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 10),
-                                      child: TextField(
-                                        controller: titleController,
-                                        cursorColor: Colors.red,
-                                        textInputAction: TextInputAction.done,
-                                        maxLines: 5,
-                                        style: AppTextStyles.poppinsRegular(),
-                                        decoration: InputDecoration(
-                                          hintMaxLines: 4,
-                                          hintText: widget.type == "post"
-                                              ? "Describe your post here, add hashtags, mention or anything else that compels you."
-                                              : "Describe your reel here, add hashtags, mention or anything else that compels you.",
-                                          hintStyle:
-                                              AppTextStyles.poppinsRegular()
-                                                  .copyWith(
-                                            color: Colors.black,
-                                            fontSize: 13,
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide:
-                                                BorderSide(color: Colors.white),
-                                          ),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide:
-                                                BorderSide(color: Colors.white),
-                                          ),
-                                        ),
+                                child: _buildMediaWidget(),
+                              ),
+                              SizedBox(width: 15),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: TextField(
+                                    controller: titleController,
+                                    cursorColor: Colors.red,
+                                    textInputAction: TextInputAction.done,
+                                    maxLines: 5,
+                                    style: AppTextStyles.poppinsRegular(),
+                                    decoration: InputDecoration(
+                                      hintMaxLines: 4,
+                                      hintText: widget.type == "post"
+                                          ? "Describe your post here, add hashtags, mention or anything else that compels you."
+                                          : "Describe your reel here, add hashtags, mention or anything else that compels you.",
+                                      hintStyle: AppTextStyles.poppinsRegular()
+                                          .copyWith(
+                                        color: Colors.black,
+                                        fontSize: 13,
+                                      ),
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.white),
+                                      ),
+                                      enabledBorder: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.white),
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                            ],
+                          ),
+                        ),
                   Divider(color: Color(0xffD3D3D3)),
                   ListTile(
                     leading: Icon(Icons.location_on_rounded, size: 25),
@@ -247,6 +329,15 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     ),
                     trailing: Icon(Icons.arrow_forward_ios_rounded,
                         color: Colors.grey, size: 17),
+                    subtitle: Text(_location,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
+                        style: AppTextStyles.poppinsRegular().copyWith(
+                          color: Colors.grey,
+                          overflow: TextOverflow.ellipsis,
+                        )),
+                    onTap: _getCurrentLocation,
                   ),
                   ListTile(
                     onTap: () {
@@ -340,14 +431,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             context,
                             CupertinoDialogRoute(
                                 builder: (_) => NewPostNow(
-                                    postField: titleController.text.trim(),
-                                    peopleTags: selectedTagUsers,
-                                    keywordsList: keywords,
-                                    privacyPost: privacyPolicy,
-                                    mediaFiles: widget.mediFiles,
-                                    interactions: interactionSheetOptions,
-                                    userProfile: widget.userProfile!,
-                                    isPoll: true),
+                                      postField: titleController.text.trim(),
+                                      peopleTags: selectedTagUsers,
+                                      keywordsList: keywords,
+                                      privacyPost: privacyPolicy,
+                                      mediaFiles: widget.mediFiles,
+                                      interactions: interactionSheetOptions,
+                                      userProfile: widget.userProfile!,
+                                      isPoll: true,
+                                      location: _location,
+                                    ),
                                 context: context));
                       }
                     } else if (widget.mediFiles.isEmpty &&
@@ -373,6 +466,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                       mediaFiles: widget.mediFiles,
                                       userProfile: widget.userProfile!,
                                       interactions: interactionSheetOptions,
+                                      location: _location,
                                     ),
                                 context: context));
                       }
@@ -385,22 +479,57 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         //ToastNotifier.showErrorToast(
                         // context, "Post  is required!");
                       } else {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => NewPostNow(
-                                    postField: titleController.text.trim(),
-                                    peopleTags: selectedTagUsers,
-                                    keywordsList: keywords,
-                                    privacyPost: privacyPolicy,
-                                    mediaFiles: widget.mediFiles,
-                                    interactions: interactionSheetOptions,
-                                    userProfile: widget.userProfile!,
-                                    isPoll: false),
-                                context: context));
+                        if (widget.type == 'reel') {
+                          final response = await pro.createNewReel(context,
+                              postField: titleController.text.trim(),
+                              peopleTags: selectedTagUsers,
+                              keywordsList: keywords,
+                              privacyPost: privacyPolicy,
+                              mediaFiles: widget.mediFiles,
+                              description: titleController.text.trim());
+
+                          if (response != null) {
+                            //ToastNotifier.showSuccessToast(
+                            // context, "Reel Successfully posted!");
+                            setState(() {
+                              isLoading = false;
+                            });
+                            final token = await Prefrences.getAuthToken();
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                CupertinoDialogRoute(
+                                    builder: (_) => MainScreen(
+                                        userProfile: widget.userProfile!,
+                                        authToken: token),
+                                    context: context),
+                                (route) => false);
+                          } else {
+                            setState(() {
+                              isLoading = false;
+                            });
+                            //ToastNotifier.showErrorToast(
+                            // context, "Something went wrong. Try again.");
+                          }
+                        } else {
+                          setState(() {
+                            isLoading = false;
+                          });
+                          Navigator.push(
+                              context,
+                              CupertinoDialogRoute(
+                                  builder: (_) => NewPostNow(
+                                        postField: titleController.text.trim(),
+                                        peopleTags: selectedTagUsers,
+                                        keywordsList: keywords,
+                                        privacyPost: privacyPolicy,
+                                        mediaFiles: widget.mediFiles,
+                                        interactions: interactionSheetOptions,
+                                        userProfile: widget.userProfile!,
+                                        isPoll: false,
+                                        location: _location,
+                                      ),
+                                  context: context));
+                        }
                       }
                     } else if (widget.mediFiles.isEmpty &&
                         interactionSheetOptions.contains('Polls') == false) {
@@ -417,7 +546,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             keywordsList: keywords,
                             privacyPost: privacyPolicy,
                             mediaFiles: widget.mediFiles,
-                            interactions: interactionSheetOptions);
+                            interactions: interactionSheetOptions,
+                            location: _location);
 
                         if (response != null) {
                           //ToastNotifier.showSuccessToast(
@@ -441,36 +571,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           //ToastNotifier.showErrorToast(
                           // context, "Network Problem. Try again.");
                         }
-                      }
-                    } else {
-                      final response = await pro.createNewReel(context,
-                          postField: titleController.text.trim(),
-                          peopleTags: selectedTagUsers,
-                          keywordsList: keywords,
-                          privacyPost: privacyPolicy,
-                          mediaFiles: widget.mediFiles);
-
-                      if (response != null) {
-                        //ToastNotifier.showSuccessToast(
-                        // context, "Reel Successfully posted!");
-                        setState(() {
-                          isLoading = false;
-                        });
-                        final token = await Prefrences.getAuthToken();
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => MainScreen(
-                                    userProfile: widget.userProfile!,
-                                    authToken: token),
-                                context: context),
-                            (route) => false);
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        //ToastNotifier.showErrorToast(
-                        // context, "Something went wrong. Try again.");
                       }
                     }
                   },

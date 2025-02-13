@@ -85,6 +85,8 @@ dependencies:
   get: ^4.6.6
   page_transition: ^2.1.0
   flutter_local_notifications: ^18.0.1
+  geolocator: ^11.1.0
+  geocoding: ^3.0.0
  
   
 

@@ -19,6 +19,7 @@ class AddPollScreen extends StatefulWidget {
   final List<File> mediaFiles;
   final UserProfile userProfile;
   final List<String> interactions;
+  final String location;
   String? postTitle;
   String? postDescription;
 
@@ -32,7 +33,8 @@ class AddPollScreen extends StatefulWidget {
       required this.userProfile,
       required this.interactions,
       this.postDescription,
-      this.postTitle});
+      this.postTitle,
+      required this.location});
 
   @override
   State<AddPollScreen> createState() => _AddPollScreenState();
@@ -248,7 +250,8 @@ class _AddPollScreenState extends State<AddPollScreen> {
                                 pollOptions: pollOptions,
                                 interactions: widget.interactions,
                                 postTitle: widget.postTitle,
-                                postDescription: widget.postDescription);
+                                postDescription: widget.postDescription,
+                                location: widget.location);
 
                             if (response != null) {
                               //ToastNotifier.showSuccessToast(

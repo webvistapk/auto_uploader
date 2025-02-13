@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../controller/endpoints.dart';
 import '../../../models/UserProfile/post_model.dart';
 import '../../advance_video_player.dart';
 import '../user_post_screen.dart';
@@ -114,112 +111,112 @@ class _PostGridState extends State<PostGrid> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification scrollInfo) {
-        if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-            !_isLoadingMore) {
-          _fetchPosts(); // Load more posts when the user reaches the bottom
-        }
-        return false;
-      },
-      child: Consumer<PostProvider>(
-        builder: (context, postProvider, child) {
-          final filteredPosts = _getFilteredPosts();
-
-          return Column(
-            children: [
-              Expanded(
-                child: GridView.builder(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-
-                  padding: const EdgeInsets.all(5.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 3,
-                    mainAxisSpacing: 3,
-                  ),
-                  itemCount: filteredPosts.length,
-                  itemBuilder: (context, index) {
-                    final post = filteredPosts[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => UserPostScreen(
-                              posts: filteredPosts,
-                              initialIndex: index,
-                              filterType: widget.filterType,
-                              userId: widget.userId,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Hero(
-                        tag: 'profile_images_$index',
-                        child: Container(
-                          color: Colors.grey[300],
-                          child: post.media.isEmpty
-                              ? const Center(
-                                  child: CircularProgressIndicator.adaptive())
-                              : post.media[0].mediaType == 'video'
-                                  ? Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        VideoPlayerWidget(
-                                          videoUrl: "${post.media[0].file}",
-                                        ),
-                                        const Icon(
-                                          Icons.play_circle_fill,
-                                          color: Colors.white,
-                                          size: 50,
-                                        ),
-                                      ],
-                                    )
-                                  : Image.network(
-                                      "${post.media[0].file}",
-                                      fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
-                                          return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress
-                                                        .expectedTotalBytes !=
-                                                    null
-                                                ? loadingProgress
-                                                        .cumulativeBytesLoaded /
-                                                    (loadingProgress
-                                                            .expectedTotalBytes ??
-                                                        1)
-                                                : null,
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.broken_image),
-                                    ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              if (_isLoadingMore)
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                ),
-            ],
-          );
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification scrollInfo) {
+          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+              !_isLoadingMore) {
+            _fetchPosts(); // Load more posts when the user reaches the bottom
+          }
+          return false;
         },
-      ),
-    ),
-  );
-}
+        child: Consumer<PostProvider>(
+          builder: (context, postProvider, child) {
+            final filteredPosts = _getFilteredPosts();
 
+            return Column(
+              children: [
+                Expanded(
+                  child: GridView.builder(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(5.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 3,
+                      mainAxisSpacing: 3,
+                    ),
+                    itemCount: filteredPosts.length,
+                    itemBuilder: (context, index) {
+                      final post = filteredPosts[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UserPostScreen(
+                                posts: filteredPosts,
+                                initialIndex: index,
+                                filterType: widget.filterType,
+                                userId: widget.userId,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Hero(
+                          tag: 'profile_images_$index',
+                          child: Container(
+                            color: Colors.grey[300],
+                            child: post.media.isEmpty
+                                ? const Center(
+                                    child: CircularProgressIndicator.adaptive())
+                                : post.media[0].mediaType == 'video'
+                                    ? Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          VideoPlayerWidget(
+                                            videoUrl: "${post.media[0].file}",
+                                          ),
+                                          const Icon(
+                                            Icons.play_circle_fill,
+                                            color: Colors.white,
+                                            size: 50,
+                                          ),
+                                        ],
+                                      )
+                                    : Image.network(
+                                        "${post.media[0].file}",
+                                        fit: BoxFit.cover,
+                                        loadingBuilder:
+                                            (context, child, loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      (loadingProgress
+                                                              .expectedTotalBytes ??
+                                                          1)
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(Icons.broken_image),
+                                      ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                if (_isLoadingMore)
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
 }

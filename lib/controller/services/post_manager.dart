@@ -16,6 +16,7 @@ class PostManager {
     required List<int> peopleTags,
     required List<String> keywordsList,
     required String privacyPost,
+    required String location,
     required List<File> mediaFiles,
     String? postTitle,
     String? postDescription,
@@ -41,6 +42,7 @@ class PostManager {
     if (pollTitle != null && pollDescription != null && pollOptions != null) {
       request.fields['poll_title'] = pollTitle;
       request.fields['poll_description'] = pollDescription;
+      request.fields['location'] = location;
 
       // Add option values
       // debugger();
@@ -104,6 +106,7 @@ class PostManager {
     required List<String> keywordsList,
     required String privacyPost,
     required List<File> mediaFiles,
+    required String description,
     required String token, // Bearer token for authorization
   }) async {
     String url = baseUrl + ApiURLs.create_new_reel_endpoint;
@@ -122,6 +125,7 @@ class PostManager {
 
     request.fields['post'] = postField;
     request.fields['privacy'] = privacyPost;
+    request.fields['description'] = description;
 
     request.fields['keywords'] = keywordsList.join(',');
     if (peopleTags.isEmpty) {

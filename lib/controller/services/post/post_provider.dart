@@ -22,14 +22,14 @@ import 'package:http/http.dart' as http;
 
 class PostProvider extends ChangeNotifier {
   PostModel? _post;
-  List<PostModel> _posts=[];
- 
+  List<PostModel> _posts = [];
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
   PostModel? get post => _post;
   List<PostModel> get posts => _posts;
   List<ReelPostModel>? _reels;
-  int _commentCount=0;
+  int _commentCount = 0;
   int get commentCount => _commentCount;
 
   List<ReelPostModel>? get reels => _reels;
@@ -51,12 +51,10 @@ class PostProvider extends ChangeNotifier {
 
   void updateCommentCount(int postId, int newCommentCount) {
     setIsLoading(true);
-    int postIndex = posts
-            .indexWhere((post) => post.id == postId);
-      _posts[postIndex]?.commentsCount = newCommentCount;
-      //notifyListeners();
-      setIsLoading(false);
-    
+    int postIndex = posts.indexWhere((post) => post.id == postId);
+    _posts[postIndex]?.commentsCount = newCommentCount;
+    //notifyListeners();
+    setIsLoading(false);
   }
 
   fetchFollowerPost(BuildContext context,
@@ -84,21 +82,19 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
+
         List<PostModel> followerPosts = (data['posts'] as List)
             .map((postJson) => PostModel.fromJson(postJson))
             .toList();
-            //_posts=followerPosts;
+        //_posts=followerPosts;
 
-            if(offset==0){
-              _posts.clear();
-              _posts=followerPosts;
-            }
-            else{
-              posts.addAll(followerPosts);
-            }
-          
-       
+        if (offset == 0) {
+          _posts.clear();
+          _posts = followerPosts;
+        } else {
+          posts.addAll(followerPosts);
+        }
+
         // Update the list of posts and notify listeners
         //setPost(followerPosts);
         //debugger();
@@ -108,7 +104,7 @@ class PostProvider extends ChangeNotifier {
     } catch (e) {
       setIsLoading(false);
       ToastNotifier.showErrorToast(context, "Error: $e");
-     // print("Error fetching follower posts: $e");
+      // print("Error fetching follower posts: $e");
       return []; // Return an empty list on error
     } finally {
       setIsLoading(
@@ -122,6 +118,7 @@ class PostProvider extends ChangeNotifier {
       required List<String> keywordsList,
       required String privacyPost,
       required List<File> mediaFiles,
+      required String location,
       String? postTitle,
       String? postDescription,
       String? pollTitle,
@@ -147,7 +144,8 @@ class PostProvider extends ChangeNotifier {
             pollOptions: pollOptions,
             postTitle: postTitle,
             postDescription: postDescription,
-            interactions: interactions!);
+            interactions: interactions!,
+            location: location);
 
         if (response != null) {
           log("Post: $response");
@@ -171,6 +169,7 @@ class PostProvider extends ChangeNotifier {
       required List<int> peopleTags,
       required List<String> keywordsList,
       required String privacyPost,
+      required String description,
       required List<File> mediaFiles}) async {
     try {
       _isLoading = true;
@@ -185,7 +184,8 @@ class PostProvider extends ChangeNotifier {
             keywordsList: keywordsList,
             privacyPost: privacyPost,
             mediaFiles: mediaFiles,
-            token: token);
+            token: token,
+            description: description);
 
         if (response != null) {
           log("Reel: $response");
@@ -199,7 +199,7 @@ class PostProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-     // print(e.toString());
+      // print(e.toString());
       return null;
     }
   }
@@ -233,7 +233,7 @@ class PostProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-    //  print(e.toString());
+      //  print(e.toString());
       return null;
     }
   }
@@ -254,7 +254,7 @@ class PostProvider extends ChangeNotifier {
       'offset': offset.toString() // Offset for pagination
     });
 
-   //print("Fetching API with URI: $uri");
+    //print("Fetching API with URI: $uri");
 
     try {
       final response = await http.get(uri, headers: {
@@ -267,8 +267,8 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final jsonList = jsonDecode(response.body);
 
-       // print(jsonList);
-      //  log("Post Data: ${jsonList['posts']}");
+        // print(jsonList);
+        //  log("Post Data: ${jsonList['posts']}");
 
         List<PostModel> postList = [];
         for (var postJson in jsonList['posts']) {
@@ -307,11 +307,11 @@ class PostProvider extends ChangeNotifier {
         "Authorization": "Bearer $token"
       });
 
-     // print(response.body);
+      // print(response.body);
 
       if (response.statusCode == 200) {
         final jsonList = jsonDecode(response.body);
-       // print("REEL GETTED SUCCESSFULLY");
+        // print("REEL GETTED SUCCESSFULLY");
         // print(jsonList);
         //log("Reel Data: ${jsonList['reels']}"); // Log the correct data
 
@@ -366,8 +366,8 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final jsonList = jsonDecode(response.body);
-       // print("REEL FETCHED SUCCESSFULLY");
-        
+        // print("REEL FETCHED SUCCESSFULLY");
+
         // Convert JSON to ReelPostModel list
         List<ReelPostModel> reelList = [];
         for (var reelJson in jsonList['reels']) {
@@ -389,7 +389,7 @@ class PostProvider extends ChangeNotifier {
       }
     } catch (e) {
       ToastNotifier.showErrorToast(context, "There is an Error: $e");
-     // print(e);
+      // print(e);
       return []; // Return an empty list on exception
     } finally {
       setIsLoading(false);
@@ -452,7 +452,7 @@ class PostProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-       // print("RESPONSE OF POST: ${response.body}");
+        // print("RESPONSE OF POST: ${response.body}");
         // Assign the post directly to the _post variable
         _post = PostModel.fromJson(data['posts']);
         // Optionally add to the list of posts
@@ -470,7 +470,7 @@ class PostProvider extends ChangeNotifier {
 
   Future<void> newLikes(int postId, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
-   // print("POst ID is : ${postId}");
+    // print("POst ID is : ${postId}");
 
     // API endpoint to like a post
     String URL = "${ApiURLs.baseUrl}${ApiURLs.new_like}post/${postId}/";
@@ -500,16 +500,16 @@ class PostProvider extends ChangeNotifier {
 
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
-      } 
+      }
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error: $e");
-     // print(e);
+      // print(e);
     }
   }
 
   Future<void> userDisLikes(int postId, BuildContext context) async {
     final String? token = await Prefrences.getAuthToken();
-   // print("POst ID is : ${postId}");
+    // print("POst ID is : ${postId}");
 
     // API endpoint to like a post
     String URL =
@@ -525,7 +525,7 @@ class PostProvider extends ChangeNotifier {
           "Authorization": "Bearer $token",
         },
       );
-     // print("API HITtED");
+      // print("API HITtED");
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         // final int newLikesCount = data['likes_count']; // Extract new like count
@@ -534,19 +534,19 @@ class PostProvider extends ChangeNotifier {
 
         final postIndex = _posts!.indexWhere((post) => post.id == postId);
         if (postIndex != -1) {
-        //  print("Post Index ${postIndex}");
-          final currentPost=_posts?[postIndex];
-          currentPost!.likesCount =(currentPost!.likesCount <0)? currentPost!.likesCount -1:0;
-          currentPost!.isLiked =
-              false; // Assuming you want to mark it as liked
+          //  print("Post Index ${postIndex}");
+          final currentPost = _posts?[postIndex];
+          currentPost!.likesCount =
+              (currentPost!.likesCount < 0) ? currentPost!.likesCount - 1 : 0;
+          currentPost!.isLiked = false; // Assuming you want to mark it as liked
           //ToastNotifier.showSuccessToast(context, "Post Disliked Successfully");
-        } 
+        }
         // Notify listeners to refresh UI (if you're using Provider)
         notifyListeners();
-      } 
+      }
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error: $e");
-     // print(e);
+      // print(e);
     }
   }
 
@@ -565,7 +565,7 @@ class PostProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
       );
-     // print("API HITTED");
+      // print("API HITTED");
       if (response.statusCode == 200) {
         // _reels?[reelIndex].isLiked = true;
         _reels?[reelIndex].likesCount += 1;
@@ -573,10 +573,10 @@ class PostProvider extends ChangeNotifier {
 
         // Notify listeners to update UI
         notifyListeners();
-      } 
+      }
     } catch (e) {
-     // ToastNotifier.showErrorToast(context, "Error liking the post: $e");
-    //  print(e);
+      // ToastNotifier.showErrorToast(context, "Error liking the post: $e");
+      //  print(e);
     }
   }
 
@@ -596,19 +596,20 @@ class PostProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
       );
-    //  print("API HITTED");
+      //  print("API HITTED");
       if (response.statusCode == 200) {
         // _reels?[reelIndex].isLiked = true;
-        final currentReel=_reels?[reelIndex];
-        currentReel!.likesCount = (currentReel!.likesCount<0)?currentReel!.likesCount- 1:0;
-        currentReel.isLiked = false; 
+        final currentReel = _reels?[reelIndex];
+        currentReel!.likesCount =
+            (currentReel!.likesCount < 0) ? currentReel!.likesCount - 1 : 0;
+        currentReel.isLiked = false;
 
         // Notify listeners to update UI
         notifyListeners();
-      } 
+      }
     } catch (e) {
       //ToastNotifier.showErrorToast(context, "Error disliking the post: $e");
-    //  print(e);
+      //  print(e);
     }
   }
 
