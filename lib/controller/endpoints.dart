@@ -68,4 +68,7 @@ class ApiURLs {
   //Notification Firebase
   static const String fCMTokenSave = "firebasenotification/new/";
   static const String fCMTokenDelete = "firebasenotification/delete/";
+
+  //New Reposted
+  static const String new_reposted = "posts/repost/new/";
 }

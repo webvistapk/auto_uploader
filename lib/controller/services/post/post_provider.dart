@@ -25,7 +25,9 @@ class PostProvider extends ChangeNotifier {
   List<PostModel> _posts = [];
 
   bool _isLoading = false;
+  bool _isReposted = false;
   bool get isLoading => _isLoading;
+  bool get isReposted => _isReposted;
   PostModel? get post => _post;
   List<PostModel> get posts => _posts;
   List<ReelPostModel>? _reels;
@@ -235,6 +237,30 @@ class PostProvider extends ChangeNotifier {
       notifyListeners();
       //  print(e.toString());
       return null;
+    }
+  }
+
+  createNewReposted(String type, int postId) async {
+    try {
+      _isReposted = true;
+      notifyListeners();
+      final token = await Prefrences.getAuthToken();
+      final data = await PostManager()
+          .newReposted(type: type, postId: postId, token: token);
+      if (data != null) {
+        log("Repost Receiving Data $data");
+        _isReposted = false;
+        notifyListeners();
+      } else {
+        _isReposted = false;
+        notifyListeners();
+        log("Repost Data having errors");
+      }
+    } catch (e) {
+      _isReposted = false;
+      notifyListeners();
+
+      log("Repost Data having errors");
     }
   }
 

@@ -19,6 +19,8 @@ class PostResponse {
   }
 }
 
+// "is_reposted": false,
+//             "reposted_by": null,
 class PostModel {
   final int id;
   final String post;
@@ -38,53 +40,66 @@ class PostModel {
   bool isLiked;
   final String? postTitle;
   final String? postDescription;
+  final String? location;
+  final bool? isReposted;
+  final User? repostedBy;
+  final int? repostCount;
 
-  PostModel({
-    required this.id,
-    required this.post,
-    required this.tags,
-    required this.keywords,
-    required this.media,
-    required this.user,
-    required this.privacy,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.likesCount,
-    required this.commentsCount,
-    required this.isLiked,
-    this.interactions,
-    this.pollTitle,
-    this.pollDescription,
-    this.polls, // Optional list of polls
-    this.postTitle,
-    this.postDescription,
-  });
+  PostModel(
+      {required this.id,
+      required this.post,
+      required this.tags,
+      required this.keywords,
+      required this.media,
+      required this.user,
+      required this.privacy,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.likesCount,
+      required this.commentsCount,
+      required this.isLiked,
+      this.interactions,
+      this.pollTitle,
+      this.pollDescription,
+      this.polls, // Optional list of polls
+      this.postTitle,
+      this.postDescription,
+      this.location,
+      this.isReposted,
+      this.repostedBy,
+      this.repostCount});
 
   // Factory method to parse JSON data
   factory PostModel.fromJson(Map<String, dynamic> json) {
     return PostModel(
-      id: json['id'],
-      post: json['post'],
-      tags: (json['tags'] as List).map((tag) => Tag.fromJson(tag)).toList(),
-      keywords:
-          (json['keywords'] as List).map((kw) => Keyword.fromJson(kw)).toList(),
-      interactions: json['interactions'],
-      pollTitle: json['poll_title'],
-      pollDescription: json['poll_description'],
-      polls: (json['polls'] as List?)
-          ?.map((poll) => Poll.fromJson(poll))
-          .toList(), // Parse polls list if available
-      media: (json['media'] as List).map((m) => Media.fromJson(m)).toList(),
-      user: User.fromJson(json['user']),
-      privacy: json['privacy'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      likesCount: json['likes_count'],
-      commentsCount: json['comments_count'],
-      isLiked: json['is_liked'],
-      postTitle: json['post_title'],
-      postDescription: json['post_description'],
-    );
+        id: json['id'],
+        post: json['post'],
+        tags: (json['tags'] as List).map((tag) => Tag.fromJson(tag)).toList(),
+        keywords: (json['keywords'] as List)
+            .map((kw) => Keyword.fromJson(kw))
+            .toList(),
+        interactions: json['interactions'],
+        pollTitle: json['poll_title'],
+        pollDescription: json['poll_description'],
+        polls: (json['polls'] as List?)
+            ?.map((poll) => Poll.fromJson(poll))
+            .toList(), // Parse polls list if available
+        media: (json['media'] as List).map((m) => Media.fromJson(m)).toList(),
+        user: User.fromJson(json['user']),
+        privacy: json['privacy'],
+        createdAt: json['created_at'],
+        updatedAt: json['updated_at'],
+        likesCount: json['likes_count'],
+        commentsCount: json['comments_count'],
+        isLiked: json['is_liked'],
+        postTitle: json['post_title'],
+        postDescription: json['post_description'],
+        location: json['location'],
+        isReposted: json['is_reposted'] ?? false,
+        repostedBy: json['reposted_by'] == null
+            ? null
+            : User.fromJson(json['reposted_by']),
+        repostCount: json['repost_count']);
   }
 }
 
@@ -195,7 +210,7 @@ class User {
       username: json['username'],
       firstName: json['first_name'],
       lastName: json['last_name'],
-      profileImage: json['profile_image'], // Parse the profileImage field
+      profileImage: json['profile_image'] ?? '', // Parse the profileImage field
     );
   }
 }

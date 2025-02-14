@@ -1,18 +1,16 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:developer';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/function/commentBottomSheet.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
-import 'package:mobile/models/UserProfile/SinglePostModel.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/screens/post/pool/poll_bottom_sheet.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
@@ -22,6 +20,7 @@ import 'package:mobile/screens/profile/widgets/pinPost.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 class PostWidget extends StatefulWidget {
   final String postId;
   final String username;
@@ -88,6 +87,7 @@ class PostWidget extends StatefulWidget {
 
 class _PostWidgetState extends State<PostWidget> {
   int _currentImageIndex = 0;
+  bool isIconBold = false;
 
   String formatWithOrdinalSuffix(DateTime dateTime) {
     // Step 1: Format the date into "MMMM d yyyy"
@@ -117,449 +117,503 @@ class _PostWidgetState extends State<PostWidget> {
     return formattedDate;
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    context.read<PostProvider>();
+  }
+
   String? date;
   @override
   Widget build(BuildContext context) {
-    final GlobalKey iconKey = GlobalKey();
+    // final GlobalKey iconKey = GlobalKey();
     if (widget.profileImageUrl
         .contains('http://147.79.117.253:8001http://147.79.117.253:8001')) {
-      var image =
-          'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg';
+      // var image =
+      //     'http://147.79.117.253:8001/media/profile/f5f2bace-a565-41a9-a03b-483311a86e0e8143963285425881007.jpg';
     }
     date = formatWithOrdinalSuffix(DateTime.parse(widget.date));
     //debugger();
-    return SingleChildScrollView(
-      physics: const ScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (widget.isSinglePost)
-            Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(14)),
-                      child: Image.network(
-                        widget.profileImageUrl == null
-                            ? AppUtils.userImage
-                            : widget.profileImageUrl,
-                        width: 28,
-                        height: 28,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    if (false)
-                      Text(
-                        "${widget.username} Reposted this Photo",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.black,
+    return Builder(builder: (context) {
+      var pro = context.watch<PostProvider>();
+      return SingleChildScrollView(
+        physics: const ScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (widget.isSinglePost)
+              Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(14)),
+                        child: Image.network(
+                          // ignore: prefer_if_null_operators
+                          widget.profileImageUrl == null
+                              ? AppUtils.userImage
+                              : widget.profileImageUrl,
+                          width: 28,
+                          height: 28,
+                          fit: BoxFit.cover,
                         ),
                       ),
-                  ],
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      if (widget.postModel.isReposted == false &&
+                          widget.postModel.repostedBy != null)
+                        Text(
+                          "${widget.postModel.repostedBy!.username} Reposted this Photo",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.black,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(14)),
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: Image.network(
+                      widget.profileImageUrl.isEmpty
+                          ? AppUtils.userImage
+                          : widget.profileImageUrl,
+                      fit: BoxFit
+                          .cover, // Ensures the image covers the container without distortion
+                    ),
+                  ),
                 ),
-                SizedBox(
-                  height: 10,
-                ),
-              ],
-            ),
-          
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              ClipRRect(
-  borderRadius: BorderRadius.all(Radius.circular(14)),
-  child: SizedBox(
-    width: 28,
-    height: 28,
-    child: Image.network(
-      widget.profileImageUrl.isEmpty ? AppUtils.userImage : widget.profileImageUrl,
-      fit: BoxFit.cover, // Ensures the image covers the container without distortion
-    ),
-  ),
-),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Row(
-                            children: [
-                              Text(
-                                widget.username,
-                                style: TextStyle(
-                                    fontSize: 24.sp,
-                                    color: AppColors.black,
-                                    //fontWeight: FontWeight.bold,
-                                    fontFamily: 'fontBold'),
-                              ),
-                              const SizedBox(
-                                width: 7,
-                              ),
-                              Text(
-                                "@"+ widget.username.removeAllWhitespace,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              children: [
+                                Text(
+                                  widget.username,
                                   style: TextStyle(
-                                    fontSize:24.sp,
+                                      fontSize: 24.sp,
+                                      color: AppColors.black,
+                                      //fontWeight: FontWeight.bold,
+                                      fontFamily: 'fontBold'),
+                                ),
+                                const SizedBox(
+                                  width: 7,
+                                ),
+                                Text(
+                                  "@" + widget.username.removeAllWhitespace,
+                                  style: TextStyle(
+                                    fontSize: 24.sp,
                                     color: AppColors.lightGrey,
                                   ),
                                 ),
-                              if (false)
-                                Text(
-                                  date!,
+                                if (widget.postModel.repostedBy != null)
+                                  Text(
+                                    date!,
+                                    style: const TextStyle(
+                                      fontSize: 7,
+                                      color: AppColors.darkGrey,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            widget.postModel.location ?? " New York, NY",
+                            style: TextStyle(
+                              fontSize: 24.sp,
+                              color: AppColors.darkGrey,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          if (widget.postModel.repostedBy != null)
+                            Row(
+                              children: [
+                                const Text(
+                                  "Senior Journalist at Fox News",
                                   style: TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 8,
                                     color: AppColors.darkGrey,
                                   ),
                                 ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                                "New York, NY",
-                                style: TextStyle(
-                                  fontSize: 24.sp,
-                                  color: AppColors.darkGrey,
-                                ),
-                              ),
-                        SizedBox(
-                          height: 16,
-                        ),
-                        
-                        if (false)
-                          Row(
-                            children: [
-                              Text(
-                                "Senior Journalist at Fox News",
-                                style: TextStyle(
-                                  fontSize: 8,
-                                  color: AppColors.darkGrey,
-                                ),
-                              ),
-                              if (false) ...[
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 2, horizontal: 8),
-                                  decoration: BoxDecoration(
-                                      color: AppColors.iconredColor,
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(3))),
-                                  child: Text(
-                                    "Chess with the best",
-                                    style: TextStyle(
-                                      fontSize: 5,
-                                      color: AppColors.white,
+                                if (widget.postModel.isReposted!) ...[
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 2, horizontal: 8),
+                                    decoration: const BoxDecoration(
+                                        color: AppColors.iconredColor,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(3))),
+                                    child: const Text(
+                                      "Chess with the best",
+                                      style: TextStyle(
+                                        fontSize: 5,
+                                        color: AppColors.white,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ]
-                            ],
-                          ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        //if (widget.isUserPost)
+                                ]
+                              ],
+                            ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          //if (widget.isUserPost)
                           GestureDetector(
-                            onTap:(){
+                            onTap: () {
                               _showOptionsMenu(
-                      context,
-                      
-                    );
-                            } ,
+                                context,
+                              );
+                            },
                             child: Container(
-                              padding: EdgeInsets.only(top: 40,left: 20,right: 10,bottom:15),
+                              padding: const EdgeInsets.only(
+                                  top: 40, left: 20, right: 10, bottom: 15),
                               child: Image.asset(
                                 AppIcons.three_dot,
                                 width: 36.sp,
                               ),
                             ),
                           ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Row(
-                          children: [
-                            if (false) ...[
-                              Image.asset(AppIcons.eyes),
-                            
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              widget.privacy ?? '',
-                              style: TextStyle(
-                                  fontSize: 7, color: AppColors.lightGrey),
-                            ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // if (widget.isUserPost == true)
-              //   GestureDetector(
-              //     key: iconKey, // Unique key for dynamic positioning
-              //     onTap: () {
-              //       _showOptionsMenu(
-              //         context,
-              //         iconKey,
-              //       );
-              //     },
-              //     child: const Icon(Icons.more_vert, size: 20),
-              //   ),
-            ],
-          ),
-          //const SizedBox(height: 10),
-          GestureDetector(
-            onTap: widget.onPressed,
-            child: widget.isVideo
-                ? _buildVideoPlayer(widget.mediaUrls[0])
-                : Column(
-                    children: [
-                      _buildImageCarousel(widget.mediaUrls),
-                      //const SizedBox(height: 8),
-                    ],
-                  ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //if(false)
-
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: (){
-                            showEmojiBottomSheet(context);
-                          },
-                          child: _buildInteractionIcon(AppIcons.emoji, '')),
-                          const SizedBox(width: 10),
-                          GestureDetector(
-                            onTap:(){
-                              showMessageBottomSheet(context);
-                            },
-                            child: _buildInteractionIcon(AppIcons.forward, '')),
-                        const SizedBox(width: 5),
-                        GestureDetector(
-                          onTap: widget
-                              .onPressLiked, // Call _likePost when the like icon is clicked
-                          child: Row(
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          Row(
                             children: [
-                              Image.asset(widget.isLiked
-                                    ? AppIcons.heart_filled
-                                    : AppIcons.heart,width: 47.sp,),
-                              // ImageIcon(
-                              //   AssetImage(widget.isLiked
-                              //       ? AppIcons.heart_filled
-                              //       : AppIcons.heart),
-                              //   size: 47.sp,
-                              //   color:
-                              //       widget.isLiked ? Colors.red : AppColors.white,
-                                
-                              // ),
-                              SizedBox(width: 3,),
-                              Text("", style: TextStyle(fontSize: 24.sp)),
+                              if (widget.postModel.repostedBy != null) ...[
+                                Image.asset(AppIcons.eyes),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  widget.privacy ?? '',
+                                  style: const TextStyle(
+                                      fontSize: 7, color: AppColors.lightGrey),
+                                ),
+                              ],
                             ],
-                          )),
-                      ],
-                    ),
-                    Text(
-                      widget.location,
-                      style: TextStyle(
-                        fontSize: 7,
-                        color: AppColors.darkGrey,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(color: Colors.black, fontSize: 10),
-                        children: [
-                          TextSpan(
-                            text: '${widget.username}',
-                            style: TextStyle(
-                                fontSize: 24.sp,
-                                
-                                fontFamily: 'fontBold'),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: 0,
-              ),
-              Center(child: _buildImageIndicator(widget.mediaUrls.length)),
-              SizedBox(
-                width: 35,
-              ),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (widget.isSinglePost)
-                    
-                      const SizedBox(width: 10),
-                      GestureDetector(
+                // if (widget.isUserPost == true)
+                //   GestureDetector(
+                //     key: iconKey, // Unique key for dynamic positioning
+                //     onTap: () {
+                //       _showOptionsMenu(
+                //         context,
+                //         iconKey,
+                //       );
+                //     },
+                //     child: const Icon(Icons.more_vert, size: 20),
+                //   ),
+              ],
+            ),
+            //const SizedBox(height: 10),
+            GestureDetector(
+              onTap: widget.onPressed,
+              child: widget.isVideo
+                  ? _buildVideoPlayer(widget.mediaUrls[0])
+                  : Column(
+                      children: [
+                        _buildImageCarousel(widget.mediaUrls),
+                        //const SizedBox(height: 8),
+                      ],
+                    ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      //if(false)
+
+                      Row(
+                        children: [
+                          GestureDetector(
+                              onTap: () {
+                                showEmojiBottomSheet(context);
+                              },
+                              child: _buildInteractionIcon(AppIcons.emoji, '')),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                              onTap: () {
+                                showMessageBottomSheet(context);
+                              },
+                              child:
+                                  _buildInteractionIcon(AppIcons.forward, '')),
+                          const SizedBox(width: 5),
+                          GestureDetector(
+                              onTap: widget
+                                  .onPressLiked, // Call _likePost when the like icon is clicked
+                              child: Row(
+                                children: [
+                                  Image.asset(
+                                    widget.isLiked
+                                        ? AppIcons.heart_filled
+                                        : AppIcons.heart,
+                                    width: 47.sp,
+                                  ),
+                                  // ImageIcon(
+                                  //   AssetImage(widget.isLiked
+                                  //       ? AppIcons.heart_filled
+                                  //       : AppIcons.heart),
+                                  //   size: 47.sp,
+                                  //   color:
+                                  //       widget.isLiked ? Colors.red : AppColors.white,
+
+                                  // ),
+                                  const SizedBox(
+                                    width: 3,
+                                  ),
+                                  Text("", style: TextStyle(fontSize: 24.sp)),
+                                ],
+                              )),
+                        ],
+                      ),
+                      Text(
+                        widget.location,
+                        style: TextStyle(
+                          fontSize: 7,
+                          color: AppColors.darkGrey,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black, fontSize: 10),
+                          children: [
+                            TextSpan(
+                              text: '${widget.username}',
+                              style: TextStyle(
+                                  fontSize: 24.sp, fontFamily: 'fontBold'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 0,
+                ),
+                Center(child: _buildImageIndicator(widget.mediaUrls.length)),
+                SizedBox(
+                  width: 35,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (widget.isSinglePost) const SizedBox(width: 10),
+                    GestureDetector(
                         onTap: () {
                           showPinPostSheet(context);
                         },
                         child: _buildInteractionIcon(AppIcons.pin, "")),
+                    const SizedBox(width: 10),
+                    pro.isReposted
+                        ? const CircularProgressIndicator.adaptive(
+                            strokeWidth: 2,
+                          )
+                        : widget.postModel.isReposted == false
+                            ? GestureDetector(
+                                onTap: () async {
+                                  log("Repost Data Fetching: ${widget.postModel.id}");
+                                  await pro.createNewReposted(
+                                      'post', widget.postModel.id);
+                                  setState(() {
+                                    isIconBold = true;
+                                  });
+                                },
+                                child: _buildInteractionIcon(
+                                    AppIcons.repost,
+                                    widget.postModel.repostCount == null
+                                        ? ""
+                                        : "${widget.postModel.repostCount}",
+                                    isBold: isIconBold))
+                            : SizedBox(),
+                    if (!widget.postModel.interactions!
+                        .contains('comments')) ...[
                       const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.repost, ""),
-                    
-                
-                  if (!widget.postModel.interactions!.contains('comments')) ...[
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: widget.showCommentSection
-                          ? null
-                          : () => showComments(
-                                widget.postId,
-                                false,
-                                context,
-                                widget.scrollCommentId.toString(),
-                                scrollOffset: widget.scrollOffset,
-                                replyID: widget.scrollReplyID.toString(),
-                                commentCount: int.parse(widget.comments),
-                              ),
-                      child: _buildInteractionIcon(AppIcons.comment,
-                          widget.comments==0?'':widget.comments //show comments count
-                          ),
-                    ),
-                  ],
-                  if (widget.postModel.interactions!.contains('polls')) ...[
-                    const SizedBox(width: 10),
-                   Row(
-                      children: [
-                        GestureDetector(
-                            onTap: () {
-                              // debugger();
-                              widget.postModel.polls!
-                                      .any((element) => element.isVoted == true)
-                                  ? showPercentageResult(
-                                      context, widget.postModel.polls!, false,widget.postModel.pollTitle??'',widget.postModel.pollDescription??'')
-                                  : showPollModal(
-                                      context,
-                                      widget.postModel.polls ?? [],
-                                      widget.postModel.pollTitle ?? '',
-                                      widget.postModel.pollDescription ?? '');
-                            },
-                            child: const Icon(
-                              Icons.poll_outlined,
-                              size: 24,
-                              color: Colors.black,
-                            )),
-                        Text('', style: TextStyle(fontSize: 24.sp))
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 2,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "${widget.caption}",
-                  style: TextStyle(
-                      fontSize: 24.sp,
-                      color: AppColors.darkGrey,
-                      fontFamily: 'Greycliff CF'),
-                ),
-                const SizedBox(height: 8),
-                widget.isSinglePost
-                    ? !widget.postModel.interactions!.contains('comments')
-                        ? CommentWidget(
-                            postId: widget.postId,
-                            isReelScreen: false,
-                            commentIdToHighlight:
-                                widget.scrollCommentId.toString(),
-                            replyIdToHighlight:
-                                widget.scrollCommentId.toString(),
-                            scrollOffset: widget.scrollOffset,
-                            isSinglePost: widget.isSinglePost,
-                          )
-                        : Text(
-                            'Comments are disabled for this post',
-                            style:
-                                TextStyle(color: AppColors.black, fontSize: 25.sp),
-                          )
-                    : !widget.postModel.interactions!.contains('comments')
-                        ? InkWell(
-                            onTap: () {
-                              showComments(widget.postId, false, context,
+                      GestureDetector(
+                        onTap: widget.showCommentSection
+                            ? null
+                            : () => showComments(
+                                  widget.postId,
+                                  false,
+                                  context,
                                   widget.scrollCommentId.toString(),
-                                  replyID: widget.scrollCommentId.toString(),
                                   scrollOffset: widget.scrollOffset,
+                                  replyID: widget.scrollReplyID.toString(),
                                   commentCount: int.parse(widget.comments),
-                                  isSinglePost: widget.isSinglePost);
-                            },
-                            child: Text(
-                              'View all ${widget.comments} comments',
-                              style: TextStyle(color: Colors.grey, fontSize: 8),
+                                ),
+                        child: _buildInteractionIcon(
+                            AppIcons.comment,
+                            widget.comments == 0
+                                ? ''
+                                : widget.comments //show comments count
                             ),
-                          )
-                        : Container(),
+                      ),
+                    ],
+                    if (widget.postModel.interactions!.contains('polls')) ...[
+                      const SizedBox(width: 10),
+                      Row(
+                        children: [
+                          GestureDetector(
+                              onTap: () {
+                                // debugger();
+                                widget.postModel.polls!.any(
+                                        (element) => element.isVoted == true)
+                                    ? showPercentageResult(
+                                        context,
+                                        widget.postModel.polls!,
+                                        false,
+                                        widget.postModel.pollTitle ?? '',
+                                        widget.postModel.pollDescription ?? '')
+                                    : showPollModal(
+                                        context,
+                                        widget.postModel.polls ?? [],
+                                        widget.postModel.pollTitle ?? '',
+                                        widget.postModel.pollDescription ?? '');
+                              },
+                              child: const Icon(
+                                Icons.poll_outlined,
+                                size: 24,
+                                color: Colors.black,
+                              )),
+                          Text('', style: TextStyle(fontSize: 24.sp))
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
-          ),
-          SizedBox(height: 30,)
-        ],
-      ),
-    );
+            const SizedBox(
+              height: 2,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${widget.caption}",
+                    style: TextStyle(
+                        fontSize: 24.sp,
+                        color: AppColors.darkGrey,
+                        fontFamily: 'Greycliff CF'),
+                  ),
+                  const SizedBox(height: 8),
+                  widget.isSinglePost
+                      ? !widget.postModel.interactions!.contains('comments')
+                          ? CommentWidget(
+                              postId: widget.postId,
+                              isReelScreen: false,
+                              commentIdToHighlight:
+                                  widget.scrollCommentId.toString(),
+                              replyIdToHighlight:
+                                  widget.scrollCommentId.toString(),
+                              scrollOffset: widget.scrollOffset,
+                              isSinglePost: widget.isSinglePost,
+                            )
+                          : Text(
+                              'Comments are disabled for this post',
+                              style: TextStyle(
+                                  color: AppColors.black, fontSize: 25.sp),
+                            )
+                      : !widget.postModel.interactions!.contains('comments')
+                          ? InkWell(
+                              onTap: () {
+                                showComments(widget.postId, false, context,
+                                    widget.scrollCommentId.toString(),
+                                    replyID: widget.scrollCommentId.toString(),
+                                    scrollOffset: widget.scrollOffset,
+                                    commentCount: int.parse(widget.comments),
+                                    isSinglePost: widget.isSinglePost);
+                              },
+                              child: Text(
+                                'View all ${widget.comments} comments',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 8),
+                              ),
+                            )
+                          : Container(),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 30,
+            )
+          ],
+        ),
+      );
+    });
   }
 
-  Widget _buildInteractionIcon(
-    String icon,
-    String count,
-  ) {
+//  isReposted == true? Top Hide and repost button Disabled:
+//   isReposted==false && isRepostedBy !=null? Top show and button show:
+
+  Widget _buildInteractionIcon(String icon, String count,
+      {bool isBold = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Image.asset(icon, height: 47.sp),
+        Image.asset(
+          icon, height: 47.sp,
+          // h: isBold ? "fontBold" : "fontMedium"
+        ),
         // ImageIcon(
         //   AssetImage(icon),
         //   size: 47.sp,
         // ),
         // Icon(icon, size: 20),
-        SizedBox(width: 3,),
-        Text(count, style: TextStyle(fontSize: 24.sp)),
+        const SizedBox(
+          width: 3,
+        ),
+        Text(count,
+            style: TextStyle(
+              fontSize: 24.sp,
+            )),
       ],
     );
   }
@@ -618,7 +672,6 @@ class _PostWidgetState extends State<PostWidget> {
                       Text(widget.postTitle ?? '',
                           style: TextStyle(
                             color: AppColors.black,
-                            
                             fontFamily: 'fontBold',
                             fontSize: 36.sp,
                           )),
@@ -634,7 +687,7 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
               ),
             if (!widget.isSinglePost) ...[
-             Positioned(
+              Positioned(
                 bottom: widget.postTitle == null ? 5 : 85,
                 left: 5,
                 //right: 0,
@@ -650,7 +703,8 @@ class _PostWidgetState extends State<PostWidget> {
                     SizedBox(
                       height: 2,
                     ),
-                    ScreenIconBuild(AppIcons.group_name, "Group Name",padRight: 17),
+                    ScreenIconBuild(AppIcons.group_name, "Group Name",
+                        padRight: 17),
                   ],
                 ),
               ),
@@ -687,7 +741,7 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
-  Widget ScreenIconBuild(String image, labelText, {double padRight=20}) {
+  Widget ScreenIconBuild(String image, labelText, {double padRight = 20}) {
     return Container(
         padding: EdgeInsets.only(left: 2, right: padRight, top: 2, bottom: 2),
         decoration: BoxDecoration(color: Color.fromARGB(83, 0, 0, 0)),
@@ -734,52 +788,70 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   void _showOptionsMenu(BuildContext context) {
-    showModalBottomSheet(context: context, 
-     shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
-      ),
-      backgroundColor: Colors.white,
-    builder: (BuildContext context){
-      
-      return Padding(
-          padding: EdgeInsets.symmetric(vertical: 162.sp, horizontal: 20),
-          child: Column(
-            children: [
-              _buildBottomSheetItem(AppIcons.person,  "Account Information",42.87, (){}),
-              SizedBox(height: 40.99.sp,),
-              _buildBottomSheetItem(AppIcons.bookmark, "Save",26.48,(){}),
-               SizedBox(height: 100.sp,),
-              _buildBottomSheetItem(AppIcons.share, "Share",41.34,(){}),
-               SizedBox(height: 64.sp,),
-              _buildBottomSheetItem(AppIcons.unfollow, "Unfollow",38,(){}),
-               SizedBox(height: 39.16.sp,),
-              _buildBottomSheetItem(AppIcons.bell, "Notifications",42.83,(){}),
-               SizedBox(height: 28.89.sp,),
-              _buildBottomSheetItem(AppIcons.report, "Report",38.45,(){}),
-               SizedBox(height: 20,),
-               if(widget.isUserPost)
-               _buildBottomSheetItem(AppIcons.delete, "Delete",47,(){
-                Provider.of<PostProvider>(context, listen: false)
-            .deletePost(widget.postId, context, false);
+    showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+        ),
+        backgroundColor: Colors.white,
+        builder: (BuildContext context) {
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 162.sp, horizontal: 20),
+            child: Column(
+              children: [
+                _buildBottomSheetItem(
+                    AppIcons.person, "Account Information", 42.87, () {}),
+                SizedBox(
+                  height: 40.99.sp,
+                ),
+                _buildBottomSheetItem(AppIcons.bookmark, "Save", 26.48, () {}),
+                SizedBox(
+                  height: 100.sp,
+                ),
+                _buildBottomSheetItem(AppIcons.share, "Share", 41.34, () {}),
+                SizedBox(
+                  height: 64.sp,
+                ),
+                _buildBottomSheetItem(AppIcons.unfollow, "Unfollow", 38, () {}),
+                SizedBox(
+                  height: 39.16.sp,
+                ),
+                _buildBottomSheetItem(
+                    AppIcons.bell, "Notifications", 42.83, () {}),
+                SizedBox(
+                  height: 28.89.sp,
+                ),
+                _buildBottomSheetItem(AppIcons.report, "Report", 38.45, () {}),
+                SizedBox(
+                  height: 20,
+                ),
+                if (widget.isUserPost)
+                  _buildBottomSheetItem(AppIcons.delete, "Delete", 47, () {
+                    Provider.of<PostProvider>(context, listen: false)
+                        .deletePost(widget.postId, context, false);
+                  }),
+              ],
+            ),
+          );
+        });
+  }
 
-               } ),
-            ],
-          ),
-        );
-    });
-   }
-
-    Widget _buildBottomSheetItem(String icon, String text,double imageSize, VoidCallback action) {
+  Widget _buildBottomSheetItem(
+      String icon, String text, double imageSize, VoidCallback action) {
     return GestureDetector(
       onTap: action,
       child: Container(
         width: double.infinity,
         child: Row(
           children: [
-        Image.asset(icon,width: imageSize.sp,),
-        SizedBox(width: 10,),
-        Text(text, style: TextStyle(fontSize: 24.sp)),
-           
+            Image.asset(
+              icon,
+              width: imageSize.sp,
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text(text, style: TextStyle(fontSize: 24.sp)),
           ],
         ),
       ),
@@ -803,6 +875,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeVideo();
     });
