@@ -186,7 +186,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         log('Location Data: $data');
-        String address = data['display_name'];
+        String address = data['address']['city'] +
+            ',' +
+            data['address']['state'] +
+            ',' +
+            data['address']['country'];
         print("Address: $address");
         setState(() {
           _location = address;
