@@ -1,119 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_icons.dart';
+import 'package:mobile/common/utils.dart';
+import 'package:mobile/controller/endpoints.dart';
 
-class DiscoursePost extends StatelessWidget {
-  final String username;
-  final String timestamp;
-  final String clubName;
+class DiscoursePost extends StatefulWidget {
+  
   final String? imageUrl;
   final String content;
-  final String profileImageUrl;
 
   const DiscoursePost({
     Key? key,
-    required this.username,
-    required this.timestamp,
-    required this.clubName,
+    
     this.imageUrl,
     required this.content,
-    required this.profileImageUrl,
   }) : super(key: key);
 
   @override
+  State<DiscoursePost> createState() => _DiscoursePostState();
+}
+
+class _DiscoursePostState extends State<DiscoursePost> {
+  @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.only(bottomRight: Radius.circular(0),topRight: Radius.circular(8),topLeft: Radius.circular(8),),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.2),
             blurRadius: 5,
-            spreadRadius: 2,
-            offset: const Offset(0, 2),
+           // spreadRadius: 2,
+            offset: const Offset(0, 0),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // User Info (Name, Time, Club Badge)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                username,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Row(
-                children: [
-                  Text(
-                    timestamp,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      clubName,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
+          
+          
+      
           // Post Image (if available)
-          if (imageUrl != null)
+          if (widget.imageUrl != null)
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(imageUrl!, fit: BoxFit.cover),
+              //borderRadius: BorderRadius.circular(0),
+              child: Image.network(widget.imageUrl!, 
+              width: double.infinity,
+              fit: BoxFit.cover),
             ),
-
+      
           // Post Content
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              content,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
+              widget.content,
+              style:  TextStyle(fontSize: 24.sp,fontFamily: 'fontMedium', color: Colors.black87),
             ),
-          ),
-
-          // User Profile + Actions
-          Row(
-            children: [
-              // Profile Picture
-              CircleAvatar(
-                radius: 16,
-                backgroundImage: NetworkImage(profileImageUrl),
-              ),
-              const SizedBox(width: 8),
-
-              // Action Buttons
-              IconButton(
-                icon: const Icon(Icons.send, color: Colors.grey),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.repeat, color: Colors.grey),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.favorite_border, color: Colors.grey),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.comment, color: Colors.grey),
-                onPressed: () {},
-              ),
-            ],
           ),
         ],
       ),

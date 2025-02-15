@@ -31,6 +31,8 @@ class AppIcons {
   static const String report = "assets/icons/report.png";
   static const String delete = "assets/icons/delete.png";
   
+  static const String cross = "assets/icons/cross.png";
+  
   static const String camera = "assets/icons/camera.png";
   static const String image = "assets/icons/image.png";
   static const String mic = "assets/icons/mic.png";

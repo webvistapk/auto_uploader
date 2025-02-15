@@ -18,6 +18,7 @@ import 'package:mobile/screens/post/pool/poll_bottom_sheet.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
 import 'package:mobile/screens/profile/widgets/emojiBottomSheet.dart';
 import 'package:mobile/screens/profile/widgets/messageBottomSheet.dart';
+import 'package:mobile/screens/profile/widgets/pinCommentBottomSheet.dart';
 import 'package:mobile/screens/profile/widgets/pinPost.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -435,7 +436,11 @@ class _PostWidgetState extends State<PostWidget> {
                         },
                         child: _buildInteractionIcon(AppIcons.pin, "")),
                       const SizedBox(width: 10),
-                      _buildInteractionIcon(AppIcons.repost, ""),
+                      GestureDetector(
+                        onTap: (){
+                          showPinCommentBottomSheet(context,widget.profileImageUrl);
+                        },
+                        child: _buildInteractionIcon(AppIcons.repost, "")),
                     
                 
                   if (!widget.postModel.interactions!.contains('comments')) ...[

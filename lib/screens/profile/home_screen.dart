@@ -20,6 +20,7 @@ import 'package:mobile/screens/messaging/chat_screen.dart';
 import 'package:mobile/screens/notification/notificationScreen.dart';
 import 'package:mobile/screens/profile/FollowerReelScreen.dart';
 import 'package:mobile/screens/profile/widgets/DiscoursePost.dart';
+import 'package:mobile/screens/profile/widgets/DiscourseScreenWidget.dart';
 import 'package:mobile/screens/profile/widgets/PostGrid.dart';
 import 'package:mobile/screens/profile/widgets/PostWidget.dart';
 import 'package:mobile/screens/search/widget/search_screen.dart';
@@ -59,8 +60,16 @@ class _HomeScreenState extends State<HomeScreen>
   Map<int, int> _currentIndexMap = {};
   int _offset = 0; // Pagination offset
   bool _isLoadingMore = false; // Indicator for loading more posts
-   int selectedIndex = 0; // 0: Content, 1: Discourse, 2: Reels
+  int selectedIndex = 0; // 0: Content, 1: Discourse, 2: Reels
   List<Stories> _stories = [];
+  final PageController _pageController = PageController();
+
+  void onPageChanged(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -94,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen>
         _offset += 10; // Increment the offset for the next request
         _isLoadingMore = false;
       });
-      print("OFFSET :${_offset}");
+    print("OFFSET :${_offset}");
   }
 
   void _fetchPosts() async {
@@ -110,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen>
     // Fetch posts from the provider after the fetch operation
     if (mounted)
       setState(() {
-       // postProvider.posts.(postProvider.posts!); // Add posts from provider to _posts
+        // postProvider.posts.(postProvider.posts!); // Add posts from provider to _posts
         _offset += 10;
         _isLoadingMore = false;
       });
@@ -126,49 +135,46 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: selectedIndex == 2
-      ? null
-      : AppBar(
-          backgroundColor: AppColors.white,  // Set fixed color
-          elevation: 0,
-          toolbarHeight: 60,
-          leading: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Image.asset(
-              AppIcons.calender,
-              width: 42.sp,
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: Image.asset(
-                AppIcons.bell,
-                color: AppColors.black,
-                width: 42.sp,
+          ? null
+          : AppBar(
+              backgroundColor: Color(0xffF4F6F6), // Set fixed color
+              elevation: 0,
+              toolbarHeight: 60,
+              leading: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Image.asset(
+                  AppIcons.calender,
+                  width: 42.sp,
+                ),
               ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    CupertinoDialogRoute(
-                        builder: (_) => NotificationScreen(), context: context));
-              },
+              actions: [
+                IconButton(
+                  icon: Image.asset(
+                    AppIcons.bell,
+                    color: AppColors.black,
+                    width: 42.sp,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        CupertinoDialogRoute(
+                            builder: (_) => NotificationScreen(),
+                            context: context));
+                  },
+                ),
+                // IconButton(
+                //   icon: Icon(Icons.search, color: Colors.grey),
+                //   onPressed: () {
+                //     showSearch(context: context, delegate: CustomSearchDelegate());
+                //   },
+                // ),
+              ],
             ),
-            // IconButton(
-            //   icon: Icon(Icons.search, color: Colors.grey),
-            //   onPressed: () {
-            //     showSearch(context: context, delegate: CustomSearchDelegate());
-            //   },
-            // ),
-          ],
-        ),
       drawer: const SideBar(),
-      backgroundColor: AppColors.white,
+      backgroundColor: Color(0xffF4F6F6),
       body: Stack(
         children: [
           // Show Fullscreen Reels if selected
-          if (selectedIndex == 2)
-            Positioned.fill(
-              child: FollowerReelScreen(),
-            ),
 
           // Tab Buttons (Always on top)
           Positioned(
@@ -178,174 +184,171 @@ class _HomeScreenState extends State<HomeScreen>
             child: SafeArea(
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 0),
-                
-                color: selectedIndex==2? Colors.transparent:Colors.white, // Make it overlay
-                child: Column(
-                  children: [
-                     Row(
+
+                color: selectedIndex == 2
+                    ? Colors.transparent
+                    : Color(0xffF4F6F6), // Make it overlay
+                child: Column(children: [
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _buildTabButton("Content", 0),
-                      SizedBox(width: 118.sp,),
+                      SizedBox(
+                        width: 118.sp,
+                      ),
                       _buildTabButton("Discourse", 1),
-                      SizedBox(width: 118.sp,),
+                      SizedBox(
+                        width: 118.sp,
+                      ),
                       _buildTabButton("Reels", 2),
-                      
                     ],
                   ),
-                 selectedIndex==2? Container():Divider()
-                  ]
-                ),
+
+                  if (selectedIndex != 2)
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Divider(color: Colors.black, thickness: 1),
+                        Positioned(
+                          left: selectedIndex == 0
+                              ? MediaQuery.of(context).size.width * 0.20
+                              : selectedIndex == 1
+                                  ? MediaQuery.of(context).size.width * 0.46
+                                  : MediaQuery.of(context).size.width * 0.78,
+                          child: Container(
+                            width: 107.sp, // Width of the line
+                            height: 2.2, // Thickness of the line
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  //  selectedIndex == 2 ? Container() : Divider()
+                ]),
               ),
             ),
           ),
 
           // Show Normal Screens
-          if (selectedIndex != 2)
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 28),
-                child: _buildNormalScreen(selectedIndex),
+
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 28),
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: onPageChanged,
+                children: [
+                  _buildNormalScreen(0),
+                  _buildNormalScreen(1),
+                  _buildNormalScreen(2),
+                ],
               ),
             ),
+          ),
         ],
       ),
-    
     );
   }
 
-   Widget _buildNormalScreen(int index) {
+  Widget _buildNormalScreen(int index) {
     switch (index) {
       case 0:
         return ContentScreen();
       case 1:
-        return DiscourseScreen();
+        return DiscourseScreen(userProfile: widget.userProfile);
+      case 2:
+        return Positioned.fill(child: FollowerReelScreen());
       default:
         return Container();
     }
   }
 
-  Widget ContentScreen(){
+  Widget ContentScreen() {
     return Container(
       color: AppColors.white,
       child: ValueListenableBuilder<String?>(
-              valueListenable: SearchStore.searchQuery,
-              builder: (context, searchQuery, child) {
-                if (searchQuery == null || searchQuery.isEmpty) {
-                  return NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification scrollInfo) {
-                      if (scrollInfo.metrics.pixels ==
-                              scrollInfo.metrics.maxScrollExtent &&
-                          !_isLoadingMore) {
-                        _fetchPosts();
-                      }
-                      return false;
-                    },
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Integrate the horizontally scrollable story section
-                          
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              UsersStoryScreen(
-                                userProfile: widget.userProfile!,
-                                token: widget.token!,
-                              ),
-                              
-                              // Spacer(),
-                              //SizedBox(width: 10),
-                              Flexible(
-                                  child: Center(child: _followerStorySection())),
-                              //Spacer(),
-                            ],
-                          ), // Calls the horizontal ListView
-                          
-                          //  const Divider(thickness: 1),
-                          // _posts.isEmpty
-                          //     ? Center(
-                          //         child: Text(
-                          //           "No Post Available Right Now",
-                          //           style: AppTextStyles.poppinsBold(),
-                          //         ),
-                          //       )
-                          //     : Padding(
-                          //         padding: const EdgeInsets.all(8.0),
-                          //         child: Consumer<PostProvider>(
-                          //             builder: (context, postProvider, child) {
-                          //           return ListView.builder(
-                          //             itemCount: _posts.length,
-                          //             shrinkWrap: true, // Prevents unbounded height
-                          //             physics: NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                          //             itemBuilder: (context, index) {
-                          //               final post = _posts[index];
-                          //               return _buildPostCard(post, () {
-                          //                 Navigator.push(
-                          //                     context,
-                          //                     CupertinoDialogRoute(
-                          //                         builder: (_) => SinglePost(
-                          //                             postId: post.id.toString(),
-                          //                             onPostUpdated: () =>
-                          //                                 _fetchPosts()),
-                          //                         context: context));
-                          //               });
-                          //             },
-                          //           );
-                          //         }),
-                          //       ),
-                          //       const Divider(thickness: 1),
-                          Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Consumer<PostProvider>(
-                                builder: (context, postProvider, child) {
-                                  final posts=postProvider.posts??[];
-                              return ListView.builder(
-                                itemCount: posts.length,
-                                shrinkWrap: true, // Prevents unbounded height
-                                physics:
-                                    NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                                itemBuilder: (context, index) {
-                                  final post = posts[index];
-                                  return _buildPostCard(post, () {
-                                    Navigator.push(
-                                        context,
-                                        CupertinoDialogRoute(
-                                            builder: (_) => SinglePost(
-                                                postId: post.id.toString(),
-                                                onPostUpdated: () {}),
-                                            context: context));
-                                  });
-                                },
-                              );
-                            }),
-                          ),
-                          if (_isLoadingMore)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                } else {
-                  return SearchWidget(
-                    query: searchQuery,
-                    authToken: Prefrences.getAuthToken().toString(),
-                  );
+        valueListenable: SearchStore.searchQuery,
+        builder: (context, searchQuery, child) {
+          if (searchQuery == null || searchQuery.isEmpty) {
+            return NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (scrollInfo.metrics.pixels ==
+                        scrollInfo.metrics.maxScrollExtent &&
+                    !_isLoadingMore) {
+                  _fetchPosts();
                 }
+                return false;
               },
-            ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Integrate the horizontally scrollable story section
+
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        UsersStoryScreen(
+                          userProfile: widget.userProfile!,
+                          token: widget.token!,
+                        ),
+
+                        // Spacer(),
+                        //SizedBox(width: 10),
+                        Flexible(child: Center(child: _followerStorySection())),
+                        //Spacer(),
+                      ],
+                    ), // Calls the horizontal ListView
+
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Consumer<PostProvider>(
+                          builder: (context, postProvider, child) {
+                        final posts = postProvider.posts ?? [];
+                        return ListView.builder(
+                          itemCount: posts.length,
+                          shrinkWrap: true, // Prevents unbounded height
+                          physics:
+                              NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
+                          itemBuilder: (context, index) {
+                            final post = posts[index];
+                            return _buildPostCard(post, () {
+                              Navigator.push(
+                                  context,
+                                  CupertinoDialogRoute(
+                                      builder: (_) => SinglePost(
+                                          postId: post.id.toString(),
+                                          onPostUpdated: () {}),
+                                      context: context));
+                            });
+                          },
+                        );
+                      }),
+                    ),
+                    if (_isLoadingMore)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            return SearchWidget(
+              query: searchQuery,
+              authToken: Prefrences.getAuthToken().toString(),
+            );
+          }
+        },
+      ),
     );
   }
-
 
   Widget _buildTabButton(String title, int index) {
     return GestureDetector(
@@ -354,33 +357,21 @@ class _HomeScreenState extends State<HomeScreen>
           selectedIndex = index;
         });
       },
-      child: Stack(
-      children: [
-        // Text widget
-        Padding(
-          padding: const EdgeInsets.only(bottom: 5),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 24.sp,
-              fontFamily: selectedIndex == index ? 'fontBold' : 'fontMedium',
-              color:selectedIndex==2? Colors.white:selectedIndex == index ? Colors.black : AppColors.darkGrey,
-            ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 5),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 24.sp,
+            fontFamily: selectedIndex == index ? 'fontBold' : 'fontMedium',
+            color: selectedIndex == 2
+                ? Colors.white
+                : selectedIndex == index
+                    ? Colors.black
+                    : AppColors.darkGrey,
           ),
         ),
-        // Small line under the selected tab
-        if (selectedIndex == index)
-          Positioned(
-            bottom: -1,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 2.0,  // Thickness of the line
-              color: Colors.black,  // Color of the line
-            ),
-          ),
-      ],
-    ),
+      ),
     );
   }
 
@@ -461,12 +452,11 @@ class _HomeScreenState extends State<HomeScreen>
                           child: CircleAvatar(
                             radius: 20,
                             backgroundImage: NetworkImage(
-                              user!.profileImage!=null?
-                               ApiURLs.baseUrl.replaceAll("/api/", '')+user!.profileImage.toString()
-                               : AppUtils.userImage,
-                            
+                              user!.profileImage != null
+                                  ? ApiURLs.baseUrl.replaceAll("/api/", '') +
+                                      user!.profileImage.toString()
+                                  : AppUtils.userImage,
                             ),
-                            
                             onBackgroundImageError: (_, __) =>
                                 const Icon(Icons.person, size: 45),
                             backgroundColor: Colors.transparent,
@@ -477,9 +467,8 @@ class _HomeScreenState extends State<HomeScreen>
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                                fontSize: 9.84.sp, color: AppColors.darkGrey),
-                          ),
-                        
+                              fontSize: 9.84.sp, color: AppColors.darkGrey),
+                        ),
                       ],
                     ),
                   );
@@ -497,9 +486,9 @@ class _HomeScreenState extends State<HomeScreen>
       final file = media.file;
       return file;
     }).toList();
-    
+
     return Container(
-      padding: EdgeInsets.only(bottom:8 ),
+      padding: EdgeInsets.only(bottom: 8),
       child: PostWidget(
         postId: post.id.toString(),
         username: post.user.username,
@@ -510,8 +499,9 @@ class _HomeScreenState extends State<HomeScreen>
         profileImageUrl: post.user.profileImage != null
             ? "${post.user.profileImage}"
             : AppUtils.userImage,
-        isVideo:
-            post.media.any((media) => media.mediaType == 'video') ? true : false,
+        isVideo: post.media.any((media) => media.mediaType == 'video')
+            ? true
+            : false,
         likes: post.likesCount.toString(),
         comments: post.commentsCount.toString(),
         shares: "",
@@ -519,11 +509,12 @@ class _HomeScreenState extends State<HomeScreen>
         refresh: () {},
         showCommentSection: false,
         isInteractive: true,
-        isUserPost: widget.userProfile!.id==post.user.id?true:false,
+        isUserPost: widget.userProfile!.id == post.user.id ? true : false,
         onPressed: onPressed,
         onPressLiked: () async {
-          final postProvider = Provider.of<PostProvider>(context, listen: false);
-      
+          final postProvider =
+              Provider.of<PostProvider>(context, listen: false);
+
           if (post.isLiked == false) {
             // Like the post
             await postProvider.newLikes(
@@ -545,29 +536,5 @@ class _HomeScreenState extends State<HomeScreen>
         privacy: post.privacy,
       ),
     );
-  }
-}
-
-
-class DiscourseScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-                                itemCount: 4,
-                                shrinkWrap: true, // Prevents unbounded height
-                                physics:
-                                    NeverScrollableScrollPhysics(), // Disable scrolling to avoid conflict
-                                itemBuilder: (context, index) {
-                                  
-                                  return DiscoursePost(
-  username: "First Lastname",
-  timestamp: "03/28/23 at 4:58 AM",
-  clubName: "Club name",
-  imageUrl: "https://example.com/image.jpg", // Replace with actual image URL
-  content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-  profileImageUrl: "https://example.com/profile.jpg", // Replace with actual profile image
-);
-                                },
-                              );;
   }
 }
