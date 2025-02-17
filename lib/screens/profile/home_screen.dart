@@ -231,18 +231,16 @@ class _HomeScreenState extends State<HomeScreen>
 
           // Show Normal Screens
 
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 28),
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: onPageChanged,
-                children: [
-                  _buildNormalScreen(0),
-                  _buildNormalScreen(1),
-                  _buildNormalScreen(2),
-                ],
-              ),
+          Padding(
+            padding: const EdgeInsets.only(top: 28),
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: onPageChanged,
+              children: [
+                _buildNormalScreen(0),
+                _buildNormalScreen(1),
+                _buildNormalScreen(2),
+              ],
             ),
           ),
         ],
@@ -257,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen>
       case 1:
         return DiscourseScreen(userProfile: widget.userProfile);
       case 2:
-        return Positioned.fill(child: FollowerReelScreen());
+        return FollowerReelScreen();
       default:
         return Container();
     }
@@ -356,6 +354,11 @@ class _HomeScreenState extends State<HomeScreen>
         setState(() {
           selectedIndex = index;
         });
+         _pageController.animateToPage(
+    index,
+    duration: Duration(milliseconds: 300),
+    curve: Curves.easeInOut,
+  );
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 5),
