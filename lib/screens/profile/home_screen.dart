@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen>
       case 1:
         return DiscourseScreen(userProfile: widget.userProfile);
       case 2:
-        return FollowerReelScreen();
+        return SafeArea(child: FollowerReelScreen());
       default:
         return Container();
     }
