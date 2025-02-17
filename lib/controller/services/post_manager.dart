@@ -42,7 +42,6 @@ class PostManager {
     if (pollTitle != null && pollDescription != null && pollOptions != null) {
       request.fields['poll_title'] = pollTitle;
       request.fields['poll_description'] = pollDescription;
-      request.fields['location'] = location;
 
       // Add option values
       // debugger();
@@ -55,6 +54,7 @@ class PostManager {
     }
 
     request.fields['post'] = postField;
+    request.fields['location'] = location;
     request.fields['privacy'] = privacyPost;
 
     if (postTitle != null && postDescription != null) {
@@ -220,6 +220,26 @@ class PostManager {
     } catch (error) {
       // debugger();
       print('Error occurred: $error');
+      return null;
+    }
+  }
+
+  Future newReposted(
+      {required String type,
+      required int postId,
+      required String token}) async {
+    String url = "${ApiURLs.baseUrl}${ApiURLs.new_reposted}$type/$postId/";
+
+    // Prepare headers
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'accept': 'application/json',
+      'Content-type': 'application/json'
+    };
+    final response = await http.post(Uri.parse(url), headers: headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
       return null;
     }
   }
