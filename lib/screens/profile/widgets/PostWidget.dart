@@ -142,34 +142,37 @@ class _PostWidgetState extends State<PostWidget> {
             if (widget.isSinglePost)
               Column(
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(14)),
-                        child: Image.network(
-                          widget.profileImageUrl == null
-                              ? AppUtils.userImage
-                              : widget.profileImageUrl,
-                          width: 28,
-                          height: 28,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      if (widget.postModel.isReposted == false &&
-                          widget.postModel.repostedBy != null)
-                        Text(
-                          "${widget.postModel.repostedBy!.username} Reposted this Photo",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.black,
+                  Padding(
+                    padding:  EdgeInsets.only(left: 13.92.sp),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(14)),
+                          child: Image.network(
+                            widget.profileImageUrl == null
+                                ? AppUtils.userImage
+                                : widget.profileImageUrl,
+                            width: 45.42.sp,
+                            height: 45.42.sp,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                    ],
+                        SizedBox(
+                          width: 5,
+                        ),
+                        if (widget.postModel.isReposted == false &&
+                            widget.postModel.repostedBy != null)
+                          Text(
+                            "${widget.postModel.repostedBy!.username} Reposted this Photo",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.black,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                   SizedBox(
                     height: 10,
@@ -177,165 +180,169 @@ class _PostWidgetState extends State<PostWidget> {
                 ],
               ),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(14)),
-                  child: SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: Image.network(
-                      widget.profileImageUrl.isEmpty
-                          ? AppUtils.userImage
-                          : widget.profileImageUrl,
-                      fit: BoxFit
-                          .cover, // Ensures the image covers the container without distortion
+            Padding(
+              padding:  EdgeInsets.only(left: 13.92.sp),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(14)),
+                    child: SizedBox(
+                      width: 73.96.sp,
+                      height: 73.96.sp,
+                      child: Image.network(
+                        widget.profileImageUrl.isEmpty
+                            ? AppUtils.userImage
+                            : widget.profileImageUrl,
+                        fit: BoxFit
+                            .cover, // Ensures the image covers the container without distortion
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Row(
-                              children: [
-                                Text(
-                                  widget.username,
-                                  style: TextStyle(
-                                      fontSize: 24.sp,
-                                      color: AppColors.black,
-                                      //fontWeight: FontWeight.bold,
-                                      fontFamily: 'fontBold'),
-                                ),
-                                const SizedBox(
-                                  width: 7,
-                                ),
-                                Text(
-                                  "@" + widget.username.removeAllWhitespace,
-                                  style: TextStyle(
-                                    fontSize: 24.sp,
-                                    color: AppColors.lightGrey,
-                                  ),
-                                ),
-                                if (widget.postModel.repostedBy != null)
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Row(
+                                children: [
                                   Text(
-                                    date!,
+                                    widget.username,
                                     style: TextStyle(
-                                      fontSize: 7,
+                                        fontSize: 24.sp,
+                                        color: AppColors.black,
+                                        //fontWeight: FontWeight.bold,
+                                        fontFamily: 'fontBold'),
+                                  ),
+                                  const SizedBox(
+                                    width: 7,
+                                  ),
+                                  Text(
+                                    "@" + widget.username.removeAllWhitespace,
+                                    style: TextStyle(
+                                      fontSize: 24.sp,
+                                      color: AppColors.lightGrey,
+                                    ),
+                                  ),
+                                  if (widget.postModel.repostedBy != null)
+                                    Text(
+                                      date!,
+                                      style: TextStyle(
+                                        fontSize: 7,
+                                        color: AppColors.darkGrey,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              widget.postModel.location ?? " New York, NY",
+                              style: TextStyle(
+                                fontSize: 24.sp,
+                                color: AppColors.darkGrey,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            if (widget.postModel.repostedBy != null)
+                              Row(
+                                children: [
+                                  Text(
+                                    "Senior Journalist at Fox News",
+                                    style: TextStyle(
+                                      fontSize: 8,
                                       color: AppColors.darkGrey,
                                     ),
                                   ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            widget.postModel.location ?? " New York, NY",
-                            style: TextStyle(
-                              fontSize: 24.sp,
-                              color: AppColors.darkGrey,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          if (widget.postModel.repostedBy != null)
-                            Row(
-                              children: [
-                                Text(
-                                  "Senior Journalist at Fox News",
-                                  style: TextStyle(
-                                    fontSize: 8,
-                                    color: AppColors.darkGrey,
-                                  ),
-                                ),
-                                if (widget.postModel.isReposted!) ...[
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 2, horizontal: 8),
-                                    decoration: BoxDecoration(
-                                        color: AppColors.iconredColor,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(3))),
-                                    child: Text(
-                                      "Chess with the best",
-                                      style: TextStyle(
-                                        fontSize: 5,
-                                        color: AppColors.white,
+                                  if (widget.postModel.isReposted!) ...[
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 2, horizontal: 8),
+                                      decoration: BoxDecoration(
+                                          color: AppColors.iconredColor,
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(3))),
+                                      child: Text(
+                                        "Chess with the best",
+                                        style: TextStyle(
+                                          fontSize: 5,
+                                          color: AppColors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ]
-                              ],
-                            ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          //if (widget.isUserPost)
-                          GestureDetector(
-                            onTap: () {
-                              _showOptionsMenu(
-                                context,
-                              );
-                            },
-                            child: Container(
-                              padding: EdgeInsets.only(
-                                  top: 40, left: 20, right: 10, bottom: 15),
-                              child: Image.asset(
-                                AppIcons.three_dot,
-                                width: 36.sp,
+                                  ]
+                                ],
+                              ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            //if (widget.isUserPost)
+                            GestureDetector(
+                              onTap: () {
+                                _showOptionsMenu(
+                                  context,
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.only(
+                                    top: 40, left: 20, right: 10, bottom: 15),
+                                child: Image.asset(
+                                  AppIcons.three_dot,
+                                  width: 36.sp,
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            children: [
-                              if (widget.postModel.repostedBy != null) ...[
-                                Image.asset(AppIcons.eyes),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  widget.privacy ?? '',
-                                  style: TextStyle(
-                                      fontSize: 7, color: AppColors.lightGrey),
-                                ),
+                            SizedBox(
+                              height: 8,
+                            ),
+                            Row(
+                              children: [
+                                if (widget.postModel.repostedBy != null) ...[
+                                  Image.asset(AppIcons.eyes),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    widget.privacy ?? '',
+                                    style: TextStyle(
+                                        fontSize: 7, color: AppColors.lightGrey),
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                // if (widget.isUserPost == true)
-                //   GestureDetector(
-                //     key: iconKey, // Unique key for dynamic positioning
-                //     onTap: () {
-                //       _showOptionsMenu(
-                //         context,
-                //         iconKey,
-                //       );
-                //     },
-                //     child: const Icon(Icons.more_vert, size: 20),
-                //   ),
-              ],
+                  // if (widget.isUserPost == true)
+                  //   GestureDetector(
+                  //     key: iconKey, // Unique key for dynamic positioning
+                  //     onTap: () {
+                  //       _showOptionsMenu(
+                  //         context,
+                  //         iconKey,
+                  //       );
+                  //     },
+                  //     child: const Icon(Icons.more_vert, size: 20),
+                  //   ),
+                ],
+              ),
             ),
+            
             //const SizedBox(height: 10),
             GestureDetector(
               onTap: widget.onPressed,
@@ -348,7 +355,7 @@ class _PostWidgetState extends State<PostWidget> {
                       ],
                     ),
             ),
-            const SizedBox(height: 8),
+             SizedBox(height: 26.55.sp),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -404,14 +411,14 @@ class _PostWidgetState extends State<PostWidget> {
                               )),
                         ],
                       ),
-                      Text(
-                        widget.location,
-                        style: TextStyle(
-                          fontSize: 7,
-                          color: AppColors.darkGrey,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
+                      // Text("test"+
+                      //   widget.location,
+                      //   style: TextStyle(
+                      //     fontSize: 7,
+                      //     color: AppColors.darkGrey,
+                      //   ),
+                      // ),
+                       SizedBox(height: 23.55.sp),
                       RichText(
                         text: TextSpan(
                           style: TextStyle(color: Colors.black, fontSize: 10),

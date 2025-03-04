@@ -71,6 +71,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                       color: AppColors.white
                     ))),
                 ),
+               
                 
               ],
             );
