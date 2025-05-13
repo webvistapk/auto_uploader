@@ -77,14 +77,18 @@ class _CustomPinImagesState extends State<CustomPinImages> {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildTabText("Recents", 0),
+                 SizedBox(width: 54.09.sp,),
                 _buildTabText("Other", 1),
+                SizedBox(width: 60.34.sp,),
                 _buildTabText("Other", 2),
+                SizedBox(width: 51.66.sp,),
                 _buildTabText("Other", 3),
+                SizedBox(width: 60.34.sp,),
                 _buildTabText("Other", 4),
-                SizedBox(width: 114.sp,),
+                SizedBox(width: 50.sp,),
                 GestureDetector(
                   onTap: (){
                     Navigator.pop(context);

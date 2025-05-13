@@ -173,93 +173,111 @@ class _HomeScreenState extends State<HomeScreen>
       drawer: const SideBar(),
       backgroundColor: Color(0xffF4F6F6),
       body: Stack(
-        children: [
-          // Show Fullscreen Reels if selected
-
-          // Tab Buttons (Always on top)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 0),
-
-                color: selectedIndex == 2
-                    ? Colors.transparent
-                    : Color(0xffF4F6F6), // Make it overlay
-                child: Column(children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildTabButton("Content", 0),
-                      SizedBox(
-                        width: 118.sp,
-                      ),
-                      _buildTabButton("Discourse", 1),
-                      SizedBox(
-                        width: 118.sp,
-                      ),
-                      _buildTabButton("Reels", 2),
-                    ],
-                  ),
-
-                  if (selectedIndex != 2)
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Divider(color: Colors.black, thickness: 1),
-                        Positioned(
-                          left: selectedIndex == 0
-                              ? MediaQuery.of(context).size.width * 0.20
-                              : selectedIndex == 1
-                                  ? MediaQuery.of(context).size.width * 0.46
-                                  : MediaQuery.of(context).size.width * 0.78,
-                          child: Container(
-                            width: 107.sp, // Width of the line
-                            height: 2.2, // Thickness of the line
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  //  selectedIndex == 2 ? Container() : Divider()
-                ]),
+  children: [
+    // Top Menu (Always Visible)
+    Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: SafeArea(
+        child: Container(
+          color: selectedIndex == 2 ? Colors.transparent : Color(0xffF4F6F6),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildTabButton("Content", 0),
+                  SizedBox(width: 118.sp),
+                  _buildTabButton("Discourse", 1),
+                  SizedBox(width: 118.sp),
+                  _buildTabButton("Reels", 2),
+                ],
               ),
-            ),
+              if (selectedIndex != 2)
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Divider(color: Colors.black, thickness: 1),
+                    Positioned(
+                      left: selectedIndex == 0
+                          ? MediaQuery.of(context).size.width * 0.20
+                          : selectedIndex == 1
+                              ? MediaQuery.of(context).size.width * 0.46
+                              : MediaQuery.of(context).size.width * 0.78,
+                      child: Container(
+                        width: 107.sp,
+                        height: 2.2,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
           ),
-
-          // Show Normal Screens
-
-          Padding(
-            padding: const EdgeInsets.only(top: 28),
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: onPageChanged,
-              children: [
-                _buildNormalScreen(0),
-                _buildNormalScreen(1),
-                _buildNormalScreen(2),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
+    ),
+    // 
+
+    // PageView (Always Scrollable)
+    Positioned.fill(
+      child: Padding(
+        padding: EdgeInsets.only( top: selectedIndex==2? 0:60), // Adjust height to fit below top menu
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: onPageChanged,
+          children: [
+            _buildNormalScreen(0),
+            _buildNormalScreen(1),
+            _buildFullScreen(2), // Ensure FollowerReelScreen expands fully
+          ],
+        ),
+      ),
+    ),
+ if(selectedIndex==2)
+    Positioned(
+      top: 30,
+      left: 0,
+      right: 0,
+      child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildTabButton("Content", 0),
+                  SizedBox(width: 118.sp),
+                  _buildTabButton("Discourse", 1),
+                  SizedBox(width: 118.sp),
+                  _buildTabButton("Reels", 2),
+                ],
+              ),),
+    
+  ],
+)
     );
   }
+  Widget _buildFullScreen(int index) {
+  return Container(
+    width: double.infinity,
+    height: double.infinity,
+    child: FollowerReelScreen(), // Takes up full space below top menu
+  );
+}
 
-  Widget _buildNormalScreen(int index) {
-    switch (index) {
-      case 0:
-        return ContentScreen();
-      case 1:
-        return DiscourseScreen(userProfile: widget.userProfile);
-      case 2:
-        return SafeArea(child: FollowerReelScreen());
-      default:
-        return Container();
-    }
+ Widget _buildNormalScreen(int index) {
+  if (index == 2) {
+    return FollowerReelScreen(); // Allow it to take the full screen
   }
+  
+  switch (index) {
+    case 0:
+      return ContentScreen();
+    case 1:
+      return DiscourseScreen(userProfile: widget.userProfile);
+    default:
+      return Container();
+  }
+}
+
 
   Widget ContentScreen() {
     return Container(
