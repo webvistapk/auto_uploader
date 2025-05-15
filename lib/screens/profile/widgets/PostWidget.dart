@@ -14,11 +14,13 @@ import 'package:mobile/controller/function/commentBottomSheet.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/SinglePostModel.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
+import 'package:mobile/screens/authantication/Access%20Info/accessinfo.dart';
 import 'package:mobile/screens/post/pool/poll_bottom_sheet.dart';
 import 'package:mobile/screens/profile/widgets/comment_Widget.dart';
 import 'package:mobile/screens/profile/widgets/emojiBottomSheet.dart';
 import 'package:mobile/screens/profile/widgets/messageBottomSheet.dart';
 import 'package:mobile/screens/profile/widgets/pinCommentBottomSheet.dart';
+import 'package:mobile/screens/profile/widgets/pinImage.dart';
 import 'package:mobile/screens/profile/widgets/pinPost.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -143,7 +145,7 @@ class _PostWidgetState extends State<PostWidget> {
               Column(
                 children: [
                   Padding(
-                    padding:  EdgeInsets.only(left: 13.92.sp),
+                    padding: EdgeInsets.only(left: 13.92.sp),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -181,7 +183,7 @@ class _PostWidgetState extends State<PostWidget> {
               ),
 
             Padding(
-              padding:  EdgeInsets.only(left: 13.92.sp),
+              padding: EdgeInsets.only(left: 13.92.sp),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -318,7 +320,8 @@ class _PostWidgetState extends State<PostWidget> {
                                   Text(
                                     widget.privacy ?? '',
                                     style: TextStyle(
-                                        fontSize: 7, color: AppColors.lightGrey),
+                                        fontSize: 7,
+                                        color: AppColors.lightGrey),
                                   ),
                                 ],
                               ],
@@ -342,7 +345,7 @@ class _PostWidgetState extends State<PostWidget> {
                 ],
               ),
             ),
-            
+
             //const SizedBox(height: 10),
             GestureDetector(
               onTap: widget.onPressed,
@@ -355,7 +358,7 @@ class _PostWidgetState extends State<PostWidget> {
                       ],
                     ),
             ),
-             SizedBox(height: 26.55.sp),
+            SizedBox(height: 26.55.sp),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -418,7 +421,7 @@ class _PostWidgetState extends State<PostWidget> {
                       //     color: AppColors.darkGrey,
                       //   ),
                       // ),
-                       SizedBox(height: 23.55.sp),
+                      SizedBox(height: 23.55.sp),
                       RichText(
                         text: TextSpan(
                           style: TextStyle(color: Colors.black, fontSize: 10),
@@ -447,7 +450,10 @@ class _PostWidgetState extends State<PostWidget> {
                     if (widget.isSinglePost) const SizedBox(width: 10),
                     GestureDetector(
                         onTap: () {
-                          showPinPostSheet(context);
+                          //showPinPostSheet(context);
+                          //_showpimImage(context);
+
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>AccessInfo()));
                         },
                         child: _buildInteractionIcon(AppIcons.pin, "")),
                     const SizedBox(width: 10),
@@ -800,6 +806,20 @@ class _PostWidgetState extends State<PostWidget> {
           );
   }
 
+  void _showpimImage(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const FractionallySizedBox(
+        heightFactor: 0.78,
+        child: PinImage(),
+      ),
+    );
+  }
+
   void _showOptionsMenu(BuildContext context) {
     showModalBottomSheet(
         context: context,
@@ -834,7 +854,10 @@ class _PostWidgetState extends State<PostWidget> {
                 SizedBox(
                   height: 28.89.sp,
                 ),
-                _buildBottomSheetItem(AppIcons.report, "Report", 38.45, () {}),
+                _buildBottomSheetItem(AppIcons.report, "Report", 38.45, () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => PinImage()));
+                }),
                 SizedBox(
                   height: 20,
                 ),
