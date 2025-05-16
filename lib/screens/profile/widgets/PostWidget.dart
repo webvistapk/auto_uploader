@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:carousel_slider/carousel_slider.dart';
@@ -9,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/function/commentBottomSheet.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
@@ -55,6 +57,7 @@ class PostWidget extends StatefulWidget {
   final String? postTitle;
   final String? postDescription;
   final String? privacy;
+  final String? userID;
 
   const PostWidget(
       {super.key,
@@ -84,7 +87,8 @@ class PostWidget extends StatefulWidget {
       this.isSinglePost = false,
       this.postTitle,
       this.postDescription,
-      this.privacy});
+      this.privacy,
+      required this.userID});
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
@@ -375,13 +379,14 @@ class _PostWidgetState extends State<PostWidget> {
                         children: [
                           GestureDetector(
                               onTap: () {
-                                showEmojiBottomSheet(context);
+                                CreateChat(widget.postId, context,isEmoji: true);
+                               
                               },
                               child: _buildInteractionIcon(AppIcons.emoji, '')),
                           const SizedBox(width: 10),
                           GestureDetector(
                               onTap: () {
-                                showMessageBottomSheet(context);
+                                CreateChat(widget.userID.toString(), context);
                               },
                               child:
                                   _buildInteractionIcon(AppIcons.forward, '')),
@@ -450,10 +455,10 @@ class _PostWidgetState extends State<PostWidget> {
                     if (widget.isSinglePost) const SizedBox(width: 10),
                     GestureDetector(
                         onTap: () {
-                          //showPinPostSheet(context);
+                          showPinPostSheet(context);
                           //_showpimImage(context);
 
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>AccessInfo()));
+                          // Navigator.push(context, MaterialPageRoute(builder: (context)=>AccessInfo()));
                         },
                         child: _buildInteractionIcon(AppIcons.pin, "")),
                     const SizedBox(width: 10),
@@ -892,6 +897,25 @@ class _PostWidgetState extends State<PostWidget> {
         ),
       ),
     );
+  }
+}
+
+void CreateChat(String PostUserID, BuildContext context, {bool isEmoji=false}) async {
+  final response = await Provider.of<PostProvider>(context, listen: false)
+      .createChat(PostUserID, context);
+  if (response?.statusCode == 201) {
+    final responseData = jsonDecode(response!.body);
+
+    // Extract chat ID
+    final chatId = responseData['chat']['id'].toString();
+    if(isEmoji){
+       showEmojiBottomSheet(context, chatId);
+    }
+    else{
+    showMessageBottomSheet(context, chatId);
+    }
+  } else {
+    ToastNotifier.showErrorToast(context, "Unable to chat");
   }
 }
 

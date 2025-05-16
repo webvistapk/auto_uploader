@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile/common/app_colors.dart';
 
 import 'package:flutter/material.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:provider/provider.dart';
 
-void showEmojiBottomSheet(BuildContext context) {
+void showEmojiBottomSheet(BuildContext context, String chatID) {
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.white, // Use AppColors.white if you have it
@@ -63,8 +65,12 @@ void showEmojiBottomSheet(BuildContext context) {
                   itemCount: emojis.length,
                   itemBuilder: (context, index) {
                     return GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context, emojis[index]); // Returns selected emoji
+                      onTap: ()async {
+                        final response=await Provider.of<PostProvider>(context,listen: false).sendChat(context, chatID, emojis[index].toString());
+                    if(response.statusCode==201){
+                      Navigator.pop(context, emojis[index]); // Returns selected emoji
+                    }
+                        
                       },
                       child: Container(
                         width: 227.sp,

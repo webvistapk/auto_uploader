@@ -555,6 +555,7 @@ class _HomeScreenState extends State<HomeScreen>
         postTitle: post.postTitle,
         postDescription: post.postDescription,
         privacy: post.privacy,
+        userID: post.user.id.toString(),
       ),
     );
   }

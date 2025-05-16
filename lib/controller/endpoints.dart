@@ -71,4 +71,7 @@ class ApiURLs {
 
   //New Reposted
   static const String new_reposted = "posts/repost/new/";
+
+   static const String chat_create = "chat/new/";
+   static const String send_chat = "messages/send/";
 }

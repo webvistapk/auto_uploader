@@ -150,6 +150,7 @@ class _SinglePostState extends State<SinglePost> {
                 isSinglePost: true,
                 postTitle: post.pollTitle,
                 postDescription: post.postDescription,
+                userID: post.user.id.toString(),
               ),
             );
           },

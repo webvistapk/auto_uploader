@@ -45,7 +45,7 @@ void showPinPostSheet(BuildContext context) {
     ),
 
            
-            MessageWidget(),
+            MessageWidget(chatId: "",),
            SizedBox(height: 10,)
           ],
         ),

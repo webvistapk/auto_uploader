@@ -123,7 +123,9 @@ class _PostScreenState extends State<PostScreen> {
                             isLiked: false,
                             postModel: post,
                             postTitle: post.pollTitle,
-                            postDescription: post.postDescription);
+                            postDescription: post.postDescription,
+                            userID: post.user.id.toString(),
+                            );
                       },
                     );
                   } else {

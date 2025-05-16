@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:provider/provider.dart';
 
 class MessageWidget extends StatefulWidget {
-  const MessageWidget({super.key});
+  String chatId;
+   MessageWidget({super.key, required this.chatId});
 
   @override
   State<MessageWidget> createState() => _MessageWidgetState();
 }
 
 class _MessageWidgetState extends State<MessageWidget> {
+  final TextEditingController _messageController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -42,6 +46,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                       SizedBox(width: 10),
                       Expanded(
                         child: TextField(
+                          controller: _messageController,
                           decoration: InputDecoration(
                             hintText: 'Send a message..',
                             hintStyle: TextStyle(
@@ -59,17 +64,27 @@ class _MessageWidgetState extends State<MessageWidget> {
                   ),
                 ),
                 SizedBox(height: 10),
-                Container(
-                  width: 802.sp,
-                  height: 76.sp,
-                  decoration: BoxDecoration(
-                    color: Color(0xff333232),
-                    borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Center(child: Text("Send",style:TextStyle(
-                      fontSize: 24.sp,
-                      color: AppColors.white
-                    ))),
+                GestureDetector(
+                  onTap: ()async{
+                    if(_messageController!=null){
+                   final response=await Provider.of<PostProvider>(context,listen: false).sendChat(context, widget.chatId, _messageController.text.toString());
+                    if(response.statusCode==201){
+                      _messageController.text="";
+                    }
+                    }
+                  },
+                  child: Container(
+                    width: 802.sp,
+                    height: 76.sp,
+                    decoration: BoxDecoration(
+                      color: Color(0xff333232),
+                      borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Center(child: Text("Send",style:TextStyle(
+                        fontSize: 24.sp,
+                        color: AppColors.white
+                      ))),
+                  ),
                 ),
                
                 

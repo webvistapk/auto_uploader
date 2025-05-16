@@ -5,7 +5,7 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/screens/profile/widgets/MessageWidget.dart';
 
-void showMessageBottomSheet(BuildContext context) {
+void showMessageBottomSheet(BuildContext context, chatId) {
   showModalBottomSheet(
     context: context,
     backgroundColor: AppColors.white,
@@ -34,7 +34,7 @@ void showMessageBottomSheet(BuildContext context) {
             ),
 
             SizedBox(height: 150.sp,),
-            MessageWidget(),
+            MessageWidget(chatId: chatId,),
            SizedBox(height: 10,)
           ],
         ),

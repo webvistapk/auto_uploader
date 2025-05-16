@@ -659,4 +659,50 @@ class PostProvider extends ChangeNotifier {
   }
 
   getPostById(int id) {}
+
+  createChat(String postUserID, BuildContext context) async {
+    try {
+      final String? token = await Prefrences.getAuthToken();
+      String URL = "${ApiURLs.baseUrl}${ApiURLs.chat_create}";
+      final response = await http.post(
+        Uri.parse(URL),
+        body: jsonEncode({
+          "participants": [postUserID]
+        }),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      
+      return response;
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error: $e");
+    }
+  }
+
+  sendChat(BuildContext context, String chatId, message) async{
+     if (chatId == null) return;
+     final String? token = await Prefrences.getAuthToken();
+    final url = Uri.parse('${ApiURLs.baseUrl}chat/$chatId/${ApiURLs.send_chat}');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({'message': message}),
+      );
+      if (response.statusCode == 201) {
+        ToastNotifier.showSuccessToast(context, "Message sent successfully"); // Refresh messages
+        return response;
+      } else {
+        throw Exception('Failed to send message');
+      }
+    } catch (e) {
+      throw Exception('Error sending message: $e');
+}
+
+  }
 }
