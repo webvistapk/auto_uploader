@@ -13,6 +13,7 @@ import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/controller/function/commentBottomSheet.dart';
+import 'package:mobile/controller/function/postfunctions.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/SinglePostModel.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
@@ -379,14 +380,14 @@ class _PostWidgetState extends State<PostWidget> {
                         children: [
                           GestureDetector(
                               onTap: () {
-                                CreateChat(widget.postId, context,isEmoji: true);
+                                CreateChat(widget.userID.toString(), widget.postId, context,  isEmoji: true);
                                
                               },
                               child: _buildInteractionIcon(AppIcons.emoji, '')),
                           const SizedBox(width: 10),
                           GestureDetector(
                               onTap: () {
-                                CreateChat(widget.userID.toString(), context);
+                                CreateChat(widget.userID.toString(), widget.postId, context);
                               },
                               child:
                                   _buildInteractionIcon(AppIcons.forward, '')),
@@ -900,24 +901,24 @@ class _PostWidgetState extends State<PostWidget> {
   }
 }
 
-void CreateChat(String PostUserID, BuildContext context, {bool isEmoji=false}) async {
-  final response = await Provider.of<PostProvider>(context, listen: false)
-      .createChat(PostUserID, context);
-  if (response?.statusCode == 201) {
-    final responseData = jsonDecode(response!.body);
+// void CreateChat(String PostUserID,PostID, BuildContext context, {bool isEmoji=false}) async {
+//   final response = await Provider.of<PostProvider>(context, listen: false)
+//       .createChat(PostUserID, context);
+//   if (response?.statusCode == 201) {
+//     final responseData = jsonDecode(response!.body);
 
-    // Extract chat ID
-    final chatId = responseData['chat']['id'].toString();
-    if(isEmoji){
-       showEmojiBottomSheet(context, chatId);
-    }
-    else{
-    showMessageBottomSheet(context, chatId);
-    }
-  } else {
-    ToastNotifier.showErrorToast(context, "Unable to chat");
-  }
-}
+//     // Extract chat ID
+//     final chatId = responseData['chat']['id'].toString();
+//     if(isEmoji){
+//        showEmojiBottomSheet(context,PostID, chatId);
+//     }
+//     else{
+//     showMessageBottomSheet(context, chatId, PostID);
+//     }
+//   } else {
+//     ToastNotifier.showErrorToast(context, "Unable to chat");
+//   }
+// }
 
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;

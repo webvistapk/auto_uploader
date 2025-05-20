@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:provider/provider.dart';
 
-void showEmojiBottomSheet(BuildContext context, String chatID) {
+void showEmojiBottomSheet(BuildContext context, String chatID, postID) {
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.white, // Use AppColors.white if you have it
@@ -66,7 +66,7 @@ void showEmojiBottomSheet(BuildContext context, String chatID) {
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: ()async {
-                        final response=await Provider.of<PostProvider>(context,listen: false).sendChat(context, chatID, emojis[index].toString());
+                        final response=await Provider.of<PostProvider>(context,listen: false).sendChat(context, chatID, postID, emojis[index].toString());
                     if(response.statusCode==201){
                       Navigator.pop(context, emojis[index]); // Returns selected emoji
                     }

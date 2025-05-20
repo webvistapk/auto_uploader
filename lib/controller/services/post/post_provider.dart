@@ -60,7 +60,7 @@ class PostProvider extends ChangeNotifier {
   }
 
   fetchFollowerPost(BuildContext context,
-      {int limit = 10, int offset = 0}) async {
+      {int limit = 10, int offset = 0, postType="post"}) async {
     setIsLoading(true);
 
     final String? token = await Prefrences.getAuthToken();
@@ -74,6 +74,7 @@ class PostProvider extends ChangeNotifier {
     Uri uri = Uri.parse(URL).replace(queryParameters: {
       'limit': limit.toString(),
       'offset': offset.toString(),
+      'post_type':postType
     });
 
     try {
@@ -674,35 +675,62 @@ class PostProvider extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
       );
-      
+
       return response;
     } catch (e) {
       ToastNotifier.showErrorToast(context, "Error: $e");
     }
   }
 
-  sendChat(BuildContext context, String chatId, message) async{
-     if (chatId == null) return;
-     final String? token = await Prefrences.getAuthToken();
-    final url = Uri.parse('${ApiURLs.baseUrl}chat/$chatId/${ApiURLs.send_chat}');
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({'message': message}),
-      );
-      if (response.statusCode == 201) {
-        ToastNotifier.showSuccessToast(context, "Message sent successfully"); // Refresh messages
-        return response;
-      } else {
-        throw Exception('Failed to send message');
-      }
-    } catch (e) {
-      throw Exception('Error sending message: $e');
-}
+   sendChat(
+  BuildContext context,
+  String? chatId,
+  String? postID,
+  String? message, {
+  List<File>? images,
+}) async {
+  if (chatId == null) return;
 
+  final String? token = await Prefrences.getAuthToken();
+  final url = Uri.parse('${ApiURLs.baseUrl}chat/$chatId/${ApiURLs.send_chat}');
+
+  try {
+    // Create multipart request
+    final request = http.MultipartRequest('POST', url)
+      ..headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'multipart/form-data',
+      })
+      ..fields['message'] = message ?? ""
+      ..fields['post_dm'] = postID ?? "";
+
+    // Add files if they exist - using 'files' as parameter name to match API
+    if (images != null && images.isNotEmpty) {
+      for (final image in images) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'files', // Changed from 'images' to 'files' to match API
+            image.path,
+            filename: image.path.split('/').last, // Add filename
+          ),
+        );
+      }
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+
+    if (response.statusCode == 201) {
+      ToastNotifier.showSuccessToast(context, "Message sent successfully");
+      return response;
+    } else {
+      throw Exception('Failed to send message. Status: ${response.statusCode}\nBody: ${response.body}');
+    }
+  } catch (e) {
+    print('Error sending message: $e');
+    ToastNotifier.showErrorToast(context, "Error sending message");
+    throw Exception('Error sending message: $e');
   }
+}
 }

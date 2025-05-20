@@ -1,11 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/screens/profile/widgets/MessageWidget.dart';
+import 'package:photo_manager/photo_manager.dart';
 
-void showMessageBottomSheet(BuildContext context, chatId) {
+void showMessageBottomSheet(BuildContext context, String chatId, postID) {
   showModalBottomSheet(
     context: context,
     backgroundColor: AppColors.white,
@@ -32,9 +35,9 @@ void showMessageBottomSheet(BuildContext context, chatId) {
               height: 2,
                       color: Color(0xff989898),
             ),
-
-            SizedBox(height: 150.sp,),
-            MessageWidget(chatId: chatId,),
+            
+            SizedBox(height: 20.sp,),
+            MessageWidget(chatId: chatId, postID: postID,),
            SizedBox(height: 10,)
           ],
         ),
@@ -42,3 +45,7 @@ void showMessageBottomSheet(BuildContext context, chatId) {
     },
   );
 }
+
+
+
+
