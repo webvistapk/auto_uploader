@@ -17,6 +17,7 @@ import 'package:mobile/screens/post/pool/add_pools.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:geolocator/geolocator.dart';
+import 'component/add_location_screen.dart';
 import 'component/interaction_bottom_sheet.dart'; // Add video player package for video handling
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
@@ -217,173 +218,269 @@ class _AddPostScreenState extends State<AddPostScreen> {
     var pro = context.watch<PostProvider>();
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
+          foregroundColor: Color(0xfaF6F7F7),
+          backgroundColor: Color(0xfaF6F7F7),
           leading: GestureDetector(
             onTap: () {
               FocusScope.of(context).unfocus();
               Navigator.pop(context);
             },
-            child: Icon(Icons.arrow_back),
+            child: Icon(
+              Icons.arrow_back,
+              color: Color(0xfa2B2B2B),
+            ),
           ),
-          centerTitle: true,
-          title: Text(
-            widget.type == 'reel' ? 'Reel Posting...' : "Posting...",
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
+          // leadingWidth: 100,
         ),
-        resizeToAvoidBottomInset: true,
         body: Stack(
           children: [
+            Container(
+              color: Color(0xfaF6F7F7),
+            ),
             SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Divider(),
-                  widget.mediFiles == null || widget.mediFiles.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: TextField(
-                            controller: titleController,
-                            cursorColor: Colors.red,
-                            textInputAction: TextInputAction.done,
-                            maxLines: 5,
-                            style: AppTextStyles.poppinsRegular(fontSize: 25),
-                            decoration: InputDecoration(
-                              hintText: 'Start Typing for Post...',
-                              hintStyle:
-                                  AppTextStyles.poppinsRegular().copyWith(
-                                color: Colors.black45,
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              border: InputBorder.none,
+              child: Container(
+                color: Color(0xfaF6F7F7),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(),
+                            Text(
+                              widget.type == 'reel'
+                                  ? 'Reel Posting...'
+                                  : "Post",
+                              style: AppTextStyles.poppinsBold(),
+                              textAlign: TextAlign.center,
                             ),
-                          ),
-                        )
-                      :
-                      // widget.type == 'reel'
-                      //     ? Row(
-                      //         mainAxisAlignment: MainAxisAlignment.center,
-                      //         children: [
-                      //           Container(
-                      //             height: 250,
-                      //             width: 300,
-                      //             child: _buildMediaWidget(),
-                      //           ),
-                      //         ],
-                      //       )
-                      //     :
-                      Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 120,
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.grey[300],
+                            SizedBox(),
+                          ]),
+                    ),
+                    Divider(),
+                    widget.mediFiles == null || widget.mediFiles.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: TextField(
+                              controller: titleController,
+                              cursorColor: Colors.red,
+                              textInputAction: TextInputAction.done,
+                              maxLines: 5,
+                              style: AppTextStyles.poppinsRegular(fontSize: 25),
+                              decoration: InputDecoration(
+                                hintText: 'Start Typing for Post...',
+                                hintStyle:
+                                    AppTextStyles.poppinsRegular().copyWith(
+                                  color: Colors.black45,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                child: _buildMediaWidget(),
+                                border: InputBorder.none,
                               ),
-                              SizedBox(width: 15),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: TextField(
-                                    controller: titleController,
-                                    cursorColor: Colors.red,
-                                    textInputAction: TextInputAction.done,
-                                    maxLines: 5,
-                                    style: AppTextStyles.poppinsRegular(),
-                                    decoration: InputDecoration(
-                                      hintMaxLines: 4,
-                                      hintText: widget.type == "post"
-                                          ? "Describe your post here, add hashtags, mention or anything else that compels you."
-                                          : "Describe your reel here, add hashtags, mention or anything else that compels you.",
-                                      hintStyle: AppTextStyles.poppinsRegular()
+                            ),
+                          )
+                        :
+                        // widget.type == 'reel'
+                        //     ? Row(
+                        //         mainAxisAlignment: MainAxisAlignment.center,
+                        //         children: [
+                        //           Container(
+                        //             height: 250,
+                        //             width: 300,
+                        //             child: _buildMediaWidget(),
+                        //           ),
+                        //         ],
+                        //       )
+                        //     :
+                        Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: 150,
+                                  width: 100,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(40),
+                                    color: Colors.grey[300],
+                                  ),
+                                  child: _buildMediaWidget(),
+                                ),
+                                SizedBox(width: 5),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: TextField(
+                                      controller: titleController,
+                                      cursorColor: Colors.red,
+                                      textInputAction: TextInputAction.done,
+                                      style: AppTextStyles.poppinsRegular()
                                           .copyWith(
-                                        color: Colors.black,
+                                        color: Color(0xfa807E7E),
                                         fontSize: 13,
                                       ),
-                                      focusedBorder: UnderlineInputBorder(
-                                        borderSide:
-                                            BorderSide(color: Colors.white),
-                                      ),
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide:
-                                            BorderSide(color: Colors.white),
+                                      maxLines: 5,
+                                      decoration: InputDecoration(
+                                        hintMaxLines: 4,
+                                        hintText: widget.type == "post"
+                                            ? "Describe your post here, add hashtags, mention or anything else that compels you."
+                                            : "Describe your reel here, add hashtags, mention or anything else that compels you.",
+                                        hintStyle:
+                                            AppTextStyles.poppinsRegular()
+                                                .copyWith(
+                                          color: Color(0xfa807E7E),
+                                          fontSize: 13,
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide.none,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                  Divider(color: Color(0xffD3D3D3)),
-                  ListTile(
-                    leading: Icon(Icons.location_on_rounded, size: 25),
-                    title: Text(
-                      "Location",
-                      style:
-                          AppTextStyles.poppinsRegular().copyWith(fontSize: 14),
+                    Divider(color: Color(0xffD3D3D3)),
+                    ListTile(
+                      leading: Image.asset(
+                        "assets/icons/location.png",
+                        height: 30,
+                      ),
+                      title: Text(
+                        "Add Location",
+                        style: AppTextStyles.poppinsRegular()
+                            .copyWith(fontSize: 14),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xfa2B2B2B), size: 18),
+                      // subtitle: Text(_location,
+                      //     maxLines: 1,
+                      //     overflow: TextOverflow.ellipsis,
+                      //     softWrap: true,
+                      //     style: AppTextStyles.poppinsRegular().copyWith(
+                      //       color: Colors.grey,
+                      //       overflow: TextOverflow.ellipsis,
+                      //     )),
+                      onTap: () {
+                        navigateToAddLocationScreen(context);
+                      },
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios_rounded,
-                        color: Colors.grey, size: 17),
-                    subtitle: Text(_location,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        style: AppTextStyles.poppinsRegular().copyWith(
-                          color: Colors.grey,
-                          overflow: TextOverflow.ellipsis,
-                        )),
-                    onTap: _getCurrentLocation,
-                  ),
-                  ListTile(
-                    onTap: () {
-                      _showTagPeopleBottomSheet(context);
-                    },
-                    leading: Icon(Icons.people_outline_outlined, size: 25),
-                    title: Text(
-                      "Tags People",
-                      style:
-                          AppTextStyles.poppinsRegular().copyWith(fontSize: 14),
+                    Divider(color: Color(0xffD3D3D3)),
+                    ListTile(
+                      onTap: () {
+                        _showTagPeopleBottomSheet(context);
+                      },
+                      leading: Image.asset(
+                        "assets/icons/tag.png",
+                        height: 30,
+                      ),
+                      title: Text(
+                        "Tag People",
+                        style: AppTextStyles.poppinsRegular()
+                            .copyWith(fontSize: 14),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xfa2B2B2B), size: 18),
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios_rounded,
-                        color: Colors.grey, size: 17),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      _showPrivacyBottomSheet(context);
-                    },
-                    leading: Icon(Icons.public_outlined, size: 25),
-                    title: Text(
-                      "Privacy",
-                      style:
-                          AppTextStyles.poppinsRegular().copyWith(fontSize: 14),
+                    Divider(color: Color(0xffD3D3D3)),
+                    ListTile(
+                      onTap: () {
+                        _showPrivacyBottomSheet(context);
+                      },
+                      leading: Image.asset(
+                        "assets/icons/privacy.png",
+                        height: 30,
+                      ),
+                      title: Text(
+                        "Privacy",
+                        style: AppTextStyles.poppinsRegular()
+                            .copyWith(fontSize: 14),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xfa2B2B2B), size: 18),
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios_rounded,
-                        color: Colors.grey, size: 17),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      showInteractionsSheet(context);
-                    },
-                    leading: Icon(Icons.bubble_chart_outlined, size: 25),
-                    title: Text(
-                      "Interactions",
-                      style:
-                          AppTextStyles.poppinsRegular().copyWith(fontSize: 14),
+                    Divider(color: Color(0xffD3D3D3)),
+                    ListTile(
+                      onTap: () {
+                        showInteractionsSheet(context);
+                      },
+                      leading: Image.asset(
+                        "assets/icons/interaction.png",
+                        height: 30,
+                      ),
+                      title: Text(
+                        "Interactions",
+                        style: AppTextStyles.poppinsRegular()
+                            .copyWith(fontSize: 14),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xfa2B2B2B), size: 18),
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios_rounded,
-                        color: Colors.grey, size: 17),
-                  ),
-                  SizedBox(height: 20),
-                ],
+                    Divider(color: Color(0xffD3D3D3)),
+                    ListTile(
+                      onTap: () {
+                        showInteractionsSheet(context);
+                      },
+                      leading: Image.asset(
+                        "assets/icons/collaborator.png",
+                        height: 30,
+                      ),
+                      title: Text(
+                        "Add collaborators",
+                        style: AppTextStyles.poppinsRegular()
+                            .copyWith(fontSize: 14),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xfa2B2B2B), size: 18),
+                    ),
+                    Divider(color: Color(0xffD3D3D3)),
+                    ListTile(
+                      onTap: () {
+                        // showInteractionsSheet(context);
+                      },
+                      leading: Image.asset(
+                        "assets/icons/audience.png",
+                        height: 30,
+                      ),
+                      title: Text(
+                        "Audience",
+                        style: AppTextStyles.poppinsRegular()
+                            .copyWith(fontSize: 14),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xfa2B2B2B), size: 18),
+                    ),
+                    Divider(color: Color(0xffD3D3D3)),
+                    ListTile(
+                      onTap: () {
+                        showInteractionsSheet(context);
+                      },
+                      leading: Image.asset(
+                        "assets/icons/engagement.png",
+                        height: 30,
+                      ),
+                      title: Text(
+                        "Engagement",
+                        style: AppTextStyles.poppinsRegular()
+                            .copyWith(fontSize: 14),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xfa2B2B2B), size: 18),
+                    ),
+                    Divider(color: Color(0xffD3D3D3)),
+                    SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
             if (isLoading)
@@ -398,226 +495,305 @@ class _AddPostScreenState extends State<AddPostScreen> {
           ],
         ),
         bottomNavigationBar: Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-          child: GestureDetector(
-            onTap: isLoading
-                ? () {}
-                : () async {
-                    setState(() {
-                      isLoading = true;
-                    });
+          padding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+          ),
+          child: Container(
+            height: 110,
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: isLoading
+                      ? () {}
+                      : () async {
+                          setState(() {
+                            isLoading = true;
+                          });
 
-                    print(titleController.text);
-                    final keywords = removeHashFromList(titleController.text);
+                          print(titleController.text);
+                          final keywords =
+                              removeHashFromList(titleController.text);
 
-                    if (keywords.isEmpty) {
-                      keywords.add('0');
-                    }
-
-                    log("Medias: ${widget.mediFiles}");
-                    log("Keywords: $keywords");
-                    log("Tag User id: $selectedTagUsers");
-                    log("Privacy Policy: $privacyPolicy");
-
-                    if (interactionSheetOptions.contains('Polls') &&
-                        widget.mediFiles.isNotEmpty) {
-                      if (titleController.text.isEmpty) {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        //ToastNotifier.showErrorToast(
-                        // context, "Post  is required!");
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => NewPostNow(
-                                      postField: titleController.text.trim(),
-                                      peopleTags: selectedTagUsers,
-                                      keywordsList: keywords,
-                                      privacyPost: privacyPolicy,
-                                      mediaFiles: widget.mediFiles,
-                                      interactions: interactionSheetOptions,
-                                      userProfile: widget.userProfile!,
-                                      isPoll: true,
-                                      location: _location,
-                                    ),
-                                context: context));
-                      }
-                    } else if (widget.mediFiles.isEmpty &&
-                        interactionSheetOptions.contains('Polls')) {
-                      if (titleController.text.isEmpty) {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        //ToastNotifier.showErrorToast(
-                        // context, "Post Title / Descritption is required!");
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        Navigator.push(
-                            context,
-                            CupertinoDialogRoute(
-                                builder: (_) => AddPollScreen(
-                                      postField: titleController.text.trim(),
-                                      selectedTagUsers: selectedTagUsers,
-                                      keywordList: keywords,
-                                      privacyPolicy: privacyPolicy,
-                                      mediaFiles: widget.mediFiles,
-                                      userProfile: widget.userProfile!,
-                                      interactions: interactionSheetOptions,
-                                      location: _location,
-                                    ),
-                                context: context));
-                      }
-                    } else if (widget.mediFiles.isNotEmpty &&
-                        interactionSheetOptions.contains('Polls') == false) {
-                      if (titleController.text.isEmpty) {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        //ToastNotifier.showErrorToast(
-                        // context, "Post  is required!");
-                      } else {
-                        if (widget.type == 'reel') {
-                          final response = await pro.createNewReel(context,
-                              postField: titleController.text.trim(),
-                              peopleTags: selectedTagUsers,
-                              keywordsList: keywords,
-                              privacyPost: privacyPolicy,
-                              mediaFiles: widget.mediFiles,
-                              description: titleController.text.trim());
-
-                          if (response != null) {
-                            //ToastNotifier.showSuccessToast(
-                            // context, "Reel Successfully posted!");
-                            setState(() {
-                              isLoading = false;
-                            });
-                            final token = await Prefrences.getAuthToken();
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                CupertinoDialogRoute(
-                                    builder: (_) => MainScreen(
-                                        userProfile: widget.userProfile!,
-                                        authToken: token),
-                                    context: context),
-                                (route) => false);
-                          } else {
-                            setState(() {
-                              isLoading = false;
-                            });
-                            //ToastNotifier.showErrorToast(
-                            // context, "Something went wrong. Try again.");
+                          if (keywords.isEmpty) {
+                            keywords.add('0');
                           }
-                        } else {
-                          setState(() {
-                            isLoading = false;
-                          });
-                          Navigator.push(
-                              context,
-                              CupertinoDialogRoute(
-                                  builder: (_) => NewPostNow(
-                                        postField: titleController.text.trim(),
-                                        peopleTags: selectedTagUsers,
-                                        keywordsList: keywords,
-                                        privacyPost: privacyPolicy,
-                                        mediaFiles: widget.mediFiles,
-                                        interactions: interactionSheetOptions,
-                                        userProfile: widget.userProfile!,
-                                        isPoll: false,
-                                        location: _location,
-                                      ),
-                                  context: context));
-                        }
-                      }
-                    } else if (widget.mediFiles.isEmpty &&
-                        interactionSheetOptions.contains('Polls') == false) {
-                      if (titleController.text.isEmpty) {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        //ToastNotifier.showErrorToast(
-                        // context, "Post Title / Descritption is required!");
-                      } else {
-                        final response = await pro.createNewPost(context,
-                            postField: titleController.text.trim(),
-                            peopleTags: selectedTagUsers,
-                            keywordsList: keywords,
-                            privacyPost: privacyPolicy,
-                            mediaFiles: widget.mediFiles,
-                            interactions: interactionSheetOptions,
-                            location: _location);
 
-                        if (response != null) {
-                          //ToastNotifier.showSuccessToast(
-                          // context, "Post Successfully posted!");
-                          setState(() {
-                            isLoading = false;
-                          });
-                          final token = await Prefrences.getAuthToken();
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              CupertinoDialogRoute(
-                                  builder: (_) => MainScreen(
-                                      userProfile: widget.userProfile!,
-                                      authToken: token),
-                                  context: context),
-                              (route) => false);
-                        } else {
-                          setState(() {
-                            isLoading = false;
-                          });
-                          //ToastNotifier.showErrorToast(
-                          // context, "Network Problem. Try again.");
-                        }
-                      }
-                    }
-                  },
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                      interactionSheetOptions.contains('Polls')
-                          ? Icons.next_plan_outlined
-                          : Icons.arrow_upward,
-                      size: 20,
-                      color: Colors.white),
-                  SizedBox(width: 5),
-                  Text(
-                    interactionSheetOptions
-                                .any((element) => element == 'Polls') &&
-                            widget.type == 'post'
-                        ? "Next"
-                        : "Post",
-                    style: AppTextStyles.poppinsMedium().copyWith(
-                      fontSize: 16,
-                      color: Colors.white,
+                          log("Medias: ${widget.mediFiles}");
+                          log("Keywords: $keywords");
+                          log("Tag User id: $selectedTagUsers");
+                          log("Privacy Policy: $privacyPolicy");
+
+                          if (interactionSheetOptions.contains('Polls') &&
+                              widget.mediFiles.isNotEmpty) {
+                            if (titleController.text.isEmpty) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              //ToastNotifier.showErrorToast(
+                              // context, "Post  is required!");
+                            } else {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              Navigator.push(
+                                  context,
+                                  CupertinoDialogRoute(
+                                      builder: (_) => NewPostNow(
+                                            postField:
+                                                titleController.text.trim(),
+                                            peopleTags: selectedTagUsers,
+                                            keywordsList: keywords,
+                                            privacyPost: privacyPolicy,
+                                            mediaFiles: widget.mediFiles,
+                                            interactions:
+                                                interactionSheetOptions,
+                                            userProfile: widget.userProfile!,
+                                            isPoll: true,
+                                            location: _location,
+                                          ),
+                                      context: context));
+                            }
+                          } else if (widget.mediFiles.isEmpty &&
+                              interactionSheetOptions.contains('Polls')) {
+                            if (titleController.text.isEmpty) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              //ToastNotifier.showErrorToast(
+                              // context, "Post Title / Descritption is required!");
+                            } else {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              Navigator.push(
+                                  context,
+                                  CupertinoDialogRoute(
+                                      builder: (_) => AddPollScreen(
+                                            postField:
+                                                titleController.text.trim(),
+                                            selectedTagUsers: selectedTagUsers,
+                                            keywordList: keywords,
+                                            privacyPolicy: privacyPolicy,
+                                            mediaFiles: widget.mediFiles,
+                                            userProfile: widget.userProfile!,
+                                            interactions:
+                                                interactionSheetOptions,
+                                            location: _location,
+                                          ),
+                                      context: context));
+                            }
+                          } else if (widget.mediFiles.isNotEmpty &&
+                              interactionSheetOptions.contains('Polls') ==
+                                  false) {
+                            if (titleController.text.isEmpty) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              //ToastNotifier.showErrorToast(
+                              // context, "Post  is required!");
+                            } else {
+                              if (widget.type == 'reel') {
+                                final response = await pro.createNewReel(
+                                    context,
+                                    postField: titleController.text.trim(),
+                                    peopleTags: selectedTagUsers,
+                                    keywordsList: keywords,
+                                    privacyPost: privacyPolicy,
+                                    mediaFiles: widget.mediFiles,
+                                    description: titleController.text.trim());
+
+                                if (response != null) {
+                                  //ToastNotifier.showSuccessToast(
+                                  // context, "Reel Successfully posted!");
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  final token = await Prefrences.getAuthToken();
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      CupertinoDialogRoute(
+                                          builder: (_) => MainScreen(
+                                              userProfile: widget.userProfile!,
+                                              authToken: token),
+                                          context: context),
+                                      (route) => false);
+                                } else {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  //ToastNotifier.showErrorToast(
+                                  // context, "Something went wrong. Try again.");
+                                }
+                              } else {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                Navigator.push(
+                                    context,
+                                    CupertinoDialogRoute(
+                                        builder: (_) => NewPostNow(
+                                              postField:
+                                                  titleController.text.trim(),
+                                              peopleTags: selectedTagUsers,
+                                              keywordsList: keywords,
+                                              privacyPost: privacyPolicy,
+                                              mediaFiles: widget.mediFiles,
+                                              interactions:
+                                                  interactionSheetOptions,
+                                              userProfile: widget.userProfile!,
+                                              isPoll: false,
+                                              location: _location,
+                                            ),
+                                        context: context));
+                              }
+                            }
+                          } else if (widget.mediFiles.isEmpty &&
+                              interactionSheetOptions.contains('Polls') ==
+                                  false) {
+                            if (titleController.text.isEmpty) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              //ToastNotifier.showErrorToast(
+                              // context, "Post Title / Descritption is required!");
+                            } else {
+                              final response = await pro.createNewPost(context,
+                                  postField: titleController.text.trim(),
+                                  peopleTags: selectedTagUsers,
+                                  keywordsList: keywords,
+                                  privacyPost: privacyPolicy,
+                                  mediaFiles: widget.mediFiles,
+                                  interactions: interactionSheetOptions,
+                                  location: _location);
+
+                              if (response != null) {
+                                //ToastNotifier.showSuccessToast(
+                                // context, "Post Successfully posted!");
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                final token = await Prefrences.getAuthToken();
+                                Navigator.pushAndRemoveUntil(
+                                    context,
+                                    CupertinoDialogRoute(
+                                        builder: (_) => MainScreen(
+                                            userProfile: widget.userProfile!,
+                                            authToken: token),
+                                        context: context),
+                                    (route) => false);
+                              } else {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                //ToastNotifier.showErrorToast(
+                                // context, "Network Problem. Try again.");
+                              }
+                            }
+                          }
+                        },
+                  child: Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                            interactionSheetOptions.contains('Polls')
+                                ? Icons.next_plan_outlined
+                                : Icons.arrow_upward,
+                            size: 20,
+                            color: Colors.white),
+                        SizedBox(width: 5),
+                        Text(
+                          interactionSheetOptions
+                                      .any((element) => element == 'Polls') &&
+                                  widget.type == 'post'
+                              ? "Next"
+                              : "Post",
+                          style: AppTextStyles.poppinsMedium().copyWith(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    height: 60,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: isLoading
+                          ? Colors.grey
+                          : interactionSheetOptions.contains('Polls') ||
+                                  widget.type == 'post'
+                              ? Color(0xfa161616)
+                              : Colors.red,
                     ),
                   ),
-                ],
-              ),
-              height: 60,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: isLoading
-                    ? Colors.grey
-                    : interactionSheetOptions.contains('Polls') ||
-                            widget.type == 'post'
-                        ? Colors.blue
-                        : Colors.red,
-              ),
+                ),
+                TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      "Save to Draft",
+                      style: TextStyle(
+                          color: Color(0xfa161616),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ))
+              ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildOptionRow(BuildContext context, Widget icon, String title) {
+    return InkWell(
+      onTap: () {
+        // Navigate or open option page
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          children: [
+            icon,
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500),
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void navigateToAddLocationScreen(BuildContext context) {
+    Navigator.of(context).push(PageRouteBuilder(
+      opaque:
+          false, // so the previous screen can be slightly visible (optional)
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          AddLocationPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(0.0, 1.0); // start from bottom
+        const end = Offset.zero;
+        const curve = Curves.easeInOut;
+
+        final tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        final offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
+      },
+    ));
   }
 
 // Widget to build media display (either image or video)
@@ -627,15 +803,20 @@ class _AddPostScreenState extends State<AddPostScreen> {
     }
 
     File mediaFile = widget.mediFiles[mediaFileIndex()];
+    final borderRadius = BorderRadius.circular(20);
+
     if (isVideo(mediaFile)) {
       // Display video
       return Stack(
         alignment: Alignment.center,
         children: [
           if (_videoController != null && _videoController!.value.isInitialized)
-            AspectRatio(
-              aspectRatio: 1,
-              child: VideoPlayer(_videoController!),
+            ClipRRect(
+              borderRadius: borderRadius,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: VideoPlayer(_videoController!),
+              ),
             )
           else
             Center(child: CircularProgressIndicator()),
@@ -666,9 +847,61 @@ class _AddPostScreenState extends State<AddPostScreen> {
       );
     } else {
       // Display image
-      return Image.file(mediaFile, fit: BoxFit.cover);
+      return ClipRRect(
+        borderRadius: borderRadius,
+        child: Image.file(mediaFile, fit: BoxFit.cover),
+      );
     }
   }
+
+  // Widget _buildMediaWidget() {
+  //   if (widget.mediFiles == null || widget.mediFiles.isEmpty) {
+  //     return Center(child: Text("No media"));
+  //   }
+
+  //   File mediaFile = widget.mediFiles[mediaFileIndex()];
+  //   if (isVideo(mediaFile)) {
+  //     // Display video
+  //     return Stack(
+  //       alignment: Alignment.center,
+  //       children: [
+  //         if (_videoController != null && _videoController!.value.isInitialized)
+  //           AspectRatio(
+  //             aspectRatio: 1,
+  //             child: VideoPlayer(_videoController!),
+  //           )
+  //         else
+  //           Center(child: CircularProgressIndicator()),
+  //         GestureDetector(
+  //           onTap: () {
+  //             if (_videoController!.value.isPlaying) {
+  //               _videoController!.pause();
+  //             } else {
+  //               _videoController!.play();
+  //             }
+  //             setState(() {
+  //               // Toggle play/pause state
+  //             });
+  //           },
+  //           child: !_videoController!.value.isPlaying
+  //               ? Icon(
+  //                   Icons.play_arrow,
+  //                   size: 60,
+  //                   color: Colors.white,
+  //                 )
+  //               : Icon(
+  //                   Icons.pause,
+  //                   size: 60,
+  //                   color: Colors.white,
+  //                 ),
+  //         ),
+  //       ],
+  //     );
+  //   } else {
+  //     // Display image
+  //     return Image.file(mediaFile, fit: BoxFit.cover);
+  //   }
+  // }
 
 // Function to extract hashtags and remove the '#' symbol from each
   List<String> removeHashFromList(String text) {

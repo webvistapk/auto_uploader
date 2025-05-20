@@ -12,6 +12,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/post/reels/reels_video_player.dart';
 import 'package:mobile/screens/post/add_post_screen.dart';
+import 'package:mobile/screens/post/widgets/discard_post.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -133,6 +134,31 @@ class _PostAndReelsState extends State<PostAndReels>
     return "$minutes:$secs";
   }
 
+  Future<void> _showDiscardDialog(BuildContext context) async {
+    bool? discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => const DiscardPostDialog(),
+    );
+
+    if (discard == true) {
+      // User pressed Yes, discard the post
+      print('Discarding post');
+      Navigator.pushAndRemoveUntil(
+          context,
+          CupertinoDialogRoute(
+              builder: (_) => MainScreen(
+                    userProfile: widget.userProfile!,
+                    authToken: widget.token,
+                    selectedIndex: 0,
+                  ),
+              context: context),
+          (_) => false);
+    } else {
+      // User pressed No or dismissed dialog
+      print('Keep editing post');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -210,6 +236,13 @@ class _PostAndReelsState extends State<PostAndReels>
               ],
             ),
             appBar: AppBar(
+              leading: InkWell(
+                onTap: () => _showDiscardDialog(context),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: Colors.black,
+                ),
+              ),
               title: const Text('Posting & Reels'),
               actions: [
                 TextButton(
@@ -230,6 +263,7 @@ class _PostAndReelsState extends State<PostAndReels>
                                           )));
                             }
                           : null
+
                       // () {
                       //     Navigator.push(
                       //         context,
