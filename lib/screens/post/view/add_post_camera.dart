@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/post/post_reels.dart';
 import 'package:path_provider/path_provider.dart';
@@ -206,92 +209,182 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     });
   }
 
+  // Widget _buildCaptureButton() {
+  //   return GestureDetector(
+  //     onTap: _onTap,
+  //     onLongPressStart: (_) => _onLongPressStart(),
+  //     onLongPressEnd: (_) => _onLongPressEnd(),
+  //     child: AnimatedScale(
+  //       duration: const Duration(milliseconds: 150),
+  //       scale: _isRecording ? 1.1 : 1.0,
+  //       curve: Curves.easeInOut,
+  //       child: _isRecording
+  //           ? CircularPercentIndicator(
+  //               radius: 42.0,
+  //               lineWidth: 6.0,
+  //               percent: _progress,
+  //               progressColor: Colors.redAccent,
+  //               backgroundColor: Colors.red.withOpacity(0.3),
+  //               circularStrokeCap: CircularStrokeCap.round,
+  //               center: Container(
+  //                 width: 66,
+  //                 height: 66,
+  //                 decoration: BoxDecoration(
+  //                   shape: BoxShape.circle,
+  //                   color: Colors.red,
+  //                   boxShadow: [
+  //                     BoxShadow(
+  //                       color: Colors.redAccent.withOpacity(0.7),
+  //                       blurRadius: 10,
+  //                       spreadRadius: 2,
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 child: const Icon(
+  //                   Icons.videocam,
+  //                   color: Colors.white,
+  //                   size: 32,
+  //                 ),
+  //               ),
+  //             )
+  //           : Container(
+  //               width: 74,
+  //               height: 74,
+  //               decoration: BoxDecoration(
+  //                 shape: BoxShape.circle,
+  //                 gradient: LinearGradient(
+  //                   colors: [
+  //                     Colors.white,
+  //                     Colors.grey.shade300,
+  //                   ],
+  //                   begin: Alignment.topLeft,
+  //                   end: Alignment.bottomRight,
+  //                 ),
+  //                 boxShadow: [
+  //                   BoxShadow(
+  //                     color: Colors.black.withOpacity(0.2),
+  //                     blurRadius: 8,
+  //                     offset: const Offset(0, 4),
+  //                   ),
+  //                   BoxShadow(
+  //                     color: Colors.white.withOpacity(0.7),
+  //                     blurRadius: 2,
+  //                     spreadRadius: 1,
+  //                     offset: const Offset(0, -2),
+  //                     // inset:
+  //                     //     true, // inner shadow for depth — requires flutter 3.7+
+  //                   ),
+  //                 ],
+  //               ),
+  //               child: Center(
+  //                 child: Container(
+  //                   width: 62,
+  //                   height: 62,
+  //                   decoration: BoxDecoration(
+  //                     shape: BoxShape.circle,
+  //                     color: Colors.white,
+  //                     border: Border.all(color: Colors.black, width: 3),
+
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildCaptureButton() {
     return GestureDetector(
       onTap: _onTap,
       onLongPressStart: (_) => _onLongPressStart(),
       onLongPressEnd: (_) => _onLongPressEnd(),
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 150),
-        scale: _isRecording ? 1.1 : 1.0,
-        curve: Curves.easeInOut,
-        child: _isRecording
-            ? CircularPercentIndicator(
-                radius: 42.0,
-                lineWidth: 6.0,
-                percent: _progress,
-                progressColor: Colors.redAccent,
-                backgroundColor: Colors.red.withOpacity(0.3),
-                circularStrokeCap: CircularStrokeCap.round,
-                center: Container(
-                  width: 66,
-                  height: 66,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.red,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.redAccent.withOpacity(0.7),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.videocam,
-                    color: Colors.white,
-                    size: 32,
-                  ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: _isRecording ? 213.86.sp : 213.86.sp,
+        height: _isRecording ? 177.54.sp : 177.54.sp,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: _isRecording
+              ? null
+              : LinearGradient(
+                  colors: [
+                    Colors.white,
+                    Colors.grey.shade300,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-              )
-            : Container(
-                width: 74,
-                height: 74,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white,
-                      Colors.grey.shade300,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+          color: _isRecording ? Colors.transparent : null,
+          boxShadow: _isRecording
+              ? [
+                  BoxShadow(
+                    color: Color.fromRGBO(123, 123, 123, 1),
+                    blurRadius: 0,
+                    spreadRadius: 0,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.white,
+                    blurRadius: 0,
+                    offset: const Offset(0, 0),
+                  ),
+                ],
+        ),
+        child: Center(
+          child: _isRecording
+              ? Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer gray border
+                    Container(
+                      width: 160.sp,
+                      height: 160.sp,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color.fromRGBO(123, 123, 123, 1),
+                      ),
                     ),
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.7),
-                      blurRadius: 2,
-                      spreadRadius: 1,
-                      offset: const Offset(0, -2),
-                      // inset:
-                      //     true, // inner shadow for depth — requires flutter 3.7+
+
+                    // Inner red circle
+                    Container(
+                      width: 130.sp,
+                      height: 130.sp,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red,
+                      ),
+                    ),
+
+                    // White circular progress
+                    CircularPercentIndicator(
+                      radius: 85.sp,
+                      lineWidth: 4.sp,
+                      percent: _progress,
+                      progressColor: Colors.white,
+                      backgroundColor: Colors.transparent,
+                      circularStrokeCap: CircularStrokeCap.round,
+                      center: const Icon(
+                        Icons.videocam,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
                   ],
-                ),
-                child: Center(
-                  child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      border: Border.all(color: Colors.black54, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.shade400,
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                )
+              : Container(
+                  width: 161.32.sp,
+                  height: 161.32.sp,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 3.sp,
                     ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -345,9 +438,28 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                       IconButton(
                         icon: const Icon(Icons.check,
                             size: 40, color: Colors.greenAccent),
-                        onPressed: () {
-                          print("Confirmed");
-                          // Your confirm logic here
+                        onPressed: () async {
+                          if (_capturedFile != null) {
+                            // Create a list of files to pass (even if single file)
+                            final file = File(_capturedFile!.path);
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AddPostScreen(
+                                  mediFiles: [file],
+                                  userProfile: widget.userProfile,
+                                  type: "post", // Auto-detect media type
+                                ),
+                              ),
+                            );
+                          } else {
+                            // Show error if no media captured
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('No media captured')),
+                            );
+                          }
                         },
                       ),
                     ],
@@ -381,36 +493,68 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     );
   }
 
+  // Add this at the top of your state class/
+  int _selectedIndex = 2; // Default selected item (Camera)
+
   Widget _buildBottomNav() {
     return Container(
-      height: 70,
+      height: 52.sp,
       color: Color(0xfa1B1C1C),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: 39.sp),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          GestureDetector(
-            onTap: () async {
-              if (!mounted) return;
+          _buildNavItem("Upload", 0),
+          _buildNavItem("Drafts", 1),
+          _buildNavItem("Camera", 2),
+          _buildNavItem("Write", 3),
+        ],
+      ),
+    );
+  }
 
-              // Now navigate
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CreatePostScreen(
-                    userProfile: widget.userProfile,
-                    token: widget.token,
-                  ),
-                ),
-              );
-            },
-            child: const Text("Upload", style: TextStyle(color: Colors.white)),
+  Widget _buildNavItem(String title, int index) {
+    final isSelected = index == _selectedIndex;
+
+    return GestureDetector(
+      onTap: () {
+        if (!mounted) return;
+
+        setState(() {
+          _selectedIndex = index;
+        });
+
+        if (index == 0) {
+          // Upload
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => CreatePostScreen(
+                userProfile: widget.userProfile,
+                token: widget.token,
+              ),
+            ),
+          );
+        }
+        // Add other navigation cases as needed
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.publicSans(
+              fontSize: 12,
+              color: Colors.white,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
-          const Text("Drafts", style: TextStyle(color: Colors.white)),
-          const Icon(Icons.circle, size: 20, color: Colors.white),
-          const Text("Camera",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          const Text("Write", style: TextStyle(color: Colors.white)),
+          if (isSelected)
+            Container(
+              margin: EdgeInsets.only(top: 4.sp),
+              height: 1,
+              width: 20, // Width of the underline
+              color: Colors.white,
+            ),
         ],
       ),
     );
