@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class InteractionsBottomSheet extends StatefulWidget {
   final List<String>? initialSelectedOptions; // Parameter for initial values
+  List<String>? finalOptions;
 
-  InteractionsBottomSheet({this.initialSelectedOptions});
+  InteractionsBottomSheet({this.initialSelectedOptions, this.finalOptions});
 
   @override
   _InteractionsBottomSheetState createState() =>
@@ -14,11 +15,18 @@ class _InteractionsBottomSheetState extends State<InteractionsBottomSheet> {
   late ValueNotifier<Set<String>> selectedOptions;
 
   // Define available options
-  final List<String> options = ['Comments', 'Polls'];
+  List<String> options = ['Comments', 'Polls'];
 
   @override
   void initState() {
     super.initState();
+    // if (widget.finalOptions!.isNotEmpty) {
+    if (widget.finalOptions == null) {
+      options = ["Post", "Reel"];
+    } else {
+      options = widget.finalOptions!;
+    }
+    // }
     // Initialize with the provided initialSelectedOptions or an empty set
     selectedOptions = ValueNotifier<Set<String>>(
       widget.initialSelectedOptions != null

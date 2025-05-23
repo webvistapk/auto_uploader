@@ -38,6 +38,8 @@ class AddPostScreen extends StatefulWidget {
   _AddPostScreenState createState() => _AddPostScreenState();
 }
 
+String? postType;
+
 class _AddPostScreenState extends State<AddPostScreen> {
   // Store filtered items for searching
   TextEditingController titleController = TextEditingController();
@@ -49,7 +51,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   void initState() {
     super.initState();
     context.read<PostProvider>();
-
+    postType = widget.type;
     _getCurrentLocation();
     // Initialize video controller if it's a video
     if (widget.mediFiles != null && widget.mediFiles.isNotEmpty) {
@@ -118,6 +120,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       isDismissible: false,
       builder: (_) => InteractionsBottomSheet(
         initialSelectedOptions: interactionSheetOptions,
+        finalOptions: ['Comments', 'Polls'],
       ),
     );
 
@@ -125,6 +128,24 @@ class _AddPostScreenState extends State<AddPostScreen> {
       log("Selected Options: $result");
       setState(() {
         interactionSheetOptions = result;
+      });
+    }
+  }
+
+  void showPostTypeSheet(BuildContext context) async {
+    final result = await showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      builder: (_) => InteractionsBottomSheet(
+        initialSelectedOptions: ["Post"],
+        finalOptions: ["Post", "Reel"],
+      ),
+    );
+
+    if (result != null) {
+      log("Selected Options: $result");
+      setState(() {
+        postType = result.toLowerCase();
       });
     }
   }
@@ -429,7 +450,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     Divider(color: Color(0xffD3D3D3)),
                     ListTile(
                       onTap: () {
-                        showInteractionsSheet(context);
+                        // showInteractionsSheet(context);
                       },
                       leading: Image.asset(
                         "assets/icons/collaborator.png",
@@ -471,6 +492,23 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       ),
                       title: Text(
                         "Engagement",
+                        style: AppTextStyles.poppinsRegular()
+                            .copyWith(fontSize: 14),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded,
+                          color: Color(0xfa2B2B2B), size: 18),
+                    ),
+                    Divider(color: Color(0xffD3D3D3)),
+                    ListTile(
+                      onTap: () {
+                        showPostTypeSheet(context);
+                      },
+                      leading: Image.asset(
+                        "assets/icons/bookmark.png",
+                        height: 30,
+                      ),
+                      title: Text(
+                        "Advanced Settings",
                         style: AppTextStyles.poppinsRegular()
                             .copyWith(fontSize: 14),
                       ),

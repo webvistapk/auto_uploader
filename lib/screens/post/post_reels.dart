@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +18,16 @@ import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sizer/sizer.dart';
 
 class PostAndReels extends StatefulWidget {
   final UserProfile? userProfile;
   final token;
-  const PostAndReels({Key? key, required this.userProfile, this.token})
-      : super(key: key);
+  PostAndReels({
+    Key? key,
+    required this.userProfile,
+    this.token,
+  }) : super(key: key);
 
   @override
   _PostAndReelsState createState() => _PostAndReelsState();
@@ -31,100 +36,16 @@ class PostAndReels extends StatefulWidget {
 class _PostAndReelsState extends State<PostAndReels>
     with TickerProviderStateMixin {
   bool _isDropdownVisible = false;
-  List<AssetEntity> _reelList = [];
-  bool _isLoadingReelPreview = false;
-  bool _isLoadingReelMore = false;
-  int _currentReelPage = 0;
-  final int _pageReelSize = 100; // Fetch smaller pages for faster initial load
-  AssetPathEntity? _selectedReelAlbum;
-  ScrollController _scrollReelController = ScrollController();
-  int? _selectedReelIndex; // Store selected index for single selection
-  AnimationController? _animationReelController;
-  late TabController _tabController;
-  bool isPost = false;
-  bool isReel = false;
-  List<File> selectedReel = [];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(_handleTabSelection);
     _fetchPostAlbums();
-    _fetchReelAlbums();
-    _scrollReelController.addListener(_scrollListener);
-    _animationReelController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 300),
-    );
-    isPost = true;
   }
 
   @override
   void dispose() {
-    _scrollReelController.dispose();
-    _animationReelController?.dispose();
-    _tabController.dispose();
     super.dispose();
-  }
-
-  Future<void> _fetchReelAlbums() async {
-    _isLoadingReelPreview = true;
-    setState(() {});
-    if (await _requestPermissions()) {
-      List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        type: RequestType.video,
-        hasAll: true,
-      );
-
-      if (albums.isNotEmpty) {
-        _selectedReelAlbum = albums[0];
-        await _fetchReels(_selectedReelAlbum!, _currentReelPage);
-        _isLoadingReelPreview = false;
-        setState(() {});
-      }
-    } else {
-      _fetchReelAlbums();
-    }
-  }
-
-  Future<void> _fetchReels(AssetPathEntity album, int page) async {
-    if (_isLoadingReelMore) return;
-    setState(() {
-      _isLoadingReelMore = true;
-    });
-
-    final List<AssetEntity> media =
-        await album.getAssetListPaged(page: page, size: _pageReelSize);
-    final List<AssetEntity> filteredReels = media
-        .where((media) => media.type == AssetType.video && media.duration <= 60)
-        .toList();
-
-    setState(() {
-      _reelList.addAll(filteredReels);
-      _isLoadingReelMore = false;
-    });
-    _animationReelController?.forward(from: 0.0);
-  }
-
-  void _scrollListener() {
-    if (_scrollReelController.position.pixels >=
-            _scrollReelController.position.maxScrollExtent - 100 &&
-        !_isLoadingReelMore) {
-      _loadMoreReels();
-    }
-  }
-
-  void _loadMoreReels() async {
-    _currentReelPage++;
-    await _fetchReels(_selectedReelAlbum!, _currentReelPage);
-  }
-
-  void _handleTabSelection() {
-    setState(() {
-      isPost = _tabController.index == 0;
-      isReel = _tabController.index == 1;
-    });
   }
 
   String _formatDuration(int seconds) {
@@ -176,235 +97,52 @@ class _PostAndReelsState extends State<PostAndReels>
               (route) => false);
           return true;
         },
-        child: DefaultTabController(
-          length: 2,
-          child: Scaffold(
-            backgroundColor: Colors.black,
-            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-            floatingActionButton: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_isDropdownVisible)
-                  Container(
-                    width: size.width * .60,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: isReel
-                        ? Column(
-                            children: [
-                              ListTile(
-                                leading: Icon(Icons.videocam,
-                                    color: Colors.blueAccent),
-                                title: Text('Record Video'),
-                                onTap: () => _openCamera(false),
-                              ),
-                            ],
-                          )
-                        : Column(
-                            children: [
-                              ListTile(
-                                leading: Icon(Icons.camera_alt,
-                                    color: Colors.blueAccent),
-                                title: Text('Take Photo'),
-                                onTap: () => _openCamera(true),
-                              ),
-                              ListTile(
-                                leading: Icon(Icons.videocam,
-                                    color: Colors.blueAccent),
-                                title: Text('Record Video'),
-                                onTap: () => _openCamera(false),
-                              ),
-                            ],
-                          ),
-                  ),
-                FloatingActionButton(
-                  onPressed: _toggleDropdown,
-                  child:
-                      Icon(_isDropdownVisible ? Icons.close : Icons.camera_alt),
-                  backgroundColor: Colors.blueAccent,
-                ),
-              ],
-            ),
-            appBar: AppBar(
-              leading: InkWell(
-                onTap: () => _showDiscardDialog(context),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Colors.black,
-                ),
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Text(
+              '(overlap)',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              title: const Text('Posting & Reels'),
-              actions: [
-                TextButton(
-                  onPressed: _tabController.index == 0
-                      ? mediaFiles.isNotEmpty
-                          ? () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => AddPostScreen(
-                                            mediFiles: _tabController.index == 0
-                                                ? mediaFiles
-                                                : selectedReel,
-                                            userProfile: widget.userProfile,
-                                            type: _tabController.index == 0
-                                                ? "post"
-                                                : "reel",
-                                          )));
-                            }
-                          : null
-
-                      // () {
-                      //     Navigator.push(
-                      //         context,
-                      //         MaterialPageRoute(
-                      //             builder: (_) => AddPostScreen(
-                      //                   mediFiles: mediaFiles,
-                      //                   userProfile: widget.userProfile,
-                      //                   type: "post",
-                      //                 )));
-                      //   }
-                      : selectedReel.isEmpty
-                          ? null
-                          // () {
-                          //     Navigator.push(
-                          //         context,
-                          //         MaterialPageRoute(
-                          //             builder: (_) => AddPostScreen(
-                          //                   mediFiles: selectedReel,
-                          //                   userProfile: widget.userProfile,
-                          //                   type: "post",
-                          //                 )));
-                          //   }
-                          : () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => AddPostScreen(
-                                            mediFiles: _tabController.index == 0
-                                                ? mediaFiles
-                                                : selectedReel,
-                                            userProfile: widget.userProfile,
-                                            type: _tabController.index == 0
-                                                ? "post"
-                                                : "reel",
-                                          )));
-                            },
-                  child: Text('Next',
-                      style: AppTextStyles.poppinsMedium(
-                          color:
-                              _tabController.index == 0 && mediaFiles.isNotEmpty
-                                  ? Colors.blue
-                                  : _tabController.index == 1 &&
-                                          selectedReel.isNotEmpty
-                                      ? Colors.blue
-                                      : Colors.grey)),
-                ),
-              ],
             ),
-            body: Column(
-              children: [
-                const SizedBox(height: 20),
-                // Animated content for tabs
-                AnimatedSwitcher(
+            centerTitle: true,
+            backgroundColor: Colors.black,
+            elevation: 0.5,
+          ),
+          body: Column(
+            children: [
+              const SizedBox(height: 20),
+              // Animated content for tabs
+              AnimatedSwitcher(
                   duration: Duration(milliseconds: 300),
                   transitionBuilder: (widget, animation) => SlideTransition(
-                    position: Tween<Offset>(
-                      begin: Offset(1.0, 0.0),
-                      end: Offset(0.0, 0.0),
-                    ).animate(animation),
-                    child: widget,
-                  ),
-                  child: isPost
-                      ? mediaFiles.isEmpty
-                          ? Text(
-                              "No Posts Selected",
-                              style: AppTextStyles.poppinsBold(
-                                  color: Colors.white),
-                            )
-                          : FileCarousel(files: mediaFiles)
-                      : selectedReel.isEmpty
-                          ? Text(
-                              "No Reel Selected",
-                              style: AppTextStyles.poppinsBold(
-                                  color: Colors.white),
-                            )
-                          : ReelsVideoPlayer(
-                              key: ValueKey(selectedReel[0]
-                                  .path), // Add key to force rebuild
-                              videoFile: selectedReel[0],
-                            ),
-                ),
-                const SizedBox(height: 20),
-                // Custom TabBar in the body
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: TabBar(
-                    controller: _tabController,
-                    indicator: BoxDecoration(
-                      color: Colors.blueAccent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    dividerColor: Colors.black,
-                    indicatorSize: TabBarIndicatorSize.label,
-                    tabs: [
-                      Tab(
-                        child: Container(
-                          width: 200,
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Center(
-                            child: Text(
-                              'Posts',
-                              style: AppTextStyles.poppinsSemiBold(
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
+                        position: Tween<Offset>(
+                          begin: Offset(1.0, 0.0),
+                          end: Offset(0.0, 0.0),
+                        ).animate(animation),
+                        child: widget,
                       ),
-                      Tab(
-                        child: Container(
-                          width: 200,
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Center(
-                            child: Text(
-                              'Reels',
-                              style: AppTextStyles.poppinsSemiBold(
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      // Content for "Posts" tab
-                      _isLoadingPostPreview
-                          ? buildMediaContent(size, "Posts")
-                          : _buildMediaListSection(context),
-                      // Content for "Reels" tab
-                      _isLoadingReelPreview
-                          ? buildMediaContent(size, "Reels")
-                          : _buildReelsGrid(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                  child: mediaFiles.isEmpty
+                      ? Text(
+                          "No Posts Selected",
+                          style: AppTextStyles.poppinsBold(color: Colors.white),
+                        )
+                      : FileCarousel(files: mediaFiles)),
+              const SizedBox(height: 20),
+              // Custom TabBar in the body
+
+              Expanded(
+                child:
+                    // Content for "Posts" tab
+                    _isLoadingPostPreview
+                        ? buildMediaContent(size, "Posts")
+                        : _buildMediaListSection(context),
+              ),
+            ],
           ),
         ),
       ),
@@ -415,114 +153,6 @@ class _PostAndReelsState extends State<PostAndReels>
     setState(() {
       _isDropdownVisible = !_isDropdownVisible;
     });
-  }
-
-  Widget _buildReelsGrid() {
-    return AnimatedOpacity(
-      opacity: _isLoadingPostPreview ? 0.5 : 1.0,
-      duration: Duration(milliseconds: 500),
-      child: GridView.builder(
-        controller: _scrollReelController,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          mainAxisSpacing: 8.0,
-          crossAxisSpacing: 8.0,
-          childAspectRatio: 1.0,
-        ),
-        itemCount: _reelList.length + (_isLoadingPostMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index >= _reelList.length) {
-            return buildMediaContent(MediaQuery.of(context).size, "Reels");
-          }
-          final media = _reelList[index];
-          return FutureBuilder<Uint8List?>(
-            future: media.thumbnailData,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done &&
-                  snapshot.hasData) {
-                return GestureDetector(
-                  onTap: () async {
-                    try {
-                      final file = await media.file;
-
-                      if (file != null) {
-                        // Clear previous selection and add the new file
-                        setState(() {
-                          selectedReel.clear(); // Clear the previous selection
-                          selectedReel.add(file); // Add the newly selected file
-                          _selectedReelIndex = index; // Set the selected index
-                          isReel = true; // Set view mode to "Reel"
-                          isPost = false; // Disable "Post" view mode
-                        });
-
-                        log("File Path : ${selectedReel[0]}");
-                      }
-                    } catch (e) {
-                      log("File Path : $e");
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    decoration: BoxDecoration(
-                      border: _selectedReelIndex == index
-                          ? Border.all(color: Colors.blue, width: 2)
-                          : null,
-                      borderRadius: BorderRadius.circular(15),
-                      color: Colors.grey[800],
-                    ),
-                    child: Stack(
-                      children: [
-                        Container(
-                          height: 200,
-                          width: 200,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: Image.memory(
-                              snapshot.data!,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: Container(
-                            color: Colors.black54,
-                            padding: EdgeInsets.all(4.0),
-                            child: Text(
-                              _formatDuration(media.duration),
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              } else {
-                return Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    height: 200,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                );
-              }
-            },
-          );
-        },
-      ),
-    );
   }
 
   /////////////     Post Section /////////////////
@@ -705,82 +335,50 @@ class _PostAndReelsState extends State<PostAndReels>
   final ImagePicker _picker = ImagePicker();
   // bool _isDropdownVisible = false;
 
-  Future<void> _openCamera(bool isPhoto) async {
-    // Request camera permission
-    PermissionStatus permissionStatus = await Permission.camera.request();
-
-    if (permissionStatus.isGranted) {
-      // Check if the user wants to capture a photo or record a video
-      final XFile? file = await (isPhoto
-          ? _picker.pickImage(source: ImageSource.camera)
-          : _picker.pickVideo(source: ImageSource.camera));
-
-      if (file != null) {
-        File data = File(file.path);
-        if (isReel) {
-          setState(() {
-            selectedReel.clear(); // Clear the previous selection
-            selectedReel.add(data); // Add the newly selected file
-            _selectedReelIndex = 0; // Set the selected index
-            isReel = true; // Set view mode to "Reel"
-            isPost = false; // Disable "Post" view mode
-          });
-
-          log("File Path : ${selectedReel[0]}");
-        } else {
-          mediaFiles.add(data);
-          isReel = false; // Set view mode to "Reel"
-          isPost = true;
-          print('File path: ${file.path}');
-          setState(() {});
-        }
-      }
-    } else if (permissionStatus.isDenied) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Camera permission is required')),
-      );
-    } else if (permissionStatus.isPermanentlyDenied) {
-      openAppSettings();
-    }
-  }
-
-// A new widget for dropdown and media list
   Widget _buildMediaListSection(BuildContext context) {
-    var size = MediaQuery.of(context).size * 1;
+    var size = MediaQuery.of(context).size;
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: DropdownButton<AssetPathEntity>(
-            menuMaxHeight: 400,
-            dropdownColor: Colors.grey.shade800,
-            isExpanded: true,
-            value: _selectedPostAlbum,
-            items: _albums
-                .map((album) => DropdownMenuItem(
-                      value: album,
-                      child: Text(
-                        album.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge!
-                            .copyWith(color: Colors.white),
-                      ),
-                    ))
-                .toList(),
-            onChanged: (album) {
-              setState(() {
-                _selectedPostAlbum = album;
-                _mediaList.clear(); // Clear current media list
-                _currentPostPage = 0; // Reset page count
-                _fetchPostMedia(album!,
-                    _currentPostPage); // Fetch media for the selected album
-              });
-            },
-          ),
-        ),
-        const SizedBox(height: 16),
+        // Large preview container (show first media thumbnail if available)
+        // if (_mediaList.isNotEmpty)
+        //   Container(
+        //     height: size.width * 0.9,
+        //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        //     decoration: BoxDecoration(
+        //       borderRadius: BorderRadius.circular(16),
+        //       color: Colors.black,
+        //     ),
+        //     child: ClipRRect(
+        //       borderRadius: BorderRadius.circular(16),
+        //       child: FutureBuilder<Uint8List?>(
+        //         future:
+        //             _mediaList.isNotEmpty ? _mediaList[0].thumbnailData : null,
+        //         builder: (context, snapshot) {
+        //           if (snapshot.connectionState == ConnectionState.done &&
+        //               snapshot.hasData) {
+        //             return Image.memory(
+        //               snapshot.data!,
+        //               fit: BoxFit.cover,
+        //               width: double.infinity,
+        //               height: double.infinity,
+        //             );
+        //           } else {
+        //             return Center(
+        //               child: CircularProgressIndicator(),
+        //             );
+        //           }
+        //         },
+        //       ),
+        //     ),
+        //   ),
+
+        // Filter row with dropdown and buttons
+        _buildFilterRow(),
+
+        const SizedBox(height: 8),
+
+        // Grid thumbnails with spacing and rounded corners + circle background behind check icon
         Expanded(
           flex: 2,
           child: NotificationListener<ScrollNotification>(
@@ -859,12 +457,40 @@ class _PostAndReelsState extends State<PostAndReels>
                                   _isLoadingPostPreview = false;
                                 });
                               },
-                              child: Icon(
-                                Icons.check_box,
-                                color: selectedFiles[index]
-                                    ? Colors.blue
-                                    : Colors.red,
+                              child: Container(
+                                width: 20, // Adjust width as needed
+                                height: 20, // Adjust height as needed
+                                decoration: BoxDecoration(
+                                  color: selectedFiles[index]
+                                      ? Colors.blue
+                                      : Colors
+                                          .transparent, // Blue fill when selected, transparent when not
+                                  border: Border.all(
+                                    color: selectedFiles[index]
+                                        ? Colors.blue
+                                        : Colors
+                                            .grey, // Blue border when selected, grey when not
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                      16), // Circular border radius
+                                ),
+                                child: selectedFiles[index]
+                                    ? Center(
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 10,
+                                        ),
+                                      )
+                                    : null, // Show tick icon when selected, otherwise show nothing
                               ),
+                              // Icon(
+                              //   Icons.check_box,
+                              //   color: selectedFiles[index]
+                              //       ? Colors.blue
+                              //       : Colors.red,
+                              // ),
                             ),
                           ),
                         ],
@@ -890,6 +516,82 @@ class _PostAndReelsState extends State<PostAndReels>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFilterRow() {
+    return Container(
+      height: 60,
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: () => _showDiscardDialog(context),
+            icon: Icon(
+              Icons.cancel,
+              size: 20,
+              color: Color.fromRGBO(68, 68, 68, 1),
+            ),
+          ),
+          Container(
+            width: 100,
+            child: Expanded(
+              child: DropdownButton<AssetPathEntity>(
+                menuMaxHeight: 400,
+                dropdownColor: Colors.white,
+                isExpanded: true,
+                value: _selectedPostAlbum,
+                iconEnabledColor: Colors.black,
+                underline: SizedBox.shrink(),
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                items: _albums
+                    .map((album) => DropdownMenuItem(
+                          value: album,
+                          child: Text(
+                            album.name,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ))
+                    .toList(),
+                onChanged: (album) {
+                  setState(() {
+                    _selectedPostAlbum = album;
+                    _mediaList.clear();
+                    _currentPostPage = 0;
+                    _fetchPostMedia(album!, _currentPostPage);
+                  });
+                },
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: mediaFiles.isNotEmpty
+                ? () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => AddPostScreen(
+                                  mediFiles: mediaFiles,
+                                  userProfile: widget.userProfile,
+                                  type: "post",
+                                )));
+                  }
+                : null,
+            child: Text('Next',
+                style: AppTextStyles.poppinsMedium(
+                    color: Color.fromRGBO(21, 68, 160, 1), fontSize: 12)),
+          ),
+        ],
+      ),
     );
   }
 }

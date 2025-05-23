@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
@@ -6,7 +7,11 @@ import 'package:mobile/screens/post/post_reels.dart';
 class CreatePostScreen extends StatefulWidget {
   UserProfile? userProfile;
   final token;
-  CreatePostScreen({super.key, this.userProfile, this.token});
+  CreatePostScreen({
+    super.key,
+    this.userProfile,
+    this.token,
+  });
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();

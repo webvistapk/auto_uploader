@@ -371,7 +371,7 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
                             style:
                                 AppTextStyles.poppinsBold(color: Colors.white),
                           )
-                        : FileCarousel(files: mediaFiles),
+                        : MediaGallery(files: mediaFiles),
                 // _buildMediaPreview(
                 //     _selectedMedia, _selectedFile, _isLoadingPreview),
 

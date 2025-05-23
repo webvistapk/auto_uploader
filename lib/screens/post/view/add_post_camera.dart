@@ -517,7 +517,7 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     final isSelected = index == _selectedIndex;
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         if (!mounted) return;
 
         setState(() {
@@ -534,6 +534,8 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
               ),
             ),
           );
+
+          await _controller.dispose();
         }
         // Add other navigation cases as needed
       },

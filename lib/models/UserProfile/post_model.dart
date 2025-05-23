@@ -101,6 +101,71 @@ class PostModel {
             : User.fromJson(json['reposted_by']),
         repostCount: json['repost_count']);
   }
+  static Map<String, dynamic> postModelToJson(PostModel post) {
+    return {
+      'id': post.id,
+      'post': post.post,
+      'tags': post.tags
+          .map((tag) => {
+                'id': tag.id,
+                'username': tag.username,
+                'first_name': tag.firstName,
+                'last_name': tag.lastName,
+              })
+          .toList(),
+      'keywords': post.keywords
+          .map((kw) => {
+                'id': kw.id,
+                'word': kw.word,
+              })
+          .toList(),
+      'interactions': post.interactions,
+      'poll_title': post.pollTitle,
+      'poll_description': post.pollDescription,
+      'polls': post.polls
+          ?.map((poll) => {
+                'id': poll.id,
+                'poll': poll.poll,
+                'vote_count': poll.voteCount,
+                'is_voted': poll.isVoted,
+              })
+          .toList(),
+      'media': post.media
+          .map((m) => {
+                'id': m.id,
+                'media_type': m.mediaType,
+                'file': m.file,
+              })
+          .toList(),
+      'user': {
+        'id': post.user.id,
+        'username': post.user.username,
+        'first_name': post.user.firstName,
+        'last_name': post.user.lastName,
+        'profile_image': post.user.profileImage ?? '',
+      },
+      'privacy': post.privacy,
+      'created_at': post.createdAt,
+      'updated_at': post.updatedAt,
+      'likes_count': post.likesCount,
+      'comments_count': post.commentsCount,
+      'is_liked': post.isLiked,
+      'post_title': post.postTitle,
+      'post_description': post.postDescription,
+      'location': post.location,
+      'is_reposted': post.isReposted,
+      'reposted_by': post.repostedBy != null
+          ? {
+              'id': post.repostedBy!.id,
+              'username': post.repostedBy!.username,
+              'first_name': post.repostedBy!.firstName,
+              'last_name': post.repostedBy!.lastName,
+              'profile_image': post.repostedBy!.profileImage ?? '',
+            }
+          : null,
+      'repost_count': post.repostCount,
+    };
+  }
 }
 
 class Poll {

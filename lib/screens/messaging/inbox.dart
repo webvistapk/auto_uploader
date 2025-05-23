@@ -7,6 +7,7 @@ import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/widgets/input_message.dart';
+import 'package:mobile/screens/messaging/widgets/post_message/post_message_widget.dart';
 import 'package:provider/provider.dart';
 import 'model/chat_model.dart';
 import 'widgets/build_user_messaging.dart';
@@ -160,21 +161,37 @@ class _InboxScreenState extends State<InboxScreen> {
                                       final message =
                                           chatController.messages[index];
                                       return message.senderUsername ==
-                                              widget.userProfile.username
-                                          ? OwnMessage(
+                                                  widget.userProfile.username &&
+                                              message.post != null
+                                          ? PostMessageWidget(
                                               text: message.content,
                                               timestampDate: formatDateString(
                                                   message.createdAt),
                                               timestampTime: formatDateString(
                                                   message.createdAt),
                                               mediaList: message.media,
+                                              post: message.post,
                                             )
-                                          : buildUserMessage(
-                                              timestamp: formatDateString(
-                                                  message.createdAt),
-                                              userProfile: widget.userProfile,
-                                              messageModel: message,
-                                            );
+                                          : message.senderUsername ==
+                                                  widget.userProfile.username
+                                              ? OwnMessage(
+                                                  text: message.content,
+                                                  timestampDate:
+                                                      formatDateString(
+                                                          message.createdAt),
+                                                  timestampTime:
+                                                      formatDateString(
+                                                          message.createdAt),
+                                                  mediaList: message.media,
+                                                )
+                                              : buildUserMessage(
+                                                  post: message.post,
+                                                  timestamp: formatDateString(
+                                                      message.createdAt),
+                                                  userProfile:
+                                                      widget.userProfile,
+                                                  messageModel: message,
+                                                );
                                     },
                                   ),
                       ),

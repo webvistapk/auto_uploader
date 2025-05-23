@@ -49,7 +49,7 @@ class ChatProvider with ChangeNotifier {
   }
 
   Future<void> fetchChats() async {
-    _isLoading = true; // Set loading to true when the fetch starts
+    _isLoading = true;
     notifyListeners();
 
     final url = Uri.parse('$baseUrl/api/chat/');
@@ -63,46 +63,130 @@ class ChatProvider with ChangeNotifier {
           'Content-Type': 'application/json',
         },
       );
-      // debugger();
+
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
         log('$data');
-        // debugger();
+
         if (data['status'] == 'success') {
-          _isLoading = false; // Set loading to true when the fetch starts
-          notifyListeners();
-          _chats = (data['chat'] as List).map((chat) {
-            if (chat['name'] == null) {
-              log("Using second participant's username: ${chat['participants'][1]['username']}");
-              chat['name'] = chat['participants'][1]['username'];
+          List<dynamic> chatsData = data['chat'] as List<dynamic>;
+          _chats = chatsData.map((chat) {
+            final participants = chat['participants'] as List<dynamic>?;
+
+            // Determine chat name safely
+            String name = '';
+
+            // Use existing 'name' if valid
+            if (chat['name'] != null &&
+                (chat['name'] as String).trim().isNotEmpty) {
+              name = chat['name'];
+              log("Using existing chat name: $name");
             } else {
-              chat['name'] = chat['name'] ?? "Unnamed Chat";
-              log("Using existing or fallback chat name: ${chat['name']}");
+              // Try to get username from participants safely
+              if (participants != null && participants.length > 1) {
+                final username = participants[1]['username'];
+                name =
+                    (username != null && username.toString().trim().isNotEmpty)
+                        ? username.toString()
+                        : "Unknown";
+                log("Using second participant's username: $name");
+              } else if (participants != null && participants.isNotEmpty) {
+                final username = participants[0]['username'];
+                name =
+                    (username != null && username.toString().trim().isNotEmpty)
+                        ? username.toString()
+                        : "Unknown";
+                log("Using first participant's username: $name");
+              } else {
+                name = "Unknown";
+                log("No participants found, using fallback name: $name");
+              }
             }
+
+            chat['name'] = name;
+
             return ChatModel.fromJson(chat);
           }).toList();
+
           _filteredChats = _chats;
+          _isLoading = false;
           notifyListeners();
         } else {
-          _isLoading = false; // Set loading to true when the fetch starts
+          _isLoading = false;
           notifyListeners();
           throw Exception('Error: ${data['status']}');
         }
       } else {
-        _isLoading = false; // Set loading to true when the fetch starts
+        _isLoading = false;
         notifyListeners();
         throw Exception(
             'Failed to fetch chats. Status Code: ${response.statusCode}');
       }
     } catch (e) {
-      _isLoading = false; // Set loading to true when the fetch starts
+      _isLoading = false;
       notifyListeners();
       throw Exception('Error fetching chats: $e');
     } finally {
-      _isLoading = false; // Set loading to false after the fetch is complete
+      _isLoading = false;
       notifyListeners();
     }
   }
+
+  // Future<void> fetchChats() async {
+  //   _isLoading = true; // Set loading to true when the fetch starts
+  //   notifyListeners();
+
+  //   final url = Uri.parse('$baseUrl/api/chat/');
+  //   String? accessToken = await Prefrences.getAuthToken();
+
+  //   try {
+  //     final response = await http.get(
+  //       url,
+  //       headers: {
+  //         'Authorization': 'Bearer $accessToken',
+  //         'Content-Type': 'application/json',
+  //       },
+  //     );
+  //     // debugger();
+  //     if (response.statusCode == 200) {
+  //       var data = json.decode(response.body);
+  //       log('$data');
+  //       // debugger();
+  //       if (data['status'] == 'success') {
+  //         _isLoading = false; // Set loading to true when the fetch starts
+  //         notifyListeners();
+  //         _chats = (data['chat'] as List).map((chat) {
+  //           if (chat['name'] == null) {
+  //             log("Using second participant's username: ${chat['participants'][1]['username']}");
+  //             chat['name'] = chat['participants'][1]['username'] ?? "UnKnown";
+  //           } else {
+  //             chat['name'] = chat['name'] ?? "Unnamed Chat";
+  //             log("Using existing or fallback chat name: ${chat['name']}");
+  //           }
+  //           return ChatModel.fromJson(chat);
+  //         }).toList();
+  //         _filteredChats = _chats;
+  //         notifyListeners();
+  //       } else {
+  //         _isLoading = false; // Set loading to true when the fetch starts
+  //         notifyListeners();
+  //         throw Exception('Error: ${data['status']}');
+  //       }
+  //     } else {
+  //       _isLoading = false; // Set loading to true when the fetch starts
+  //       notifyListeners();
+  //       throw Exception(
+  //           'Failed to fetch chats. Status Code: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     _isLoading = false; // Set loading to true when the fetch starts
+  //     notifyListeners();
+  //     throw Exception('Error fetching chats: $e');
+  //   } finally {
+  //     _isLoading = false; // Set loading to false after the fetch is complete
+  //     notifyListeners();
+  //   }
+  // }
 
   void filterChats(String query) {
     if (query.isEmpty) {
