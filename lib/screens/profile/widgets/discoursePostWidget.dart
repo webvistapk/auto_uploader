@@ -1,11 +1,15 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/controller/function/commentBottomSheet.dart';
 import 'package:mobile/controller/function/postfunctions.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/screens/profile/widgets/DiscoursePost.dart';
+import 'package:provider/provider.dart';
 
 class DiscoursePostWidget extends StatelessWidget {
   final String postID;
@@ -96,7 +100,15 @@ class DiscoursePostWidget extends StatelessWidget {
                   },
                   child: Image.asset(AppIcons.forward, width: 22.6.sp)),
               SizedBox(width: 57.74.sp),
-              Image.asset(AppIcons.repost, width: 22.6.sp),
+              GestureDetector(
+                onTap: ()async{
+                  
+                   print("Reposted: ${postID}");
+                                  await Provider.of<PostProvider>(context,listen: false).createNewReposted(
+                                      'discourse', int.parse(postID));
+                                  
+                },
+                child: Image.asset(AppIcons.repost, width: 22.6.sp)),
               SizedBox(width: 57.74.sp),
               GestureDetector(
                 onTap: onPressLiked,
