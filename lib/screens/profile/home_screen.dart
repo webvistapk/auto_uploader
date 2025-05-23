@@ -332,6 +332,7 @@ class _HomeScreenState extends State<HomeScreen>
                           itemBuilder: (context, index) {
                             final post = posts[index];
                             return _buildPostCard(post, () {
+                              
                               Navigator.push(
                                   context,
                                   CupertinoDialogRoute(
@@ -339,7 +340,8 @@ class _HomeScreenState extends State<HomeScreen>
                                           postId: post.id.toString(),
                                           onPostUpdated: () {}),
                                       context: context));
-                            });
+                            }
+                            );
                           },
                         );
                       }),
@@ -555,6 +557,7 @@ class _HomeScreenState extends State<HomeScreen>
         postTitle: post.postTitle,
         postDescription: post.postDescription,
         privacy: post.privacy,
+        userID: post.user.id.toString(),
       ),
     );
   }
