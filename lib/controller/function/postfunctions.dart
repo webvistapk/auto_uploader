@@ -16,7 +16,7 @@ void CreateChat(String PostUserID,PostID, BuildContext context, {bool isEmoji=fa
     // Extract chat ID
     final chatId = responseData['chat']['id'].toString();
     if(isEmoji){
-       showEmojiBottomSheet(context,PostID, chatId);
+       showEmojiBottomSheet(context,chatId,PostID );
     }
     else{
     showMessageBottomSheet(context, chatId, PostID);

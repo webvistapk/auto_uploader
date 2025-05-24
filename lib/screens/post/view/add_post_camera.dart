@@ -209,90 +209,6 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     });
   }
 
-  // Widget _buildCaptureButton() {
-  //   return GestureDetector(
-  //     onTap: _onTap,
-  //     onLongPressStart: (_) => _onLongPressStart(),
-  //     onLongPressEnd: (_) => _onLongPressEnd(),
-  //     child: AnimatedScale(
-  //       duration: const Duration(milliseconds: 150),
-  //       scale: _isRecording ? 1.1 : 1.0,
-  //       curve: Curves.easeInOut,
-  //       child: _isRecording
-  //           ? CircularPercentIndicator(
-  //               radius: 42.0,
-  //               lineWidth: 6.0,
-  //               percent: _progress,
-  //               progressColor: Colors.redAccent,
-  //               backgroundColor: Colors.red.withOpacity(0.3),
-  //               circularStrokeCap: CircularStrokeCap.round,
-  //               center: Container(
-  //                 width: 66,
-  //                 height: 66,
-  //                 decoration: BoxDecoration(
-  //                   shape: BoxShape.circle,
-  //                   color: Colors.red,
-  //                   boxShadow: [
-  //                     BoxShadow(
-  //                       color: Colors.redAccent.withOpacity(0.7),
-  //                       blurRadius: 10,
-  //                       spreadRadius: 2,
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 child: const Icon(
-  //                   Icons.videocam,
-  //                   color: Colors.white,
-  //                   size: 32,
-  //                 ),
-  //               ),
-  //             )
-  //           : Container(
-  //               width: 74,
-  //               height: 74,
-  //               decoration: BoxDecoration(
-  //                 shape: BoxShape.circle,
-  //                 gradient: LinearGradient(
-  //                   colors: [
-  //                     Colors.white,
-  //                     Colors.grey.shade300,
-  //                   ],
-  //                   begin: Alignment.topLeft,
-  //                   end: Alignment.bottomRight,
-  //                 ),
-  //                 boxShadow: [
-  //                   BoxShadow(
-  //                     color: Colors.black.withOpacity(0.2),
-  //                     blurRadius: 8,
-  //                     offset: const Offset(0, 4),
-  //                   ),
-  //                   BoxShadow(
-  //                     color: Colors.white.withOpacity(0.7),
-  //                     blurRadius: 2,
-  //                     spreadRadius: 1,
-  //                     offset: const Offset(0, -2),
-  //                     // inset:
-  //                     //     true, // inner shadow for depth — requires flutter 3.7+
-  //                   ),
-  //                 ],
-  //               ),
-  //               child: Center(
-  //                 child: Container(
-  //                   width: 62,
-  //                   height: 62,
-  //                   decoration: BoxDecoration(
-  //                     shape: BoxShape.circle,
-  //                     color: Colors.white,
-  //                     border: Border.all(color: Colors.black, width: 3),
-
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildCaptureButton() {
     return GestureDetector(
       onTap: _onTap,
@@ -364,11 +280,6 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                       progressColor: Colors.white,
                       backgroundColor: Colors.transparent,
                       circularStrokeCap: CircularStrokeCap.round,
-                      center: const Icon(
-                        Icons.videocam,
-                        color: Colors.white,
-                        size: 28,
-                      ),
                     ),
                   ],
                 )
@@ -429,16 +340,8 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.close,
-                            size: 40, color: Colors.white),
-                        onPressed: _reset,
-                      ),
-                      const SizedBox(width: 40),
-                      IconButton(
-                        icon: const Icon(Icons.check,
-                            size: 40, color: Colors.greenAccent),
-                        onPressed: () async {
+                      GestureDetector(
+                        onTap: () {
                           if (_capturedFile != null) {
                             // Create a list of files to pass (even if single file)
                             final file = File(_capturedFile!.path);
@@ -461,6 +364,33 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                             );
                           }
                         },
+                        child: Container(
+                          padding: EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 245, 30, 84),
+                              borderRadius: BorderRadius.circular(30)),
+                          child:
+                              Icon(Icons.check, size: 24, color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 40),
+                      ClipPath(
+                        clipper: LeftArrowClipper(),
+                        child: Material(
+                          color: Colors.white,
+                          child: InkWell(
+                            onTap: _reset,
+                            child: SizedBox(
+                              width: 50,
+                              height: 25,
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: Icon(Icons.close,
+                                    size: 24, color: Colors.black),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -613,4 +543,22 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
       ),
     );
   }
+}
+
+class LeftArrowClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(20, 0); // Start after arrow tip
+    path.lineTo(size.width, 0); // Top-right corner
+    path.lineTo(size.width, size.height); // Bottom-right
+    path.lineTo(20, size.height); // Bottom-left before arrow
+    path.lineTo(0, size.height / 2); // Arrow tip
+    path.lineTo(20, 0); // Top-left before arrow
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

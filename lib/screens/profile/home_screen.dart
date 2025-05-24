@@ -63,11 +63,22 @@ class _HomeScreenState extends State<HomeScreen>
   int selectedIndex = 0; // 0: Content, 1: Discourse, 2: Reels
   List<Stories> _stories = [];
   final PageController _pageController = PageController();
-
+int _previousIndex = 0;
   void onPageChanged(int index) {
+    if (mounted) {
+    // Check if we're swiping from Discourse (1) to Content (0)
+    if (_previousIndex == 1 && index == 0) {
+      _offset = 0; // Reset pagination
+      final mediaProvider = context.read<MediaProvider>();
+      initFunctions(mediaProvider);
+    }
+    
     setState(() {
       selectedIndex = index;
+      _previousIndex = index; // Update previous index
     });
+  }
+  
   }
 
   @override
@@ -83,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   initFunctions(MediaProvider mediaProvider) {
+    
     mediaProvider.fetchUserStatuses(limit: 10, offset: _offset);
     mediaProvider.fetchFollowerStories(context, limit: 10, offset: _offset);
     _fetchPosts();

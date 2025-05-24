@@ -378,19 +378,24 @@ class _PostWidgetState extends State<PostWidget> {
 
                       Row(
                         children: [
-                          GestureDetector(
-                              onTap: () {
-                                CreateChat(widget.userID.toString(), widget.postId, context,  isEmoji: true);
-                               
-                              },
-                              child: _buildInteractionIcon(AppIcons.emoji, '')),
-                          const SizedBox(width: 10),
-                          GestureDetector(
-                              onTap: () {
-                                CreateChat(widget.userID.toString(), widget.postId, context);
-                              },
-                              child:
-                                  _buildInteractionIcon(AppIcons.forward, '')),
+                          if (!widget.isUserPost) ...[
+                            GestureDetector(
+                                onTap: () {
+                                  CreateChat(widget.userID.toString(),
+                                      widget.postId, context,
+                                      isEmoji: true);
+                                },
+                                child:
+                                    _buildInteractionIcon(AppIcons.emoji, '')),
+                            const SizedBox(width: 10),
+                            GestureDetector(
+                                onTap: () {
+                                  CreateChat(widget.userID.toString(),
+                                      widget.postId, context);
+                                },
+                                child: _buildInteractionIcon(
+                                    AppIcons.forward, '')),
+                          ],
                           const SizedBox(width: 5),
                           GestureDetector(
                               onTap: widget
