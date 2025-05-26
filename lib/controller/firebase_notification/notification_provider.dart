@@ -35,7 +35,7 @@ class FirebaseNotificationProvider extends ChangeNotifier {
           await Prefrences.setFcmToken(fCMToken);
         } else {
           log("FCM: $fCMToken");
-          debugger();
+          // debugger();
           log("Status Code: ${response.statusCode}");
           log("Data: ${response.body}");
         }

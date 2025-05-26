@@ -15,7 +15,7 @@ class AddPollScreen extends StatefulWidget {
   final String postField;
   final List<int> selectedTagUsers;
   final List<String> keywordList;
-  final String privacyPolicy;
+  final List<String> privacyPolicy;
   final List<File> mediaFiles;
   final UserProfile userProfile;
   final List<String> interactions;

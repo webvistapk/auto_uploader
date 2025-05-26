@@ -341,38 +341,36 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
-                        onTap: () {
-                          if (_capturedFile != null) {
-                            // Create a list of files to pass (even if single file)
-                            final file = File(_capturedFile!.path);
+                          onTap: () {
+                            if (_capturedFile != null) {
+                              // Create a list of files to pass (even if single file)
+                              final file = File(_capturedFile!.path);
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AddPostScreen(
-                                  mediFiles: [file],
-                                  userProfile: widget.userProfile,
-                                  type: "post", // Auto-detect media type
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => AddPostScreen(
+                                    mediFiles: [file],
+                                    userProfile: widget.userProfile,
+                                    // type: "post", // Auto-detect media type
+                                  ),
                                 ),
-                              ),
-                            );
-                          } else {
-                            // Show error if no media captured
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('No media captured')),
-                            );
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 245, 30, 84),
-                              borderRadius: BorderRadius.circular(30)),
-                          child:
-                              Icon(Icons.check, size: 24, color: Colors.white),
-                        ),
-                      ),
+                              );
+                            } else {
+                              // Show error if no media captured
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('No media captured')),
+                              );
+                            }
+                          },
+                          child: SizedBox(
+                            width: 50,
+                            height: 25,
+                            child: Image.asset(
+                              "assets/icons/tick.png",
+                            ),
+                          )),
                       const SizedBox(width: 40),
                       ClipPath(
                         clipper: LeftArrowClipper(),
@@ -385,8 +383,8 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                               height: 25,
                               child: Align(
                                 alignment: Alignment.centerRight,
-                                child: Icon(Icons.close,
-                                    size: 24, color: Colors.black),
+                                child:
+                                    Image.asset("assets/icons/cross_post.png"),
                               ),
                             ),
                           ),

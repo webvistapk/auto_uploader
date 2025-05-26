@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class PrivacyOptionsSheet extends StatefulWidget {
-  final String privacyPolicy; // The initial privacy policy value
-  const PrivacyOptionsSheet({Key? key, required this.privacyPolicy})
+  final List<String>
+      initialPrivacyPolicy; // Initial selected options in lowercase
+  const PrivacyOptionsSheet({Key? key, required this.initialPrivacyPolicy})
       : super(key: key);
 
   @override
@@ -10,46 +11,23 @@ class PrivacyOptionsSheet extends StatefulWidget {
 }
 
 class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
-  late ValueNotifier<String>
-      selectedPrivacyOption; // Notifier for real-time updates
+  late ValueNotifier<List<String>> selectedPrivacyOptions;
 
-  // Define privacy policy options
-  final List<String> privacyPolicyOptions = ['public', 'followers', 'private'];
+  // Define all privacy options with display text and their lowercase values
+  final List<Map<String, String>> privacyOptions = [
+    {'label': 'Public', 'value': 'public'},
+    {'label': 'Followers', 'value': 'followers'},
+    {'label': 'Following', 'value': 'following'},
+  ];
 
   @override
   void initState() {
     super.initState();
-    // Initialize the ValueNotifier based on the initial privacy policy
-    selectedPrivacyOption =
-        ValueNotifier(_getOptionFromPrivacy(widget.privacyPolicy));
-  }
 
-  // Convert the privacy policy string to corresponding option text
-  String _getOptionFromPrivacy(String privacy) {
-    switch (privacy) {
-      case 'public':
-        return 'Public';
-      case 'followers':
-        return 'Followers';
-      case 'private':
-        return 'Only Me';
-      default:
-        return 'Public'; // Default option
-    }
-  }
-
-  // Convert the option text back to the privacy policy value
-  String _getPrivacyFromOption(String option) {
-    switch (option) {
-      case 'Public':
-        return 'public';
-      case 'Followers':
-        return 'followers';
-      case 'Only Me':
-        return 'private';
-      default:
-        return 'public'; // Default privacy
-    }
+    // Initialize with initial privacy list or empty list
+    selectedPrivacyOptions = ValueNotifier<List<String>>(
+      widget.initialPrivacyPolicy.map((e) => e.toLowerCase()).toList(),
+    );
   }
 
   @override
@@ -66,7 +44,7 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title Row with Close Button
+          // Title row with close button
           Padding(
             padding: const EdgeInsets.only(top: 15, right: 20),
             child: Row(
@@ -80,8 +58,7 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
                 const Spacer(),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context,
-                        _getPrivacyFromOption(selectedPrivacyOption.value));
+                    Navigator.pop(context, selectedPrivacyOptions.value);
                   },
                   child: const Icon(Icons.close),
                 ),
@@ -90,76 +67,72 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
           ),
           const SizedBox(height: 10),
           const Divider(),
-          // Privacy options with checkboxes
-          Column(
-            children: [
-              _buildCheckboxOption(
-                context,
-                'Public',
-                'Visible to everyone.',
-              ),
-              _buildCheckboxOption(
-                context,
-                'Followers',
-                'Visible only to followers.',
-              ),
-              _buildCheckboxOption(
-                context,
-                'Only Me',
-                'Visible only to you.',
-              ),
-            ],
+          // Privacy options with checkboxes supporting multiple selection
+          Expanded(
+            child: ValueListenableBuilder<List<String>>(
+              valueListenable: selectedPrivacyOptions,
+              builder: (context, selectedValues, _) {
+                return ListView(
+                  children: privacyOptions.map((option) {
+                    final isSelected = selectedValues.contains(option['value']);
+                    return CheckboxListTile(
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            option['label']!,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            _getDescription(option['value']!),
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      activeColor: Colors.red,
+                      value: isSelected,
+                      onChanged: (bool? selected) {
+                        if (selected == null) return;
+
+                        final newSelected = List<String>.from(selectedValues);
+                        if (selected) {
+                          if (!newSelected.contains(option['value'])) {
+                            newSelected.add(option['value']!);
+                          }
+                        } else {
+                          newSelected.remove(option['value']);
+                        }
+                        selectedPrivacyOptions.value = newSelected;
+                      },
+                    );
+                  }).toList(),
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Custom method to build each checkbox option
-  Widget _buildCheckboxOption(
-      BuildContext context, String option, String description) {
-    return ValueListenableBuilder<String>(
-      valueListenable: selectedPrivacyOption,
-      builder: (context, value, _) {
-        return CheckboxListTile(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                option,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                description,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-          activeColor: Colors.red,
-          value: value == option, // Check if this option is selected
-          onChanged: (bool? selected) {
-            if (selected == true) {
-              selectedPrivacyOption.value = option;
-
-              // Update selected option
-              _updatePrivacyPolicy(option);
-            }
-          },
-        );
-      },
-    );
-  }
-
-  // Update the privacy policy value based on user selection
-  void _updatePrivacyPolicy(String option) {
-    String newPrivacy = _getPrivacyFromOption(option);
-    print("Updated privacy policy: $newPrivacy");
+  // Return description text based on option value
+  String _getDescription(String value) {
+    switch (value) {
+      case 'public':
+        return 'Visible to everyone.';
+      case 'followers':
+        return 'Visible only to followers.';
+      case 'private':
+        return 'Visible only to you.';
+      default:
+        return '';
+    }
   }
 
   @override
   void dispose() {
-    selectedPrivacyOption
-        .dispose(); // Dispose ValueNotifier to prevent memory leaks
+    selectedPrivacyOptions.dispose();
     super.dispose();
   }
 }

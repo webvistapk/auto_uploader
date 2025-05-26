@@ -67,7 +67,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     return 0; // Change this to widget.mediFiles!.length - 1 to show the last media file
   }
 
-  String privacyPolicy = "public";
+  List<String> privacyPolicy = ["public"];
 
   void _showTagPeopleBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -82,10 +82,10 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
 
   void _showPrivacyBottomSheet(BuildContext context) async {
     // Example current privacy value
-    String? result = await showModalBottomSheet<String>(
+    List<String> result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
-      builder: (_) => PrivacyOptionsSheet(privacyPolicy: privacyPolicy),
+      builder: (_) => PrivacyOptionsSheet(initialPrivacyPolicy: privacyPolicy),
     );
 
     if (result != null) {

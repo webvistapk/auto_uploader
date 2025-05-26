@@ -25,13 +25,25 @@ class _ChatListState extends State<ChatList> {
           chatProvider.isLoading && chatProvider.chats.isEmpty,
       builder: (context, isLoading, child) {
         var chatProvider = context.watch<ChatProvider>();
+
         if (isLoading) {
           // Show loading indicator when fetching data
           return Center(child: CircularProgressIndicator());
         } else {
-          // Show list of chats if loading is false
+          // Sort chats by updatedAt descending (newest first)
+          final sortedChats = List.of(chatProvider.chats);
+          sortedChats.sort((a, b) {
+            DateTime aDate = a.updatedAt is DateTime
+                ? a.updatedAt
+                : DateTime.parse(a.updatedAt.toString());
+            DateTime bDate = b.updatedAt is DateTime
+                ? b.updatedAt
+                : DateTime.parse(b.updatedAt.toString());
+            return aDate.compareTo(aDate);
+          });
+
           return Expanded(
-            child: chatProvider.chats.isEmpty
+            child: sortedChats.isEmpty
                 ? const Center(
                     child: Text(
                       "No chats available", // Display message if no chats
@@ -39,9 +51,9 @@ class _ChatListState extends State<ChatList> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: chatProvider.chats.length,
+                    itemCount: sortedChats.length,
                     itemBuilder: (context, index) {
-                      final chat = chatProvider.chats[index];
+                      final chat = sortedChats[index];
 
                       // Logic to determine chat display details
                       String chatName;
@@ -54,13 +66,23 @@ class _ChatListState extends State<ChatList> {
                         final participant = chat.participants.firstWhere(
                           (participant) =>
                               participant.id != widget.userProfile.id,
+                          orElse: () => chat.participants[0],
                         );
-                        chatName =
-                            '${participant.firstName} ${participant.lastName}';
-                        profileImage = participant.profileImage;
+
+                        if (participant != null) {
+                          chatName =
+                              '${participant.firstName} ${participant.lastName}';
+                          profileImage = participant.profileImage;
+                        } else {
+                          chatName = 'Unknown';
+                          profileImage = null;
+                        }
                       }
 
-                      final String updateAt = formatMessageDate(chat.updatedAt);
+                      final String updateAt = formatMessageDate(
+                          chat.updatedAt is DateTime
+                              ? chat.updatedAt
+                              : DateTime.parse(chat.updatedAt.toString()));
 
                       return InkWell(
                         onTap: () async {
@@ -79,35 +101,29 @@ class _ChatListState extends State<ChatList> {
 
                           // If the user returns from the InboxScreen
                           if (result == true) {
-                            if (result == true) {
-                              chatProvider.markChatAsRead(chat.id);
-                            }
+                            chatProvider.markChatAsRead(chat.id);
                           }
                         },
                         child: ListTile(
-                          leading:
-                              profileImage != null && profileImage.isNotEmpty
-                                  ? CircleAvatar(
-                                      radius: 22,
-                                      backgroundImage: NetworkImage(
-                                        profileImage,
-                                      ),
-                                    )
-                                  : ClipRRect(
-                                      borderRadius: BorderRadius.circular(
-                                          50), // Ensure the image fits properly
-                                      child: ColorFiltered(
-                                        colorFilter: const ColorFilter.mode(
-                                          Colors
-                                              .grey, // Change this to any color you want
-                                          BlendMode.srcIn,
-                                        ),
-                                        child: Image.asset(
-                                          'assets/icons/profile.png',
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                          leading: profileImage != null &&
+                                  profileImage.isNotEmpty
+                              ? CircleAvatar(
+                                  radius: 22,
+                                  backgroundImage: NetworkImage(profileImage),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: ColorFiltered(
+                                    colorFilter: const ColorFilter.mode(
+                                      Colors.grey,
+                                      BlendMode.srcIn,
                                     ),
+                                    child: Image.asset(
+                                      'assets/icons/profile.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -116,17 +132,12 @@ class _ChatListState extends State<ChatList> {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  if (chat.unReadMessages)
-                                    const Icon(
-                                      Icons.circle,
-                                      color: Colors.blue,
-                                      size: 10,
-                                    ),
-                                ],
-                              ),
+                              if (chat.unReadMessages)
+                                const Icon(
+                                  Icons.circle,
+                                  color: Colors.blue,
+                                  size: 10,
+                                ),
                             ],
                           ),
                           subtitle: Row(
@@ -142,10 +153,11 @@ class _ChatListState extends State<ChatList> {
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsets.only(left: 4),
+                                padding: const EdgeInsets.only(left: 4),
                                 child: Text(
-                                  chat.updatedAt
-                                      .toIso8601String(), // Replace with the timestamp if available
+                                  chat.updatedAt is DateTime
+                                      ? chat.updatedAt.toIso8601String()
+                                      : chat.updatedAt.toString(),
                                   style: const TextStyle(
                                       color: Colors.grey, fontSize: 10),
                                 ),

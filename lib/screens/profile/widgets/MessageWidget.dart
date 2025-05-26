@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -44,7 +45,6 @@ class _MessageWidgetState extends State<MessageWidget> {
         messageText,
         images: _selectedImages,
       );
-
       if (response != null && response.statusCode == 201) {
         _messageController.clear();
         setState(() => _selectedImages.clear());
@@ -53,6 +53,7 @@ class _MessageWidgetState extends State<MessageWidget> {
         ToastNotifier.showErrorToast(context, "Failed to send message");
       }
     } catch (e) {
+      debugger();
       ToastNotifier.showErrorToast(context, "Error: ${e.toString()}");
     }
   }
@@ -83,7 +84,6 @@ class _MessageWidgetState extends State<MessageWidget> {
               ],
             ),
           ),
-        
         Container(
           padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
           decoration: BoxDecoration(
@@ -288,7 +288,9 @@ class _CustomPinImagesState extends State<CustomPinImages> {
                       top: 5,
                       right: 5,
                       child: Icon(
-                        isSelected ? Icons.check_box : Icons.check_box_outline_blank_outlined,
+                        isSelected
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank_outlined,
                         color: Colors.white,
                         size: 20,
                       ),
@@ -325,12 +327,13 @@ class _CustomPinImagesState extends State<CustomPinImages> {
                 _buildTabText("Others", 3),
                 Spacer(),
                 GestureDetector(
-                  onTap: (){
+                  onTap: () {
                     Navigator.pop(context);
                   },
                   child: Text(
                     "Cancel",
-                    style: TextStyle(fontSize: 24.sp, color: const Color(0xFFFF0000)),
+                    style: TextStyle(
+                        fontSize: 24.sp, color: const Color(0xFFFF0000)),
                   ),
                 ),
               ],

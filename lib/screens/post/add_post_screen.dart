@@ -25,13 +25,13 @@ import 'package:http/http.dart' as http;
 class AddPostScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final List<File> mediFiles;
-  final type;
+  // final type;
 
   const AddPostScreen({
     super.key,
     required this.userProfile,
     required this.mediFiles,
-    required this.type,
+    // required this.type,
   });
 
   @override
@@ -51,7 +51,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   void initState() {
     super.initState();
     context.read<PostProvider>();
-    postType = widget.type;
+    postType = "post";
     _getCurrentLocation();
     // Initialize video controller if it's a video
     if (widget.mediFiles != null && widget.mediFiles.isNotEmpty) {
@@ -82,7 +82,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     return 0; // Change this to widget.mediFiles.length - 1 to show the last media file
   }
 
-  String privacyPolicy = "public";
+  List<String> privacyPolicy = ["public"];
 
   void _showTagPeopleBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -97,10 +97,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   void _showPrivacyBottomSheet(BuildContext context) async {
     // Example current privacy value
-    String? result = await showModalBottomSheet<String>(
+    List<String>? result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
-      builder: (_) => PrivacyOptionsSheet(privacyPolicy: privacyPolicy),
+      builder: (_) => PrivacyOptionsSheet(initialPrivacyPolicy: privacyPolicy),
     );
 
     if (result != null) {
@@ -138,7 +138,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       isDismissible: false,
       builder: (_) => InteractionsBottomSheet(
         initialSelectedOptions: ["Post"],
-        finalOptions: ["Post", "Reel"],
+        finalOptions: ["Post", "Discource", "Reel"],
       ),
     );
 
@@ -273,9 +273,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           children: [
                             SizedBox(),
                             Text(
-                              widget.type == 'reel'
-                                  ? 'Reel Posting...'
-                                  : "Post",
+                              postType == 'reel' ? 'Reel Posting...' : "Post",
                               style: AppTextStyles.poppinsBold(),
                               textAlign: TextAlign.center,
                             ),
@@ -305,7 +303,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             ),
                           )
                         :
-                        // widget.type == 'reel'
+                        // postType == 'reel'
                         //     ? Row(
                         //         mainAxisAlignment: MainAxisAlignment.center,
                         //         children: [
@@ -349,7 +347,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                       maxLines: 5,
                                       decoration: InputDecoration(
                                         hintMaxLines: 4,
-                                        hintText: widget.type == "post"
+                                        hintText: postType == "post"
                                             ? "Describe your post here, add hashtags, mention or anything else that compels you."
                                             : "Describe your reel here, add hashtags, mention or anything else that compels you.",
                                         hintStyle:
@@ -631,7 +629,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                               //ToastNotifier.showErrorToast(
                               // context, "Post  is required!");
                             } else {
-                              if (widget.type == 'reel') {
+                              if (postType == 'reel') {
                                 final response = await pro.createNewReel(
                                     context,
                                     postField: titleController.text.trim(),
@@ -744,7 +742,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         Text(
                           interactionSheetOptions
                                       .any((element) => element == 'Polls') &&
-                                  widget.type == 'post'
+                                  postType == 'post'
                               ? "Next"
                               : "Post",
                           style: AppTextStyles.poppinsMedium().copyWith(
@@ -757,14 +755,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     height: 60,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: isLoading
-                          ? Colors.grey
-                          : interactionSheetOptions.contains('Polls') ||
-                                  widget.type == 'post'
-                              ? Color(0xfa161616)
-                              : Colors.red,
-                    ),
+                        borderRadius: BorderRadius.circular(10),
+                        color: isLoading ? Colors.grey : Color(0xfa161616)),
                   ),
                 ),
                 TextButton(

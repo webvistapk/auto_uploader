@@ -85,11 +85,11 @@ class ChatController extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
         if (data['status'] == 'success') {
+          // debugger();
           final newMessages = List<MessageModel>.from(
             data['messages'].map((message) => MessageModel.fromJson(message)),
           );

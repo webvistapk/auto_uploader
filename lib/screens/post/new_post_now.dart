@@ -14,7 +14,7 @@ class NewPostNow extends StatefulWidget {
   final String postField; // Title of the post
   final List<int> peopleTags; // List of tagged users
   final List<String> keywordsList; // List of keywords
-  final String privacyPost; // Privacy policy (e.g., Public, Private)
+  final List<String> privacyPost; // Privacy policy (e.g., Public, Private)
   final List<File> mediaFiles; // List of media files
   final List<String> interactions; // Interaction options
   final UserProfile userProfile;

@@ -582,7 +582,7 @@ class _PostAndReelsState extends State<PostAndReels>
                             builder: (_) => AddPostScreen(
                                   mediFiles: mediaFiles,
                                   userProfile: widget.userProfile,
-                                  type: "post",
+                                  // type: "post",
                                 )));
                   }
                 : null,

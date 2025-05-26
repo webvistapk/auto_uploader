@@ -342,7 +342,7 @@ class _ContentSelectionScreenState extends State<ContentSelectionScreen> {
                                 builder: (_) => AddPostScreen(
                                       mediFiles: mediaFiles,
                                       userProfile: widget.userProfile,
-                                      type: null,
+                                      // type: null,
                                     )));
                       }
                     : null,

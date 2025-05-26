@@ -38,29 +38,28 @@ class _SinglePostState extends State<SinglePost> {
   @override
   void initState() {
     super.initState();
+    // debugger();
     if (widget.isInteractive == true) isUserPost = true;
     // Fetch the single post from the provider if available
     final postProvider = context.read<PostProvider>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (postProvider.posts != null) {
-      var post = postProvider.posts!.firstWhere(
-        (post) => post.id.toString() == widget.postId,
-        // Return null if no post is found
-      );
-      if (post != null) {
-        
-        postProvider.setSinglePost(
-            post); // Use this to set the post if it's found in the list
+      if (postProvider.posts != null) {
+        var post = postProvider.posts!.firstWhere(
+          (post) => post.id.toString() == widget.postId,
+          // Return null if no post is found
+        );
+        if (post != null) {
+          postProvider.setSinglePost(
+              post); // Use this to set the post if it's found in the list
+        } else {
+          postProvider
+              .getSinglePost(widget.postId); // Otherwise, fetch it from the API
+        }
       } else {
-         
-        postProvider
-            .getSinglePost(widget.postId); // Otherwise, fetch it from the API
+        // debugger();
+        postProvider.getSinglePost(
+            widget.postId); // Fetch if posts list is empty or null
       }
-    } else {
-       
-      postProvider
-          .getSinglePost(widget.postId); // Fetch if posts list is empty or null
-    }
     });
   }
 
@@ -85,9 +84,12 @@ class _SinglePostState extends State<SinglePost> {
             if (postProvider.post == null) {
               return const Center(child: CircularProgressIndicator());
             }
-
+            // debugger();
             final post = postProvider.post!;
             var mediaList = post.media.map((media) => "${media.file}").toList();
+            bool hasMedia = post.media.isNotEmpty;
+            bool isVideo = hasMedia && post.media[0].mediaType == 'video';
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: PostWidget(
@@ -100,7 +102,7 @@ class _SinglePostState extends State<SinglePost> {
                 profileImageUrl: post.user.profileImage != null
                     ? "${post.user.profileImage}"
                     : AppUtils.userImage,
-                isVideo: post.media[0].mediaType == 'video',
+                isVideo: isVideo,
                 likes: post.likesCount.toString(),
                 comments: post.commentsCount.toString(),
                 shares: "",
@@ -112,13 +114,13 @@ class _SinglePostState extends State<SinglePost> {
                 refresh: () => postProvider.getSinglePost(widget.postId),
                 isUserPost: isUserPost,
                 onPressed: () {
-                  //debugger();
-                  if (post.media[0].mediaType == 'video') {
+                  if (!hasMedia) return;
+                  if (isVideo) {
                     Navigator.push(
                       context,
                       CupertinoDialogRoute(
                         builder: (_) => FullscreenVideoPlayer(
-                          videoUrl: "${mediaList[0]}",
+                          videoUrl: mediaList[0],
                         ),
                         context: context,
                       ),
@@ -127,25 +129,20 @@ class _SinglePostState extends State<SinglePost> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            postFullScreen(mediaUrls: mediaList, initialIndex: 0),
+                        builder: (context) => postFullScreen(
+                            mediaUrls: mediaList, initialIndex: 0),
                       ),
                     );
                   }
                 },
                 onPressLiked: () {
-                  // Toggle like status
                   if (post.isLiked == false) {
                     postProvider.newLikes(post.id, context);
                   } else {
-                    postProvider.userDisLikes(
-                      post.id,
-                      context,
-                    );
+                    postProvider.userDisLikes(post.id, context);
                   }
                 },
-                isLiked:
-                    post.isLiked, // Use the actual 'isLiked' value from the post
+                isLiked: post.isLiked,
                 postModel: post,
                 isSinglePost: true,
                 postTitle: post.pollTitle,

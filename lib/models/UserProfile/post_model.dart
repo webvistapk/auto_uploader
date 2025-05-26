@@ -91,10 +91,10 @@ class PostModel {
         updatedAt: json['updated_at'],
         likesCount: json['likes_count'],
         commentsCount: json['comments_count'],
-        isLiked: json['is_liked'],
+        isLiked: json['is_liked'] ?? false,
         postTitle: json['post_title'],
         postDescription: json['post_description'],
-        location: json['location'],
+        location: json['location'] ?? "",
         isReposted: json['is_reposted'] ?? false,
         repostedBy: json['reposted_by'] == null
             ? null
@@ -149,7 +149,7 @@ class PostModel {
       'updated_at': post.updatedAt,
       'likes_count': post.likesCount,
       'comments_count': post.commentsCount,
-      'is_liked': post.isLiked,
+      'is_liked': post.isLiked ?? false,
       'post_title': post.postTitle,
       'post_description': post.postDescription,
       'location': post.location,

@@ -51,7 +51,6 @@ class ChatProvider with ChangeNotifier {
   Future<void> fetchChats() async {
     _isLoading = true;
     notifyListeners();
-
     final url = Uri.parse('$baseUrl/api/chat/');
     String? accessToken = await Prefrences.getAuthToken();
 

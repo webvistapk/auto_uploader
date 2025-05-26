@@ -15,7 +15,7 @@ class PostManager {
     required String postField,
     required List<int> peopleTags,
     required List<String> keywordsList,
-    required String privacyPost,
+    required List<String> privacyPost,
     required String location,
     required List<File> mediaFiles,
     String? postTitle,
@@ -55,7 +55,9 @@ class PostManager {
 
     request.fields['post'] = postField;
     request.fields['location'] = location;
-    request.fields['privacy'] = privacyPost;
+    if (privacyPost.isNotEmpty) {
+      request.fields['privacy'] = privacyPost.join(',');
+    }
 
     if (postTitle != null && postDescription != null) {
       request.fields['post_title'] = postTitle;
@@ -104,7 +106,7 @@ class PostManager {
     required String postField,
     required List<int> peopleTags,
     required List<String> keywordsList,
-    required String privacyPost,
+    required List<String> privacyPost,
     required List<File> mediaFiles,
     required String description,
     required String token, // Bearer token for authorization
@@ -124,7 +126,9 @@ class PostManager {
     // Add fields
 
     request.fields['post'] = postField;
-    request.fields['privacy'] = privacyPost;
+    if (privacyPost.isNotEmpty) {
+      request.fields['privacy'] = privacyPost.join(',');
+    }
     request.fields['description'] = description;
 
     request.fields['keywords'] = keywordsList.join(',');
@@ -167,7 +171,7 @@ class PostManager {
 
   Future<dynamic> createStory({
     required List<int> peopleTags,
-    required String privacyPost,
+    required List<String> privacyPost,
     required List<File> mediaFiles,
     required String token, // Bearer token for authorization
   }) async {
@@ -185,7 +189,10 @@ class PostManager {
 
     // Add fields
 
-    request.fields['privacy'] = privacyPost;
+    if (privacyPost.isEmpty) {
+    } else {
+      request.fields['privacy'] = privacyPost.join(',');
+    }
 
     if (peopleTags.isEmpty) {
     } else {

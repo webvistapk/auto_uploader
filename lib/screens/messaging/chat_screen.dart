@@ -4,6 +4,7 @@ import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/screens/messaging/controller/chat_provider.dart';
 import 'package:mobile/screens/messaging/create_message/new_message_screen.dart';
 import 'package:mobile/screens/messaging/widgets/chat_lists.dart';
+import 'package:mobile/screens/messaging/widgets/shimmer_chat_list.dart';
 import 'package:provider/provider.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -189,10 +190,14 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                         ),
                       ),
-                      ChatList(
-                        userProfile: widget.userProfile,
-                        chatProvider: pro,
-                      ),
+                      pro.isLoading
+                          ? Center(
+                              child: CircularProgressIndicator.adaptive(),
+                            )
+                          : ChatList(
+                              userProfile: widget.userProfile,
+                              chatProvider: pro,
+                            ),
                     ],
                   ),
                 ),
