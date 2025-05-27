@@ -57,7 +57,7 @@ class PostWidget extends StatefulWidget {
   final bool isSinglePost;
   final String? postTitle;
   final String? postDescription;
-  final String? privacy;
+  final List<String>? privacy;
   final String? userID;
 
   const PostWidget(
@@ -323,7 +323,7 @@ class _PostWidgetState extends State<PostWidget> {
                                     width: 5,
                                   ),
                                   Text(
-                                    widget.privacy ?? '',
+                                    widget.privacy?.first ?? '',
                                     style: TextStyle(
                                         fontSize: 7,
                                         color: AppColors.lightGrey),

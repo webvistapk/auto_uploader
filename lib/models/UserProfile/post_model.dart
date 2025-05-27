@@ -32,7 +32,7 @@ class PostModel {
   final List<Poll>? polls; // Optional list of polls
   final List<Media> media;
   final User user;
-  final String privacy;
+  final List<String> privacy;
   final String createdAt;
   final String updatedAt;
   int likesCount;
@@ -86,7 +86,7 @@ class PostModel {
             .toList(), // Parse polls list if available
         media: (json['media'] as List).map((m) => Media.fromJson(m)).toList(),
         user: User.fromJson(json['user']),
-        privacy: json['privacy'],
+        privacy: List<String>.from(json['privacy']),
         createdAt: json['created_at'],
         updatedAt: json['updated_at'],
         likesCount: json['likes_count'],

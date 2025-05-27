@@ -54,7 +54,7 @@ class MediaProvider with ChangeNotifier {
           headers: {
             'Authorization': 'Bearer $token',
           });
-
+      // debugger();
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 

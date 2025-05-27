@@ -85,7 +85,7 @@ class PostProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
+        // debugger();
         List<PostModel> followerPosts = (data['posts'] as List)
             .map((postJson) => PostModel.fromJson(postJson))
             .toList();
