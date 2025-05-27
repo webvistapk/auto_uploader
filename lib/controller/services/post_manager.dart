@@ -56,7 +56,11 @@ class PostManager {
     request.fields['post'] = postField;
     request.fields['location'] = location;
     if (privacyPost.isNotEmpty) {
-      request.fields['privacy'] = privacyPost.join(',');
+      // Encode the list to a JSON string
+      String privacyValue = jsonEncode(privacyPost);
+
+// Add the privacy field as text
+      request.fields['privacy'] = privacyValue;
     }
 
     if (postTitle != null && postDescription != null) {
@@ -127,7 +131,11 @@ class PostManager {
 
     request.fields['post'] = postField;
     if (privacyPost.isNotEmpty) {
-      request.fields['privacy'] = privacyPost.join(',');
+      // Encode the list to a JSON string
+      String privacyValue = jsonEncode(privacyPost);
+
+// Add the privacy field as text
+      request.fields['privacy'] = privacyValue;
     }
     request.fields['description'] = description;
 
@@ -191,7 +199,11 @@ class PostManager {
 
     if (privacyPost.isEmpty) {
     } else {
-      request.fields['privacy'] = privacyPost.join(',');
+      // Encode the list to a JSON string
+      String privacyValue = jsonEncode(privacyPost);
+
+// Add the privacy field as text
+      request.fields['privacy'] = privacyValue;
     }
 
     if (peopleTags.isEmpty) {
