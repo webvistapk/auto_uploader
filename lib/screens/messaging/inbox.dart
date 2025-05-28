@@ -171,6 +171,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                                   message.createdAt),
                                               mediaList: message.media,
                                               post: message.post,
+                                              isUser: true,
                                             )
                                           : message.senderUsername ==
                                                   widget.userProfile.username
@@ -184,7 +185,24 @@ class _InboxScreenState extends State<InboxScreen> {
                                                           message.createdAt),
                                                   mediaList: message.media,
                                                 )
-                                              : buildUserMessage(
+                                              :
+                                              //  message.post != null
+                                              //     ? PostMessageWidget(
+                                              //         text: message.content,
+                                              //         timestampDate:
+                                              //             formatDateString(
+                                              //                 message
+                                              //                     .createdAt),
+                                              //         timestampTime:
+                                              //             formatDateString(
+                                              //                 message
+                                              //                     .createdAt),
+                                              //         mediaList: message.media,
+                                              //         post: message.post,
+                                              //         isUser: false,
+                                              //       )
+                                              //     :
+                                              buildUserMessage(
                                                   post: message.post,
                                                   timestamp: formatDateString(
                                                       message.createdAt),

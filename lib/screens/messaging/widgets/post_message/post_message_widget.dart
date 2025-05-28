@@ -14,22 +14,25 @@ class PostMessageWidget extends StatelessWidget {
   final String timestampTime;
   final List<dynamic> mediaList;
   final PostModel? post;
+  final bool isUser;
 
-  const PostMessageWidget({
-    Key? key,
-    required this.text,
-    required this.timestampDate,
-    required this.timestampTime,
-    required this.mediaList,
-    this.post,
-  }) : super(key: key);
+  const PostMessageWidget(
+      {Key? key,
+      required this.text,
+      required this.timestampDate,
+      required this.timestampTime,
+      required this.mediaList,
+      this.post,
+      required this.isUser})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment:
+            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           // Date displayed centered above everything
           Padding(
@@ -46,62 +49,113 @@ class PostMessageWidget extends StatelessWidget {
           if (post != null)
             InkWell(
               onTap: () {
-                // debugger();
                 push(
-                    context,
-                    SinglePost(
-                        postId: post!.id.toString(), onPostUpdated: () {}));
+                  context,
+                  SinglePost(
+                    postId: post!.id.toString(),
+                    onPostUpdated: () {},
+                  ),
+                );
               },
               child: Container(
-                margin: const EdgeInsets.only(left: 50, bottom: 8.0),
-                padding: const EdgeInsets.all(12),
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.7,
-                ),
+                width: 100,
+                height: 150,
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade400.withOpacity(0.5),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade400),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (post!.postTitle != null)
-                      Text(
-                        post!.postTitle!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
+                    const Text(
+                      "Replied to Post",
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey,
                       ),
-                    if (post!.postDescription != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6.0),
-                        child: Text(
-                          post!.postDescription!,
-                          style: const TextStyle(color: Colors.black54),
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      post!.postTitle ?? 'No Title',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.black87,
                       ),
-                    if (post!.media.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Column(
-                          children: post!.media.map((media) {
-                            return MediaItem(
-                              url: media.file,
-                              mediaType: media.mediaType,
-                              timestamp: timestampTime,
-                            );
-                          }).toList(),
-                        ),
+                    ),
+                    const SizedBox(height: 6),
+
+                    if (post!.media.isNotEmpty) ...[
+                      Column(
+                        children: post!.media.map((media) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Stack(
+                              children: [
+                                // Image/Video Thumbnail
+
+                                Image.network(
+                                  media.file,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: Colors.grey.shade300,
+                                      child: const Center(
+                                          child: CircularProgressIndicator()),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                    color: Colors.grey.shade300,
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.broken_image,
+                                        size: 50,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Play icon overlay for videos
+                                if (media.mediaType == 'video')
+                                  Positioned.fill(
+                                    child: Container(
+                                      color: Colors.black26,
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.play_circle_fill,
+                                          color: Colors.white,
+                                          size: 32,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       ),
+                    ]
+                    // Expanded(
+                    //   child: Text(
+                    //     post!.postDescription ?? 'No Description',
+                    //     maxLines: 3,
+                    //     overflow: TextOverflow.ellipsis,
+                    //     style: const TextStyle(
+                    //       fontSize: 13,
+                    //       color: Colors.black54,
+                    //     ),
+                    //   ),
+                    // ),
+                    // if (post!.media.isNotEmpty)
                   ],
                 ),
               ),
