@@ -340,39 +340,6 @@ class _PostAndReelsState extends State<PostAndReels>
 
     return Column(
       children: [
-        // Large preview container (show first media thumbnail if available)
-        // if (_mediaList.isNotEmpty)
-        //   Container(
-        //     height: size.width * 0.9,
-        //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        //     decoration: BoxDecoration(
-        //       borderRadius: BorderRadius.circular(16),
-        //       color: Colors.black,
-        //     ),
-        //     child: ClipRRect(
-        //       borderRadius: BorderRadius.circular(16),
-        //       child: FutureBuilder<Uint8List?>(
-        //         future:
-        //             _mediaList.isNotEmpty ? _mediaList[0].thumbnailData : null,
-        //         builder: (context, snapshot) {
-        //           if (snapshot.connectionState == ConnectionState.done &&
-        //               snapshot.hasData) {
-        //             return Image.memory(
-        //               snapshot.data!,
-        //               fit: BoxFit.cover,
-        //               width: double.infinity,
-        //               height: double.infinity,
-        //             );
-        //           } else {
-        //             return Center(
-        //               child: CircularProgressIndicator(),
-        //             );
-        //           }
-        //         },
-        //       ),
-        //     ),
-        //   ),
-
         // Filter row with dropdown and buttons
         _buildFilterRow(),
 
@@ -541,36 +508,33 @@ class _PostAndReelsState extends State<PostAndReels>
           ),
           Container(
             width: 100,
-            child: Expanded(
-              child: DropdownButton<AssetPathEntity>(
-                menuMaxHeight: 400,
-                dropdownColor: Colors.white,
-                isExpanded: true,
-                value: _selectedPostAlbum,
-                iconEnabledColor: Colors.black,
-                underline: SizedBox.shrink(),
-                style:
-                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                items: _albums
-                    .map((album) => DropdownMenuItem(
-                          value: album,
-                          child: Text(
-                            album.name,
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ))
-                    .toList(),
-                onChanged: (album) {
-                  setState(() {
-                    _selectedPostAlbum = album;
-                    _mediaList.clear();
-                    _currentPostPage = 0;
-                    _fetchPostMedia(album!, _currentPostPage);
-                  });
-                },
-              ),
+            child: DropdownButton<AssetPathEntity>(
+              menuMaxHeight: 400,
+              dropdownColor: Colors.white,
+              isExpanded: true,
+              value: _selectedPostAlbum,
+              iconEnabledColor: Colors.black,
+              underline: SizedBox.shrink(),
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              items: _albums
+                  .map((album) => DropdownMenuItem(
+                        value: album,
+                        child: Text(
+                          album.name,
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                      ))
+                  .toList(),
+              onChanged: (album) {
+                setState(() {
+                  _selectedPostAlbum = album;
+                  _mediaList.clear();
+                  _currentPostPage = 0;
+                  _fetchPostMedia(album!, _currentPostPage);
+                });
+              },
             ),
           ),
           TextButton(
