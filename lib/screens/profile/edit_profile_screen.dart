@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_styles.dart';
-import 'package:mobile/screens/profile/change_password_screen.dart';
-import 'package:mobile/screens/profile/profile_screen.dart';
-import 'package:mobile/store/search/search_store.dart';
+import 'package:mobile/common/app_textfield.dart';
+import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/common/utils.dart';
-import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/controller/providers/profile_provider.dart';
+import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
+import 'package:mobile/screens/authantication/update%20password/old_password_screen.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/search/widget/search_widget.dart';
-import 'package:mobile/screens/widgets/bottom_bar.dart';
 import 'package:mobile/screens/widgets/side_bar.dart';
 import 'package:mobile/screens/widgets/top_bar.dart';
-import 'package:mobile/services/profile/user_service.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/controller/store/search/search_store.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -25,16 +30,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _lastNameController;
   late TextEditingController _phoneNumberController;
   late TextEditingController _descriptionController;
-  late TextEditingController _positionController;
-  late TextEditingController _organizationController;
   late TextEditingController _addressController;
   late TextEditingController _cityController;
   late TextEditingController _countryController;
-  late TextEditingController _websiteController;
 
   @override
   void initState() {
     super.initState();
+    context.read<ProfileProvider>();
     _initializeControllers();
   }
 
@@ -53,12 +56,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController = TextEditingController();
     _phoneNumberController = TextEditingController();
     _descriptionController = TextEditingController();
-    _positionController = TextEditingController();
-    _organizationController = TextEditingController();
     _addressController = TextEditingController();
     _cityController = TextEditingController();
     _countryController = TextEditingController();
-    _websiteController = TextEditingController();
   }
 
   void _populateControllers(UserProfile user) {
@@ -68,12 +68,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController.text = user.lastName ?? '';
     _phoneNumberController.text = user.phoneNumber ?? '';
     _descriptionController.text = user.description ?? '';
-    _positionController.text = user.position ?? '';
-    _organizationController.text = user.organization ?? '';
     _addressController.text = user.address ?? '';
     _cityController.text = user.city ?? '';
     _countryController.text = user.country ?? '';
-    _websiteController.text = user.website ?? '';
   }
 
   @override
@@ -84,20 +81,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController.dispose();
     _phoneNumberController.dispose();
     _descriptionController.dispose();
-    _positionController.dispose();
-    _organizationController.dispose();
     _addressController.dispose();
     _cityController.dispose();
     _countryController.dispose();
-    _websiteController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveProfile() async {
+  Future<void> _saveProfile(ProfileProvider pro) async {
     final UserProfile existingUser =
         ModalRoute.of(context)!.settings.arguments as UserProfile;
 
-    // Create a new UserProfile instance with fields updated as per the user's input
     final UserProfile updatedUser = UserProfile(
       id: existingUser.id,
       username:
@@ -107,30 +100,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       lastName: _lastNameController.text,
       phoneNumber: _phoneNumberController.text,
       description: _descriptionController.text,
-      position: _positionController.text,
-      organization: _organizationController.text,
       address: _addressController.text,
       city: _cityController.text,
       country: _countryController.text,
-      website: _websiteController.text,
     );
 
     try {
-      await UserService.updateUserProfile(updatedUser);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully.')),
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
-        (Route<dynamic> route) => false, // Remove all previous routes
-      );
+      final token = Prefrences.getAuthToken();
+      await pro.updateProfile(context, updatedUser);
+      await UserPreferences().saveCurrentUser(updatedUser);
+      //ToastNotifier.showSuccessToast(context, 'Profile updated successfully.');
+
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (_) => MainScreen(
+                    userProfile: updatedUser,
+                    authToken: token.toString(),
+                    selectedIndex: 4,
+                  )),
+          (route) => false);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update profile: $e')),
-      );
+      //ToastNotifier.showErrorToast(context, 'Failed to update profile: $e');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -139,170 +132,146 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         onSearch: (query) => SearchStore.updateSearchQuery(query),
       ),
       drawer: const SideBar(),
-      bottomNavigationBar: const BottomBar(),
-      backgroundColor: Utils.mainBgColor,
-      body: ValueListenableBuilder<String?>(
-        valueListenable: SearchStore.searchQuery,
-        builder: (context, searchQuery, child) {
-          if (searchQuery == null || searchQuery.isEmpty) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Edit Profile',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: _usernameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Username',
-                      ),
-                      enabled: false,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _emailController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Email',
-                      ),
-                      enabled: false,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _firstNameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'First Name',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _lastNameController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Last Name',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _phoneNumberController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Phone Number',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _descriptionController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Description',
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _positionController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Position',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _organizationController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Organization',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _addressController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Address',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _cityController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'City',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _countryController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Country',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _websiteController,
-                      decoration: AppStyles.inputDecoration.copyWith(
-                        labelText: 'Website',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _saveProfile,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                      ),
-                      child: const Text('Save Changes',
-                          style: AppStyles.buttonTextStyle),
-                    ),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (context) => const ChangePasswordScreen()),
-                          (Route<dynamic> route) =>
-                              false, // Remove all previous routes
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                      ),
-                      child: const Text('Change Password',
-                          style: AppStyles.buttonTextStyle),
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (context) => const ProfileScreen()),
-                          (Route<dynamic> route) =>
-                              false, // Remove all previous routes
-                        );
-                      },
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+      backgroundColor: AppColors.mainBgColor.withOpacity(1),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.mainBgColor, // Light blue
+                  AppColors.mainBgColor, // Very light blue
+                ],
               ),
-            );
-          } else {
-            return SearchWidget(query: searchQuery);
-          }
-        },
+            ),
+          ),
+          ValueListenableBuilder<String?>(
+            valueListenable: SearchStore.searchQuery,
+            builder: (context, searchQuery, child) {
+              if (searchQuery == null || searchQuery.isEmpty) {
+                return Builder(builder: (context) {
+                  var pro = context.watch<ProfileProvider>();
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Edit Profile',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontFamily: 'Greycliff CF',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          // Example usage of CustomAppTextField in the EditProfileScreen
+                          CustomAppTextField(
+                            labelText: 'Username',
+                            controller: _usernameController,
+                            enabled: false,
+                          ),
+                          const SizedBox(height: 10),
+                          CustomAppTextField(
+                            labelText: 'Email',
+                            controller: _emailController,
+                            enabled: false,
+                          ),
+                          const SizedBox(height: 10),
+                          CustomAppTextField(
+                            labelText: 'First Name',
+                            controller: _firstNameController,
+                            hintText: "Enter First Name",
+                          ),
+                          const SizedBox(height: 10),
+                          CustomAppTextField(
+                            labelText: 'Last Name',
+                            controller: _lastNameController,
+                            hintText: "Enter Last Name",
+                          ),
+                          const SizedBox(height: 10),
+                          CustomAppTextField(
+                            labelText: 'Phone Number',
+                            controller: _phoneNumberController,
+                            hintText: "Enter Phone Number",
+                          ),
+                          const SizedBox(height: 10),
+                          CustomAppTextField(
+                            labelText: 'Description',
+                            controller: _descriptionController,
+                            hintText: "Enter Description",
+                            maxLines: 3,
+                          ),
+                          const SizedBox(height: 10),
+                          CustomAppTextField(
+                            labelText: 'Address',
+                            controller: _addressController,
+                            hintText: "Enter Your Address",
+                          ),
+                          const SizedBox(height: 10),
+                          CustomAppTextField(
+                            labelText: 'City',
+                            controller: _cityController,
+                            hintText: "Enter Your City",
+                          ),
+                          const SizedBox(height: 10),
+                          CustomAppTextField(
+                            labelText: 'Country',
+                            controller: _countryController,
+                            hintText: "Enter Your Country",
+                          ),
+
+                          const SizedBox(height: 20),
+                          pro.isLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator.adaptive(),
+                                )
+                              : ElevatedButton(
+                                  onPressed: () async {
+                                    await _saveProfile(pro);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    minimumSize:
+                                        const Size(double.infinity, 50),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50),
+                                    ),
+                                  ),
+                                  child: const Text('Save Changes',
+                                      style: AppStyles.buttonTextStyle),
+                                ),
+                          const SizedBox(height: 10),
+
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.blue),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  );
+                });
+              } else {
+                return SearchWidget(
+                  query: searchQuery,
+                  authToken: Prefrences.getAuthToken().toString(),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

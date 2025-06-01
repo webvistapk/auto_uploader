@@ -1,13 +1,23 @@
+import 'dart:developer';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/common/app_icons.dart';
+import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/controller/endpoints.dart';
+import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/prefrences/user_prefrences.dart';
 import 'package:mobile/screens/profile/profile_screen.dart';
-import 'package:mobile/store/search/search_store.dart';
+import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
-import 'package:mobile/services/search/search_service.dart';
+import 'package:mobile/controller/services/search/search_service.dart';
 
 class SearchWidget extends StatefulWidget {
   final String query;
-  const SearchWidget({super.key, required this.query});
+  final authToken;
+  const SearchWidget({super.key, required this.query, this.authToken});
 
   @override
   _SearchWidgetState createState() => _SearchWidgetState();
@@ -16,53 +26,77 @@ class SearchWidget extends StatefulWidget {
 class _SearchWidgetState extends State<SearchWidget>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String selectedCategory = 'All';
+  String selectedCategory = 'Content';
   bool isLoading = false;
 
   Map<String, List<UserProfile>> data = {
-    'All': [],
-    'Accounts': [],
-    'Photos': [],
-    'Pages': [],
-    'Videos': [],
-    'Slides': [],
+    'Content': [],
+    'People': [],
+    'Business': [],
+    'Jobs': [],
+    'Events': [],
+    'Clubs': [],
+    'Recents': [],
   };
+
+  String? token;
+  getAuthToken() async {
+    if (widget.authToken == null) {
+      token = await Prefrences.getAuthToken();
+      setState(() {});
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    
     _tabController = TabController(length: 6, vsync: this);
     _tabController.addListener(() {
       setState(() {
         selectedCategory = _getCategoryName(_tabController.index);
       });
     });
+    if (widget.authToken == null) {
+      getAuthToken();
+      _fetchSearchResults(context, widget.query, token!);
+    } else {
+      _fetchSearchResults(context, widget.query, widget.authToken);
+    }
 
-    _fetchSearchResults(widget.query);
+    print("Init State is called");
   }
 
   @override
   void didUpdateWidget(covariant SearchWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.query != widget.query) {
-      _fetchSearchResults(widget.query);
+      _fetchSearchResults(context, widget.query, widget.authToken);
     }
   }
 
-  Future<void> _fetchSearchResults(String query) async {
+  Future<void> _fetchSearchResults(
+      context, String query, String authToken) async {
     setState(() {
       isLoading = true;
     });
-
+    authToken = await Prefrences.getAuthToken();
+    // debugger();
     try {
-      final userResults = await SearchService.fetchSearchResults(query);
-
-      setState(() {
-        data['All'] = userResults;
-        data['Accounts'] = userResults;
-      });
+      if (query.isNotEmpty) {
+        final userResults =
+            await SearchService.fetchSearchResults(query, authToken);
+        print("Auth Token ${authToken}");
+        print("User Results ${userResults}");
+        // debugger();
+        setState(() {
+          data['Content'] = userResults;
+          data['Recents'] = userResults;
+        });
+      }
     } catch (e) {
-      print("Error fetching search results: $e");
+      // ToastNotifier.showErrorToast(
+      //     context, "Error fetching search results: $e");
     } finally {
       setState(() {
         isLoading = false;
@@ -73,21 +107,28 @@ class _SearchWidgetState extends State<SearchWidget>
   void _removeUser(int index) {
     setState(() {
       data[selectedCategory]!.removeAt(index);
-      if (selectedCategory != 'All') {
-        data['All']!.removeAt(index);
+      if (selectedCategory != 'Content') {
+        data['Content']!.removeAt(index);
       }
     });
   }
 
-  void _navigateToProfile(BuildContext context, int userId) {
+  void _navigateToProfile(BuildContext context, int userId)async {
     SearchStore.searchQuery.value = null;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => const ProfileScreen(),
-        settings: RouteSettings(arguments: userId),
-      ),
-      (Route<dynamic> route) => false, // Remove all previous routes
-    );
+   
+    Navigator.push(
+        context,
+        CupertinoDialogRoute(
+            builder: (_) => ProfileScreen(id: userId), context: context,));
+    // Navigator.of(context).pushAndRemoveUntil(
+    //   MaterialPageRoute(
+    //     builder: (context) => ProfileScreen(
+    //       id: userId,
+    //     ),
+    //     settings: RouteSettings(arguments: userId),
+    //   ),
+    //   (Route<dynamic> route) => false, // Remove all previous routes
+    // );
   }
 
   @override
@@ -99,19 +140,19 @@ class _SearchWidgetState extends State<SearchWidget>
   String _getCategoryName(int index) {
     switch (index) {
       case 0:
-        return 'All';
+        return 'Content';
       case 1:
-        return 'Accounts';
+        return 'People';
       case 2:
-        return 'Photos';
+        return 'Business';
       case 3:
-        return 'Pages';
+        return 'Jobs';
       case 4:
-        return 'Videos';
+        return 'Event';
       case 5:
-        return 'Slides';
+        return 'Clubs';
       default:
-        return 'All';
+        return 'Content';
     }
   }
 
@@ -121,43 +162,61 @@ class _SearchWidgetState extends State<SearchWidget>
 
   @override
   Widget build(BuildContext context) {
+    // debugger();
     final results = _searchUsers(selectedCategory);
-
+    //debugger();
+    //final recommended=_searchUsers("")
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TabBar(
           controller: _tabController,
           labelColor: Colors.black,
+          physics: ScrollPhysics(),
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.red,
+          indicatorColor: Colors.transparent,
+          dividerHeight: 0,
+          padding: EdgeInsets.symmetric(horizontal: 20),
           isScrollable: true,
+          labelStyle: TextStyle(
+                  fontSize: 12,fontFamily: 'Greycliff CF',
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xff18181)),
+          unselectedLabelStyle:  TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,fontFamily: 'Greycliff CF',
+                  color: Color(0xff848484)),
           tabs: const [
-            Tab(text: 'All'),
-            Tab(text: 'Accounts'),
-            Tab(text: 'Photos'),
-            Tab(text: 'Pages'),
-            Tab(text: 'Videos'),
-            Tab(text: 'Slides'),
+            Tab(child: Text('Content')),
+            Tab(child: Text('People')),
+            Tab(child: Text('Business')),
+            Tab(child: Text('Jobs')),
+            Tab(child: Text('Events')),
+            Tab(child: Text('Clubs')),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 40),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Recents',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Implement "See all" functionality
-                },
-                child:
-                    const Text('See all', style: TextStyle(color: Colors.red)),
-              ),
+              // Text(
+              //   'Recents',
+              //   style: GoogleFonts.publicSans(
+              //     textStyle: TextStyle(
+              //       fontSize: 16,
+              //       fontWeight: FontWeight.bold
+              //     )
+              //   ),
+              // ),
+              // TextButton(
+              //   onPressed: () {
+              //     // Implement "See all" functionality
+              //   },
+              //   child:
+              //       const Text('See all', style: TextStyle(color: Colors.red)),
+              // ),
             ],
           ),
         ),
@@ -165,31 +224,48 @@ class _SearchWidgetState extends State<SearchWidget>
         Expanded(
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  itemCount: results.length,
-                  itemBuilder: (context, index) {
-                    final user = results[index];
-                    return ListTile(
-                      leading: const CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(Utils.testImage), // Placeholder image
-                      ),
-                      title: Text(
-                        user.username!,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text('${user.firstName} ${user.lastName}'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          _removeUser(index);
-                        },
-                      ),
-                      onTap: () => _navigateToProfile(
-                          context, user.id), // Navigate to profile on tap
-                    );
-                  },
-                ),
+              : results.isEmpty
+                  ? Center(
+                      child: Text("No Result Found!"),
+                    )
+                  : ListView.builder(
+                      itemCount: results.length,
+                      itemBuilder: (context, index) {
+                        final user = results[index];
+                        return ListTile(
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              user.profileUrl != null
+                                  ? ApiURLs.baseUrl.replaceAll("/api/",'')+user.profileUrl.toString()
+                                  : AppUtils.userImage,
+                              width: 38,
+                              height: 38,
+                            ),
+                          ),
+                          title: Text(
+                            user.username!,
+                            style: TextStyle(
+                                    color: Color(0xff34342F),fontFamily: 'Greycliff CF',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16),
+                          ),
+                          subtitle: Text('${user.firstName} ${user.lastName}',
+                              style: TextStyle(
+                                      color: Color(0xff34342F),
+                                      fontSize: 14)),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.close,
+                                size: 10, color: Color(0xffB5B5B5)),
+                            onPressed: () {
+                              _removeUser(index);
+                            },
+                          ),
+                          onTap: () => _navigateToProfile(
+                              context, user.id), // Navigate to profile on tap
+                        );
+                      },
+                    ),
         ),
       ],
     );

@@ -1,0 +1,363 @@
+import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_icons.dart';
+import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:provider/provider.dart';
+
+class MessageWidget extends StatefulWidget {
+  final String chatId;
+  final String postID;
+  const MessageWidget({super.key, required this.chatId, required this.postID});
+
+  @override
+  State<MessageWidget> createState() => _MessageWidgetState();
+}
+
+class _MessageWidgetState extends State<MessageWidget> {
+  final TextEditingController _messageController = TextEditingController();
+  bool _showGallery = false;
+  List<File> _selectedImages = [];
+
+  void _toggleGallery() {
+    setState(() => _showGallery = !_showGallery);
+  }
+
+  Future<void> _sendMessage() async {
+    final String messageText = _messageController.text.trim();
+
+    // Return early if both message and images are empty
+
+    if (messageText.isEmpty && _selectedImages.isEmpty) return;
+
+    try {
+      final response =
+          await Provider.of<PostProvider>(context, listen: false).sendChat(
+        context,
+        widget.chatId,
+        widget.postID,
+        messageText,
+        images: _selectedImages,
+      );
+      if (response != null && response.statusCode == 201) {
+        _messageController.clear();
+        setState(() => _selectedImages.clear());
+        Navigator.pop(context);
+      } else {
+        ToastNotifier.showErrorToast(context, "Failed to send message");
+      }
+    } catch (e) {
+      debugger();
+      ToastNotifier.showErrorToast(context, "Error: ${e.toString()}");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_showGallery)
+          Container(
+            height: MediaQuery.of(context).size.height * 0.34,
+            child: Stack(
+              children: [
+                CustomPinImages(
+                  onImagesSelected: (images) {
+                    setState(() => _selectedImages = images);
+                  },
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white),
+                    onPressed: _toggleGallery,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+          decoration: BoxDecoration(
+            color: Color(0xffF8F8F8),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              Image.asset(AppIcons.camera, width: 33.35.sp, height: 33.34.sp),
+              SizedBox(width: 17.31.sp),
+              GestureDetector(
+                onTap: _toggleGallery,
+                child: Image.asset(AppIcons.image,
+                    width: 32.83.sp, height: 32.83.sp),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: _messageController,
+                  decoration: InputDecoration(
+                    hintText: 'Send a message..',
+                    hintStyle:
+                        TextStyle(fontSize: 24.sp, color: Color(0xff757474)),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              Image.asset(AppIcons.mic, width: 32.83.sp, height: 32.83.sp),
+            ],
+          ),
+        ),
+        SizedBox(height: 10),
+        GestureDetector(
+          onTap: _sendMessage,
+          child: Container(
+            width: 802.sp,
+            height: 76.sp,
+            decoration: BoxDecoration(
+              color: Color(0xff333232),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Center(
+              child: Text(
+                "Send",
+                style: TextStyle(fontSize: 24.sp, color: AppColors.white),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class CustomPinImages extends StatefulWidget {
+  final Function(List<File>) onImagesSelected;
+
+  const CustomPinImages({Key? key, required this.onImagesSelected})
+      : super(key: key);
+
+  @override
+  _CustomPinImagesState createState() => _CustomPinImagesState();
+}
+
+class _CustomPinImagesState extends State<CustomPinImages> {
+  int _selectedIndex = 0;
+  PageController _pageController = PageController();
+  List<AssetEntity> _recentAssets = [];
+  List<AssetEntity> _galleryAssets = [];
+  List<AssetEntity> _otherAssets1 = [];
+  List<AssetEntity> _otherAssets2 = [];
+  List<AssetEntity> _otherAssets3 = [];
+  bool _isLoading = true;
+  List<AssetEntity> _selectedAssets = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAssets();
+  }
+
+  Future<void> _loadAssets() async {
+    final PermissionState permission =
+        await PhotoManager.requestPermissionExtend();
+    if (!permission.isAuth) {
+      ToastNotifier.showErrorToast(context, "Permission denied");
+      return;
+    }
+
+    try {
+      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
+        filterOption: FilterOptionGroup(
+          orders: [OrderOption(type: OrderOptionType.createDate, asc: false)],
+        ),
+      );
+
+      if (albums.isEmpty) return;
+
+      _recentAssets = await albums[0].getAssetListRange(start: 0, end: 50);
+      if (albums.length > 1)
+        _galleryAssets = await albums[1].getAssetListRange(start: 0, end: 50);
+      if (albums.length > 2)
+        _otherAssets1 = await albums[2].getAssetListRange(start: 0, end: 50);
+      if (albums.length > 3)
+        _otherAssets2 = await albums[3].getAssetListRange(start: 0, end: 50);
+      if (albums.length > 4)
+        _otherAssets3 = await albums[4].getAssetListRange(start: 0, end: 50);
+
+      setState(() => _isLoading = false);
+    } catch (e) {
+      ToastNotifier.showErrorToast(context, "Error loading images");
+    }
+  }
+
+  void _toggleAssetSelection(AssetEntity asset) async {
+    setState(() {
+      if (_selectedAssets.contains(asset)) {
+        _selectedAssets.remove(asset);
+      } else {
+        _selectedAssets.add(asset);
+      }
+    });
+
+    await _sendSelectedImages();
+  }
+
+  Future<void> _sendSelectedImages() async {
+    final List<File> imageFiles = [];
+    for (final asset in _selectedAssets) {
+      final file = await asset.file;
+      if (file != null) {
+        imageFiles.add(file);
+      }
+    }
+    widget.onImagesSelected(imageFiles);
+  }
+
+  Widget _buildTabText(String title, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedIndex = index);
+        _pageController.animateToPage(
+          index,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
+      },
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 24.sp,
+          fontWeight: FontWeight.bold,
+          color: _selectedIndex == index ? Colors.black : Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageGrid(List<AssetEntity> assets) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: GridView.builder(
+        itemCount: assets.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
+        ),
+        itemBuilder: (context, index) {
+          final asset = assets[index];
+          final isSelected = _selectedAssets.contains(asset);
+
+          return GestureDetector(
+            onTap: () => _toggleAssetSelection(asset),
+            child: FutureBuilder<Uint8List?>(
+              future: asset.thumbnailDataWithSize(ThumbnailSize(200, 200)),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Container(color: Colors.grey[200]);
+                }
+
+                return Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image.memory(
+                        snapshot.data!,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    if (isSelected)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                    Positioned(
+                      top: 5,
+                      right: 5,
+                      child: Icon(
+                        isSelected
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+            child: Row(
+              children: [
+                _buildTabText("Recents", 0),
+                SizedBox(width: 54.09.sp),
+                _buildTabText("Gallery", 1),
+                SizedBox(width: 54.09.sp),
+                _buildTabText("Others", 2),
+                SizedBox(width: 54.09.sp),
+                _buildTabText("Others", 3),
+                Spacer(),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                        fontSize: 24.sp, color: const Color(0xFFFF0000)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1),
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) =>
+                        setState(() => _selectedIndex = index),
+                    children: [
+                      _buildImageGrid(_recentAssets),
+                      _buildImageGrid(_galleryAssets),
+                      _buildImageGrid(_otherAssets1),
+                      _buildImageGrid(_otherAssets2),
+                      _buildImageGrid(_otherAssets3),
+                    ],
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}

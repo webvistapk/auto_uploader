@@ -1,81 +1,166 @@
+import 'dart:developer';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_size.dart';
+import 'package:mobile/screens/profile/widgets/PostGrid.dart';
+import 'package:mobile/screens/profile/widgets/profile_info.dart';
 import 'package:mobile/screens/widgets/full_screen_image.dart';
 
-class ProfileImages extends StatelessWidget {
-  final List<String> images;
-  
-  const ProfileImages({
+import '../../../models/UserProfile/post_model.dart';
+import 'ReelPostGrid.dart';
+
+class ProfileImages extends StatefulWidget {
+  String userid;
+  ProfileImages({
     super.key,
-    required this.images,
+    required this.userid,
   });
+
+  @override
+  State<ProfileImages> createState() => _ProfileImagesState();
+}
+
+class _ProfileImagesState extends State<ProfileImages> {
+  /*// Filter Image Posts
+  List<PostModel> getImagePosts(List<PostModel> posts) {
+    return posts.where((post) {
+      return post.media.isNotEmpty &&
+          post.media.any((element) => element.mediaType == 'image');
+    }).toList();
+  }
+
+// Filter Video Posts
+  List<PostModel> getVideoPosts(List<PostModel> posts) {
+    return posts.where((post) {
+      return post.media.isNotEmpty && post.media[0].mediaType == 'video';
+    }).toList();
+  }*/
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6,
+      length: 8,
       child: Column(
         children: [
-          const TabBar(
-            isScrollable: true,
-            tabs: [
-              Tab(text: 'All'),
-              Tab(text: 'Photos'),
-              Tab(text: 'Videos'),
-              Tab(text: 'Pages'),
-              Tab(text: 'Posts'),
-              Tab(text: 'Tagged'),
-            ],
-          ),
-          SizedBox(
-            height: 500, // Adjust height as needed
-            child: TabBarView(
-              children: [
-                _buildImageGrid(images), // Replace with your methods to build each tab's content
-                _buildImageGrid(images),
-                _buildImageGrid(images),
-                _buildImageGrid(images),
-                _buildImageGrid(images),
-                _buildImageGrid(images),
+          Theme(
+            data: ThemeData(
+              tabBarTheme: TabBarTheme(
+                labelColor: Colors.black, // Set the color for the selected tab
+                unselectedLabelColor:
+                    Colors.grey, // Set the color for unselected tabs
+                indicator: UnderlineTabIndicator(
+                  borderSide: BorderSide(
+                      color: Colors.black, width: 2.0), // Indicator color
+                ),
+              ),
+            ),
+            child:  TabBar(
+              // physics: NeverScrollableScrollPhysics(),
+              isScrollable: true,
+
+              labelPadding: EdgeInsets.symmetric(
+                horizontal: 18,
+              ), // Padding for labels
+              indicatorWeight: 1.0,
+              tabs: [
+                Tab(
+                  child: tabText("All"),
+                ),
+                Tab(
+                  child:  tabText("Photos"),
+                ),
+                Tab(
+                  child: tabText("Videos"),
+                ),
+                Tab(
+                  child: tabText("Pages")
+                ),
+                Tab(
+                  child: tabText("Posts")
+                ),
+                Tab(
+                  child: tabText("tagged")
+                ),
+                Tab(
+                  child: tabText("Reel")
+                ),
+                Tab(
+                  child: tabText("Info")
+                ),
               ],
             ),
           ),
+          // SizedBox(
+          //   height: 10,
+          // ),
+         
+          SingleChildScrollView(
+            child: SizedBox(
+              height: 350, // Adjust height as needed
+              child: TabBarView(
+                // physics: NeverScrollableScrollPhysics(),
+
+                children: [
+                  PostGrid(
+                    filterType: "allPost",
+                    userId: widget.userid,
+                  ), // All Posts
+                  PostGrid(
+                    filterType: "image",
+                    userId: widget.userid,
+                  ), // Filtered Image Posts
+                  PostGrid(
+                    filterType: "video",
+                    userId: widget.userid,
+                  ), // Filtered Video Posts
+                  PostGrid(
+                    filterType: "allPost",
+                    userId: widget.userid,
+                  ), // Placeholder for Pages
+                  PostGrid(
+                    filterType: "allPost",
+                    userId: widget.userid,
+                  ),
+                  PostGrid(
+                    filterType: "allPost",
+                    userId: widget.userid,
+                  ), // Placeholder for Posts
+                  ReelPostGrid(userId: widget.userid),
+                  const profile_info(), // Info tab
+                ],
+              )// Placeholder for Posts
+
+            ),
+
+              /*TabBarView(
+                children: [
+                  PostGrid(posts: posts),
+                  PostGrid(posts: imagePosts),
+                  PostGrid(posts: posts),
+                  PostGrid(posts: posts),
+                  PostGrid(posts: posts),
+                  PostGrid(posts: posts),
+                  profile_info(),
+                ],
+              ),*/
+            ),
+
         ],
       ),
     );
   }
 
-  Widget _buildImageGrid(List<String> imagesToDisplay) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(8.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
-      itemCount: imagesToDisplay.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FullScreenImage(
-                  imageUrl: imagesToDisplay[index],
-                  tag: "profile_images_$index"
-                ),
-              ),
-            );
-          },
-          child: Hero(
-            tag: 'profile_images_$index', // Unique tag for each image
-            child: Image.network(
-              imagesToDisplay[index],
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
-    );
+  Widget tabText(String text){
+    return Text(text,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                          fontSize: 10,
+                          color: Color(0XFF010101)
+                      )
+                    
+                  );
   }
-
 }

@@ -8,10 +8,14 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/logo.webp', // Ensure you have your logo in assets
-      width: width,
-      height: height,
-    );
+    return height != null && width != null
+        ? Image.asset(
+            'assets/splash.png', // Ensure you have your logo in assets
+            width: width,
+            height: height,
+          )
+        : Image.asset(
+            'assets/splash.png', // Ensure you have your logo in assets
+          );
   }
 }

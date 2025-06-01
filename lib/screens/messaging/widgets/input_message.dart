@@ -1,0 +1,347 @@
+import 'dart:developer';
+import 'dart:io'; // For File class
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mobile/screens/messaging/model/chat_model.dart';
+import 'package:mobile/screens/messaging/widgets/media_preview/media_screen_preview.dart';
+
+class ChatInputField extends StatefulWidget {
+  final TextEditingController messageController;
+  final onPressedSend;
+  final ChatModel chatModel;
+  ChatInputField(
+      {super.key,
+      required this.messageController,
+      this.onPressedSend,
+      required this.chatModel});
+
+  @override
+  State<ChatInputField> createState() => _ChatInputFieldState();
+}
+
+class _ChatInputFieldState extends State<ChatInputField> {
+  @override
+  void initState() {
+    super.initState();
+    widget.messageController.addListener(() {
+      setState(() {}); // Rebuild the widget when text changes
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.messageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          // Emoji Button
+          IconButton(
+            icon: const Icon(
+              Icons.emoji_emotions_outlined,
+              color: Colors.grey,
+            ),
+            onPressed: () {
+              // Handle emoji selection (Use a package like emoji_picker_flutter)
+              showEmojiPicker(context);
+            },
+          ),
+
+          // TextField
+          Expanded(
+            child: TextField(
+              controller: widget.messageController,
+              decoration: InputDecoration(
+                hintText: 'Type a message',
+                hintStyle: TextStyle(color: Colors.grey.shade500),
+                border: InputBorder.none,
+              ),
+              minLines: 1,
+              maxLines: 5, // Allow multiline input
+            ),
+          ),
+
+          // Attachments Button
+          IconButton(
+            icon: const Icon(
+              Icons.attach_file,
+              color: Colors.grey,
+            ),
+            onPressed: () {
+              _showOptionsBottomSheet(context, "attachment");
+              // Handle attachment (file picker or gallery)
+            },
+          ),
+
+          // Camera Button
+          IconButton(
+            icon: const Icon(
+              Icons.camera_alt,
+              color: Colors.grey,
+            ),
+            onPressed: () {
+              _showOptionsBottomSheet(context, "camera");
+              // Handle camera action (open camera or photo picker)
+            },
+          ),
+
+          // Send Button or Voice Button
+          widget.messageController.text.isNotEmpty
+              ? buildSendButton(widget.onPressedSend)
+              : buildVoiceButton(),
+        ],
+      ),
+    );
+  }
+
+  // Send Button
+  Widget buildSendButton(onPressed) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.blue,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+          icon: const Icon(Icons.send, color: Colors.white),
+          onPressed: onPressed),
+    );
+  }
+
+  // Voice Input Button
+  Widget buildVoiceButton() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.green,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.keyboard_voice_sharp, color: Colors.white),
+        onPressed: () {
+          // Handle voice input (start recording)
+        },
+      ),
+    );
+  }
+
+  // Emoji Picker (can be enhanced with a package)
+  void showEmojiPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SizedBox(
+          height: 250,
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
+            ),
+            itemCount: 100, // A basic example, can be replaced with emojis
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  // Add the emoji to the text input field
+                  widget.messageController.text += '😊'; // Example emoji
+                  Navigator.pop(context);
+                },
+                child: Center(
+                  child: Text(
+                    '😊',
+                    style: TextStyle(fontSize: 28),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  final ImagePicker _picker = ImagePicker();
+  List<File> mediaPaths = []; // Store File objects instead of String paths
+
+  // Pick Photos
+  Future<void> _pickPhotos() async {
+    try {
+      mediaPaths.clear();
+      final List<XFile>? result = await _picker.pickMultiImage();
+      if (result != null && result.isNotEmpty) {
+        setState(() {
+          mediaPaths.addAll(result.map((file) => File(file.path)).toList());
+        });
+        _confirmAndNavigate();
+      }
+    } catch (e) {
+      print("Error picking photos: $e");
+    }
+  }
+
+  // Pick Videos
+  Future<void> _pickVideos() async {
+    try {
+      mediaPaths.clear();
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.video,
+        allowMultiple: true,
+      );
+      if (result != null) {
+        setState(() {
+          mediaPaths.addAll(result.paths.map((path) => File(path!)).toList());
+        });
+        _confirmAndNavigate();
+      }
+    } catch (e) {
+      print("Error picking videos: $e");
+    }
+  }
+
+  // Take Photo
+  Future<void> _takePhoto() async {
+    try {
+      mediaPaths.clear();
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        setState(() {
+          mediaPaths.add(File(image.path));
+        });
+        _confirmAndNavigate();
+      }
+    } catch (e) {
+      print("Error taking photo: $e");
+    }
+  }
+
+  // Record Video
+  Future<void> _recordVideo() async {
+    try {
+      mediaPaths.clear();
+      final XFile? video = await _picker.pickVideo(source: ImageSource.camera);
+      if (video != null) {
+        setState(() {
+          mediaPaths.add(File(video.path));
+        });
+        _confirmAndNavigate();
+      }
+    } catch (e) {
+      print("Error recording video: $e");
+    }
+  }
+
+  // Show Confirmation Dialog and Navigate
+  void _confirmAndNavigate() {
+    if (mediaPaths.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Confirm Selection'),
+            content:
+                const Text('Do you want to proceed with the selected media?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  log('Files list: $mediaPaths');
+                  // debugger();
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MediaMessagingScreen(
+                        initialMediaList: mediaPaths,
+                        chatModel: widget.chatModel,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void _showOptionsBottomSheet(BuildContext context, String type) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (type == "attachment") ...[
+                ListTile(
+                  leading: const Icon(Icons.photo_album, color: Colors.blue),
+                  title: const Text('Gallery Photos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickPhotos();
+                  },
+                ),
+                ListTile(
+                  leading:
+                      const Icon(Icons.video_library, color: Colors.orange),
+                  title: const Text('Gallery Videos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickVideos();
+                  },
+                ),
+              ],
+              if (type == "camera") ...[
+                ListTile(
+                  leading: const Icon(Icons.camera_alt, color: Colors.green),
+                  title: const Text('Take Photo'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _takePhoto();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.videocam, color: Colors.red),
+                  title: const Text('Record Video'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _recordVideo();
+                  },
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

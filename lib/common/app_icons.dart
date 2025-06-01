@@ -1,0 +1,53 @@
+class AppIcons {
+  //Post Widget Icon
+  static const String favorite = "assets/icons/favourite.png";
+  static const String heart_filled = "assets/icons/heart_filled.png";
+   static const String heart_outlined = "assets/icons/heart_outlined.png";
+  static const String heart = "assets/icons/heart2.png";
+  static const String share = "assets/icons/share.png";
+  static const String comment = "assets/icons/comment2.png";
+  static const String repost = "assets/icons/repeat.png";
+  static const String circle = "assets/icons/dual_circle.png";
+  static const String event_link = "assets/icons/eventlink.png";
+  static const String eyes = "assets/icons/eyes.png";
+  static const String service_link = "assets/icons/servicelink.png";
+  static const String group_name = "assets/icons/groupname.png";
+  static const String three_dot = "assets/icons/three_dot.png";
+  static const String bell = "assets/icons/bell2.png";
+  static const String calender = "assets/icons/calender2.png";
+  static const String chessButton = "assets/icons/chess_with_best.png";
+  static const String message = "assets/icons/message.png";
+  static const String star = "assets/icons/star.png";
+  static const String search = "assets/icons/search.png";
+  static const String torch = "assets/icons/torch.png";
+  static const String addIcon = "assets/icons/addIcon.png";
+  static const String rectangle = "assets/icons/rectangle.png";
+  static const String emoji = "assets/icons/face.png";
+  static const String pin = "assets/icons/pin.png";
+  static const String forward = "assets/icons/forward.png";
+  static const String person = "assets/icons/person.png";
+  static const String bookmark = "assets/icons/bookmark.png";
+  static const String unfollow = "assets/icons/unfollow.png";
+  static const String report = "assets/icons/report.png";
+  static const String delete = "assets/icons/delete.png";
+  
+  static const String cross = "assets/icons/cross.png";
+  
+  static const String camera = "assets/icons/camera.png";
+  static const String image = "assets/icons/image.png";
+  static const String mic = "assets/icons/mic.png";
+
+  //Bottom Bar Widget Icon
+  static const String home = "assets/icons/home.png";
+  static const String reel = "assets/icons/reel.png";
+  static const String add_item = "assets/icons/add_item.png";
+  static const String notification = "assets/icons/notification.png";
+  static const String profile = "assets/icons/profile.png";
+
+  static const String drop_down = "assets/icons/drop_down.png";
+
+  //Search Screen
+  static const String searchIcon2 = "assets/icons/search2.png";
+  static const String filter = "assets/icons/search_filter.png";
+  static const String back_arrow = "assets/icons/back_icon.png";
+}

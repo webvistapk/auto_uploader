@@ -20,6 +20,7 @@ class UserProfile {
   final int? following_count;
   final String? privacy;
   final Roles? roles;
+  final String? profileUrl;
 
   UserProfile({
     required this.id,
@@ -39,28 +40,29 @@ class UserProfile {
     this.following_count,
     this.privacy,
     this.roles,
+    this.profileUrl,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      id: json['id'],
-      username: json['username'],
-      email: json['email'],
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      phoneNumber: json['phone_number'],
-      description: json['description'],
-      position: json['position'],
-      organization: json['organization'],
-      address: json['address'],
-      city: json['city'],
-      country: json['country'],
-      website: json['website'],
-      followers_count: json['followers_count'],
-      following_count: json['following_count'],
-      privacy: json['privacy'],
-      roles: json['roles'] != null ? Roles.fromJson(json['roles']) : null,
-    );
+        id: json['id'],
+        username: json['username'],
+        email: json['email'],
+        firstName: json['first_name'],
+        lastName: json['last_name'],
+        phoneNumber: json['phone_number'],
+        description: json['description'],
+        position: json['position'],
+        organization: json['organization'],
+        address: json['address'],
+        city: json['city'],
+        country: json['country'],
+        website: json['website'],
+        followers_count: json['followers_count'] ?? 0,
+        following_count: json['following_count'] ?? 0,
+        privacy: json['privacy'],
+        roles: json['roles'] != null ? Roles.fromJson(json['roles']) : null,
+        profileUrl: json['profile_image']);
   }
 
   Map<String, dynamic> toJson() {
@@ -78,8 +80,8 @@ class UserProfile {
       'city': city,
       'country': country,
       'website': website,
-      'followers_count': followers_count,
-      'following_count': following_count,
+      'followers_count': followers_count ?? 0,
+      'following_count': following_count ?? 0,
       'privacy': privacy,
       'roles': roles?.toJson(), // Assuming Roles class also has a toJson method
     };
