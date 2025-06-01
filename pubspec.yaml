@@ -56,7 +56,7 @@ dependencies:
   card_swiper: ^3.0.1
  
   image_picker:
-  permission_handler: ^11.0.1
+  permission_handler: ^12.0.0+1
   dotted_border: 
   
 
@@ -64,7 +64,7 @@ dependencies:
   shimmer: ^3.0.0
   carousel_slider: ^5.0.0
   photo_manager: ^3.5.1
-  path_provider: ^2.1.3
+  path_provider: ^2.1.5
   flutter_screenutil: ^5.9.3
   font_awesome_flutter: ^10.8.0
   camera: ^0.10.5+9
@@ -88,6 +88,7 @@ dependencies:
   geolocator: ^11.1.0
   geocoding: ^3.0.0
   percent_indicator: ^4.2.5
+  camera_camera: ^3.0.0
  
   
 

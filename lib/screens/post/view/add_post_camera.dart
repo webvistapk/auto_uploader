@@ -9,6 +9,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/post/post_reels.dart';
+import 'package:mobile/screens/post/view/camera/camera.dart';
+import 'package:mobile/screens/post/view/camera/preview_screen.dart';
+import 'package:mobile/utils/custom_navigations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:video_player/video_player.dart';
@@ -29,7 +32,26 @@ class AddPostCameraScreen extends StatefulWidget {
 class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     with WidgetsBindingObserver {
   late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
+  Future<void>? _initializeControllerFuture; // Make nullable
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final camera = cameras.first;
+    _controller = CameraController(camera, ResolutionPreset.ultraHigh);
+
+    _initializeControllerFuture = _controller.initialize();
+
+    // Rebuild UI after initialization future is assigned
+    if (mounted) setState(() {});
+  }
+
   XFile? _capturedFile;
   bool _isVideo = false;
   bool _isRecording = false;
@@ -40,15 +62,15 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
   Timer? _recordingTimer;
   Duration _recordingDuration = Duration.zero;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _videoPlayerController = null;
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addObserver(this);
+  //   _videoPlayerController = null;
 
-    _chewieController?.dispose(); // Dispose chewie properly
-    _initializeCamera();
-  }
+  //   _chewieController?.dispose(); // Dispose chewie properly
+  //   _initializeCamera();
+  // }
 
   @override
   void dispose() {
@@ -59,15 +81,15 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     super.dispose();
   }
 
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    final camera = cameras.first;
-    _controller = CameraController(camera, ResolutionPreset.low);
+  // Future<void> _initializeCamera() async {
+  //   final cameras = await availableCameras();
+  //   final camera = cameras.first;
+  //   _controller = CameraController(camera, ResolutionPreset.low);
 
-    _initializeControllerFuture = _controller.initialize();
+  //   _initializeControllerFuture = _controller.initialize();
 
-    if (mounted) setState(() {});
-  }
+  //   if (mounted) setState(() {});
+  // }
 
   Future<String> _getFilePath(String ext) async {
     final directory = await getTemporaryDirectory();
@@ -94,6 +116,10 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     if (_isRecording) return;
     try {
       await _initializeControllerFuture;
+
+      // Dispose old video controllers first if any
+      await _disposeVideoControllers();
+
       await _controller.startVideoRecording();
 
       // Reset progress and timer
@@ -101,11 +127,18 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
       _recordingDuration = Duration.zero;
 
       _progressTimer =
-          Timer.periodic(const Duration(milliseconds: 50), (timer) {
+          Timer.periodic(const Duration(milliseconds: 100), (timer) {
         setState(() {
-          // Progress spinner infinite loop
-          _progress += 0.02;
-          if (_progress > 1) _progress = 0;
+          _recordingDuration += const Duration(milliseconds: 100);
+          // For example, max 15 seconds video
+          final maxDuration = Duration(seconds: 15);
+          _progress =
+              _recordingDuration.inMilliseconds / maxDuration.inMilliseconds;
+          if (_progress >= 1) {
+            _progress = 1.0;
+            _onLongPressEnd(); // Auto stop recording when max reached
+            timer.cancel();
+          }
         });
       });
 
@@ -134,29 +167,19 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
       _progressTimer?.cancel();
       _progressTimer = null;
 
-      _recordingTimer?.cancel();
-      _recordingTimer = null;
-
-      // Dispose previous controllers
-      await _chewieController?.pause();
-      _chewieController?.dispose();
-      _chewieController = null;
-
-      await _videoPlayerController?.pause();
-      await _videoPlayerController?.dispose();
-      _videoPlayerController = null;
-
       final file = File(video.path);
 
-      // Give time for file to flush
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Wait for the file to be fully written — increase delay if needed
+      await Future.delayed(const Duration(milliseconds: 400));
 
       final newVideoController = VideoPlayerController.file(file);
       await newVideoController.initialize();
 
       if (!mounted) return;
 
-      // Setup ChewieController
+      // Dispose old controllers properly before assigning new
+      await _disposeVideoControllers();
+
       _chewieController = ChewieController(
         videoPlayerController: newVideoController,
         autoPlay: true,
@@ -168,9 +191,7 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
           bufferedColor: Colors.white70,
           backgroundColor: Colors.white30,
         ),
-        placeholder: Container(
-          color: Colors.black,
-        ),
+        placeholder: Container(color: Colors.black),
       );
 
       setState(() {
@@ -182,7 +203,26 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
         _recordingDuration = Duration.zero;
       });
     } catch (e) {
-      print('Error stopping video recording: $e');
+      log('Error stopping video recording: $e');
+      setState(() {
+        _isRecording = false;
+        _progress = 0.0;
+        _recordingDuration = Duration.zero;
+      });
+    }
+  }
+
+  Future<void> _disposeVideoControllers() async {
+    try {
+      await _chewieController?.pause();
+      _chewieController?.dispose();
+      _chewieController = null;
+
+      await _videoPlayerController?.pause();
+      await _videoPlayerController?.dispose();
+      _videoPlayerController = null;
+    } catch (e) {
+      print('Error disposing video controllers: $e');
     }
   }
 
@@ -314,7 +354,18 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                     ? (_chewieController != null &&
                             _chewieController!
                                 .videoPlayerController.value.isInitialized
-                        ? Chewie(controller: _chewieController!)
+                        ? GestureDetector(
+                            onTap: () {
+                              final controller =
+                                  _chewieController!.videoPlayerController;
+                              if (controller.value.isPlaying) {
+                                controller.pause();
+                              } else {
+                                controller.play();
+                              }
+                            },
+                            child: Chewie(controller: _chewieController!),
+                          )
                         : const Center(
                             child:
                                 CircularProgressIndicator(color: Colors.white),
@@ -503,7 +554,9 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
         height: bottomHeight,
         child: _buildBottomNav(),
       ),
-      body: Stack(
+      body:
+          // Flexible(child: CustomCameraScreen())
+          Stack(
         children: [
           FutureBuilder<void>(
             future: _initializeControllerFuture,
