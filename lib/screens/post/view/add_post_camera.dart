@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:chewie/chewie.dart';
@@ -108,9 +109,9 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
         });
       });
 
-      _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _recordingTimer = Timer.periodic(const Duration(seconds: 0), (timer) {
         setState(() {
-          _recordingDuration += const Duration(seconds: 1);
+          _recordingDuration += const Duration(seconds: 0);
         });
         print('Recording timer: $_recordingDuration');
       });
