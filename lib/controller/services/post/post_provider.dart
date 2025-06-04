@@ -127,7 +127,10 @@ class PostProvider extends ChangeNotifier {
       String? pollTitle,
       String? pollDescription,
       List<String>? pollOptions,
-      required List<String>? interactions}) async {
+      required List<String>? interactions,
+      required List<String> dmReplies, // Interaction options
+      required List<String> dmComments // Interaction options
+      }) async {
     try {
       _isLoading = true;
       notifyListeners();
@@ -148,7 +151,9 @@ class PostProvider extends ChangeNotifier {
             postTitle: postTitle,
             postDescription: postDescription,
             interactions: interactions!,
-            location: location);
+            location: location,
+            dmReplies: dmReplies,
+            dmComments: dmComments);
 
         if (response != null) {
           log("Post: $response");

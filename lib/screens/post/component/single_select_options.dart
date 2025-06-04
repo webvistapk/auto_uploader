@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 
-class PrivacyOptionsSheet extends StatefulWidget {
-  final List<String> initialPrivacyPolicy;
-  final UserProfile userProfile;
+class SingleSelectOptionsSheet extends StatefulWidget {
+  final List<String> initialValues;
+  final List<Map<String, dynamic>> finalValueList;
 
-  const PrivacyOptionsSheet(
-      {Key? key, required this.initialPrivacyPolicy, required this.userProfile})
+  final String titile;
+
+  const SingleSelectOptionsSheet(
+      {Key? key,
+      required this.initialValues,
+      this.titile = "Privacy",
+      required this.finalValueList})
       : super(key: key);
 
   @override
-  _PrivacyOptionsSheetState createState() => _PrivacyOptionsSheetState();
+  _SingleSelectOptionsSheetState createState() =>
+      _SingleSelectOptionsSheetState();
 }
 
-class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
+class _SingleSelectOptionsSheetState extends State<SingleSelectOptionsSheet> {
   late String selectedOption;
 
   // Only one option can be selected now (single-select radio behavior)
@@ -23,25 +29,13 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
   void initState() {
     super.initState();
     setPrivacy();
-    selectedOption = widget.initialPrivacyPolicy.isNotEmpty
-        ? widget.initialPrivacyPolicy.first.toLowerCase()
+    selectedOption = widget.initialValues.isNotEmpty
+        ? widget.initialValues.first.toLowerCase()
         : 'followers';
   }
 
   setPrivacy() {
-    privacyOptions = [
-      {
-        'label': 'Followers',
-        'value': 'followers',
-        'count': '${widget.userProfile.followers_count} people'
-      },
-      {'label': 'Public', 'value': 'public', 'count': 'Every people'},
-      {
-        'label': 'Following',
-        'value': 'following',
-        'count': '${widget.userProfile.following_count} people'
-      },
-    ];
+    privacyOptions = widget.finalValueList;
     if (mounted) return;
     setState(() {});
   }
@@ -61,8 +55,8 @@ class _PrivacyOptionsSheetState extends State<PrivacyOptionsSheet> {
       child: Column(
         children: [
           const SizedBox(height: 12),
-          const Text(
-            'Privacy',
+          Text(
+            widget.titile,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),

@@ -489,11 +489,10 @@ class _PostWidgetState extends State<PostWidget> {
                                         : "${widget.postModel.repostCount}",
                                     isBold: isIconBold))
                             : SizedBox(),
-                    if (!widget.postModel.interactions!
-                        .contains('comments')) ...[
+                    if (widget.postModel.showComment == true) ...[
                       const SizedBox(width: 10),
                       GestureDetector(
-                        onTap: widget.showCommentSection
+                        onTap: widget.postModel.showComment == false
                             ? null
                             : () => showComments(
                                   widget.postId,
@@ -539,6 +538,23 @@ class _PostWidgetState extends State<PostWidget> {
                                 color: Colors.black,
                               )),
                           Text('', style: TextStyle(fontSize: 24.sp))
+                        ],
+                      ),
+                    ],
+                    if (widget.postModel.showDm == true) ...[
+                      const SizedBox(width: 10),
+                      Row(
+                        children: [
+                          GestureDetector(
+                              onTap: () {
+                                // debugger();
+                              },
+                              child: const Icon(
+                                Icons.reply_rounded,
+                                size: 24,
+                                color: Colors.black,
+                              )),
+                          Text('Replies', style: TextStyle(fontSize: 24.sp))
                         ],
                       ),
                     ],

@@ -8,7 +8,7 @@ import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/post/component/privacy_option_sheet.dart';
+import 'package:mobile/screens/post/component/single_select_options.dart';
 import 'package:mobile/screens/post/component/tag_option_sheet.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
@@ -85,10 +85,21 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     List<String> result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
-      builder: (_) => PrivacyOptionsSheet(
-        initialPrivacyPolicy: privacyPolicy,
-        userProfile: widget.userProfile!,
-      ),
+      builder: (_) => SingleSelectOptionsSheet(
+          initialValues: privacyPolicy,
+          finalValueList: [
+            {
+              'label': 'Followers',
+              'value': 'followers',
+              'count': '${widget.userProfile?.followers_count} people'
+            },
+            {'label': 'Public', 'value': 'public', 'count': 'Every people'},
+            {
+              'label': 'Following',
+              'value': 'following',
+              'count': '${widget.userProfile?.following_count} people'
+            },
+          ]),
     );
 
     if (result != null) {
