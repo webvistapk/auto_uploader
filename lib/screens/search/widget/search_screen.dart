@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/prefrences/prefrences.dart';
@@ -147,7 +148,13 @@ class _SearchScreenState extends State<SearchScreen> {
                     controller: _searchController,
                     onChanged: _onSearchChanged,
                     decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Image.asset(AppIcons.searchIcon,),
+                      ),
+                      prefixIconConstraints: BoxConstraints(
+                        maxWidth: 35
+                      ),
                       hintText: 'Search...',
                       border: InputBorder.none,
                       hintStyle:TextStyle(fontSize: 14),
@@ -159,7 +166,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 onTap: () {
                   // Handle filter or additional actions if required
                 },
-                child: Icon(Icons.filter_list, color: Colors.grey),
+                child: Image.asset(AppIcons.SearchFilter, width: 42.sp,),
               ),
             ],
           ),

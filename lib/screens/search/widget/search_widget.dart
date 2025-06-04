@@ -13,6 +13,7 @@ import 'package:mobile/controller/store/search/search_store.dart';
 import 'package:mobile/common/utils.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/controller/services/search/search_service.dart';
+import 'package:mobile/screens/search/widget/search_post_widget.dart';
 
 class SearchWidget extends StatefulWidget {
   final String query;
@@ -26,12 +27,21 @@ class SearchWidget extends StatefulWidget {
 class _SearchWidgetState extends State<SearchWidget>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String selectedCategory = 'Content';
+  String selectedCategory = 'People'; // Changed default to People
   bool isLoading = false;
-
+  List<String> imageList = [
+    'assets/images/TestImage (1).png',
+    'assets/images/TestImage (2).png',
+    'assets/images/TestImage (3).png',
+    'assets/images/TestImage (4).png',
+    'assets/images/girl-image.png',
+    'assets/images/girl-image.png',
+    
+  ];
   Map<String, List<UserProfile>> data = {
-    'Content': [],
-    'People': [],
+   
+    'People': [], // This will now hold user search results
+     'Content': [],
     'Business': [],
     'Jobs': [],
     'Events': [],
@@ -50,7 +60,7 @@ class _SearchWidgetState extends State<SearchWidget>
   @override
   void initState() {
     super.initState();
-    
+
     _tabController = TabController(length: 6, vsync: this);
     _tabController.addListener(() {
       setState(() {
@@ -63,8 +73,6 @@ class _SearchWidgetState extends State<SearchWidget>
     } else {
       _fetchSearchResults(context, widget.query, widget.authToken);
     }
-
-    print("Init State is called");
   }
 
   @override
@@ -81,16 +89,15 @@ class _SearchWidgetState extends State<SearchWidget>
       isLoading = true;
     });
     authToken = await Prefrences.getAuthToken();
-    // debugger();
+
     try {
       if (query.isNotEmpty) {
         final userResults =
             await SearchService.fetchSearchResults(query, authToken);
-        print("Auth Token ${authToken}");
-        print("User Results ${userResults}");
-        // debugger();
+
         setState(() {
-          data['Content'] = userResults;
+          // Changed to store results in People instead of Content
+          data['People'] = userResults;
           data['Recents'] = userResults;
         });
       }
@@ -107,28 +114,20 @@ class _SearchWidgetState extends State<SearchWidget>
   void _removeUser(int index) {
     setState(() {
       data[selectedCategory]!.removeAt(index);
-      if (selectedCategory != 'Content') {
-        data['Content']!.removeAt(index);
+      if (selectedCategory != 'People') {
+        // Changed from Content to People
+        data['People']!.removeAt(index);
       }
     });
   }
 
-  void _navigateToProfile(BuildContext context, int userId)async {
+  void _navigateToProfile(BuildContext context, int userId) async {
     SearchStore.searchQuery.value = null;
-   
+
     Navigator.push(
         context,
         CupertinoDialogRoute(
-            builder: (_) => ProfileScreen(id: userId), context: context,));
-    // Navigator.of(context).pushAndRemoveUntil(
-    //   MaterialPageRoute(
-    //     builder: (context) => ProfileScreen(
-    //       id: userId,
-    //     ),
-    //     settings: RouteSettings(arguments: userId),
-    //   ),
-    //   (Route<dynamic> route) => false, // Remove all previous routes
-    // );
+            builder: (_) => ProfileScreen(id: userId), context: context));
   }
 
   @override
@@ -140,19 +139,19 @@ class _SearchWidgetState extends State<SearchWidget>
   String _getCategoryName(int index) {
     switch (index) {
       case 0:
-        return 'Content';
-      case 1:
         return 'People';
+      case 1:
+        return 'Content'; 
       case 2:
         return 'Business';
       case 3:
         return 'Jobs';
       case 4:
-        return 'Event';
+        return 'Events';
       case 5:
         return 'Clubs';
       default:
-        return 'Content';
+        return 'People'; // Changed default to People
     }
   }
 
@@ -162,10 +161,8 @@ class _SearchWidgetState extends State<SearchWidget>
 
   @override
   Widget build(BuildContext context) {
-    // debugger();
     final results = _searchUsers(selectedCategory);
-    //debugger();
-    //final recommended=_searchUsers("")
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -179,93 +176,90 @@ class _SearchWidgetState extends State<SearchWidget>
           padding: EdgeInsets.symmetric(horizontal: 20),
           isScrollable: true,
           labelStyle: TextStyle(
-                  fontSize: 12,fontFamily: 'Greycliff CF',
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff18181)),
-          unselectedLabelStyle:  TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,fontFamily: 'Greycliff CF',
-                  color: Color(0xff848484)),
+              fontSize: 12,
+              fontFamily: 'Greycliff CF',
+              fontWeight: FontWeight.bold,
+              color: Color(0xff18181)),
+          unselectedLabelStyle: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Greycliff CF',
+              color: Color(0xff848484)),
           tabs: const [
+            Tab(child: Text('People')), // People is now the second tab
             Tab(child: Text('Content')),
-            Tab(child: Text('People')),
             Tab(child: Text('Business')),
             Tab(child: Text('Jobs')),
             Tab(child: Text('Events')),
             Tab(child: Text('Clubs')),
           ],
         ),
-        const SizedBox(height: 40),
+        
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Text(
-              //   'Recents',
-              //   style: GoogleFonts.publicSans(
-              //     textStyle: TextStyle(
-              //       fontSize: 16,
-              //       fontWeight: FontWeight.bold
-              //     )
-              //   ),
-              // ),
-              // TextButton(
-              //   onPressed: () {
-              //     // Implement "See all" functionality
-              //   },
-              //   child:
-              //       const Text('See all', style: TextStyle(color: Colors.red)),
-              // ),
+              // You can add content specific headers here if needed
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        
         Expanded(
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
-              : results.isEmpty
+              : selectedCategory == 'People' && results.isEmpty
                   ? Center(
-                      child: Text("No Result Found!"),
+                      child: Text("No People Found!"),
                     )
-                  : ListView.builder(
-                      itemCount: results.length,
-                      itemBuilder: (context, index) {
-                        final user = results[index];
-                        return ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              user.profileUrl != null
-                                  ? ApiURLs.baseUrl.replaceAll("/api/",'')+user.profileUrl.toString()
-                                  : AppUtils.userImage,
-                              width: 38,
-                              height: 38,
-                            ),
-                          ),
-                          title: Text(
-                            user.username!,
-                            style: TextStyle(
-                                    color: Color(0xff34342F),fontFamily: 'Greycliff CF',
+                  :selectedCategory=="Content"?
+                  SearchPostWidget(
+                        imageList: imageList,
+                      )
+                  : selectedCategory != 'People'
+                      ? Center(
+                        child: Text("No Data Found"),
+                      )
+                      : ListView.builder(
+                          itemCount: results.length,
+                          itemBuilder: (context, index) {
+                            final user = results[index];
+                            return ListTile(
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  user.profileUrl != null
+                                      ? ApiURLs.baseUrl
+                                              .replaceAll("/api/", '') +
+                                          user.profileUrl.toString()
+                                      : AppUtils.userImage,
+                                  width: 38,
+                                  height: 38,
+                                ),
+                              ),
+                              title: Text(
+                                user.username!,
+                                style: TextStyle(
+                                    color: Color(0xff34342F),
+                                    fontFamily: 'Greycliff CF',
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16),
-                          ),
-                          subtitle: Text('${user.firstName} ${user.lastName}',
-                              style: TextStyle(
-                                      color: Color(0xff34342F),
-                                      fontSize: 14)),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.close,
-                                size: 10, color: Color(0xffB5B5B5)),
-                            onPressed: () {
-                              _removeUser(index);
-                            },
-                          ),
-                          onTap: () => _navigateToProfile(
-                              context, user.id), // Navigate to profile on tap
-                        );
-                      },
-                    ),
+                              ),
+                              subtitle: Text(
+                                  '${user.firstName} ${user.lastName}',
+                                  style: TextStyle(
+                                      color: Color(0xff34342F), fontSize: 14)),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.close,
+                                    size: 10, color: Color(0xffB5B5B5)),
+                                onPressed: () {
+                                  _removeUser(index);
+                                },
+                              ),
+                              onTap: () => _navigateToProfile(context, user.id),
+                            );
+                          },
+                        ),
         ),
       ],
     );
