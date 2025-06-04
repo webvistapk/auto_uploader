@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/controller/services/post/tags/tags_provider.dart';
 import 'package:mobile/models/post/tag_people.dart';
 import 'package:mobile/prefrences/user_prefrences.dart';
@@ -40,9 +41,9 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
   void _onTagUserSelected(int id) {
     setState(() {
       if (widget.selectedTagUser.contains(id)) {
-        widget.selectedTagUser.remove(id); // Deselect if already selected
+        widget.selectedTagUser.remove(id); // Deselect
       } else {
-        widget.selectedTagUser.add(id); // Select if not selected
+        widget.selectedTagUser.add(id); // Select
       }
     });
   }
@@ -59,8 +60,9 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
     var tagUsers = await pro.getTagUsersList(futureUser!);
 
     if (tagUsers.isEmpty) {
-      print(tagUsers);
+      debugPrint("No tag users found");
     } else {
+      // Ensure unique users
       List<TagUser> uniqueTagUsers = tagUsers.toSet().toList();
 
       setState(() {
@@ -76,133 +78,183 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
 
     return pro.isLoading
         ? _buildShimmerEffect()
-        : Container(
-            padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(),
-                    Text(
-                      "Tag People",
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      iconSize: 24,
-                    ),
-                  ],
+        : SafeArea(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  cursorColor: Colors.grey,
-                  controller: _textController,
-                  decoration: InputDecoration(
-                    hintText: 'Search...',
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    border: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
                   ),
-                  onChanged: (value) {
-                    _filterItems(value);
-                  },
-                ),
-                const SizedBox(height: 10),
-                if (_filteredItems.isEmpty)
-                  SizedBox(
-                    height: 100,
-                    child: Center(
-                      child: Text(
-                        "No friends found",
-                        style: Theme.of(context).textTheme.titleMedium,
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header Row
+                  Row(
+                    children: [
+                      const Spacer(),
+                      Text(
+                        "Tag People",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 28),
+                        onPressed: () => Navigator.of(context).pop(),
+                        splashRadius: 24,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Search Box
+                  TextField(
+                    controller: _textController,
+                    cursorColor: Colors.grey.shade600,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      hintText: 'Search people...',
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
                       ),
                     ),
+                    onChanged: _filterItems,
                   ),
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: _filteredItems.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () =>
-                            _onTagUserSelected(_filteredItems[index].id),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Checkbox(
-                              activeColor: Colors.red,
-                              value: widget.selectedTagUser
-                                  .contains(_filteredItems[index].id),
-                              onChanged: (_) =>
-                                  _onTagUserSelected(_filteredItems[index].id),
-                            ),
-                            CircleAvatar(
-                                child: const Icon(Icons.person), radius: 20),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${_filteredItems[index].firstName} ${_filteredItems[index].lastName}",
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                  Text(
-                                    _filteredItems[index].username,
-                                    style: const TextStyle(
-                                        fontSize: 14, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+
+                  const SizedBox(height: 12),
+
+                  // Empty State
+                  if (_filteredItems.isEmpty)
+                    SizedBox(
+                      height: 100,
+                      child: Center(
+                        child: Text(
+                          "No friends found",
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
-                      );
-                    },
-                    separatorBuilder: (context, index) => const Divider(),
+                      ),
+                    ),
+
+                  // List of Users
+                  Expanded(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: _filteredItems.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final user = _filteredItems[index];
+                        final isSelected =
+                            widget.selectedTagUser.contains(user.id);
+
+                        return ListTile(
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 0),
+                          leading: CircleAvatar(
+                            radius: 22,
+                            backgroundColor: Colors.grey.shade300,
+                            child: user.profileImage != null &&
+                                    user.profileImage!.isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(22),
+                                    child: Image.network(
+                                      '${ApiURLs.baseUrl2}${user.profileImage!}',
+                                      fit: BoxFit.cover,
+                                      width: 44,
+                                      height: 44,
+                                    ),
+                                  )
+                                : const Icon(Icons.person, color: Colors.white),
+                          ),
+                          title: Text(
+                            "${user.firstName} ${user.lastName}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: Text(
+                            user.username,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          trailing: GestureDetector(
+                            onTap: () => _onTagUserSelected(user.id),
+                            child: Container(
+                              height: 28,
+                              width: 28,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isSelected
+                                    ? Colors.red
+                                    : Colors.transparent,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.red
+                                      : Colors.grey.shade400,
+                                  width: 2,
+                                ),
+                              ),
+                              child: isSelected
+                                  ? const Icon(Icons.check,
+                                      color: Colors.white, size: 18)
+                                  : null,
+                            ),
+                          ),
+                          onTap: () => _onTagUserSelected(user.id),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 12),
+                ],
+              ),
             ),
           );
   }
 
   Widget _buildShimmerEffect() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
       child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 10),
         itemCount: 6,
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.grey[300],
-            ),
-            title: Container(
-              width: double.infinity,
-              height: 16,
-              color: Colors.grey[300],
-            ),
-            subtitle: Container(
-              width: double.infinity,
-              height: 12,
-              color: Colors.grey[300],
-            ),
-          );
-        },
+        itemBuilder: (_, __) => ListTile(
+          leading: CircleAvatar(
+            radius: 22,
+            backgroundColor: Colors.grey.shade300,
+          ),
+          title: Container(
+            height: 16,
+            color: Colors.grey.shade300,
+            margin: const EdgeInsets.only(bottom: 6),
+          ),
+          subtitle: Container(
+            height: 12,
+            color: Colors.grey.shade300,
+            width: 150,
+          ),
+        ),
       ),
     );
   }

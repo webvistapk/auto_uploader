@@ -35,7 +35,7 @@ main() async {
     statusBarColor: Colors.transparent, // Transparent status bar
     statusBarIconBrightness: Brightness.dark, // Dark icons for the status bar
   ));
-  await NotificationService.initializeFCM();
+  // await NotificationService.initializeFCM();
   runApp(MyApp());
 }
 
@@ -62,9 +62,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FirebaseNotificationProvider()),
       ],
       child: ScreenUtilInit(
-         designSize: Size(889, 1940.71), // Set your Figma design size
-      minTextAdapt: true, // ✅ Prevents LateInitializationError
-      splitScreenMode: true, // ✅ Handles landscape mode better
+        designSize: Size(889, 1940.71), // Set your Figma design size
+        minTextAdapt: true, // ✅ Prevents LateInitializationError
+        splitScreenMode: true, // ✅ Handles landscape mode better
         child: GetMaterialApp(
             title: 'Fillet Social Media App',
             theme: ThemeData(

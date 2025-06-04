@@ -124,6 +124,7 @@ class _AddLocationPageState extends State<AddLocationPage>
       appBar: AppBar(
         backgroundColor: backgroundColor,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: Text(
           'Add Location',
           style: TextStyle(

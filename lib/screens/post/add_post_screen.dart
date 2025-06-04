@@ -100,7 +100,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
     List<String>? result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
-      builder: (_) => PrivacyOptionsSheet(initialPrivacyPolicy: privacyPolicy),
+      builder: (_) => PrivacyOptionsSheet(
+        initialPrivacyPolicy: privacyPolicy,
+        userProfile: widget.userProfile!,
+      ),
     );
 
     if (result != null) {
@@ -120,7 +123,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
       isDismissible: false,
       builder: (_) => InteractionsBottomSheet(
         initialSelectedOptions: interactionSheetOptions,
-        finalOptions: ['Comments', 'Polls'],
+        finalOptions: [
+          {'label': 'Comments', 'value': 'comments', 'count': ''},
+          {'label': 'Polls', 'value': 'polls', 'count': ''},
+        ],
       ),
     );
 
@@ -138,14 +144,22 @@ class _AddPostScreenState extends State<AddPostScreen> {
       isDismissible: false,
       builder: (_) => InteractionsBottomSheet(
         initialSelectedOptions: ["Post"],
-        finalOptions: ["Post", "Discource", "Reel"],
+        finalOptions: [
+          {'label': 'Post', 'value': 'post', 'count': '5000 posts'},
+          {
+            'label': 'Discourse',
+            'value': 'discourse',
+            'count': '5000 discourse'
+          },
+          {'label': 'Reel', 'value': 'reel', 'count': '1200 reels'},
+        ],
       ),
     );
 
     if (result != null) {
       log("Selected Options: $result");
       setState(() {
-        postType = result.toLowerCase();
+        postType = result[0].toLowerCase();
       });
     }
   }
@@ -482,7 +496,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                     Divider(color: Color(0xffD3D3D3)),
                     ListTile(
                       onTap: () {
-                        showInteractionsSheet(context);
+                        // showInteractionsSheet(context);
                       },
                       leading: Image.asset(
                         "assets/icons/engagement.png",
@@ -559,8 +573,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           log("Keywords: $keywords");
                           log("Tag User id: $selectedTagUsers");
                           log("Privacy Policy: $privacyPolicy");
+                          log("Post Type: $postType");
+                          log("Interactions: $interactionSheetOptions");
 
-                          if (interactionSheetOptions.contains('Polls') &&
+                          if (interactionSheetOptions.contains('polls') &&
                               widget.mediFiles.isNotEmpty) {
                             if (titleController.text.isEmpty) {
                               setState(() {

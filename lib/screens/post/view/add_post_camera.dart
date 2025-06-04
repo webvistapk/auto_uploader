@@ -62,16 +62,6 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
   Timer? _recordingTimer;
   Duration _recordingDuration = Duration.zero;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addObserver(this);
-  //   _videoPlayerController = null;
-
-  //   _chewieController?.dispose(); // Dispose chewie properly
-  //   _initializeCamera();
-  // }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -80,16 +70,6 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     _controller.dispose();
     super.dispose();
   }
-
-  // Future<void> _initializeCamera() async {
-  //   final cameras = await availableCameras();
-  //   final camera = cameras.first;
-  //   _controller = CameraController(camera, ResolutionPreset.low);
-
-  //   _initializeControllerFuture = _controller.initialize();
-
-  //   if (mounted) setState(() {});
-  // }
 
   Future<String> _getFilePath(String ext) async {
     final directory = await getTemporaryDirectory();
@@ -169,16 +149,31 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
 
       final file = File(video.path);
 
-      // Wait for the file to be fully written — increase delay if needed
-      await Future.delayed(const Duration(milliseconds: 400));
+      // Wait until file is ready
+      int retryCount = 0;
+      while ((!file.existsSync() || file.lengthSync() == 0) && retryCount < 5) {
+        await Future.delayed(const Duration(milliseconds: 300));
+        retryCount++;
+      }
 
-      final newVideoController = VideoPlayerController.file(file);
-      await newVideoController.initialize();
+      // Dispose existing video controllers before creating new one
+      await _disposeVideoControllers();
+      debugger();
+      final newVideoController = VideoPlayerController.file(file)
+        ..initialize().then((_) {
+          // Set looping and start playing
 
+          setState(() {});
+        });
+      newVideoController.setLooping(true);
+      newVideoController.play();
+      setState(() {});
       if (!mounted) return;
 
-      // Dispose old controllers properly before assigning new
-      await _disposeVideoControllers();
+      if (newVideoController.value.hasError) {
+        log('Video player error: ${newVideoController.value.errorDescription}');
+        return;
+      }
 
       _chewieController = ChewieController(
         videoPlayerController: newVideoController,
@@ -341,135 +336,139 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     );
   }
 
+  // UPDATED: _buildPreviewOverlay with proper Stack parent for Positioned widgets
   Widget _buildPreviewOverlay() {
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withOpacity(0.6),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            if (_capturedFile != null)
-              Positioned.fill(
-                child: _isVideo
-                    ? (_chewieController != null &&
-                            _chewieController!
-                                .videoPlayerController.value.isInitialized
-                        ? GestureDetector(
-                            onTap: () {
-                              final controller =
-                                  _chewieController!.videoPlayerController;
-                              if (controller.value.isPlaying) {
-                                controller.pause();
-                              } else {
-                                controller.play();
-                              }
-                            },
-                            child: Chewie(controller: _chewieController!),
-                          )
-                        : const Center(
-                            child:
-                                CircularProgressIndicator(color: Colors.white),
-                          ))
-                    : Image.file(File(_capturedFile!.path), fit: BoxFit.cover),
-              ),
-            Positioned(
-              bottom: 80,
-              child: Column(
-                children: [
-                  if (_isRecording)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text(
-                        _formatDuration(_recordingDuration),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withOpacity(0.6),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (_capturedFile != null)
+                  Positioned.fill(
+                    child: _isVideo
+                        ? (_chewieController != null &&
+                                _chewieController!
+                                    .videoPlayerController.value.isInitialized
+                            ? GestureDetector(
+                                onTap: () {
+                                  final controller =
+                                      _chewieController!.videoPlayerController;
+                                  if (controller.value.isPlaying) {
+                                    controller.pause();
+                                  } else {
+                                    controller.play();
+                                  }
+                                },
+                                child: Chewie(controller: _chewieController!),
+                              )
+                            : const Center(
+                                child: CircularProgressIndicator(
+                                    color: Colors.white),
+                              ))
+                        : Image.file(File(_capturedFile!.path),
+                            fit: BoxFit.cover),
+                  ),
+                Positioned(
+                  bottom: 80,
+                  child: Column(
                     children: [
-                      GestureDetector(
-                          onTap: () {
-                            if (_capturedFile != null) {
-                              // Create a list of files to pass (even if single file)
-                              final file = File(_capturedFile!.path);
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => AddPostScreen(
-                                    mediFiles: [file],
-                                    userProfile: widget.userProfile,
-                                    // type: "post", // Auto-detect media type
-                                  ),
-                                ),
-                              );
-                            } else {
-                              // Show error if no media captured
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('No media captured')),
-                              );
-                            }
-                          },
-                          child: SizedBox(
-                            width: 50,
-                            height: 25,
-                            child: Image.asset(
-                              "assets/icons/tick.png",
-                            ),
-                          )),
-                      const SizedBox(width: 40),
-                      ClipPath(
-                        clipper: LeftArrowClipper(),
-                        child: Material(
-                          color: Colors.white,
-                          child: InkWell(
-                            onTap: _reset,
-                            child: SizedBox(
-                              width: 50,
-                              height: 25,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child:
-                                    Image.asset("assets/icons/cross_post.png"),
-                              ),
+                      if (_isRecording)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text(
+                            _formatDuration(_recordingDuration),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
                             ),
                           ),
                         ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                              onTap: () {
+                                if (_capturedFile != null) {
+                                  // Create a list of files to pass (even if single file)
+                                  final file = File(_capturedFile!.path);
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => AddPostScreen(
+                                        mediFiles: [file],
+                                        userProfile: widget.userProfile,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('No media captured')),
+                                  );
+                                }
+                              },
+                              child: SizedBox(
+                                width: 50,
+                                height: 25,
+                                child: Image.asset(
+                                  "assets/icons/tick.png",
+                                ),
+                              )),
+                          const SizedBox(width: 40),
+                          ClipPath(
+                            clipper: LeftArrowClipper(),
+                            child: Material(
+                              color: Colors.white,
+                              child: InkWell(
+                                onTap: _reset,
+                                child: SizedBox(
+                                  width: 50,
+                                  height: 25,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Image.asset(
+                                        "assets/icons/cross_post.png"),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            if (_isRecording)
-              Positioned(
-                bottom: 20,
-                child: CircularPercentIndicator(
-                  radius: 36.0,
-                  lineWidth: 5.0,
-                  percent: _progress,
-                  progressColor: Colors.red,
-                  backgroundColor: Colors.white.withOpacity(0.4),
-                  circularStrokeCap: CircularStrokeCap.round,
-                  center: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.red,
+                ),
+                if (_isRecording)
+                  Positioned(
+                    bottom: 20,
+                    child: CircularPercentIndicator(
+                      radius: 36.0,
+                      lineWidth: 5.0,
+                      percent: _progress,
+                      progressColor: Colors.red,
+                      backgroundColor: Colors.white.withOpacity(0.4),
+                      circularStrokeCap: CircularStrokeCap.round,
+                      center: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.red,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-          ],
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 

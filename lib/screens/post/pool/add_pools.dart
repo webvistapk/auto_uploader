@@ -299,7 +299,7 @@ class _AddPollScreenState extends State<AddPollScreen> {
                           width: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            color: Colors.red,
+                            color: Colors.black,
                           ),
                         ),
                       ))

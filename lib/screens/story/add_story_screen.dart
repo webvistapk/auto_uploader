@@ -85,7 +85,10 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     List<String> result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
-      builder: (_) => PrivacyOptionsSheet(initialPrivacyPolicy: privacyPolicy),
+      builder: (_) => PrivacyOptionsSheet(
+        initialPrivacyPolicy: privacyPolicy,
+        userProfile: widget.userProfile!,
+      ),
     );
 
     if (result != null) {

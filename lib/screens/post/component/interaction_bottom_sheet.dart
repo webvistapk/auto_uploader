@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
 class InteractionsBottomSheet extends StatefulWidget {
-  final List<String>? initialSelectedOptions; // Parameter for initial values
-  List<String>? finalOptions;
+  final List<String>? initialSelectedOptions;
+  final List<Map<String, String>>? finalOptions;
 
-  InteractionsBottomSheet({this.initialSelectedOptions, this.finalOptions});
+  const InteractionsBottomSheet({
+    Key? key,
+    this.initialSelectedOptions,
+    this.finalOptions,
+  }) : super(key: key);
 
   @override
   _InteractionsBottomSheetState createState() =>
@@ -12,33 +16,31 @@ class InteractionsBottomSheet extends StatefulWidget {
 }
 
 class _InteractionsBottomSheetState extends State<InteractionsBottomSheet> {
-  late ValueNotifier<Set<String>> selectedOptions;
-
-  // Define available options
-  List<String> options = ['Comments', 'Polls'];
+  late Set<String> selectedOptions;
+  late List<Map<String, String>> options;
 
   @override
   void initState() {
     super.initState();
-    // if (widget.finalOptions!.isNotEmpty) {
-    if (widget.finalOptions == null) {
-      options = ["Post", "Reel"];
-    } else {
-      options = widget.finalOptions!;
-    }
-    // }
-    // Initialize with the provided initialSelectedOptions or an empty set
-    selectedOptions = ValueNotifier<Set<String>>(
-      widget.initialSelectedOptions != null
-          ? widget.initialSelectedOptions!.toSet()
-          : {},
-    );
+
+    // Default options if none provided
+    options = (widget.finalOptions == null || widget.finalOptions!.isEmpty)
+        ? [
+            {'label': 'Post', 'value': 'post', 'count': ''},
+            {'label': 'Reel', 'value': 'reel', 'count': ''},
+          ]
+        : widget.finalOptions!;
+
+    selectedOptions = widget.initialSelectedOptions != null
+        ? widget.initialSelectedOptions!.map((e) => e.toLowerCase()).toSet()
+        : <String>{};
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 300,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -47,74 +49,101 @@ class _InteractionsBottomSheetState extends State<InteractionsBottomSheet> {
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title Row with Close Button
-          Padding(
-            padding: const EdgeInsets.only(top: 15, right: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
-                const Text(
-                  "Choose Options",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context, selectedOptions.value.toList());
-                  },
-                  child: const Icon(Icons.close),
-                ),
-              ],
-            ),
+          const SizedBox(height: 12),
+          const Text(
+            'Choose Options',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10),
-          const Divider(),
-          // Options with checkboxes
+          const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
               itemCount: options.length,
               itemBuilder: (context, index) {
-                return _buildCheckboxOption(context, options[index]);
+                final option = options[index];
+                final value = option['value']!.toLowerCase();
+                final isSelected = selectedOptions.contains(value);
+                final count = option['count'] ?? '';
+
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        selectedOptions.remove(value);
+                      } else {
+                        selectedOptions.add(value);
+                      }
+                    });
+                  },
+                  title: Text(
+                    option['label'] ?? '',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
+                  subtitle: count.isNotEmpty
+                      ? Text(
+                          count,
+                          style: const TextStyle(color: Colors.black),
+                        )
+                      : null,
+                  trailing: Container(
+                    height: 30,
+                    width: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected ? Colors.black : Colors.white,
+                      border: Border.all(
+                        color: isSelected ? Colors.black : Colors.grey,
+                      ),
+                    ),
+                    child: Center(
+                      child: Container(
+                        height: 5,
+                        width: 5,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
               },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      selectedOptions.isNotEmpty ? Colors.black : Colors.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: selectedOptions.isNotEmpty
+                    ? () {
+                        Navigator.pop(context, selectedOptions.toList());
+                      }
+                    : null, // Disabled when no selection
+                child: const Text(
+                  'Done',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white),
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  // Custom method to build each checkbox option
-  Widget _buildCheckboxOption(BuildContext context, String option) {
-    return ValueListenableBuilder<Set<String>>(
-      valueListenable: selectedOptions,
-      builder: (context, selectedSet, _) {
-        return CheckboxListTile(
-          title: Text(
-            option,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          activeColor: Colors.blue,
-          value:
-              selectedSet.contains(option), // Check if this option is selected
-          onChanged: (bool? selected) {
-            if (selected == true) {
-              selectedSet.add(option);
-            } else {
-              selectedSet.remove(option);
-            }
-            selectedOptions.value = {...selectedSet}; // Update the set
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    selectedOptions.dispose(); // Dispose ValueNotifier to prevent memory leaks
-    super.dispose();
   }
 }
