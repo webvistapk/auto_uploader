@@ -369,6 +369,9 @@ class _UploadFromGalleryState extends State<UploadFromGallery> {
   Widget _buildPreviewArea() {
     return Container(
       color: Colors.black,
+      constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.width, // Makes it square
+    ),
       child: FutureBuilder<Widget>(
         future: _buildPreview(),
         builder: (context, snapshot) {

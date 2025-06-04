@@ -61,6 +61,7 @@ class _FileCarouselState extends State<FileCarousel> {
               autoPlay: true,
               enlargeCenterPage: true,
               aspectRatio: 16 / 9,
+              viewportFraction: 0.9,
               enableInfiniteScroll: false,
               onPageChanged: (index, reason) {
                 setState(() {
