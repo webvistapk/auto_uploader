@@ -378,7 +378,8 @@ class _PostWidgetState extends State<PostWidget> {
 
                       Row(
                         children: [
-                          if (!widget.isUserPost) ...[
+                          if (!widget.isUserPost &&
+                              widget.postModel.showDm == true) ...[
                             GestureDetector(
                                 onTap: () {
                                   CreateChat(widget.userID.toString(),
@@ -541,28 +542,11 @@ class _PostWidgetState extends State<PostWidget> {
                         ],
                       ),
                     ],
-                    if (widget.postModel.showDm == true) ...[
-                      const SizedBox(width: 10),
-                      Row(
-                        children: [
-                          GestureDetector(
-                              onTap: () {
-                                // debugger();
-                              },
-                              child: const Icon(
-                                Icons.reply_rounded,
-                                size: 24,
-                                color: Colors.black,
-                              )),
-                          Text('Replies', style: TextStyle(fontSize: 24.sp))
-                        ],
-                      ),
-                    ],
                   ],
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 2,
             ),
             Padding(
