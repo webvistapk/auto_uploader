@@ -34,7 +34,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     
 
     final String messageText = _messageController.text.trim();
- if (messageText.isEmpty && _selectedImages.isEmpty) {
+ if (messageText.isEmpty ) {
     setState(() {
       _temporaryErrorMessage = "Message field must not be empty";
     });

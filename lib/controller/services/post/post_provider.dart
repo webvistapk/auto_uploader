@@ -724,11 +724,7 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 201) {
         ToastNotifier.showSuccessToast(context, "Message sent successfully");
         return response;
-      } else {
-        final body = jsonDecode(response.body);
-final errorMessage = body['message']['message'][0];
-            ToastNotifier.showErrorToast(context, "Error: $errorMessage");
-      }
+      } 
     } catch (e) {
       print('Error sending message: $e');
       ToastNotifier.showErrorToast(context, "Error sending message");
