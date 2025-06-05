@@ -1,5 +1,5 @@
 class PostResponse {
-  final String? totalcount;
+  final int? totalcount;
   final bool? has_next_page;
   final int? next_offset;
   List<PostModel>? postModel;
@@ -9,7 +9,7 @@ class PostResponse {
 
   factory PostResponse.fromJson(Map<String, dynamic> json) {
     return PostResponse(
-      totalcount: json["total_count"] ?? '',
+      totalcount: json["total_count"] ?? 0,
       has_next_page: json['has_next_page'] ?? false,
       next_offset: json['next_offset'] ?? 0,
       postModel: (json['posts'] as List)
@@ -279,3 +279,7 @@ class User {
     );
   }
 }
+
+
+
+

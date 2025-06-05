@@ -499,7 +499,7 @@ class _PostAndReelsState extends State<PostAndReels>
             ),
           ),
           Container(
-            width: 80, // This will constrain the total width
+            width: 60, // This will constrain the total width
             child: Row(
               mainAxisSize:
                   MainAxisSize.min, // Makes the row take minimum space
@@ -520,6 +520,7 @@ class _PostAndReelsState extends State<PostAndReels>
                               child: Text(
                                 album.name,
                                 style: TextStyle(
+                                  fontSize: 10,
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold),
                                 overflow:
@@ -556,7 +557,7 @@ class _PostAndReelsState extends State<PostAndReels>
             child: Text('Next',
                 style: GoogleFonts.publicSans(
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: 10,
                   color: Color.fromRGBO(21, 68, 160, 1),
                 )),
           ),

@@ -81,9 +81,15 @@ class _FileCarouselState extends State<FileCarousel> {
             ),
             itemBuilder: (context, index, realIndex) {
               final file = widget.files[index];
-              return file.path.endsWith('.mp4')
-                  ? buildVideoPlayer(file)
-                  : buildImage(file);
+              return ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: file.path.endsWith('.mp4')
+                    ? buildVideoPlayer(file)
+                    : buildImage(file),
+              );
             },
           );
   }
