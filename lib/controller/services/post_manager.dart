@@ -24,6 +24,8 @@ class PostManager {
     String? pollDescription,
     List<String>? pollOptions,
     required List<String> interactions,
+    required List<String> dmReplies, // Interaction options
+    required List<String> dmComments,
     required String token, // Bearer token for authorization
   }) async {
     String url = baseUrl + ApiURLs.create_new_post;
@@ -51,6 +53,14 @@ class PostManager {
     }
     if (interactions.isNotEmpty) {
       request.fields['interactions'] = interactions.join(',').toLowerCase();
+    }
+    if (dmReplies.isNotEmpty) {
+      String dmReply = jsonEncode(dmReplies);
+      request.fields['dm_privacy '] = dmReply;
+    }
+    if (dmComments.isNotEmpty) {
+      String dmComment = jsonEncode(dmComments);
+      request.fields['comments_privacy '] = dmComment;
     }
 
     request.fields['post'] = postField;

@@ -8,12 +8,15 @@ class MediaItem extends StatefulWidget {
   final String url;
   final String mediaType;
   final String timestamp;
+  final bool
+      isUser; // New boolean flag to check if the message is from the user
 
   const MediaItem({
     Key? key,
     required this.url,
     required this.mediaType,
     required this.timestamp,
+    required this.isUser, // Accept the user status
   }) : super(key: key);
 
   @override
@@ -29,11 +32,21 @@ class _MediaItemState extends State<MediaItem> {
       child: Stack(
         alignment: Alignment.bottomRight,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: widget.mediaType == 'video'
-                ? MessageVideoPlayer(videoUrl: widget.url)
-                : _buildImage(widget.url, size),
+          // Media container with conditional background color
+          Container(
+            padding: const EdgeInsets.all(10), // Apply padding of 10
+            decoration: BoxDecoration(
+              color: widget.isUser
+                  ? Color.fromARGB(255, 103, 207, 255)
+                  : Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: widget.mediaType == 'video'
+                  ? MessageVideoPlayer(videoUrl: widget.url)
+                  : _buildImage(widget.url, size),
+            ),
           ),
           // Timestamp on Bottom-Right
           Positioned(
@@ -71,9 +84,9 @@ class _MediaItemState extends State<MediaItem> {
       },
       child: Image.network(
         url,
-        height: 200,
-        width: size.width * .60,
-        fit: BoxFit.cover,
+        height: 200, // You can adjust the height as required
+        width: size.width * .60, // Adjust width accordingly
+        fit: BoxFit.contain, // Make sure the image fits within the container
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Container(

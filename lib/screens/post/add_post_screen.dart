@@ -9,16 +9,17 @@ import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
-import 'package:mobile/screens/post/component/privacy_option_sheet.dart';
+import 'package:mobile/screens/post/component/single_select_options.dart';
 import 'package:mobile/screens/post/component/tag_option_sheet.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/post/new_post_now.dart';
 import 'package:mobile/screens/post/pool/add_pools.dart';
+import 'package:mobile/screens/post/widgets/custom_option_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:geolocator/geolocator.dart';
 import 'component/add_location_screen.dart';
-import 'component/interaction_bottom_sheet.dart'; // Add video player package for video handling
+import 'component/multi_select_options.dart'; // Add video player package for video handling
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,7 +39,7 @@ class AddPostScreen extends StatefulWidget {
   _AddPostScreenState createState() => _AddPostScreenState();
 }
 
-String? postType;
+String postType = "post";
 
 class _AddPostScreenState extends State<AddPostScreen> {
   // Store filtered items for searching
@@ -100,10 +101,21 @@ class _AddPostScreenState extends State<AddPostScreen> {
     List<String>? result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
-      builder: (_) => PrivacyOptionsSheet(
-        initialPrivacyPolicy: privacyPolicy,
-        userProfile: widget.userProfile!,
-      ),
+      builder: (_) => SingleSelectOptionsSheet(
+          initialValues: privacyPolicy,
+          finalValueList: [
+            {
+              'label': 'Followers',
+              'value': 'followers',
+              'count': '${widget.userProfile?.followers_count} people'
+            },
+            {'label': 'Public', 'value': 'public', 'count': 'Every people'},
+            {
+              'label': 'Following',
+              'value': 'following',
+              'count': '${widget.userProfile?.following_count} people'
+            },
+          ]),
     );
 
     if (result != null) {
@@ -121,7 +133,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     final result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
-      builder: (_) => InteractionsBottomSheet(
+      builder: (_) => MultiSelectBottomSheet(
         initialSelectedOptions: interactionSheetOptions,
         finalOptions: [
           {'label': 'Comments', 'value': 'comments', 'count': ''},
@@ -142,9 +154,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
     final result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
-      builder: (_) => InteractionsBottomSheet(
-        initialSelectedOptions: ["Post"],
-        finalOptions: [
+      builder: (_) => SingleSelectOptionsSheet(
+        initialValues: [postType],
+        finalValueList: [
           {'label': 'Post', 'value': 'post', 'count': '5000 posts'},
           {
             'label': 'Discourse',
@@ -153,6 +165,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
           },
           {'label': 'Reel', 'value': 'reel', 'count': '1200 reels'},
         ],
+        titile: "Settings",
       ),
     );
 
@@ -160,6 +173,69 @@ class _AddPostScreenState extends State<AddPostScreen> {
       log("Selected Options: $result");
       setState(() {
         postType = result[0].toLowerCase();
+      });
+    }
+  }
+
+  List<String> dmRepliesOptions = ["public"];
+  List<String> dmCommentOptions = ["public"];
+
+  void showDmRepliesSheet(BuildContext context) async {
+    final result = await showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      builder: (_) => MultiSelectBottomSheet(
+        initialSelectedOptions: dmRepliesOptions,
+        finalOptions: [
+          {
+            'label': 'Friends Only',
+            'value': 'friends',
+            'count': 'only people you followback message'
+          },
+          {
+            'label': 'Anyone',
+            'value': 'public',
+            'count': 'Anyone can direct message'
+          },
+          {'label': 'Off', 'value': 'off', 'count': ''},
+        ],
+      ),
+    );
+
+    if (result != null) {
+      log("Selected Options: $result");
+      setState(() {
+        dmRepliesOptions = result;
+      });
+    }
+  }
+
+  void showDmCommentsSheet(BuildContext context) async {
+    final result = await showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      builder: (_) => MultiSelectBottomSheet(
+        initialSelectedOptions: dmCommentOptions,
+        finalOptions: [
+          {
+            'label': 'Friends Only',
+            'value': 'friends',
+            'count': 'only people you followback message'
+          },
+          {
+            'label': 'Anyone',
+            'value': 'public',
+            'count': 'Anyone can direct message'
+          },
+          {'label': 'Off', 'value': 'off', 'count': ''},
+        ],
+      ),
+    );
+
+    if (result != null) {
+      log("Selected Options: $result");
+      setState(() {
+        dmCommentOptions = result;
       });
     }
   }
@@ -384,151 +460,54 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             ),
                           ),
                     Divider(color: Color(0xffD3D3D3)),
-                    ListTile(
-                      leading: Image.asset(
-                        "assets/icons/location.png",
-                        height: 30,
-                      ),
-                      title: Text(
-                        "Add Location",
-                        style: AppTextStyles.poppinsRegular()
-                            .copyWith(fontSize: 14),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xfa2B2B2B), size: 18),
-                      // subtitle: Text(_location,
-                      //     maxLines: 1,
-                      //     overflow: TextOverflow.ellipsis,
-                      //     softWrap: true,
-                      //     style: AppTextStyles.poppinsRegular().copyWith(
-                      //       color: Colors.grey,
-                      //       overflow: TextOverflow.ellipsis,
-                      //     )),
-                      onTap: () {
-                        navigateToAddLocationScreen(context);
-                      },
+                    CustomOptionTile(
+                      iconPath: "assets/icons/location.png",
+                      title: "Add Location",
+                      onTap: () => navigateToAddLocationScreen(context),
                     ),
-                    Divider(color: Color(0xffD3D3D3)),
-                    ListTile(
-                      onTap: () {
-                        _showTagPeopleBottomSheet(context);
-                      },
-                      leading: Image.asset(
-                        "assets/icons/tag.png",
-                        height: 30,
-                      ),
-                      title: Text(
-                        "Tag People",
-                        style: AppTextStyles.poppinsRegular()
-                            .copyWith(fontSize: 14),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xfa2B2B2B), size: 18),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/tag.png",
+                      title: "Tag People",
+                      onTap: () => _showTagPeopleBottomSheet(context),
                     ),
-                    Divider(color: Color(0xffD3D3D3)),
-                    ListTile(
-                      onTap: () {
-                        _showPrivacyBottomSheet(context);
-                      },
-                      leading: Image.asset(
-                        "assets/icons/privacy.png",
-                        height: 30,
-                      ),
-                      title: Text(
-                        "Privacy",
-                        style: AppTextStyles.poppinsRegular()
-                            .copyWith(fontSize: 14),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xfa2B2B2B), size: 18),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/privacy.png",
+                      title: "Privacy",
+                      onTap: () => _showPrivacyBottomSheet(context),
                     ),
-                    Divider(color: Color(0xffD3D3D3)),
-                    ListTile(
-                      onTap: () {
-                        showInteractionsSheet(context);
-                      },
-                      leading: Image.asset(
-                        "assets/icons/interaction.png",
-                        height: 30,
-                      ),
-                      title: Text(
-                        "Interactions",
-                        style: AppTextStyles.poppinsRegular()
-                            .copyWith(fontSize: 14),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xfa2B2B2B), size: 18),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/interaction.png",
+                      title: "Interactions",
+                      onTap: () => showInteractionsSheet(context),
                     ),
-                    Divider(color: Color(0xffD3D3D3)),
-                    ListTile(
-                      onTap: () {
-                        // showInteractionsSheet(context);
-                      },
-                      leading: Image.asset(
-                        "assets/icons/collaborator.png",
-                        height: 30,
-                      ),
-                      title: Text(
-                        "Add collaborators",
-                        style: AppTextStyles.poppinsRegular()
-                            .copyWith(fontSize: 14),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xfa2B2B2B), size: 18),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/collaborator.png",
+                      title: "Add collaborators",
                     ),
-                    Divider(color: Color(0xffD3D3D3)),
-                    ListTile(
-                      onTap: () {
-                        // showInteractionsSheet(context);
-                      },
-                      leading: Image.asset(
-                        "assets/icons/audience.png",
-                        height: 30,
-                      ),
-                      title: Text(
-                        "Audience",
-                        style: AppTextStyles.poppinsRegular()
-                            .copyWith(fontSize: 14),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xfa2B2B2B), size: 18),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/audience.png",
+                      title: "Audience",
                     ),
-                    Divider(color: Color(0xffD3D3D3)),
-                    ListTile(
-                      onTap: () {
-                        // showInteractionsSheet(context);
-                      },
-                      leading: Image.asset(
-                        "assets/icons/engagement.png",
-                        height: 30,
-                      ),
-                      title: Text(
-                        "Engagement",
-                        style: AppTextStyles.poppinsRegular()
-                            .copyWith(fontSize: 14),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xfa2B2B2B), size: 18),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/dm_replies.png",
+                      title: "Direct Replies",
+                      onTap: () => showDmRepliesSheet(context),
                     ),
-                    Divider(color: Color(0xffD3D3D3)),
-                    ListTile(
-                      onTap: () {
-                        showPostTypeSheet(context);
-                      },
-                      leading: Image.asset(
-                        "assets/icons/bookmark.png",
-                        height: 30,
-                      ),
-                      title: Text(
-                        "Advanced Settings",
-                        style: AppTextStyles.poppinsRegular()
-                            .copyWith(fontSize: 14),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded,
-                          color: Color(0xfa2B2B2B), size: 18),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/dm_comment.png",
+                      title: "Direct Comments",
+                      onTap: () => showDmCommentsSheet(context),
                     ),
-                    Divider(color: Color(0xffD3D3D3)),
-                    SizedBox(height: 20),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/engagement.png",
+                      title: "Engagement",
+                    ),
+                    CustomOptionTile(
+                      iconPath: "assets/icons/setting.png",
+                      title: "Advanced Settings",
+                      onTap: () => showPostTypeSheet(context),
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -600,6 +579,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                             mediaFiles: widget.mediFiles,
                                             interactions:
                                                 interactionSheetOptions,
+                                            dmReplies: dmRepliesOptions,
+                                            dmComments: dmRepliesOptions,
                                             userProfile: widget.userProfile!,
                                             isPoll: true,
                                             location: _location,
@@ -631,6 +612,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                             userProfile: widget.userProfile!,
                                             interactions:
                                                 interactionSheetOptions,
+                                            dmReplies: dmRepliesOptions,
+                                            dmComments: dmRepliesOptions,
                                             location: _location,
                                           ),
                                       context: context));
@@ -642,8 +625,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                               setState(() {
                                 isLoading = false;
                               });
-                              //ToastNotifier.showErrorToast(
-                              // context, "Post  is required!");
+                              ToastNotifier.showErrorToast(
+                                  context, "Describe your post please!");
                             } else {
                               if (postType == 'reel') {
                                 final response = await pro.createNewReel(
@@ -696,6 +679,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                               userProfile: widget.userProfile!,
                                               isPoll: false,
                                               location: _location,
+                                              dmReplies: dmRepliesOptions,
+                                              dmComments: dmRepliesOptions,
                                             ),
                                         context: context));
                               }
@@ -707,6 +692,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                               setState(() {
                                 isLoading = false;
                               });
+
                               //ToastNotifier.showErrorToast(
                               // context, "Post Title / Descritption is required!");
                             } else {
@@ -717,6 +703,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                   privacyPost: privacyPolicy,
                                   mediaFiles: widget.mediFiles,
                                   interactions: interactionSheetOptions,
+                                  dmReplies: dmRepliesOptions,
+                                  dmComments: dmRepliesOptions,
                                   location: _location);
 
                               if (response != null) {

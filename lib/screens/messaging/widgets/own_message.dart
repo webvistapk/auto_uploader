@@ -47,6 +47,7 @@ class OwnMessage extends StatelessWidget {
                   url: media['file'],
                   mediaType: media['media_type'],
                   timestamp: timestampTime,
+                  isUser: true,
                 );
               }).toList(),
             ),

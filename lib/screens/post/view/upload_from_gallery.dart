@@ -132,14 +132,17 @@ class _UploadFromGalleryState extends State<UploadFromGallery> {
       itemCount: _filteredMedia.length,
       itemBuilder: (context, index) {
         final asset = _filteredMedia[index];
-        return FutureBuilder<Uint8List?>(
-          future: asset.thumbnailDataWithSize(ThumbnailSize(200, 200)),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Container(color: Colors.grey[200]);
-            }
-            return _buildGridItem(asset, snapshot.data!);
-          },
+        return GestureDetector(
+          onTap: () => _handleMediaSelection(asset),
+          child: FutureBuilder<Uint8List?>(
+            future: asset.thumbnailDataWithSize(ThumbnailSize(200, 200)),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Container(color: Colors.grey[200]);
+              }
+              return _buildGridItem(asset, snapshot.data!);
+            },
+          ),
         );
       },
     );
@@ -147,50 +150,56 @@ class _UploadFromGalleryState extends State<UploadFromGallery> {
 
   Widget _buildGridItem(AssetEntity asset, Uint8List thumbnail) {
     final isSelected =
-        _selectedFiles.any((f) => f.path.endsWith(asset.title ?? ''));
+        _selectedFiles.any((f) => f.path.endsWith(asset.title ?? ""));
+
     return GestureDetector(
-      onTap: () => _handleMediaSelection(asset),
+      onTap: () => _handleMediaSelection(asset), // Whole container responds
+      behavior: HitTestBehavior
+          .translucent, // Ensures even empty space registers taps
       child: Container(
         decoration: BoxDecoration(
           border:
               isSelected ? Border.all(color: Colors.blue, width: 2.sp) : null,
         ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.memory(thumbnail, fit: BoxFit.cover),
-            if (asset.type == AssetType.video)
-              Center(
-                child: Icon(
-                  Icons.play_circle_filled,
-                  color: Colors.white.withOpacity(0.8),
-                  size: 24.sp,
+        child: GestureDetector(
+          onTap: () => _handleMediaSelection(asset),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.memory(thumbnail, fit: BoxFit.cover),
+
+              if (asset.type == AssetType.video)
+                Center(
+                  child: Icon(
+                    Icons.play_circle_filled,
+                    color: Colors.white.withOpacity(0.8),
+                    size: 24.sp,
+                  ),
+                ),
+
+              // Checkmark in top-right corner
+              Positioned(
+                top: 4.sp,
+                right: 4.sp,
+                child: IgnorePointer(
+                  // This prevents the icon container from blocking taps
+                  child: Container(
+                    width: 20.sp,
+                    height: 20.sp,
+                    padding: EdgeInsets.all(2.sp),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.red : Colors.transparent,
+                      border: Border.all(color: Colors.white, width: 1.sp),
+                      borderRadius: BorderRadius.circular(4.sp),
+                    ),
+                    child: isSelected
+                        ? Icon(Icons.check, size: 14.sp, color: Colors.white)
+                        : null,
+                  ),
                 ),
               ),
-            Positioned(
-              top: 4.sp,
-              right: 4.sp,
-              child: Container(
-                width: 20.sp, // Fixed size for consistency
-                height: 20.sp,
-                padding: EdgeInsets.all(2.sp),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.red : Colors.transparent,
-                  border: isSelected
-                      ? Border.all(color: Colors.white, width: 1.sp)
-                      : Border.all(color: Colors.white, width: 1.sp),
-                  borderRadius: BorderRadius.circular(4.sp), // Square shape
-                ),
-                child: isSelected
-                    ? Icon(
-                        Icons.check,
-                        size: 14.sp,
-                        color: Colors.white,
-                      )
-                    : null,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -198,24 +207,37 @@ class _UploadFromGalleryState extends State<UploadFromGallery> {
 
   Widget _buildFilterRow() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 8.sp),
+      padding: EdgeInsets.symmetric(vertical: 8.sp),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
+          // Left Cancel Icon (no left padding)
+          Padding(
+            padding: EdgeInsets.only(left: 0), // No left space
+            child: IconButton(
               onPressed: () {},
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(),
               icon: Icon(
-                Icons.cancel,
-                size: 12,
-                color: Color.fromRGBO(68, 68, 68, 1),
-              )),
+                Icons.close,
+                size: 20.sp,
+                color: Color(0xFF444444),
+              ),
+            ),
+          ),
+
+          // Center Dropdown (tight spacing between text and icon)
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _selectedOption,
-              icon: Icon(Icons.arrow_drop_down, size: 20.sp),
+              icon: Padding(
+                padding: EdgeInsets.only(
+                    left: 2.sp), // Reduce spacing between text and icon
+                child: Icon(Icons.arrow_drop_down, size: 20.sp),
+              ),
+              isDense: true, // Makes the layout more compact
               style: TextStyle(
                 fontSize: 14.sp,
                 color: Colors.black,
@@ -235,6 +257,7 @@ class _UploadFromGalleryState extends State<UploadFromGallery> {
               },
             ),
           ),
+
           Text(
             "Next",
             style:

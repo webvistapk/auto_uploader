@@ -481,8 +481,7 @@ class _PostAndReelsState extends State<PostAndReels>
     return Container(
       height: 60,
       width: double.infinity,
-      margin: EdgeInsets.all(0),
-      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
