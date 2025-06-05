@@ -53,7 +53,7 @@ class _MessageWidgetState extends State<MessageWidget> {
         ToastNotifier.showErrorToast(context, "Failed to send message");
       }
     } catch (e) {
-      debugger();
+      // debugger();
       ToastNotifier.showErrorToast(context, "Error: ${e.toString()}");
     }
   }

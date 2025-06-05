@@ -161,7 +161,7 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
 
       // Dispose existing video controllers before creating new one
       await _disposeVideoControllers();
-      debugger();
+      // debugger();ss
       final newVideoController = VideoPlayerController.file(file)
         ..initialize().then((_) {
           // Set looping and start playing
