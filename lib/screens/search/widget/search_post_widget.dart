@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
+import 'package:mobile/screens/profile/SinglePost.dart';
 import 'package:mobile/screens/profile/imageFullScreen.dart';
 import 'package:mobile/screens/profile/widgets/ReelPostGrid.dart';
 import 'package:video_player/video_player.dart';
@@ -33,29 +34,16 @@ class _SearchPostWidgetState extends State<SearchPostWidget> {
     super.dispose();
   }
 
-
-  void _handleMediaTap(bool isVideo, String mediaUrl, List<String> mediaList) {
-  if (isVideo) {
+  void _handleMediaTap(
+    String postID,
+  ) {
     Navigator.push(
-      context,
-      CupertinoDialogRoute(
-        builder: (_) => FullscreenVideoPlayer(videoUrl: mediaUrl),
-        context: context,
-      ),
-    );
-  } else {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => postFullScreen(
-          mediaUrls: mediaList,
-          initialIndex: 0,
-        ),
-      ),
-    );
+        context,
+        CupertinoDialogRoute(
+            builder: (_) =>
+                SinglePost(postId: postID, onPostUpdated: () {}),
+            context: context));
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +52,10 @@ class _SearchPostWidgetState extends State<SearchPostWidget> {
     for (var post in widget.posts) {
       for (var media in post.media) {
         mediaItems.add(_MediaItem(
-          url: media.file,
-          isVideo: media.mediaType == 'video', // Assuming media has a 'type' field
-        ));
+            url: media.file,
+            isVideo:
+                media.mediaType == 'video', // Assuming media has a 'type' field
+            id: post.id.toString()));
       }
     }
 
@@ -82,11 +71,11 @@ class _SearchPostWidgetState extends State<SearchPostWidget> {
           itemCount: mediaItems.length,
           itemBuilder: (context, index) {
             final media = mediaItems[index];
-            
+
             if (media.isVideo) {
-              return _buildVideoItem(media.url, index);
+              return _buildVideoItem(media.url, index, media.id);
             } else {
-              return _buildImageItem(media.url);
+              return _buildImageItem(media.url, media.id);
             }
           },
         ),
@@ -94,83 +83,82 @@ class _SearchPostWidgetState extends State<SearchPostWidget> {
     );
   }
 
-  Widget _buildImageItem(String url) {
-  return GestureDetector(
-    onTap: () {
-      _handleMediaTap(false, url, [url]);
-    },
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        url,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey[200],
-            child: const Icon(Icons.error),
-          );
-        },
+  Widget _buildImageItem(String url, id) {
+    return GestureDetector(
+      onTap: () {
+        _handleMediaTap(id);
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          url,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey[200],
+              child: const Icon(Icons.error),
+            );
+          },
+        ),
       ),
-    ),
-  );
-}
-
-
-  Widget _buildVideoItem(String url, int index) {
-  if (!_videoControllers.containsKey(index)) {
-    _videoControllers[index] = VideoPlayerController.network(url)
-      ..initialize().then((_) {
-        if (mounted) {
-          setState(() {});
-          _videoControllers[index]!.play();
-          _chewieControllers[index] = ChewieController(
-            videoPlayerController: _videoControllers[index]!,
-            autoPlay: true,
-            looping: true,
-            showControls: false,
-            allowFullScreen: false,
-          );
-        }
-      });
+    );
   }
 
-  return GestureDetector(
-    onTap: () {
-      _handleMediaTap(true, url, [url]);
-    },
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: _videoControllers[index] != null &&
-                _videoControllers[index]!.value.isInitialized
-            ? Chewie(controller: _chewieControllers[index]!)
-            : Container(
-                color: Colors.grey[200],
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-      ),
-    ),
-  );
-}
+  Widget _buildVideoItem(String url, int index, String id) {
+    if (!_videoControllers.containsKey(index)) {
+      _videoControllers[index] = VideoPlayerController.network(url)
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {});
+            _videoControllers[index]!.play();
+            _chewieControllers[index] = ChewieController(
+              videoPlayerController: _videoControllers[index]!,
+              autoPlay: true,
+              looping: true,
+              showControls: false,
+              allowFullScreen: false,
+            );
+          }
+        });
+    }
 
+    return GestureDetector(
+      onTap: () {
+        _handleMediaTap(id);
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: _videoControllers[index] != null &&
+                  _videoControllers[index]!.value.isInitialized
+              ? Chewie(controller: _chewieControllers[index]!)
+              : Container(
+                  color: Colors.grey[200],
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+        ),
+      ),
+    );
+  }
 }
 
 // Helper class to store media information
 class _MediaItem {
   final String url;
   final bool isVideo;
+  final String id;
 
-  _MediaItem({required this.url, required this.isVideo});
+  _MediaItem({required this.url, required this.isVideo, required this.id});
 }

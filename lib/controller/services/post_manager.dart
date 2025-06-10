@@ -57,11 +57,12 @@ class PostManager {
     
     if (dmReplies.isNotEmpty) {
       String dmReply = jsonEncode(dmReplies);
-      print(dmReply);
+     
       request.fields['dm_privacy'] = dmReply;
     }
     if (dmComments.isNotEmpty) {
       String dmComment = jsonEncode(dmComments);
+      
       request.fields['comments_privacy'] = dmComment;
     }
 

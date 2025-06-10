@@ -580,7 +580,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                             interactions:
                                                 interactionSheetOptions,
                                             dmReplies: dmRepliesOptions,
-                                            dmComments: dmRepliesOptions,
+                                            dmComments: dmCommentOptions,
                                             userProfile: widget.userProfile!,
                                             isPoll: true,
                                             location: _location,
@@ -613,7 +613,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                             interactions:
                                                 interactionSheetOptions,
                                             dmReplies: dmRepliesOptions,
-                                            dmComments: dmRepliesOptions,
+                                            dmComments: dmCommentOptions,
                                             location: _location,
                                           ),
                                       context: context));
@@ -680,7 +680,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                               isPoll: false,
                                               location: _location,
                                               dmReplies: dmRepliesOptions,
-                                              dmComments: dmRepliesOptions,
+                                              dmComments: dmCommentOptions,
                                             ),
                                         context: context));
                               }
@@ -704,7 +704,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                   mediaFiles: widget.mediFiles,
                                   interactions: interactionSheetOptions,
                                   dmReplies: dmRepliesOptions,
-                                  dmComments: dmRepliesOptions,
+                                  dmComments: dmCommentOptions,
                                   location: _location);
 
                               if (response != null) {

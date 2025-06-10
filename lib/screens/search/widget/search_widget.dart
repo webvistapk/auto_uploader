@@ -47,25 +47,35 @@ class _SearchWidgetState extends State<SearchWidget>
   }
 
   @override
-  void didUpdateWidget(SearchWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.query != widget.query) {
-      // Apply debounce only for subsequent query changes
-      _handleQueryChangeWithDebounce();
-    }
-  }
-
-  void _handleQueryChangeWithDebounce() {
+ void didUpdateWidget(SearchWidget oldWidget) {
+  super.didUpdateWidget(oldWidget);
+  if (oldWidget.query != widget.query) {
     // Cancel any previous debounce timer
     if (_debounceTimer != null) {
       _debounceTimer!.cancel();
     }
     
-    // Start a new debounce timer
-    _debounceTimer = Timer(_debounceDelay, () {
+    // If query is empty, fetch immediately (no debounce)
+    if (widget.query.isEmpty) {
       _fetchDataForCurrentCategory();
-    });
+    } else {
+      // Apply debounce only for non-empty queries
+      _debounceTimer = Timer(_debounceDelay, _fetchDataForCurrentCategory);
+    }
   }
+}
+
+  // void _handleQueryChangeWithDebounce() {
+  //   // Cancel any previous debounce timer
+  //   if (_debounceTimer != null) {
+  //     _debounceTimer!.cancel();
+  //   }
+    
+  //   // Start a new debounce timer
+  //   _debounceTimer = Timer(_debounceDelay, () {
+  //     _fetchDataForCurrentCategory();
+  //   });
+  // }
 
  
 
@@ -89,51 +99,41 @@ class _SearchWidgetState extends State<SearchWidget>
     });
   }
 
-   Future<void> _fetchInitialPostsData() async {
-    if (widget.query.isEmpty) {
-      try {
-      final token = widget.authToken ?? await Prefrences.getAuthToken();
-      await _fetchPostsResults(token);
-    } catch (e) {
-      debugPrint('Initial posts fetch error: $e');
-    } finally {
-      setState(() => isLoading = false);
-    }
-      setState(() {
-        usersResults = [];
-      });
-      return;
-    }
-    
-   
+  Future<void> _fetchInitialPostsData() async {
+  setState(() => isLoading = true);
+  try {
+    final token = widget.authToken ?? await Prefrences.getAuthToken();
+    // Always fetch posts, even with empty query
+    await _fetchPostsResults(token);
+  } catch (e) {
+    debugPrint('Initial posts fetch error: $e');
+  } finally {
+    setState(() => isLoading = false);
   }
+}
 
    Future<void> _fetchDataForCurrentCategory() async {
-    if (widget.query.isEmpty) {
-      setState(() {
-        if (selectedCategory == 'Content') {
-          postsResults = [];
-        } else if (selectedCategory == 'People') {
-          usersResults = [];
-        }
-      });
-      return;
-    }
+  setState(() => isLoading = true);
+  try {
+    final token = widget.authToken ?? await Prefrences.getAuthToken();
     
-    setState(() => isLoading = true);
-    try {
-      final token = widget.authToken ?? await Prefrences.getAuthToken();
-      if (selectedCategory == 'People') {
+    if (selectedCategory == 'People') {
+      // Only fetch users if we have a query
+      if (widget.query.isNotEmpty) {
         await _fetchUsersResults(token);
-      } else if (selectedCategory == 'Content') {
-        await _fetchPostsResults(token);
+      } else {
+        usersResults = []; // Clear users when query is empty
       }
-    } catch (e) {
-      debugPrint('Category data fetch error: $e');
-    } finally {
-      setState(() => isLoading = false);
+    } else if (selectedCategory == 'Content') {
+      // Always fetch posts, even with empty query
+      await _fetchPostsResults(token);
     }
+  } catch (e) {
+    debugPrint('Category data fetch error: $e');
+  } finally {
+    setState(() => isLoading = false);
   }
+}
 
   Future<void> _fetchUsersResults(String token) async {
     try {
@@ -154,6 +154,7 @@ class _SearchWidgetState extends State<SearchWidget>
       debugPrint('Users search error: $e');
     }
   }
+
 
   Future<void> _fetchPostsResults(String token) async {
     try {
@@ -244,19 +245,21 @@ class _SearchWidgetState extends State<SearchWidget>
           ],
         ),
         const SizedBox(height: 40),
-        Expanded(
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : selectedCategory == 'People'
-                  ? usersResults.isEmpty
-                      ? _buildEmptyState('No People Found!')
-                      : _buildUsersList()
-                  : selectedCategory == 'Content'
-                      ? postsResults.isEmpty
-                          ? _buildEmptyState('No Content Found')
-                          : SearchPostWidget(posts: postsResults)
-                      : _buildEmptyState('Coming Soon'),
-        ),
+         Expanded(
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : selectedCategory == 'People'
+                ? widget.query.isEmpty
+                    ? _buildEmptyState('Search for people') // Show when people tab is selected but query is empty
+                    : usersResults.isEmpty
+                        ? _buildEmptyState('No People Found!')
+                        : _buildUsersList()
+                : selectedCategory == 'Content'
+                    ? postsResults.isEmpty
+                        ? _buildEmptyState('No Content Found')
+                        : SearchPostWidget(posts: postsResults)
+                    : _buildEmptyState('Coming Soon'),
+      ),
       ],
     );
   }
