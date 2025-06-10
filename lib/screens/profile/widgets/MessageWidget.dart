@@ -8,6 +8,7 @@ import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:mobile/screens/post/view/add_post_camera.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -58,10 +59,31 @@ class _MessageWidgetState extends State<MessageWidget> {
     }
   }
 
+  Future<List<File>?> showFullScreenAlert(
+      BuildContext context, Widget contentScreen) {
+    return showDialog<List<File>>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          child: SizedBox.expand(
+            child: Material(
+              color: Colors.white,
+              child: contentScreen,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_showGallery)
           Container(
@@ -84,6 +106,54 @@ class _MessageWidgetState extends State<MessageWidget> {
               ],
             ),
           ),
+        if (_selectedImages.isNotEmpty)
+          Container(
+            height: 150.sp,
+            // padding: EdgeInsets.symmetric(vertical: 10),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: _selectedImages.map((file) {
+                  return Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        child: CircleAvatar(
+                          radius: 35.sp,
+                          backgroundImage: FileImage(File(file.path)),
+                          backgroundColor: Colors.grey[200], // fallback
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedImages.remove(file);
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 16.sp,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
         Container(
           padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
           decoration: BoxDecoration(
@@ -92,7 +162,25 @@ class _MessageWidgetState extends State<MessageWidget> {
           ),
           child: Row(
             children: [
-              Image.asset(AppIcons.camera, width: 33.35.sp, height: 33.34.sp),
+              InkWell(
+                  onTap: () async {
+                    final result = await showFullScreenAlert(
+                        context,
+                        AddPostCameraScreen(
+                          token: '',
+                          userProfile: null,
+                          isChatCamera: true,
+                          postId: widget.postID,
+                          chatId: widget.chatId,
+                        ));
+                    // debugger();
+                    if (result != null) {
+                      _selectedImages = result;
+                      setState(() {});
+                    }
+                  },
+                  child: Image.asset(AppIcons.camera,
+                      width: 33.35.sp, height: 33.34.sp)),
               SizedBox(width: 17.31.sp),
               GestureDetector(
                 onTap: _toggleGallery,

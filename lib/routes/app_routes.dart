@@ -63,7 +63,11 @@ class AppRoutes {
               authToken: Prefrences.getAuthToken(),
               userProfile: userData!,
             )),
-    GetPage(name: createPost, page: () => CreatePostScreen()),
+    GetPage(
+        name: createPost,
+        page: () => CreatePostScreen(
+              isChatCamera: false,
+            )),
     // GetPage(
     //     name: comment,
     //     page: () => CommentScreen(postId: Get.parameters['postId'] ?? '')),

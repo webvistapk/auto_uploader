@@ -2,15 +2,17 @@ import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
-import 'package:mobile/screens/post/post_reels.dart';
+import 'package:mobile/screens/post/view/upload_from_gallery.dart';
 
 class CreatePostScreen extends StatefulWidget {
   UserProfile? userProfile;
   final token;
+  final bool isChatCamera;
   CreatePostScreen({
     super.key,
     this.userProfile,
     this.token,
+    required this.isChatCamera,
   });
 
   @override
@@ -22,9 +24,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget build(BuildContext context) {
     return
         // ReelsScreenData();
-        PostAndReels(
+        UploadFromGallery(
       userProfile: widget.userProfile,
       token: widget.token,
+      isChatCamera: widget.isChatCamera,
     );
     // AddPostScreen(userProfile: widget.userProfile, mediFiles: []);
     //     ContentSelectionScreen(

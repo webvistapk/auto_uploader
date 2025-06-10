@@ -1,202 +1,148 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:camera/camera.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mobile/screens/post/create_post_screen.dart';
+import 'package:mobile/common/app_colors.dart';
+import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/models/UserProfile/userprofile.dart';
+import 'package:mobile/prefrences/prefrences.dart';
+import 'package:mobile/screens/mainscreen/main_screen.dart';
+import 'package:mobile/screens/post/reels/reels_video_player.dart';
+import 'package:mobile/screens/post/add_post_screen.dart';
+import 'package:mobile/screens/post/widgets/discard_post.dart';
+import 'package:mobile/screens/post/widgets/image_videos.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:sizer/sizer.dart';
 
 class UploadFromGallery extends StatefulWidget {
+  final UserProfile? userProfile;
+  final token;
+  final bool isChatCamera;
+  UploadFromGallery({
+    Key? key,
+    required this.userProfile,
+    this.token,
+    required this.isChatCamera,
+  }) : super(key: key);
+
   @override
   _UploadFromGalleryState createState() => _UploadFromGalleryState();
 }
 
-class _UploadFromGalleryState extends State<UploadFromGallery> {
-  final ImagePicker _picker = ImagePicker();
-  List<AssetEntity> _recentMedia = [];
-  List<AssetEntity> _filteredMedia = [];
-  List<File> _selectedFiles = [];
-  File? _previewFile;
-  String _selectedOption = 'Upload';
+class _UploadFromGalleryState extends State<UploadFromGallery>
+    with TickerProviderStateMixin {
+  bool _isDropdownVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _loadRecentMedia();
+    _fetchPostAlbums();
   }
 
-  Future<void> _loadRecentMedia() async {
-    final PermissionState state = await PhotoManager.requestPermissionExtend();
-    if (!state.hasAccess) return;
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
-    final RequestType filterType = _selectedOption == 'Images'
-        ? RequestType.image
-        : _selectedOption == 'Videos'
-            ? RequestType.video
-            : RequestType.common;
+  String _formatDuration(int seconds) {
+    final Duration duration = Duration(seconds: seconds);
+    final String minutes = duration.inMinutes.toString().padLeft(2, '0');
+    final String secs = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$secs";
+  }
 
-    final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-      onlyAll: true,
-      type: filterType,
+  Future<void> _showDiscardDialog(BuildContext context) async {
+    bool? discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => const DiscardPostDialog(),
     );
 
-    if (albums.isNotEmpty) {
-      final recent = await albums.first.getAssetListRange(start: 0, end: 50);
-      setState(() {
-        _recentMedia = recent;
-        _filteredMedia = recent;
-      });
+    if (discard == true) {
+      // User pressed Yes, discard the post
+      print('Discarding post');
+      Navigator.pushAndRemoveUntil(
+          context,
+          CupertinoDialogRoute(
+              builder: (_) => MainScreen(
+                    userProfile: widget.userProfile!,
+                    authToken: widget.token,
+                    selectedIndex: 0,
+                  ),
+              context: context),
+          (_) => false);
+    } else {
+      // User pressed No or dismissed dialog
+      print('Keep editing post');
     }
   }
 
-  Future<void> _selectFromGallery() async {
-    final List<XFile>? files = await _picker.pickMultiImage();
-    if (files != null) {
-      setState(() {
-        _selectedFiles = files.map((xfile) => File(xfile.path)).toList();
-        if (_selectedFiles.isNotEmpty) {
-          _previewFile = _selectedFiles.last;
-        }
-      });
-    }
-  }
-
-  Future<void> _filterMedia() async {
-    setState(() {
-      if (_selectedOption == 'Images') {
-        _filteredMedia = _recentMedia
-            .where((asset) => asset.type == AssetType.image)
-            .toList();
-      } else if (_selectedOption == 'Videos') {
-        _filteredMedia = _recentMedia
-            .where((asset) => asset.type == AssetType.video)
-            .toList();
-      } else {
-        _filteredMedia = List.from(_recentMedia);
-      }
-    });
-
-    // Clear selections if they're no longer in filtered list
-    final filesToRemove = <File>[];
-    for (final file in _selectedFiles) {
-      bool exists = false;
-      for (final asset in _filteredMedia) {
-        final f = await asset.file;
-        if (f?.path == file.path) {
-          exists = true;
-          break;
-        }
-      }
-      if (!exists) filesToRemove.add(file);
-    }
-
-    if (filesToRemove.isNotEmpty) {
-      setState(() {
-        _selectedFiles.removeWhere((file) => filesToRemove.contains(file));
-        if (_selectedFiles.isEmpty) {
-          _previewFile = null;
-        } else if (!_selectedFiles.contains(_previewFile)) {
-          _previewFile = _selectedFiles.last;
-        }
-      });
-    }
-  }
-
-  Future<void> _handleMediaSelection(AssetEntity asset) async {
-    final file = await asset.file;
-    if (file == null) return;
-
-    setState(() {
-      if (_selectedFiles.any((f) => f.path == file.path)) {
-        _selectedFiles.removeWhere((f) => f.path == file.path);
-      } else {
-        _selectedFiles.add(file);
-      }
-
-      if (_selectedFiles.isNotEmpty) {
-        _previewFile = _selectedFiles.last;
-      } else {
-        _previewFile = null;
-      }
-    });
-  }
-
-  Widget _buildMediaGrid() {
-    return GridView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 8.sp),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 2.sp,
-        mainAxisSpacing: 2.sp,
-      ),
-      itemCount: _filteredMedia.length,
-      itemBuilder: (context, index) {
-        final asset = _filteredMedia[index];
-        return GestureDetector(
-          onTap: () => _handleMediaSelection(asset),
-          child: FutureBuilder<Uint8List?>(
-            future: asset.thumbnailDataWithSize(ThumbnailSize(200, 200)),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Container(color: Colors.grey[200]);
-              }
-              return _buildGridItem(asset, snapshot.data!);
-            },
+  @override
+  Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    return SafeArea(
+      child: WillPopScope(
+        onWillPop: () async {
+          // var token = await Prefrences.getAuthToken();
+          Navigator.pushAndRemoveUntil(
+              context,
+              CupertinoDialogRoute(
+                  builder: (_) => MainScreen(
+                      userProfile: widget.userProfile!,
+                      authToken: widget.token),
+                  context: context),
+              (route) => false);
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Text(
+              '(overlap)',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.black,
+            elevation: 0.5,
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildGridItem(AssetEntity asset, Uint8List thumbnail) {
-    final isSelected =
-        _selectedFiles.any((f) => f.path.endsWith(asset.title ?? ""));
-
-    return GestureDetector(
-      onTap: () => _handleMediaSelection(asset), // Whole container responds
-      behavior: HitTestBehavior
-          .translucent, // Ensures even empty space registers taps
-      child: Container(
-        decoration: BoxDecoration(
-          border:
-              isSelected ? Border.all(color: Colors.blue, width: 2.sp) : null,
-        ),
-        child: GestureDetector(
-          onTap: () => _handleMediaSelection(asset),
-          child: Stack(
-            fit: StackFit.expand,
+          body: Column(
             children: [
-              Image.memory(thumbnail, fit: BoxFit.cover),
+              const SizedBox(height: 20),
+              // Animated content for tabs
+              AnimatedSwitcher(
+                  duration: Duration(milliseconds: 300),
+                  transitionBuilder: (widget, animation) => SlideTransition(
+                        position: Tween<Offset>(
+                          begin: Offset(1.0, 0.0),
+                          end: Offset(0.0, 0.0),
+                        ).animate(animation),
+                        child: widget,
+                      ),
+                  child: mediaFiles.isEmpty
+                      ? Text(
+                          "No Posts Selected",
+                          style: AppTextStyles.poppinsBold(color: Colors.white),
+                        )
+                      : FileCarousel(files: mediaFiles)),
+              const SizedBox(height: 20),
+              // Custom TabBar in the body
 
-              if (asset.type == AssetType.video)
-                Center(
-                  child: Icon(
-                    Icons.play_circle_filled,
-                    color: Colors.white.withOpacity(0.8),
-                    size: 24.sp,
-                  ),
-                ),
-
-              // Checkmark in top-right corner
-              Positioned(
-                top: 4.sp,
-                right: 4.sp,
-                child: IgnorePointer(
-                  // This prevents the icon container from blocking taps
-                  child: Container(
-                    width: 20.sp,
-                    height: 20.sp,
-                    padding: EdgeInsets.all(2.sp),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.red : Colors.transparent,
-                      border: Border.all(color: Colors.white, width: 1.sp),
-                      borderRadius: BorderRadius.circular(4.sp),
-                    ),
-                    child: isSelected
-                        ? Icon(Icons.check, size: 14.sp, color: Colors.white)
-                        : null,
-                  ),
-                ),
+              Expanded(
+                child:
+                    // Content for "Posts" tab
+                    _isLoadingPostPreview
+                        ? buildMediaContent(size, "Posts")
+                        : _buildMediaListSection(context),
               ),
             ],
           ),
@@ -205,244 +151,493 @@ class _UploadFromGalleryState extends State<UploadFromGallery> {
     );
   }
 
-  Widget _buildFilterRow() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.sp),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
-      ),
-      child: Row(
-        children: [
-          // Left Cancel Icon (no left padding)
-          Padding(
-            padding: EdgeInsets.only(left: 0), // No left space
-            child: IconButton(
-              onPressed: () {},
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(),
-              icon: Icon(
-                Icons.close,
-                size: 20.sp,
-                color: Color(0xFF444444),
-              ),
-            ),
-          ),
-
-          // Center Dropdown (tight spacing between text and icon)
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedOption,
-              icon: Padding(
-                padding: EdgeInsets.only(
-                    left: 2.sp), // Reduce spacing between text and icon
-                child: Icon(Icons.arrow_drop_down, size: 20.sp),
-              ),
-              isDense: true, // Makes the layout more compact
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-              ),
-              items: ['Upload', 'Images', 'Videos'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedOption = newValue!;
-                  _filterMedia();
-                });
-              },
-            ),
-          ),
-
-          Text(
-            "Next",
-            style:
-                TextStyle(fontSize: 12, color: Color.fromRGBO(21, 68, 160, 1)),
-          )
-        ],
-      ),
-    );
+  void _toggleDropdown() {
+    setState(() {
+      _isDropdownVisible = !_isDropdownVisible;
+    });
   }
 
-  Future<Widget> _buildPreview() async {
-    if (_previewFile == null) {
-      return Container(); // Empty container since background is already black
-    }
+  /////////////     Post Section /////////////////
 
-    try {
-      final isVideo = _previewFile!.path.endsWith('.mp4') ||
-          _previewFile!.path.endsWith('.mov');
-
-      AssetEntity? matchingAsset;
-      try {
-        matchingAsset = _filteredMedia.firstWhere(
-          (a) => a.title == _previewFile!.path.split('/').last,
-        );
-      } catch (_) {
-        matchingAsset = await _findAssetByPath(_previewFile!.path);
-      }
-
-      if (matchingAsset == null) {
-        return Center(
-          child: Text(
-            'Preview not available',
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      }
-
-      final thumbnail = await matchingAsset.thumbnailDataWithSize(
-        const ThumbnailSize(500, 500),
-      );
-
-      if (thumbnail == null) {
-        return Center(
-          child: Text(
-            'Error loading thumbnail',
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      }
-
-      return Stack(
-        children: [
-          // Black background container
-          Container(color: Colors.black),
-
-          // Media content with rounded top corners
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.only(top: 8.sp), // Add small top padding
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12.sp),
-                  topRight: Radius.circular(12.sp),
-                ),
-                child: Center(
-                  child: Image.memory(
-                    thumbnail,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Video play icon
-          if (isVideo)
-            Center(
-              child: Icon(
-                Icons.play_circle_filled,
-                color: Colors.white,
-                size: 50.sp,
-              ),
-            ),
-
-          // Navigation arrows
-          Positioned(
-            left: 16.sp,
-            top: 0,
-            bottom: 0,
-            child: Center(
-              child: Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white.withOpacity(0.7),
-                size: 30.sp,
-              ),
-            ),
-          ),
-          Positioned(
-            right: 16.sp,
-            top: 0,
-            bottom: 0,
-            child: Center(
-              child: Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white.withOpacity(0.7),
-                size: 30.sp,
-              ),
-            ),
-          ),
-        ],
-      );
-    } catch (e) {
-      return Center(
-        child: Text(
-          'Error loading preview',
-          style: TextStyle(color: Colors.white),
+  Widget buildMediaContent(Size size, String type) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[800]!,
+      highlightColor: Colors.grey[600]!,
+      child: GridView.builder(
+        padding: EdgeInsets.all(16),
+        itemCount: 12, // Example shimmer placeholders
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
         ),
-      );
-    }
-  }
-
-  Future<AssetEntity?> _findAssetByPath(String path) async {
-    for (final asset in _filteredMedia) {
-      final file = await asset.file;
-      if (file?.path == path) {
-        return asset;
-      }
-    }
-    return null;
-  }
-
-  Widget _buildPreviewArea() {
-    return Container(
-      color: Colors.black,
-      child: FutureBuilder<Widget>(
-        future: _buildPreview(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          return snapshot.data ??
-              Center(
-                child: Text(
-                  'Select media to preview',
-                  style: TextStyle(color: Colors.black, fontSize: 14.sp),
-                ),
-              );
+        itemBuilder: (context, index) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[800],
+              borderRadius: BorderRadius.circular(15),
+            ),
+          );
         },
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(
-          '(overlap)',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+  List<AssetPathEntity> _albums = [];
+  List<AssetEntity> _mediaList = [];
+  AssetEntity? _selectedMedia;
+  AssetPathEntity? _selectedPostAlbum;
+  File? _selectedFile;
+  // VideoPlayerController? _videoPlayerController;
+  bool _isLoadingPostPreview = false; // Track loading state for preview
+  bool _isLoadingPostMore = false; // To handle loading more assets
+  int _currentPostPage = 0; // For pagination
+  final int _pagePostSize = 100; // Fetch 100 items at a time
+  List<File> mediaFiles = [];
+  List<bool> selectedFiles = [];
+
+  // Fetch albums and initial media
+
+  Future<void> _fetchPostAlbums() async {
+    _isLoadingPostPreview = true;
+    setState(() {});
+
+    // Handle permission based on Android version
+    if (await _requestPermissions()) {
+      // If permission granted
+      List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+        type: RequestType.common,
+        hasAll: true,
+      );
+
+      if (albums.isNotEmpty) {
+        _selectedPostAlbum = albums[0];
+        _albums = albums;
+        await _fetchPostMedia(_selectedPostAlbum!,
+            _currentPostPage); // Fetch media for the first album
+
+        // Automatically select the first media item
+        if (_mediaList.isNotEmpty) {
+          final file = await _mediaList[0].file;
+          _selectedMedia = _mediaList[0];
+          _selectedFile = file;
+          // mediaFiles.add(_selectedFile!);
+
+          final checker = List.filled(_mediaList.length, false);
+          selectedFiles.addAll(checker);
+          // selectedFiles[0] = true;
+          _isLoadingPostPreview = false;
+        }
+      }
+      setState(() {});
+    } else {
+      // If permissions are denied, open settings to manually grant permissions
+      PhotoManager.openSetting();
+    }
+  }
+
+// Function to request appropriate permissions for Android 11 and above
+
+  Future<bool> _requestPermissions() async {
+    bool permissions = await Prefrences.getMediaPermission();
+    // debugger();
+    if (permissions) {
+      return true;
+    } else {
+      String version = await getAndroidVersion() ?? "";
+      // final PermissionState state = await PhotoManager.getPermissionState(
+      //     requestOption: const PermissionRequestOption(
+      //   androidPermission:
+      //       AndroidPermission(type: RequestType.common, mediaLocation: true),
+      // ));
+      // if (state == PermissionState.authorized) {
+      //   print('The application has full access permission');
+      // } else {
+      //   print('The application does not have full access permission');
+      // }
+      // For Android 13+ (API level 33+), request specific media permissions
+      if (Platform.isAndroid && int.parse(version) >= 13) {
+        final result = await [
+          Permission.photos,
+          Permission.videos,
+          // Permission.audio,
+        ].request();
+
+        if (result[Permission.photos] == PermissionStatus.granted ||
+                result[Permission.videos] == PermissionStatus.granted
+            // ||
+            // result[Permission.audio] == PermissionStatus.granted
+            ) {
+          await Prefrences.setMediaPermission(true);
+          return true;
+        }
+      }
+
+      // For Android 11 and 12 (API level 30 and 31), request manageExternalStorage
+      if (Platform.isAndroid && int.parse(version) >= 11) {
+        final result = await Permission.manageExternalStorage.request();
+        if (result == PermissionStatus.granted) {
+          await Prefrences.setMediaPermission(true);
+          return true;
+        }
+      }
+
+      // For Android 10 and below (API level < 30), request storage permission only
+      if (Platform.isAndroid && int.parse(version) < 11) {
+        final result = await Permission.storage.request();
+        if (result == PermissionStatus.granted) {
+          await Prefrences.setMediaPermission(true);
+          return true;
+        }
+      }
+
+      // If all checks fail, permissions are denied
+      await Prefrences.setMediaPermission(false);
+      return false;
+    }
+  }
+
+// Helper function to get Android version
+  Future<String?> getAndroidVersion() async {
+    if (Platform.isAndroid) {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.version.release; // e.g., "11", "12"
+    }
+    return null;
+  }
+
+  // Fetch media for a selected album with pagination
+  Future<void> _fetchPostMedia(AssetPathEntity album, int page) async {
+    if (_isLoadingPostMore) return; // Avoid duplicate loads
+    _isLoadingPostMore = true;
+    final List<AssetEntity> media =
+        await album.getAssetListPaged(page: page, size: _pagePostSize);
+    List<bool> boolean = List.filled(_pagePostSize, false);
+    setState(() {
+      _mediaList.addAll(media);
+
+      selectedFiles.addAll(boolean); // Append new media to the list
+      _isLoadingPostMore = false;
+      // selectedFiles
+      //     .addAll(List.filled(_mediaList.length + selectedFiles.length, false));
+    });
+  }
+
+  // Load more assets when reaching the end of the grid
+  void _loadMorePostAssets() async {
+    if (!_isLoadingPostMore) {
+      _currentPostPage++;
+      await _fetchPostMedia(_selectedPostAlbum!, _currentPostPage);
+    }
+  }
+
+  // Widget to build media preview
+
+  final ImagePicker _picker = ImagePicker();
+  // bool _isDropdownVisible = false;
+
+  Widget _buildMediaListSection(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+
+    return Column(
+      children: [
+        // Filter row with dropdown and buttons
+        _buildFilterRow(),
+
+        const SizedBox(height: 8),
+
+        // Grid thumbnails with spacing and rounded corners + circle background behind check icon
+        Expanded(
+          flex: 2,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo.metrics.pixels ==
+                  scrollInfo.metrics.maxScrollExtent) {
+                _loadMorePostAssets(); // Load more assets when scrolled to the bottom
+              }
+              return false;
+            },
+            child: GridView.builder(
+              itemCount: _mediaList.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemBuilder: (context, index) {
+                final media = _mediaList[index];
+
+                return FutureBuilder<Uint8List?>(
+                  future: media.thumbnailData,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasData) {
+                      return Stack(
+                        children: [
+                          Container(
+                            height: 200,
+                            width: 200,
+                            decoration: BoxDecoration(
+                                color: Colors.grey,
+                                borderRadius: BorderRadius.circular(20)),
+                            child:
+                                Image.memory(snapshot.data!, fit: BoxFit.cover),
+                          ),
+                          if (media.type == AssetType.video)
+                            const Positioned(
+                              bottom: 4,
+                              right: 4,
+                              child: Icon(Icons.play_circle_fill,
+                                  color: Colors.white),
+                            ),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: GestureDetector(
+                              onTap: () async {
+                                // Toggle selection state
+                                selectedFiles[index] = !selectedFiles[index];
+
+                                // Get the media file asynchronously
+                                final file = await media.file;
+
+                                // Start updating UI state
+                                setState(() {
+                                  _isLoadingPostPreview =
+                                      true; // Start loading indicator
+                                });
+
+                                if (selectedFiles[index]) {
+                                  // If selected, add the file to mediaFiles
+                                  if (file != null) {
+                                    mediaFiles.add(file);
+                                  }
+                                } else {
+                                  // If deselected, remove the file from mediaFiles
+                                  if (file != null) {
+                                    mediaFiles.removeWhere(
+                                        (element) => element.path == file.path);
+                                  }
+                                }
+
+                                // Stop loading indicator
+                                setState(() {
+                                  _isLoadingPostPreview = false;
+                                });
+                              },
+                              child: Container(
+                                width: 20, // Adjust width as needed
+                                height: 20, // Adjust height as needed
+                                decoration: BoxDecoration(
+                                  color: selectedFiles[index]
+                                      ? Colors.blue
+                                      : Colors
+                                          .transparent, // Blue fill when selected, transparent when not
+                                  border: Border.all(
+                                    color: selectedFiles[index]
+                                        ? Colors.blue
+                                        : Colors
+                                            .grey, // Blue border when selected, grey when not
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                      16), // Circular border radius
+                                ),
+                                child: selectedFiles[index]
+                                    ? Center(
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 10,
+                                        ),
+                                      )
+                                    : null, // Show tick icon when selected, otherwise show nothing
+                              ),
+                              // Icon(
+                              //   Icons.check_box,
+                              //   color: selectedFiles[index]
+                              //       ? Colors.blue
+                              //       : Colors.red,
+                              // ),
+                            ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          height: 200,
+                          width: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
           ),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.black,
-        elevation: 0.5,
-      ),
-      body: Column(
-        children: [
-          Expanded(
+      ],
+    );
+  }
+
+  Future<bool?> showConfirmationDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildPreviewArea(),
+                Icon(Icons.attachment, size: 50, color: Colors.indigo),
+                SizedBox(height: 15),
+                Text(
+                  'Confirmation',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                _buildFilterRow(),
-                Expanded(
-                  flex: 3,
-                  child: _buildMediaGrid(),
+                SizedBox(height: 10),
+                Text(
+                  'Are you sure you want to attach the files to this post?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16),
                 ),
+                SizedBox(height: 25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.pop(context, false);
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context, true);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Files attached successfully!')),
+                        );
+                      },
+                      child: Text('Confirm'),
+                    ),
+                  ],
+                )
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterRow() {
+    return Container(
+      height: 60,
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: () => _showDiscardDialog(context),
+            icon: Icon(
+              Icons.cancel,
+              size: 20,
+              color: Color.fromRGBO(68, 68, 68, 1),
+            ),
+          ),
+          Container(
+            width: 100,
+            child: DropdownButton<AssetPathEntity>(
+              menuMaxHeight: 400,
+              dropdownColor: Colors.white,
+              isExpanded: true,
+              value: _selectedPostAlbum,
+              iconEnabledColor: Colors.black,
+              underline: SizedBox.shrink(),
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              items: _albums
+                  .map((album) => DropdownMenuItem(
+                        value: album,
+                        child: Text(
+                          album.name,
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                      ))
+                  .toList(),
+              onChanged: (album) {
+                setState(() {
+                  _selectedPostAlbum = album;
+                  _mediaList.clear();
+                  _currentPostPage = 0;
+                  _fetchPostMedia(album!, _currentPostPage);
+                });
+              },
+            ),
+          ),
+          TextButton(
+            onPressed: mediaFiles.isNotEmpty
+                ? () async {
+                    if (widget.isChatCamera == false) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => AddPostScreen(
+                                    mediFiles: mediaFiles,
+                                    userProfile: widget.userProfile,
+                                    // type: "post",
+                                  )));
+                    } else {
+                      final result = await showConfirmationDialog(context);
+                      // debugger();
+                      if (result == true) {
+                        Navigator.pop(context, mediaFiles);
+                      }
+                    }
+                  }
+                : null,
+            child: Text('Next',
+                style: AppTextStyles.poppinsMedium(
+                    color: Color.fromRGBO(21, 68, 160, 1), fontSize: 12)),
           ),
         ],
       ),

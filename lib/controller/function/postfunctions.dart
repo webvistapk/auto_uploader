@@ -7,7 +7,8 @@ import 'package:mobile/screens/profile/widgets/emojiBottomSheet.dart';
 import 'package:mobile/screens/profile/widgets/messageBottomSheet.dart';
 import 'package:provider/provider.dart';
 
-void CreateChat(String PostUserID,PostID, BuildContext context, {bool isEmoji=false}) async {
+void CreateChat(String PostUserID, PostID, BuildContext context,
+    {bool isEmoji = false}) async {
   final response = await Provider.of<PostProvider>(context, listen: false)
       .createChat(PostUserID, context);
   if (response?.statusCode == 201) {
@@ -15,11 +16,10 @@ void CreateChat(String PostUserID,PostID, BuildContext context, {bool isEmoji=fa
 
     // Extract chat ID
     final chatId = responseData['chat']['id'].toString();
-    if(isEmoji){
-       showEmojiBottomSheet(context,chatId,PostID );
-    }
-    else{
-    showMessageBottomSheet(context, chatId, PostID);
+    if (isEmoji) {
+      showEmojiBottomSheet(context, chatId, PostID);
+    } else {
+      showMessageBottomSheet(context, chatId, PostID);
     }
   } else {
     ToastNotifier.showErrorToast(context, "Unable to chat");

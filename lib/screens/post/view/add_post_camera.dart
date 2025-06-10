@@ -8,10 +8,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
-import 'package:mobile/screens/post/post_reels.dart';
-import 'package:mobile/screens/post/view/camera/camera.dart';
-import 'package:mobile/screens/post/view/camera/preview_screen.dart';
-import 'package:mobile/utils/custom_navigations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:video_player/video_player.dart';
@@ -20,9 +16,17 @@ import '../../../models/UserProfile/userprofile.dart';
 
 class AddPostCameraScreen extends StatefulWidget {
   final String token;
-  final UserProfile userProfile;
-  const AddPostCameraScreen(
-      {Key? key, required this.token, required this.userProfile})
+  UserProfile? userProfile;
+  final bool isChatCamera;
+  String? postId;
+  String? chatId;
+  AddPostCameraScreen(
+      {Key? key,
+      required this.token,
+      this.userProfile,
+      required this.isChatCamera,
+      this.postId,
+      this.chatId})
       : super(key: key);
 
   @override
@@ -399,21 +403,19 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                                 if (_capturedFile != null) {
                                   // Create a list of files to pass (even if single file)
                                   final file = File(_capturedFile!.path);
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => AddPostScreen(
-                                        mediFiles: [file],
-                                        userProfile: widget.userProfile,
+                                  if (widget.isChatCamera == false) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => AddPostScreen(
+                                          mediFiles: [file],
+                                          userProfile: widget.userProfile,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text('No media captured')),
-                                  );
+                                    );
+                                  } else {
+                                    Navigator.pop(context, [file]);
+                                  }
                                 }
                               },
                               child: SizedBox(
@@ -495,6 +497,26 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     );
   }
 
+  Future<List<File>?> showFullScreenAlert(
+      BuildContext context, Widget contentScreen) {
+    return showDialog<List<File>>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          child: SizedBox.expand(
+            child: Material(
+              color: Colors.white,
+              child: contentScreen,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildNavItem(String title, int index) {
     final isSelected = index == _selectedIndex;
 
@@ -517,14 +539,29 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
 
           if (!mounted) return;
 
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => CreatePostScreen(
-                userProfile: widget.userProfile,
-                token: widget.token,
+          if (widget.isChatCamera) {
+            final result = await showFullScreenAlert(
+                context,
+                CreatePostScreen(
+                  isChatCamera: true,
+                  token: widget.token,
+                  userProfile: widget.userProfile,
+                ));
+            // debugger();
+            if (result != null) {
+              Navigator.pop(context, result);
+            }
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => CreatePostScreen(
+                  userProfile: widget.userProfile,
+                  token: widget.token,
+                  isChatCamera: widget.isChatCamera,
+                ),
               ),
-            ),
-          );
+            );
+          }
         }
 
         // Add other navigation cases as needed

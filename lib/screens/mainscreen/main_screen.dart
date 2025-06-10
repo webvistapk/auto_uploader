@@ -383,6 +383,7 @@ class _MainScreenState extends State<MainScreen> {
                           .push(_createSlideRoute(AddPostCameraScreen(
                         token: widget.authToken,
                         userProfile: widget.userProfile,
+                        isChatCamera: false,
                       )));
                       // After pop, return to previous tab (e.g., home)
                       setState(() {

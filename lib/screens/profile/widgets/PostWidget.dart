@@ -137,6 +137,26 @@ class _PostWidgetState extends State<PostWidget> {
     }
     date = formatWithOrdinalSuffix(DateTime.parse(widget.date));
     bool isIconBold = false;
+
+    void showFullScreenAlert(BuildContext context, Widget contentScreen) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return Dialog(
+            insetPadding: EdgeInsets.zero,
+            backgroundColor: Colors.transparent,
+            child: SizedBox.expand(
+              child: Material(
+                color: Colors.white,
+                child: contentScreen,
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     //debugger();
     return Builder(builder: (context) {
       var pro = context.watch<PostProvider>();
