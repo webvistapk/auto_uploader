@@ -127,7 +127,10 @@ class PostProvider extends ChangeNotifier {
       String? pollTitle,
       String? pollDescription,
       List<String>? pollOptions,
-      required List<String>? interactions}) async {
+      required List<String>? interactions,
+      required List<String> dmReplies, // Interaction options
+      required List<String> dmComments // Interaction options
+      }) async {
     try {
       _isLoading = true;
       notifyListeners();
@@ -148,7 +151,9 @@ class PostProvider extends ChangeNotifier {
             postTitle: postTitle,
             postDescription: postDescription,
             interactions: interactions!,
-            location: location);
+            location: location,
+            dmReplies: dmReplies,
+            dmComments: dmComments);
 
         if (response != null) {
           log("Post: $response");
@@ -724,14 +729,11 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 201) {
         ToastNotifier.showSuccessToast(context, "Message sent successfully");
         return response;
-      } else {
-        throw Exception(
-            'Failed to send message. Status: ${response.statusCode}\nBody: ${response.body}');
-      }
+      } 
     } catch (e) {
       print('Error sending message: $e');
       ToastNotifier.showErrorToast(context, "Error sending message");
-      throw Exception('Error sending message: $e');
+      throw Exception('Error sending message:');
     }
   }
 }

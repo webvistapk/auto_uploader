@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_text_styles.dart';
+import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/models/UserProfile/post_model.dart';
 import 'package:mobile/screens/messaging/widgets/media_item.dart';
 import 'package:mobile/screens/profile/SinglePost.dart';
@@ -16,15 +15,15 @@ class PostMessageWidget extends StatelessWidget {
   final PostModel? post;
   final bool isUser;
 
-  const PostMessageWidget(
-      {Key? key,
-      required this.text,
-      required this.timestampDate,
-      required this.timestampTime,
-      required this.mediaList,
-      this.post,
-      required this.isUser})
-      : super(key: key);
+  const PostMessageWidget({
+    Key? key,
+    required this.text,
+    required this.timestampDate,
+    required this.timestampTime,
+    required this.mediaList,
+    this.post,
+    required this.isUser,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +39,14 @@ class PostMessageWidget extends StatelessWidget {
             child: Center(
               child: Text(
                 timestampDate,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
           ),
-
           // Post details container (light grey with rounded corners & slight shadow)
           if (post != null)
             InkWell(
@@ -59,122 +61,99 @@ class PostMessageWidget extends StatelessWidget {
               },
               child: Container(
                 width: 100,
-                height: 150,
-                padding: const EdgeInsets.all(10),
+                height: 150, // Adjust height as needed
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.shade400,
+                        blurRadius: 8,
+                        spreadRadius: 2)
+                  ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
                   children: [
-                    const Text(
-                      "Replied to Post",
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      post!.postTitle ?? 'No Title',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    if (post!.media.isNotEmpty) ...[
-                      Column(
-                        children: post!.media.map((media) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Stack(
-                              children: [
-                                // Image/Video Thumbnail
-
-                                Image.network(
-                                  media.file,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Container(
-                                      color: Colors.grey.shade300,
-                                      child: const Center(
-                                          child: CircularProgressIndicator()),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                    color: Colors.grey.shade300,
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.broken_image,
-                                        size: 50,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                // Play icon overlay for videos
-                                if (media.mediaType == 'video')
-                                  Positioned.fill(
-                                    child: Container(
-                                      color: Colors.black26,
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.play_circle_fill,
-                                          color: Colors.white,
-                                          size: 32,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
+                    // Image as the background
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        '${ApiURLs.baseUrl2}${post!.media.first.file}', // Assuming the first media is the image
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: Colors.grey.shade300,
+                            child: const Center(
+                                child: CircularProgressIndicator()),
                           );
-                        }).toList(),
+                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey.shade300,
+                          child: const Center(
+                            child: Icon(Icons.broken_image,
+                                size: 50, color: Colors.red),
+                          ),
+                        ),
                       ),
-                    ]
-                    // Expanded(
-                    //   child: Text(
-                    //     post!.postDescription ?? 'No Description',
-                    //     maxLines: 3,
-                    //     overflow: TextOverflow.ellipsis,
-                    //     style: const TextStyle(
-                    //       fontSize: 13,
-                    //       color: Colors.black54,
-                    //     ),
-                    //   ),
-                    // ),
-                    // if (post!.media.isNotEmpty)
+                    ),
+                    // Grey overlay with opacity
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          color: Colors.black.withOpacity(
+                              0.4), // Semi-transparent grey overlay
+                        ),
+                      ),
+                    ),
+                    // "Replied to Post" text on top
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: Text(
+                        "Replied to Post",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-
-          // Text message bubble below post container, with Instagram-like blue bubble style
+          if (mediaList.isNotEmpty)
+            Column(
+              children: mediaList.map((media) {
+                return MediaItem(
+                  url: media['file'],
+                  mediaType: media['media_type'],
+                  timestamp: timestampTime,
+                  isUser: true,
+                );
+              }).toList(),
+            ),
+          // Post message bubble below image, with blue bubble style
           if (text.isNotEmpty)
             Container(
-              margin: const EdgeInsets.only(
-                left: 55,
-              ),
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 103, 207, 255),
+              margin: const EdgeInsets.only(left: 55, top: 12),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Color(0xFF68CFFF),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
                   bottomLeft: Radius.circular(12),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.blueAccent.shade100,
+                      blurRadius: 6,
+                      spreadRadius: 2)
+                ],
               ),
               child: Text(
                 text,
@@ -182,7 +161,6 @@ class PostMessageWidget extends StatelessWidget {
                 softWrap: true,
               ),
             ),
-
           // Timestamp below aligned right, small and grey
           Padding(
             padding: const EdgeInsets.only(top: 6.0, right: 4.0),

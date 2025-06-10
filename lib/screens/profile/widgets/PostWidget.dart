@@ -378,7 +378,8 @@ class _PostWidgetState extends State<PostWidget> {
 
                       Row(
                         children: [
-                          if (!widget.isUserPost) ...[
+                          if (!widget.isUserPost &&
+                              widget.postModel.showDm == true) ...[
                             GestureDetector(
                                 onTap: () {
                                   CreateChat(widget.userID.toString(),
@@ -489,11 +490,10 @@ class _PostWidgetState extends State<PostWidget> {
                                         : "${widget.postModel.repostCount}",
                                     isBold: isIconBold))
                             : SizedBox(),
-                    if (!widget.postModel.interactions!
-                        .contains('comments')) ...[
+                    if (widget.postModel.showComment == true) ...[
                       const SizedBox(width: 10),
                       GestureDetector(
-                        onTap: widget.showCommentSection
+                        onTap: widget.postModel.showComment == false
                             ? null
                             : () => showComments(
                                   widget.postId,
@@ -546,7 +546,7 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 2,
             ),
             Padding(

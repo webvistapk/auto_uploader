@@ -24,14 +24,30 @@ class _MessageWidgetState extends State<MessageWidget> {
   final TextEditingController _messageController = TextEditingController();
   bool _showGallery = false;
   List<File> _selectedImages = [];
-
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String? _temporaryErrorMessage;
   void _toggleGallery() {
     setState(() => _showGallery = !_showGallery);
   }
 
   Future<void> _sendMessage() async {
-    final String messageText = _messageController.text.trim();
+    
 
+    final String messageText = _messageController.text.trim();
+ if (messageText.isEmpty ) {
+    setState(() {
+      _temporaryErrorMessage = "Message field must not be empty";
+    });
+
+    Future.delayed(Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _temporaryErrorMessage = null;
+        });
+      }
+    });
+    return;
+  }
     // Return early if both message and images are empty
 
     if (messageText.isEmpty && _selectedImages.isEmpty) return;
@@ -49,13 +65,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         _messageController.clear();
         setState(() => _selectedImages.clear());
         Navigator.pop(context);
-      } else {
-        ToastNotifier.showErrorToast(context, "Failed to send message");
       }
-    } catch (e) {
-      debugger();
-      ToastNotifier.showErrorToast(context, "Error: ${e.toString()}");
-    }
+    } catch (e) {}
   }
 
   @override
@@ -84,35 +95,46 @@ class _MessageWidgetState extends State<MessageWidget> {
               ],
             ),
           ),
-        Container(
-          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-          decoration: BoxDecoration(
-            color: Color(0xffF8F8F8),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Image.asset(AppIcons.camera, width: 33.35.sp, height: 33.34.sp),
-              SizedBox(width: 17.31.sp),
-              GestureDetector(
-                onTap: _toggleGallery,
-                child: Image.asset(AppIcons.image,
-                    width: 32.83.sp, height: 32.83.sp),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  decoration: InputDecoration(
-                    hintText: 'Send a message..',
-                    hintStyle:
-                        TextStyle(fontSize: 24.sp, color: Color(0xff757474)),
-                    border: InputBorder.none,
+        Form(
+          key: _formKey,
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+            decoration: BoxDecoration(
+              color: Color(0xffF8F8F8),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(AppIcons.camera, width: 33.35.sp, height: 33.34.sp),
+                SizedBox(width: 17.31.sp),
+                GestureDetector(
+                  onTap: _toggleGallery,
+                  child: Image.asset(AppIcons.image,
+                      width: 32.83.sp, height: 32.83.sp),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: _temporaryErrorMessage ?? 'Send a message..',
+                      hintStyle: TextStyle(
+                        fontSize: 24.sp,
+                        color: _temporaryErrorMessage != null
+                            ? Colors.red
+                            : Color(0xff757474),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 12), // fixed padding
+                    ),
                   ),
                 ),
-              ),
-              Image.asset(AppIcons.mic, width: 32.83.sp, height: 32.83.sp),
-            ],
+                Image.asset(AppIcons.mic, width: 32.83.sp, height: 32.83.sp),
+              ],
+            ),
           ),
         ),
         SizedBox(height: 10),

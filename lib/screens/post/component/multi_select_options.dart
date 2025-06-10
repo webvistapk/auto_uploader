@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
-class InteractionsBottomSheet extends StatefulWidget {
+class MultiSelectBottomSheet extends StatefulWidget {
   final List<String>? initialSelectedOptions;
   final List<Map<String, String>>? finalOptions;
+  final String title;
 
-  const InteractionsBottomSheet({
-    Key? key,
-    this.initialSelectedOptions,
-    this.finalOptions,
-  }) : super(key: key);
+  const MultiSelectBottomSheet(
+      {Key? key,
+      this.initialSelectedOptions,
+      this.finalOptions,
+      this.title = 'Choose Options'})
+      : super(key: key);
 
   @override
-  _InteractionsBottomSheetState createState() =>
-      _InteractionsBottomSheetState();
+  _MultiSelectBottomSheetState createState() => _MultiSelectBottomSheetState();
 }
 
-class _InteractionsBottomSheetState extends State<InteractionsBottomSheet> {
+class _MultiSelectBottomSheetState extends State<MultiSelectBottomSheet> {
   late Set<String> selectedOptions;
   late List<Map<String, String>> options;
 
@@ -51,8 +52,8 @@ class _InteractionsBottomSheetState extends State<InteractionsBottomSheet> {
       child: Column(
         children: [
           const SizedBox(height: 12),
-          const Text(
-            'Choose Options',
+          Text(
+            widget.title,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
