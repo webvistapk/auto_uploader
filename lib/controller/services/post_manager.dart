@@ -54,13 +54,15 @@ class PostManager {
     if (interactions.isNotEmpty) {
       request.fields['interactions'] = interactions.join(',').toLowerCase();
     }
+    
     if (dmReplies.isNotEmpty) {
       String dmReply = jsonEncode(dmReplies);
-      request.fields['dm_privacy '] = dmReply;
+      print(dmReply);
+      request.fields['dm_privacy'] = dmReply;
     }
     if (dmComments.isNotEmpty) {
       String dmComment = jsonEncode(dmComments);
-      request.fields['comments_privacy '] = dmComment;
+      request.fields['comments_privacy'] = dmComment;
     }
 
     request.fields['post'] = postField;
