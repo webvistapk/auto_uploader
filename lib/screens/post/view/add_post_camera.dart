@@ -57,6 +57,8 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
   }
 
   XFile? _capturedFile;
+
+  List<File> selectedFiles = [];
   bool _isVideo = false;
   bool _isRecording = false;
   Timer? _progressTimer;
@@ -404,15 +406,18 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                                   // Create a list of files to pass (even if single file)
                                   final file = File(_capturedFile!.path);
                                   if (widget.isChatCamera == false) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => AddPostScreen(
-                                          mediFiles: [file],
-                                          userProfile: widget.userProfile,
-                                        ),
-                                      ),
-                                    );
+                                    selectedFiles.add(file);
+                                    _capturedFile = null;
+                                    setState(() {});
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (_) => AddPostScreen(
+                                    //       mediFiles: [file],
+                                    //       userProfile: widget.userProfile,
+                                    //     ),
+                                    //   ),
+                                    // );
                                   } else {
                                     Navigator.pop(context, [file]);
                                   }
@@ -556,6 +561,7 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
               MaterialPageRoute(
                 builder: (_) => CreatePostScreen(
                   userProfile: widget.userProfile,
+                  selectedFiles: selectedFiles,
                   token: widget.token,
                   isChatCamera: widget.isChatCamera,
                 ),
@@ -597,10 +603,12 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
 
     return Scaffold(
       backgroundColor: Colors.black,
-      bottomNavigationBar: SizedBox(
-        height: bottomHeight,
-        child: _buildBottomNav(),
-      ),
+      bottomNavigationBar: widget.isChatCamera
+          ? null
+          : SizedBox(
+              height: bottomHeight,
+              child: _buildBottomNav(),
+            ),
       body:
           // Flexible(child: CustomCameraScreen())
           Stack(

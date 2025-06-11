@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,12 +10,13 @@ class CreatePostScreen extends StatefulWidget {
   UserProfile? userProfile;
   final token;
   final bool isChatCamera;
-  CreatePostScreen({
-    super.key,
-    this.userProfile,
-    this.token,
-    required this.isChatCamera,
-  });
+  List<File>? selectedFiles;
+  CreatePostScreen(
+      {super.key,
+      this.userProfile,
+      this.token,
+      required this.isChatCamera,
+      this.selectedFiles});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -25,6 +28,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return
         // ReelsScreenData();
         UploadFromGallery(
+      selectedFiles: widget.selectedFiles,
       userProfile: widget.userProfile,
       token: widget.token,
       isChatCamera: widget.isChatCamera,

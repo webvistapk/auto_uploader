@@ -489,17 +489,17 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       title: "Audience",
                     ),
                     CustomOptionTile(
-                      iconPath: "assets/icons/dm_replies.png",
+                      iconPath: "assets/icons/forward.png",
                       title: "Direct Replies",
                       onTap: () => showDmRepliesSheet(context),
                     ),
                     CustomOptionTile(
-                      iconPath: "assets/icons/dm_comment.png",
-                      title: "Direct Comments",
+                      iconPath: "assets/icons/engagement.png",
+                      title: "Comments",
                       onTap: () => showDmCommentsSheet(context),
                     ),
                     CustomOptionTile(
-                      iconPath: "assets/icons/engagement.png",
+                      iconPath: "assets/icons/dm_comment.png",
                       title: "Engagement",
                     ),
                     CustomOptionTile(

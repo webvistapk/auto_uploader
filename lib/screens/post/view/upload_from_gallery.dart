@@ -24,12 +24,14 @@ class UploadFromGallery extends StatefulWidget {
   final UserProfile? userProfile;
   final token;
   final bool isChatCamera;
-  UploadFromGallery({
-    Key? key,
-    required this.userProfile,
-    this.token,
-    required this.isChatCamera,
-  }) : super(key: key);
+  List<File>? selectedFiles;
+  UploadFromGallery(
+      {Key? key,
+      required this.userProfile,
+      this.token,
+      required this.isChatCamera,
+      this.selectedFiles})
+      : super(key: key);
 
   @override
   _UploadFromGalleryState createState() => _UploadFromGalleryState();
@@ -42,6 +44,11 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
   @override
   void initState() {
     super.initState();
+    if (widget.selectedFiles != null) {
+      if (widget.selectedFiles!.isNotEmpty) {
+        mediaFiles.addAll(widget.selectedFiles!);
+      }
+    }
     _fetchPostAlbums();
   }
 
@@ -627,11 +634,7 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
                                     // type: "post",
                                   )));
                     } else {
-                      final result = await showConfirmationDialog(context);
-                      // debugger();
-                      if (result == true) {
-                        Navigator.pop(context, mediaFiles);
-                      }
+                      Navigator.pop(context, mediaFiles);
                     }
                   }
                 : null,

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:mobile/screens/messaging/widgets/media_preview/media_screen_preview.dart';
+import 'package:mobile/screens/post/create_post_screen.dart';
+import 'package:mobile/screens/post/view/add_post_camera.dart';
 
 class ChatInputField extends StatefulWidget {
   final TextEditingController messageController;
@@ -87,8 +89,20 @@ class _ChatInputFieldState extends State<ChatInputField> {
               Icons.attach_file,
               color: Colors.grey,
             ),
-            onPressed: () {
-              _showOptionsBottomSheet(context, "attachment");
+            onPressed: () async {
+              // _showOptionsBottomSheet(context, "attachment");
+              mediaPaths.clear();
+              final result = await showFullScreenAlert(
+                  context,
+                  CreatePostScreen(
+                    isChatCamera: true,
+                  ));
+              if (result != null && result.isNotEmpty) {
+                setState(() {
+                  mediaPaths.addAll(result.toList());
+                });
+                _confirmAndNavigate();
+              }
               // Handle attachment (file picker or gallery)
             },
           ),
@@ -99,8 +113,22 @@ class _ChatInputFieldState extends State<ChatInputField> {
               Icons.camera_alt,
               color: Colors.grey,
             ),
-            onPressed: () {
-              _showOptionsBottomSheet(context, "camera");
+            onPressed: () async {
+              // _showOptionsBottomSheet(context, "camera");
+              mediaPaths.clear();
+              List<File>? image = await showFullScreenAlert(
+                  context,
+                  AddPostCameraScreen(
+                    isChatCamera: true,
+                    token: '',
+                  ));
+
+              if (image != null) {
+                setState(() {
+                  mediaPaths.addAll(image);
+                });
+                _confirmAndNavigate();
+              }
               // Handle camera action (open camera or photo picker)
             },
           ),
@@ -185,10 +213,14 @@ class _ChatInputFieldState extends State<ChatInputField> {
   Future<void> _pickPhotos() async {
     try {
       mediaPaths.clear();
-      final List<XFile>? result = await _picker.pickMultiImage();
+      final result = await showFullScreenAlert(
+          context,
+          CreatePostScreen(
+            isChatCamera: true,
+          ));
       if (result != null && result.isNotEmpty) {
         setState(() {
-          mediaPaths.addAll(result.map((file) => File(file.path)).toList());
+          mediaPaths.addAll(result.toList());
         });
         _confirmAndNavigate();
       }
@@ -201,13 +233,14 @@ class _ChatInputFieldState extends State<ChatInputField> {
   Future<void> _pickVideos() async {
     try {
       mediaPaths.clear();
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.video,
-        allowMultiple: true,
-      );
+      final result = await showFullScreenAlert(
+          context,
+          CreatePostScreen(
+            isChatCamera: true,
+          ));
       if (result != null) {
         setState(() {
-          mediaPaths.addAll(result.paths.map((path) => File(path!)).toList());
+          mediaPaths.addAll(result.toList());
         });
         _confirmAndNavigate();
       }
@@ -220,10 +253,16 @@ class _ChatInputFieldState extends State<ChatInputField> {
   Future<void> _takePhoto() async {
     try {
       mediaPaths.clear();
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      List<File>? image = await showFullScreenAlert(
+          context,
+          AddPostCameraScreen(
+            isChatCamera: true,
+            token: '',
+          ));
+
       if (image != null) {
         setState(() {
-          mediaPaths.add(File(image.path));
+          mediaPaths.addAll(image);
         });
         _confirmAndNavigate();
       }
@@ -236,10 +275,15 @@ class _ChatInputFieldState extends State<ChatInputField> {
   Future<void> _recordVideo() async {
     try {
       mediaPaths.clear();
-      final XFile? video = await _picker.pickVideo(source: ImageSource.camera);
+      final video = await showFullScreenAlert(
+          context,
+          AddPostCameraScreen(
+            isChatCamera: true,
+            token: '',
+          ));
       if (video != null) {
         setState(() {
-          mediaPaths.add(File(video.path));
+          mediaPaths.addAll(video);
         });
         _confirmAndNavigate();
       }
@@ -287,6 +331,26 @@ class _ChatInputFieldState extends State<ChatInputField> {
         },
       );
     }
+  }
+
+  Future<List<File>?> showFullScreenAlert(
+      BuildContext context, Widget contentScreen) {
+    return showDialog<List<File>>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          child: SizedBox.expand(
+            child: Material(
+              color: Colors.white,
+              child: contentScreen,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showOptionsBottomSheet(BuildContext context, String type) {
