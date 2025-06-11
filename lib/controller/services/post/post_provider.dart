@@ -729,14 +729,11 @@ class PostProvider extends ChangeNotifier {
       if (response.statusCode == 201) {
         ToastNotifier.showSuccessToast(context, "Message sent successfully");
         return response;
-      } else {
-        throw Exception(
-            'Failed to send message. Status: ${response.statusCode}\nBody: ${response.body}');
-      }
+      } 
     } catch (e) {
       print('Error sending message: $e');
       ToastNotifier.showErrorToast(context, "Error sending message");
-      throw Exception('Error sending message: $e');
+      throw Exception('Error sending message:');
     }
   }
 }
