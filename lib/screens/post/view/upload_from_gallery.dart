@@ -134,7 +134,7 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
                           style: AppTextStyles.poppinsBold(color: Colors.white),
                         )
                       : FileCarousel(files: mediaFiles)),
-              const SizedBox(height: 20),
+              //const SizedBox(height: 20),
               // Custom TabBar in the body
 
               Expanded(
@@ -375,14 +375,47 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
                         snapshot.hasData) {
                       return Stack(
                         children: [
-                          Container(
-                            height: 200,
-                            width: 200,
-                            decoration: BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.circular(20)),
-                            child:
-                                Image.memory(snapshot.data!, fit: BoxFit.cover),
+                          GestureDetector(
+                            onTap: () async {
+                              // Toggle selection state
+                              selectedFiles[index] = !selectedFiles[index];
+
+                              // Get the media file asynchronously
+                              final file = await media.file;
+
+                              // Start updating UI state
+                              setState(() {
+                                _isLoadingPostPreview =
+                                    true; // Start loading indicator
+                              });
+
+                              if (selectedFiles[index]) {
+                                // If selected, add the file to mediaFiles
+                                if (file != null) {
+                                  mediaFiles.add(file);
+                                }
+                              } else {
+                                // If deselected, remove the file from mediaFiles
+                                if (file != null) {
+                                  mediaFiles.removeWhere(
+                                      (element) => element.path == file.path);
+                                }
+                              }
+
+                              // Stop loading indicator
+                              setState(() {
+                                _isLoadingPostPreview = false;
+                              });
+                            },
+                            child: Container(
+                              height: 200,
+                              width: 200,
+                              decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Image.memory(snapshot.data!,
+                                  fit: BoxFit.cover),
+                            ),
                           ),
                           if (media.type == AssetType.video)
                             const Positioned(
@@ -394,72 +427,33 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
                           Positioned(
                             top: 4,
                             right: 4,
-                            child: GestureDetector(
-                              onTap: () async {
-                                // Toggle selection state
-                                selectedFiles[index] = !selectedFiles[index];
-
-                                // Get the media file asynchronously
-                                final file = await media.file;
-
-                                // Start updating UI state
-                                setState(() {
-                                  _isLoadingPostPreview =
-                                      true; // Start loading indicator
-                                });
-
-                                if (selectedFiles[index]) {
-                                  // If selected, add the file to mediaFiles
-                                  if (file != null) {
-                                    mediaFiles.add(file);
-                                  }
-                                } else {
-                                  // If deselected, remove the file from mediaFiles
-                                  if (file != null) {
-                                    mediaFiles.removeWhere(
-                                        (element) => element.path == file.path);
-                                  }
-                                }
-
-                                // Stop loading indicator
-                                setState(() {
-                                  _isLoadingPostPreview = false;
-                                });
-                              },
-                              child: Container(
-                                width: 20, // Adjust width as needed
-                                height: 20, // Adjust height as needed
-                                decoration: BoxDecoration(
+                            child: Container(
+                              width: 20, // Adjust width as needed
+                              height: 20, // Adjust height as needed
+                              decoration: BoxDecoration(
+                                color: selectedFiles[index]
+                                    ? Colors.blue
+                                    : Colors
+                                        .transparent, // Blue fill when selected, transparent when not
+                                border: Border.all(
                                   color: selectedFiles[index]
                                       ? Colors.blue
                                       : Colors
-                                          .transparent, // Blue fill when selected, transparent when not
-                                  border: Border.all(
-                                    color: selectedFiles[index]
-                                        ? Colors.blue
-                                        : Colors
-                                            .grey, // Blue border when selected, grey when not
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                      16), // Circular border radius
+                                          .grey, // Blue border when selected, grey when not
+                                  width: 2,
                                 ),
-                                child: selectedFiles[index]
-                                    ? Center(
-                                        child: Icon(
-                                          Icons.check,
-                                          color: Colors.white,
-                                          size: 10,
-                                        ),
-                                      )
-                                    : null, // Show tick icon when selected, otherwise show nothing
+                                borderRadius: BorderRadius.circular(
+                                    16), // Circular border radius
                               ),
-                              // Icon(
-                              //   Icons.check_box,
-                              //   color: selectedFiles[index]
-                              //       ? Colors.blue
-                              //       : Colors.red,
-                              // ),
+                              child: selectedFiles[index]
+                                  ? Center(
+                                      child: Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 10,
+                                      ),
+                                    )
+                                  : null, // Show tick icon when selected, otherwise show nothing
                             ),
                           ),
                         ],
@@ -579,28 +573,37 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
             onPressed: () => _showDiscardDialog(context),
             icon: Icon(
               Icons.cancel,
-              size: 20,
+              size: 18,
               color: Color.fromRGBO(68, 68, 68, 1),
             ),
           ),
           Container(
-            width: 100,
+            constraints:
+                BoxConstraints(maxWidth: 80, minWidth: 60), // Adjust max width as needed
             child: DropdownButton<AssetPathEntity>(
               menuMaxHeight: 400,
               dropdownColor: Colors.white,
-              isExpanded: true,
+              isExpanded: true, // Allows text to take available space
               value: _selectedPostAlbum,
               iconEnabledColor: Colors.black,
-              underline: SizedBox.shrink(),
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              underline: const SizedBox.shrink(),
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+              ),
               items: _albums
                   .map((album) => DropdownMenuItem(
                         value: album,
                         child: Text(
                           album.name,
-                          style: TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                          style: AppTextStyles.poppinsRegular(
+                            color: Colors.black,
+                            fontSize: 10,
+                          ),
+                          overflow:
+                              TextOverflow.ellipsis, // Truncates with '...'
+                          maxLines: 1, // Ensures single line
                         ),
                       ))
                   .toList(),
@@ -612,6 +615,10 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
                   _fetchPostMedia(album!, _currentPostPage);
                 });
               },
+              icon: const Icon(Icons.arrow_drop_down, size: 16), // Smaller icon
+              iconSize: 16, // Matches icon size
+              padding:
+                  const EdgeInsets.fromLTRB(8, 0, 0, 0), // Minimal left padding
             ),
           ),
           TextButton(
@@ -637,7 +644,7 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
                 : null,
             child: Text('Next',
                 style: AppTextStyles.poppinsMedium(
-                    color: Color.fromRGBO(21, 68, 160, 1), fontSize: 12)),
+                    color: Color.fromRGBO(21, 68, 160, 1), fontSize: 10)),
           ),
         ],
       ),

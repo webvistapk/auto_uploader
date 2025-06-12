@@ -67,7 +67,7 @@ void showEmojiBottomSheet(BuildContext context, String chatID, postID) {
                     return GestureDetector(
                       onTap: ()async {
                         final response=await Provider.of<PostProvider>(context,listen: false).sendChat(context, chatID, postID, emojis[index].toString());
-                    if(response.statusCode==201){
+                    if(response!.statusCode==201){
                       Navigator.pop(context, emojis[index]); // Returns selected emoji
                     }
                         

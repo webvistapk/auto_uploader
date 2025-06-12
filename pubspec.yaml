@@ -45,7 +45,7 @@ dependencies:
   provider: 
   flutter_spinkit: ^5.2.1
   convex_bottom_bar: ^3.2.0
-  http: ^0.13.3
+  http: 
   flutter_secure_storage:
   shared_preferences: ^2.0.6
   url_launcher: ^6.0.9
@@ -89,8 +89,9 @@ dependencies:
   geocoding: ^3.0.0
   percent_indicator: ^4.2.5
   camera_camera: ^3.0.0
- 
-  
+  audioplayers: ^5.2.1
+  just_audio: ^0.9.34  
+  waveform_recorder:
 
 dev_dependencies:
   flutter_test:
