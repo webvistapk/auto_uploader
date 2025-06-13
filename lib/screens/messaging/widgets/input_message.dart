@@ -12,11 +12,13 @@ import 'package:mobile/screens/post/view/add_post_camera.dart';
 class ChatInputField extends StatefulWidget {
   final TextEditingController messageController;
   final onPressedSend;
+  final onCameraChat;
   final ChatModel chatModel;
   ChatInputField(
       {super.key,
       required this.messageController,
       this.onPressedSend,
+      this.onCameraChat,
       required this.chatModel});
 
   @override
@@ -116,18 +118,18 @@ class _ChatInputFieldState extends State<ChatInputField> {
             onPressed: () async {
               // _showOptionsBottomSheet(context, "camera");
               mediaPaths.clear();
-              List<File>? image = await showFullScreenAlert(
+
+              final image = await showFullScreenAlertBool(
                   context,
                   AddPostCameraScreen(
                     isChatCamera: true,
+                    routeChatCamera: true,
+                    chatModel: widget.chatModel,
                     token: '',
                   ));
 
-              if (image != null) {
-                setState(() {
-                  mediaPaths.addAll(image);
-                });
-                _confirmAndNavigate();
+              if (image) {
+                widget.onCameraChat;
               }
               // Handle camera action (open camera or photo picker)
             },
@@ -351,6 +353,26 @@ class _ChatInputFieldState extends State<ChatInputField> {
         );
       },
     );
+  }
+
+  Future<bool> showFullScreenAlertBool(
+      BuildContext context, Widget contentScreen) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          child: SizedBox.expand(
+            child: Material(
+              color: Colors.white,
+              child: contentScreen,
+            ),
+          ),
+        );
+      },
+    ).then((value) => value ?? false); // ensures a boolean is always returned
   }
 
   void _showOptionsBottomSheet(BuildContext context, String type) {

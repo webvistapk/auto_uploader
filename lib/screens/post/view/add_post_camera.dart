@@ -6,18 +6,25 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
+import 'package:mobile/screens/post/view/chat_input_field.dart';
+import 'package:mobile/utils/custom_navigations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../models/UserProfile/userprofile.dart';
+import '../../messaging/model/chat_model.dart';
 
 class AddPostCameraScreen extends StatefulWidget {
   final String token;
   UserProfile? userProfile;
   final bool isChatCamera;
+  final bool routeChatCamera;
+  ChatModel? chatModel;
   String? postId;
   String? chatId;
   AddPostCameraScreen(
@@ -25,6 +32,8 @@ class AddPostCameraScreen extends StatefulWidget {
       required this.token,
       this.userProfile,
       required this.isChatCamera,
+      this.routeChatCamera = false,
+      this.chatModel,
       this.postId,
       this.chatId})
       : super(key: key);
@@ -48,12 +57,20 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
     final camera = cameras.first;
-    _controller = CameraController(camera, ResolutionPreset.ultraHigh);
 
+    _controller = CameraController(
+      camera,
+      ResolutionPreset.high, // Changed from ultraHigh to high
+      enableAudio: false,
+    );
+    // Wait until fully initialized
     _initializeControllerFuture = _controller.initialize();
+    await _initializeControllerFuture;
 
-    // Rebuild UI after initialization future is assigned
     if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {}); // Only update UI when ready
+    }
   }
 
   XFile? _capturedFile;
@@ -86,11 +103,18 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
   }
 
   Future<void> _onTap() async {
-    if (_isRecording) return; // Prevent tap while recording
+    if (_isRecording || !_controller.value.isInitialized) return;
+
     try {
-      await _initializeControllerFuture;
-      final image = await _controller.takePicture();
+      // Turn off flash for smoother experience
+      await _controller.setFlashMode(FlashMode.off);
+
+      // Clear any previous video controller before capturing
       _clearVideoController();
+
+      final image = await _controller.takePicture();
+
+      if (!mounted) return;
 
       setState(() {
         _capturedFile = image;
@@ -345,6 +369,8 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
     );
   }
 
+  TextEditingController _messageController = TextEditingController();
+
   // UPDATED: _buildPreviewOverlay with proper Stack parent for Positioned widgets
   Widget _buildPreviewOverlay() {
     return Stack(
@@ -381,7 +407,7 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                             fit: BoxFit.cover),
                   ),
                 Positioned(
-                  bottom: 80,
+                  bottom: widget.routeChatCamera ? 10 : 80,
                   child: Column(
                     children: [
                       if (_isRecording)
@@ -397,63 +423,103 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                             ),
                           ),
                         ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                              onTap: () {
-                                if (_capturedFile != null) {
-                                  // Create a list of files to pass (even if single file)
-                                  final file = File(_capturedFile!.path);
-                                  if (widget.isChatCamera == false) {
-                                    selectedFiles.add(file);
-                                    _capturedFile = null;
-                                    setState(() {});
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (_) => AddPostScreen(
-                                    //       mediFiles: [file],
-                                    //       userProfile: widget.userProfile,
-                                    //     ),
-                                    //   ),
-                                    // );
-                                  } else {
-                                    Navigator.pop(context, [file]);
+                      if (widget.routeChatCamera) ...[
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 100,
+                          child: ChatInputFieldNoMedia(
+                            messageController: _messageController,
+                            onPressedSend: () async {
+                              try {
+                                final chatController =
+                                    context.read<ChatController>();
+                                await chatController.sendMessage(
+                                  _messageController.text.trim(),
+                                  widget.chatModel!.id,
+                                  [File(_capturedFile!.path)],
+                                );
+                                setState(() => _messageController.clear());
+                                Navigator.pop(context, true);
+                              } catch (_) {}
+                            },
+                            chatModel: widget.chatModel!,
+                          ),
+                        ),
+                      ] else ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                                onTap: () {
+                                  if (_capturedFile != null) {
+                                    // Create a list of files to pass (even if single file)
+                                    final file = File(_capturedFile!.path);
+                                    if (widget.isChatCamera == false) {
+                                      selectedFiles.add(file);
+                                      _capturedFile = null;
+                                      setState(() {});
+                                      // Navigator.push(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //     builder: (_) => AddPostScreen(
+                                      //       mediFiles: [file],
+                                      //       userProfile: widget.userProfile,
+                                      //     ),
+                                      //   ),
+                                      // );
+                                    } else {
+                                      Navigator.pop(context, [file]);
+                                    }
                                   }
-                                }
-                              },
-                              child: SizedBox(
-                                width: 50,
-                                height: 25,
-                                child: Image.asset(
-                                  "assets/icons/tick.png",
-                                ),
-                              )),
-                          const SizedBox(width: 40),
-                          ClipPath(
-                            clipper: LeftArrowClipper(),
-                            child: Material(
-                              color: Colors.white,
-                              child: InkWell(
-                                onTap: _reset,
+                                },
                                 child: SizedBox(
                                   width: 50,
                                   height: 25,
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Image.asset(
-                                        "assets/icons/cross_post.png"),
+                                  child: Image.asset(
+                                    "assets/icons/tick.png",
+                                  ),
+                                )),
+                            const SizedBox(width: 40),
+                            ClipPath(
+                              clipper: LeftArrowClipper(),
+                              child: Material(
+                                color: Colors.white,
+                                child: InkWell(
+                                  onTap: _reset,
+                                  child: SizedBox(
+                                    width: 50,
+                                    height: 25,
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Image.asset(
+                                          "assets/icons/cross_post.png"),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ]
                     ],
                   ),
                 ),
+                if (widget.routeChatCamera)
+                  Positioned(
+                      top: 10,
+                      left: 10,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _capturedFile = null;
+                          });
+                        },
+                        child: const Icon(
+                          Icons.close,
+                          size: 24,
+                          color: Colors.white,
+                        ),
+                      )),
                 if (_isRecording)
                   Positioned(
                     bottom: 20,
@@ -500,6 +566,13 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
         ],
       ),
     );
+  }
+
+  _onNextPressed() {
+    push(
+        context,
+        AddPostScreen(
+            userProfile: widget.userProfile, mediFiles: selectedFiles));
   }
 
   Future<List<File>?> showFullScreenAlert(
@@ -647,6 +720,30 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                   : const SizedBox(),
             ),
           ),
+          if (selectedFiles.isNotEmpty && _capturedFile == null)
+            Positioned(
+              top: 30,
+              right: 20,
+              child: ElevatedButton(
+                onPressed: _onNextPressed, // Your handler here
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  elevation: 4,
+                ),
+                child: const Text(
+                  'Next',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ),
+            )
         ],
       ),
     );
