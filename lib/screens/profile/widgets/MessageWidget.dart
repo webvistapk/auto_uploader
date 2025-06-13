@@ -5,16 +5,14 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/controller/function/AudioController.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
-import 'package:mobile/screens/post/view/add_post_camera.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:mobile/screens/profile/widgets/AudioRecordingWidget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:waveform_recorder/waveform_recorder.dart';
 
 class MessageWidget extends StatefulWidget {
   final String chatId;
@@ -27,131 +25,64 @@ class MessageWidget extends StatefulWidget {
 
 class _MessageWidgetState extends State<MessageWidget> {
   final TextEditingController _messageController = TextEditingController();
+  final AudioController _audioController = AudioController();
   bool _showGallery = false;
-  bool _showRecordingUI = false;
-  bool _isPlaying = false;
-  List<File> _files = []; // Now handles both images and audio
+  List<File> _files = [];
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _temporaryErrorMessage;
-  late final AudioPlayer _audioPlayer;
-  late final WaveformRecorderController _waveController;
-  Timer? _recordingTimer;
-  int _recordingDuration = 0;
-  late StreamSubscription<PlayerState> _playerStateSubscription;
-
 
   @override
   void initState() {
     super.initState();
-    _audioPlayer = AudioPlayer();
-    _waveController = WaveformRecorderController();
-    _setupAudioPlayer();
-  _setupPlayerListeners(); // Add this
+    _audioController.init();
   }
 
-
- void _setupPlayerListeners() {
-  _playerStateSubscription = _audioPlayer.playerStateStream.listen((state) {
-    if (mounted) {
-      setState(() {
-        _isPlaying = state.playing && 
-                    state.processingState == ProcessingState.ready;
-      });
-    }
-  });
-}
-
-
-  void _setupAudioPlayer() {
-    _audioPlayer.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        setState(() => _isPlaying = false);
-      }
-    });
+  @override
+  void dispose() {
+    _audioController.dispose();
+    super.dispose();
   }
 
   void _toggleGallery() {
     setState(() => _showGallery = !_showGallery);
   }
 
- Future<void> _startRecording() async {
-  try {
-    // Stop any ongoing playback and clear previous audio
-    await _audioPlayer.stop();
-    if (mounted) {
+  // In your _MessageWidgetState:
+Future<void> _startRecording() async {
+    try {
       setState(() {
-        _isPlaying = false;
         _files.removeWhere((f) => f.path.endsWith('.m4a'));
       });
+      await _audioController.startRecording();
+      setState(() {});
+    } catch (e) {
+      print('Recording error: $e');
+      setState(() {});
     }
+  }
 
-    final directory = await getTemporaryDirectory();
-    final path = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.m4a';
-
-    await _waveController.startRecording();
-
-    if (mounted) {
-      setState(() {
-        _recordingDuration = 0;
-        _showRecordingUI = true;
-      });
-    }
-
-    _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() => _recordingDuration++);
+  Future<void> _stopRecording() async {
+    try {
+      final audioFile = await _audioController.stopRecording();
+      if (audioFile != null) {
+        setState(() {
+          _files.add(audioFile);
+        });
       }
+    } catch (e) {
+      print('Stop recording error: $e');
+    }
+    setState(() {});
+  }
+
+  Future<void> _deleteRecording() async {
+    if (_audioController.isPlaying) {
+      await _audioController.audioPlayer.stop();
+    }
+    setState(() {
+      _files.removeWhere((f) => f.path.endsWith('.m4a'));
     });
-  } catch (e) {
-    print('Recording error: $e');
-    if (mounted) {
-      setState(() {
-        _showRecordingUI = false;
-        _recordingTimer?.cancel();
-      });
-    }
   }
-}
-
-  Future<void> _stopRecording({bool send = true}) async {
-    _recordingTimer?.cancel();
-    await _waveController.stopRecording();
-
-    final fileUrl = _waveController.url;
-
-    if (send && fileUrl != null) {
-      setState(() {
-        _files.add(File(fileUrl.path));
-        _showRecordingUI = false;
-      });
-    } else {
-      setState(() => _showRecordingUI = false);
-    }
-  }
-
-  Future<void> _togglePlayback() async {
-  final audioFile = _files.firstWhere(
-    (file) => file.path.endsWith('.m4a'),
-    orElse: () => File(''),
-  );
-
-  if (!await audioFile.exists()) return;
-
-  try {
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.stop();
-      await _audioPlayer.setAudioSource(
-        AudioSource.uri(Uri.file(audioFile.path)),
-      );
-      await _audioPlayer.play();
-    }
-  } catch (e) {
-    print('Playback error: $e');
-    if (mounted) setState(() => _isPlaying = false);
-  }
-}
 
   Future<void> _sendMessage() async {
     final String messageText = _messageController.text.trim();
@@ -185,14 +116,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     }
   }
 
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    _waveController.dispose();
-    _recordingTimer?.cancel();
-    super.dispose();
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -215,7 +139,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                   top: 10,
                   right: 10,
                   child: IconButton(
-                    icon: Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(Icons.close, color: Colors.white),
                     onPressed: _toggleGallery,
                   ),
                 ),
@@ -227,57 +151,66 @@ class _MessageWidgetState extends State<MessageWidget> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 5),
             decoration: BoxDecoration(
-              color: Color(0xffF8F8F8),
+              color: const Color(0xffF8F8F8),
               borderRadius: BorderRadius.circular(10),
             ),
-            child:  _files.isNotEmpty &&
-                            _files.any((f) => f.path.endsWith('.m4a'))
-                        ? _buildAudioPreview()
-                        :Row(
-              children: [
-                if (!_showRecordingUI) ...[
-                  Image.asset(AppIcons.camera,
-                      width: 33.35.sp, height: 33.34.sp),
-                  SizedBox(width: 17.31.sp),
-                  GestureDetector(
-                    onTap: _toggleGallery,
-                    child: Image.asset(AppIcons.image,
-                        width: 32.83.sp, height: 32.83.sp),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
+            child: _files.isNotEmpty && _files.any((f) => f.path.endsWith('.m4a'))
+                ? AudioWidget(
+                    controller: _audioController,
+                    audioFile: _files.firstWhere((f) => f.path.endsWith('.m4a')),
+                    onDelete: _deleteRecording,
+                    showRecordingUI: _audioController.isRecording,
+                  )
+                : Row(
+                    children: [
+                      if (!_audioController.isRecording) ...[
+                        Image.asset(AppIcons.camera,
+                            width: 33.35.sp, height: 33.34.sp),
+                        SizedBox(width: 17.31.sp),
+                        GestureDetector(
+                          onTap: _toggleGallery,
+                          child: Image.asset(AppIcons.image,
+                              width: 32.83.sp, height: 32.83.sp),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: TextFormField(
                             controller: _messageController,
                             decoration: InputDecoration(
-                              hintText:
-                                  _temporaryErrorMessage ?? 'Send a message..',
+                              hintText: _temporaryErrorMessage ?? 'Send a message..',
                               hintStyle: TextStyle(
                                 fontSize: 24.sp,
                                 color: _temporaryErrorMessage != null
                                     ? Colors.red
-                                    : Color(0xff757474),
+                                    : const Color(0xff757474),
                               ),
                               border: InputBorder.none,
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 12),
+                              contentPadding: EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
+                        ),
+                      ] else
+                        Expanded(
+                          child: AudioWidget(
+                            controller: _audioController,
+                            audioFile: null,
+                            onDelete: _deleteRecording,
+                            showRecordingUI: _audioController.isRecording,
+                          ),
+                        ),
+                      GestureDetector(
+                        onLongPressStart: (_) => _startRecording(),
+                        onLongPressEnd: (_) => _stopRecording(),
+                        child: Image.asset(
+                          AppIcons.mic,
+                          width: 32.sp,
+                          color: _files.any((file) => file.path.endsWith('.m4a'))
+                              ? Colors.green
+                              : null,
+                        ),
+                      ),
+                    ],
                   ),
-                ] else
-                  Expanded(child: _buildRecordingUI()),
-                GestureDetector(
-                  onLongPressStart: (_) => _startRecording(),
-                  onLongPressEnd: (_) => _stopRecording(),
-                  child: Image.asset(
-                    AppIcons.mic,
-                    width: 32.sp,
-                    color: _files.any((file) => file.path.endsWith('.m4a'))
-                        ? Colors.green
-                        : null,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
         SizedBox(height: 10),
@@ -287,7 +220,7 @@ class _MessageWidgetState extends State<MessageWidget> {
             width: 802.sp,
             height: 76.sp,
             decoration: BoxDecoration(
-              color: Color(0xff333232),
+              color: const Color(0xff333232),
               borderRadius: BorderRadius.circular(5),
             ),
             child: Center(
@@ -301,137 +234,6 @@ class _MessageWidgetState extends State<MessageWidget> {
       ],
     );
   }
-
-  Widget _buildRecordingUI() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.mic, color: Colors.red, size: 24),
-          SizedBox(width: 8),
-          Expanded(
-            child: WaveformRecorder(
-              controller: _waveController,
-              height: 40,
-            ),
-          ),
-          SizedBox(width: 8),
-          Text(
-            '${_recordingDuration}s',
-            style: TextStyle(fontSize: 16, color: Colors.black),
-          ),
-          if (_waveController.isRecording)
-            IconButton(
-              icon: Icon(Icons.cancel, color: Colors.red),
-              onPressed: () => _stopRecording(send: false),
-            ),
-        ],
-      ),
-    );
-  }
-
- Widget _buildAudioPreview() {
-  return Container(
-    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-    child: Column(
-      children: [
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(
-                _isPlaying ? Icons.pause : Icons.play_arrow,
-                color: Colors.blue,
-                size: 30,
-              ),
-              onPressed: _togglePlayback,
-            ),
-            SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  StreamBuilder<Duration?>(
-                    stream: _audioPlayer.positionStream,
-                    builder: (context, positionSnapshot) {
-                      return StreamBuilder<Duration?>(
-                        stream: _audioPlayer.durationStream,
-                        builder: (context, durationSnapshot) {
-                          final position = positionSnapshot.data ?? Duration.zero;
-                          Duration duration = durationSnapshot.data ?? Duration.zero;
-
-                          // If duration is zero (not loaded yet), use recording duration
-                          if (duration.inMilliseconds == 0) {
-                            duration = Duration(seconds: _recordingDuration);
-                          }
-
-                          final progress = duration.inMilliseconds > 0
-                              ? position.inMilliseconds / duration.inMilliseconds
-                              : 0.0;
-
-                          return Column(
-                            children: [
-                              LinearProgressIndicator(
-                                value: progress,
-                                backgroundColor: Colors.grey[300],
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                                minHeight: 3,
-                              ),
-                              SizedBox(height: 4),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _formatDuration(position),
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                                  ),
-                                  Text(
-                                    _formatDuration(duration),
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: 8),
-            IconButton(
-              icon: Icon(Icons.delete, color: Colors.red, size: 24),
-              onPressed: () async {
-                if (_isPlaying) {
-                  await _audioPlayer.stop();
-                }
-                if (mounted) {
-                  setState(() {
-                    _isPlaying = false;
-                    _files.removeWhere((f) => f.path.endsWith('.m4a'));
-                  });
-                }
-              },
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-
-}
-
-String _formatDuration(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, '0');
-  final minutes = twoDigits(duration.inMinutes.remainder(60));
-  final seconds = twoDigits(duration.inSeconds.remainder(60));
-  return "$minutes:$seconds";
-}
 }
 
 class CustomPinImages extends StatefulWidget {
