@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:mobile/controller/services/post/comment_provider.dart';
 import 'package:mobile/controller/services/post_manager.dart';
 import 'package:mobile/prefrences/prefrences.dart';
@@ -687,53 +688,80 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  sendChat(
-    BuildContext context,
-    String? chatId,
-    String? postID,
-    String? message, {
-    List<File>? images,
-  }) async {
-    if (chatId == null) return;
+  Future<http.Response?> sendChat(
+  BuildContext context,
+  String? chatId,
+  String? postID,
+  String? message, {
+  List<File>? files, // Changed from images to files
+}) async {
+  if (chatId == null) return null;
 
-    final String? token = await Prefrences.getAuthToken();
-    final url =
-        Uri.parse('${ApiURLs.baseUrl}chat/$chatId/${ApiURLs.send_chat}');
-
-    try {
-      // Create multipart request
-      final request = http.MultipartRequest('POST', url)
-        ..headers.addAll({
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'multipart/form-data',
-        })
-        ..fields['message'] = message ?? ""
-        ..fields['post_dm'] = postID ?? "";
-
-      // Add files if they exist - using 'files' as parameter name to match API
-      if (images != null && images.isNotEmpty) {
-        for (final image in images) {
-          request.files.add(
-            await http.MultipartFile.fromPath(
-              'files', // Changed from 'images' to 'files' to match API
-              image.path,
-              filename: image.path.split('/').last, // Add filename
-            ),
-          );
-        }
-      }
-
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 201) {
-        ToastNotifier.showSuccessToast(context, "Message sent successfully");
-        return response;
-      } 
-    } catch (e) {
-      print('Error sending message: $e');
-      ToastNotifier.showErrorToast(context, "Error sending message");
-      throw Exception('Error sending message:');
-    }
+  final String? token = await Prefrences.getAuthToken();
+  if (token == null) {
+    ToastNotifier.showErrorToast(context, "Authentication required");
+    return null;
   }
+
+  final url = Uri.parse('${ApiURLs.baseUrl}chat/$chatId/${ApiURLs.send_chat}');
+
+  try {
+    final request = http.MultipartRequest('POST', url)
+      ..headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json', // Added for better API compatibility
+      })
+      ..fields['message'] = message ?? ""
+      ..fields['post_dm'] = postID ?? "";
+
+    // Handle both images and audio files
+    if (files != null && files.isNotEmpty) {
+      for (final file in files) {
+        // Validate file exists
+        if (!await file.exists()) {
+          print('File not found: ${file.path}');
+          continue;
+        }
+
+        // Determine content type based on file extension
+        String contentType;
+        if (file.path.toLowerCase().endsWith('.m4a') || 
+            file.path.toLowerCase().endsWith('.mp3')) {
+          contentType = 'audio/mp4'; // For m4a files
+        } else {
+          contentType = 'image/jpeg'; // Default for images
+        }
+
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'files', // Keep consistent with API
+            file.path,
+            filename: file.path.split('/').last,
+            contentType: MediaType.parse(contentType),
+          ),
+        );
+      }
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 201) {
+      ToastNotifier.showSuccessToast(context, "Message sent successfully");
+      return response;
+    } else {
+      // Handle other status codes
+      final errorData = json.decode(response.body);
+      ToastNotifier.showErrorToast(
+        context, 
+        errorData['message'] ?? "Failed to send message"
+      );
+      return null;
+    }
+  } catch (e) {
+    print('Error sending message: $e');
+    ToastNotifier.showErrorToast(context, "Error sending message");
+    return null;
+  }
+}
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
@@ -7,9 +8,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile/common/app_colors.dart';
 import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
+import 'package:mobile/controller/function/AudioController.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
-import 'package:mobile/screens/post/create_post_screen.dart';
-import 'package:mobile/screens/post/view/add_post_camera.dart';
+import 'package:mobile/screens/profile/widgets/AudioRecordingWidget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -24,25 +25,76 @@ class MessageWidget extends StatefulWidget {
 
 class _MessageWidgetState extends State<MessageWidget> {
   final TextEditingController _messageController = TextEditingController();
+  final AudioController _audioController = AudioController();
   bool _showGallery = false;
-  List<File> _selectedImages = [];
+  List<File> _files = [];
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String? _temporaryErrorMessage;
 
-  void _toggleGallery() async {
-    final result = await showFullScreenAlert(
-        context, CreatePostScreen(isChatCamera: true));
-    // debugger();
-    if (result != null) {
-      _selectedImages.addAll(result);
+  @override
+  void initState() {
+    super.initState();
+    _audioController.init();
+  }
+
+  @override
+  void dispose() {
+    _audioController.dispose();
+    super.dispose();
+  }
+
+  void _toggleGallery() {
+    setState(() => _showGallery = !_showGallery);
+  }
+
+  // In your _MessageWidgetState:
+Future<void> _startRecording() async {
+    try {
+      setState(() {
+        _files.removeWhere((f) => f.path.endsWith('.m4a'));
+      });
+      await _audioController.startRecording();
+      setState(() {});
+    } catch (e) {
+      print('Recording error: $e');
       setState(() {});
     }
+  }
+
+  Future<void> _stopRecording() async {
+    try {
+      final audioFile = await _audioController.stopRecording();
+      if (audioFile != null) {
+        setState(() {
+          _files.add(audioFile);
+        });
+      }
+    } catch (e) {
+      print('Stop recording error: $e');
+    }
+    setState(() {});
+  }
+
+  Future<void> _deleteRecording() async {
+    if (_audioController.isPlaying) {
+      await _audioController.audioPlayer.stop();
+    }
+    setState(() {
+      _files.removeWhere((f) => f.path.endsWith('.m4a'));
+    });
   }
 
   Future<void> _sendMessage() async {
     final String messageText = _messageController.text.trim();
 
-    // Return early if both message and images are empty
-
-    if (messageText.isEmpty && _selectedImages.isEmpty) return;
+    if (messageText.isEmpty && _files.isEmpty) {
+      setState(
+          () => _temporaryErrorMessage = "Message field must not be empty");
+      Future.delayed(Duration(seconds: 3), () {
+        if (mounted) setState(() => _temporaryErrorMessage = null);
+      });
+      return;
+    }
 
     try {
       final response =
@@ -51,46 +103,24 @@ class _MessageWidgetState extends State<MessageWidget> {
         widget.chatId,
         widget.postID,
         messageText,
-        images: _selectedImages,
+        files: _files, // Now handles both images and audio
       );
-      if (response != null && response.statusCode == 201) {
+
+      if (response?.statusCode == 201) {
         _messageController.clear();
-        setState(() => _selectedImages.clear());
+        setState(() => _files.clear());
         Navigator.pop(context);
-      } else {
-        ToastNotifier.showErrorToast(context, "Failed to send message");
       }
     } catch (e) {
-      // debugger();
-      ToastNotifier.showErrorToast(context, "Error: ${e.toString()}");
+      print('Error sending message: $e');
     }
   }
 
-  Future<List<File>?> showFullScreenAlert(
-      BuildContext context, Widget contentScreen) {
-    return showDialog<List<File>>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.transparent,
-          child: SizedBox.expand(
-            child: Material(
-              color: Colors.white,
-              child: contentScreen,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_showGallery)
           Container(
@@ -99,116 +129,88 @@ class _MessageWidgetState extends State<MessageWidget> {
               children: [
                 CustomPinImages(
                   onImagesSelected: (images) {
-                    setState(() => _selectedImages = images);
+                    setState(() {
+                      _files.removeWhere((file) => !file.path.endsWith('.m4a'));
+                      _files.addAll(images);
+                    });
                   },
                 ),
                 Positioned(
                   top: 10,
                   right: 10,
                   child: IconButton(
-                    icon: Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(Icons.close, color: Colors.white),
                     onPressed: _toggleGallery,
                   ),
                 ),
               ],
             ),
           ),
-        if (_selectedImages.isNotEmpty)
-          Container(
-            height: 150.sp,
-            // padding: EdgeInsets.symmetric(vertical: 10),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: _selectedImages.map((file) {
-                  return Stack(
+        Form(
+          key: _formKey,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xffF8F8F8),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: _files.isNotEmpty && _files.any((f) => f.path.endsWith('.m4a'))
+                ? AudioWidget(
+                    controller: _audioController,
+                    audioFile: _files.firstWhere((f) => f.path.endsWith('.m4a')),
+                    onDelete: _deleteRecording,
+                    showRecordingUI: _audioController.isRecording,
+                  )
+                : Row(
                     children: [
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        child: CircleAvatar(
-                          radius: 35.sp,
-                          backgroundImage: FileImage(File(file.path)),
-                          backgroundColor: Colors.grey[200], // fallback
+                      if (!_audioController.isRecording) ...[
+                        Image.asset(AppIcons.camera,
+                            width: 33.35.sp, height: 33.34.sp),
+                        SizedBox(width: 17.31.sp),
+                        GestureDetector(
+                          onTap: _toggleGallery,
+                          child: Image.asset(AppIcons.image,
+                              width: 32.83.sp, height: 32.83.sp),
                         ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedImages.remove(file);
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 16.sp,
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _messageController,
+                            decoration: InputDecoration(
+                              hintText: _temporaryErrorMessage ?? 'Send a message..',
+                              hintStyle: TextStyle(
+                                fontSize: 24.sp,
+                                color: _temporaryErrorMessage != null
+                                    ? Colors.red
+                                    : const Color(0xff757474),
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
                         ),
+                      ] else
+                        Expanded(
+                          child: AudioWidget(
+                            controller: _audioController,
+                            audioFile: null,
+                            onDelete: _deleteRecording,
+                            showRecordingUI: _audioController.isRecording,
+                          ),
+                        ),
+                      GestureDetector(
+                        onLongPressStart: (_) => _startRecording(),
+                        onLongPressEnd: (_) => _stopRecording(),
+                        child: Image.asset(
+                          AppIcons.mic,
+                          width: 32.sp,
+                          color: _files.any((file) => file.path.endsWith('.m4a'))
+                              ? Colors.green
+                              : null,
+                        ),
                       ),
                     ],
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        Container(
-          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-          decoration: BoxDecoration(
-            color: Color(0xffF8F8F8),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              // Image.asset(AppIcons.camera, width: 33.35.sp, height: 33.34.sp),
-              InkWell(
-                  onTap: () async {
-                    final result = await showFullScreenAlert(
-                        context,
-                        AddPostCameraScreen(
-                          token: '',
-                          userProfile: null,
-                          isChatCamera: true,
-                          postId: widget.postID,
-                          chatId: widget.chatId,
-                        ));
-                    // debugger();
-                    if (result != null) {
-                      _selectedImages.addAll(result);
-                      setState(() {});
-                    }
-                  },
-                  child: Image.asset(AppIcons.camera,
-                      width: 33.35.sp, height: 33.34.sp)),
-              SizedBox(width: 17.31.sp),
-              GestureDetector(
-                onTap: _toggleGallery,
-                child: Image.asset(AppIcons.image,
-                    width: 32.83.sp, height: 32.83.sp),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  decoration: InputDecoration(
-                    hintText: 'Send a message..',
-                    hintStyle:
-                        TextStyle(fontSize: 24.sp, color: Color(0xff757474)),
-                    border: InputBorder.none,
                   ),
-                ),
-              ),
-              Image.asset(AppIcons.mic, width: 32.83.sp, height: 32.83.sp),
-            ],
           ),
         ),
         SizedBox(height: 10),
@@ -218,7 +220,7 @@ class _MessageWidgetState extends State<MessageWidget> {
             width: 802.sp,
             height: 76.sp,
             decoration: BoxDecoration(
-              color: Color(0xff333232),
+              color: const Color(0xff333232),
               borderRadius: BorderRadius.circular(5),
             ),
             child: Center(
