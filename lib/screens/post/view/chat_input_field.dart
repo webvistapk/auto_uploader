@@ -77,9 +77,10 @@ class _ChatInputFieldNoMediaState extends State<ChatInputFieldNoMedia> {
           ),
 
           // Send or Voice Input Button
-          widget.messageController.text.isNotEmpty
-              ? buildSendButton(widget.onPressedSend)
-              : buildVoiceButton(),
+          // widget.messageController.text.isNotEmpty
+          //     ?
+          buildSendButton(widget.onPressedSend)
+          // : buildVoiceButton(),
         ],
       ),
     );

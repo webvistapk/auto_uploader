@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
+import 'package:mobile/screens/post/view/camera/funky_code.dart';
 import 'package:mobile/screens/post/view/chat_input_field.dart';
 import 'package:mobile/utils/custom_navigations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -191,13 +192,13 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
 
       // Dispose existing video controllers before creating new one
       await _disposeVideoControllers();
-      // debugger();ss
-      final newVideoController = VideoPlayerController.file(file)
-        ..initialize().then((_) {
-          // Set looping and start playing
+      _videoPlayerController?.pause();
+      final newVideoController = VideoPlayerController.file(file);
+      // debugger();
+      await newVideoController.initialize();
 
-          setState(() {});
-        });
+      // Set looping and start playing
+      // debugger();
       newVideoController.setLooping(true);
       newVideoController.play();
       setState(() {});
@@ -230,8 +231,14 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
         _progress = 0.0;
         _recordingDuration = Duration.zero;
       });
+      // push(
+      //     context,
+      //     CameraVideoPlayer(
+      //       videoPath: video.path,
+      //     ));
     } catch (e) {
       log('Error stopping video recording: $e');
+      debugger();
       setState(() {
         _isRecording = false;
         _progress = 0.0;
@@ -397,7 +404,23 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                                     controller.play();
                                   }
                                 },
-                                child: VideoPlayer(_videoPlayerController!),
+                                child: Transform.rotate(
+                                    angle: 270 *
+                                        3.14 /
+                                        180, // 90 degrees to radians
+                                    child: Center(
+                                      child: FittedBox(
+                                        fit: BoxFit.cover,
+                                        child: SizedBox(
+                                          width: _videoPlayerController!
+                                              .value.size.width,
+                                          height: _videoPlayerController!
+                                              .value.size.height,
+                                          child: VideoPlayer(
+                                              _videoPlayerController!),
+                                        ),
+                                      ),
+                                    )),
                               )
                             : const Center(
                                 child: CircularProgressIndicator(

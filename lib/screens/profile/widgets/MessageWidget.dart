@@ -10,6 +10,8 @@ import 'package:mobile/common/app_icons.dart';
 import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/controller/function/AudioController.dart';
 import 'package:mobile/controller/services/post/post_provider.dart';
+import 'package:mobile/screens/post/create_post_screen.dart';
+import 'package:mobile/screens/post/view/add_post_camera.dart';
 import 'package:mobile/screens/profile/widgets/AudioRecordingWidget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +29,8 @@ class _MessageWidgetState extends State<MessageWidget> {
   final TextEditingController _messageController = TextEditingController();
   final AudioController _audioController = AudioController();
   bool _showGallery = false;
-  List<File> _files = [];
+  // List<File> _selectedFiles = [];
+  List<File> _selectedFiles = [];
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _temporaryErrorMessage;
 
@@ -43,15 +46,41 @@ class _MessageWidgetState extends State<MessageWidget> {
     super.dispose();
   }
 
-  void _toggleGallery() {
-    setState(() => _showGallery = !_showGallery);
+  void _toggleGallery() async {
+    final result = await showFullScreenAlert(
+        context, CreatePostScreen(isChatCamera: true));
+    // debugger();
+    if (result != null) {
+      _selectedFiles.addAll(result);
+      setState(() {});
+    }
+  }
+
+  Future<List<File>?> showFullScreenAlert(
+      BuildContext context, Widget contentScreen) {
+    return showDialog<List<File>>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          child: SizedBox.expand(
+            child: Material(
+              color: Colors.white,
+              child: contentScreen,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   // In your _MessageWidgetState:
-Future<void> _startRecording() async {
+  Future<void> _startRecording() async {
     try {
       setState(() {
-        _files.removeWhere((f) => f.path.endsWith('.m4a'));
+        _selectedFiles.removeWhere((f) => f.path.endsWith('.m4a'));
       });
       await _audioController.startRecording();
       setState(() {});
@@ -66,7 +95,7 @@ Future<void> _startRecording() async {
       final audioFile = await _audioController.stopRecording();
       if (audioFile != null) {
         setState(() {
-          _files.add(audioFile);
+          _selectedFiles.add(audioFile);
         });
       }
     } catch (e) {
@@ -80,14 +109,14 @@ Future<void> _startRecording() async {
       await _audioController.audioPlayer.stop();
     }
     setState(() {
-      _files.removeWhere((f) => f.path.endsWith('.m4a'));
+      _selectedFiles.removeWhere((f) => f.path.endsWith('.m4a'));
     });
   }
 
   Future<void> _sendMessage() async {
     final String messageText = _messageController.text.trim();
 
-    if (messageText.isEmpty && _files.isEmpty) {
+    if (messageText.isEmpty && _selectedFiles.isEmpty) {
       setState(
           () => _temporaryErrorMessage = "Message field must not be empty");
       Future.delayed(Duration(seconds: 3), () {
@@ -103,12 +132,12 @@ Future<void> _startRecording() async {
         widget.chatId,
         widget.postID,
         messageText,
-        files: _files, // Now handles both images and audio
+        files: _selectedFiles, // Now handles both images and audio
       );
 
       if (response?.statusCode == 201) {
         _messageController.clear();
-        setState(() => _files.clear());
+        setState(() => _selectedFiles.clear());
         Navigator.pop(context);
       }
     } catch (e) {
@@ -116,7 +145,6 @@ Future<void> _startRecording() async {
     }
   }
 
- 
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -130,8 +158,9 @@ Future<void> _startRecording() async {
                 CustomPinImages(
                   onImagesSelected: (images) {
                     setState(() {
-                      _files.removeWhere((file) => !file.path.endsWith('.m4a'));
-                      _files.addAll(images);
+                      _selectedFiles
+                          .removeWhere((file) => !file.path.endsWith('.m4a'));
+                      _selectedFiles.addAll(images);
                     });
                   },
                 ),
@@ -146,6 +175,54 @@ Future<void> _startRecording() async {
               ],
             ),
           ),
+        if (_selectedFiles.isNotEmpty)
+          Container(
+            height: 150.sp,
+            // padding: EdgeInsets.symmetric(vertical: 10),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: _selectedFiles.map((file) {
+                  return Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        child: CircleAvatar(
+                          radius: 35.sp,
+                          backgroundImage: FileImage(File(file.path)),
+                          backgroundColor: Colors.grey[200], // fallback
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedFiles.remove(file);
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 16.sp,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
         Form(
           key: _formKey,
           child: Container(
@@ -154,18 +231,37 @@ Future<void> _startRecording() async {
               color: const Color(0xffF8F8F8),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: _files.isNotEmpty && _files.any((f) => f.path.endsWith('.m4a'))
+            child: _selectedFiles.isNotEmpty &&
+                    _selectedFiles.any((f) => f.path.endsWith('.m4a'))
                 ? AudioWidget(
                     controller: _audioController,
-                    audioFile: _files.firstWhere((f) => f.path.endsWith('.m4a')),
+                    audioFile: _selectedFiles
+                        .firstWhere((f) => f.path.endsWith('.m4a')),
                     onDelete: _deleteRecording,
                     showRecordingUI: _audioController.isRecording,
                   )
                 : Row(
                     children: [
                       if (!_audioController.isRecording) ...[
-                        Image.asset(AppIcons.camera,
-                            width: 33.35.sp, height: 33.34.sp),
+                        InkWell(
+                            onTap: () async {
+                              final result = await showFullScreenAlert(
+                                  context,
+                                  AddPostCameraScreen(
+                                    token: '',
+                                    userProfile: null,
+                                    isChatCamera: true,
+                                    postId: widget.postID,
+                                    chatId: widget.chatId,
+                                  ));
+                              // debugger();
+                              if (result != null) {
+                                _selectedFiles.addAll(result);
+                                setState(() {});
+                              }
+                            },
+                            child: Image.asset(AppIcons.camera,
+                                width: 33.35.sp, height: 33.34.sp)),
                         SizedBox(width: 17.31.sp),
                         GestureDetector(
                           onTap: _toggleGallery,
@@ -177,7 +273,8 @@ Future<void> _startRecording() async {
                           child: TextFormField(
                             controller: _messageController,
                             decoration: InputDecoration(
-                              hintText: _temporaryErrorMessage ?? 'Send a message..',
+                              hintText:
+                                  _temporaryErrorMessage ?? 'Send a message..',
                               hintStyle: TextStyle(
                                 fontSize: 24.sp,
                                 color: _temporaryErrorMessage != null
@@ -185,7 +282,8 @@ Future<void> _startRecording() async {
                                     : const Color(0xff757474),
                               ),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(vertical: 12),
+                              contentPadding:
+                                  EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
                         ),
@@ -204,7 +302,8 @@ Future<void> _startRecording() async {
                         child: Image.asset(
                           AppIcons.mic,
                           width: 32.sp,
-                          color: _files.any((file) => file.path.endsWith('.m4a'))
+                          color: _selectedFiles
+                                  .any((file) => file.path.endsWith('.m4a'))
                               ? Colors.green
                               : null,
                         ),

@@ -101,7 +101,7 @@ class _InboxScreenState extends State<InboxScreen> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 100),
           curve: Curves.easeOut,
         );
       }
@@ -215,6 +215,7 @@ class _InboxScreenState extends State<InboxScreen> {
                       ),
                       ChatInputField(
                           messageController: messageController,
+                          voicePressed: () async {},
                           onPressedSend: () async {
                             try {
                               await chatController.sendMessage(

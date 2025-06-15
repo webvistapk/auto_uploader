@@ -51,7 +51,6 @@ dependencies:
   url_launcher: ^6.0.9
   jwt_decoder: ^2.0.1
   win32: 
-  video_player: 
   chewie: ^1.7.5
   card_swiper: ^3.0.1
  
@@ -92,6 +91,12 @@ dependencies:
   audioplayers: ^5.2.1
   just_audio: ^0.9.34  
   waveform_recorder:
+  video_player: ^2.10.0
+
+dependency_overrides:
+  video_player_android: 
+    git: 
+      url: https://github.com/dennisstromberg/video_player_android.git
 
 dev_dependencies:
   flutter_test:

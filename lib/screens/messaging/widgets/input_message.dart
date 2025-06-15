@@ -4,14 +4,17 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/controller/function/AudioController.dart';
 import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:mobile/screens/messaging/widgets/media_preview/media_screen_preview.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/post/view/add_post_camera.dart';
+import 'package:mobile/screens/profile/widgets/AudioRecordingWidget.dart';
 
 class ChatInputField extends StatefulWidget {
   final TextEditingController messageController;
   final onPressedSend;
+  final voicePressed;
   final onCameraChat;
   final ChatModel chatModel;
   ChatInputField(
@@ -19,7 +22,8 @@ class ChatInputField extends StatefulWidget {
       required this.messageController,
       this.onPressedSend,
       this.onCameraChat,
-      required this.chatModel});
+      required this.chatModel,
+      this.voicePressed});
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();
@@ -29,14 +33,21 @@ class _ChatInputFieldState extends State<ChatInputField> {
   @override
   void initState() {
     super.initState();
+
+    _audioController.init();
     widget.messageController.addListener(() {
       setState(() {}); // Rebuild the widget when text changes
     });
   }
 
+  final AudioController _audioController = AudioController();
+  final List<File> _selectedFiles = [];
+
   @override
   void dispose() {
     widget.messageController.dispose();
+
+    _audioController.dispose();
     super.dispose();
   }
 
@@ -57,90 +68,112 @@ class _ChatInputFieldState extends State<ChatInputField> {
         ],
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Row(
-        children: [
-          // Emoji Button
-          IconButton(
-            icon: const Icon(
-              Icons.emoji_emotions_outlined,
-              color: Colors.grey,
+      child: _selectedFiles.isNotEmpty &&
+              _selectedFiles.any((f) => f.path.endsWith('.m4a'))
+          ? AudioWidget(
+              controller: _audioController,
+              audioFile:
+                  _selectedFiles.firstWhere((f) => f.path.endsWith('.m4a')),
+              onDelete: _deleteRecording,
+              showRecordingUI: _audioController.isRecording,
+            )
+          : Row(
+              children: [
+                // Emoji Button
+                if (!_audioController.isRecording) ...[
+                  IconButton(
+                    icon: const Icon(
+                      Icons.emoji_emotions_outlined,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      // Handle emoji selection (Use a package like emoji_picker_flutter)
+                      showEmojiPicker(context);
+                    },
+                  ),
+
+                  // TextField
+                  Expanded(
+                    child: TextField(
+                      controller: widget.messageController,
+                      decoration: InputDecoration(
+                        hintText: 'Type a message',
+                        hintStyle: TextStyle(color: Colors.grey.shade500),
+                        border: InputBorder.none,
+                      ),
+                      minLines: 1,
+                      maxLines: 5, // Allow multiline input
+                    ),
+                  ),
+
+                  // Attachments Button
+                  IconButton(
+                    icon: const Icon(
+                      Icons.attach_file,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () async {
+                      // _showOptionsBottomSheet(context, "attachment");
+                      mediaPaths.clear();
+                      final result = await showFullScreenAlert(
+                          context,
+                          CreatePostScreen(
+                            isChatCamera: true,
+                          ));
+                      if (result != null && result.isNotEmpty) {
+                        setState(() {
+                          mediaPaths.addAll(result.toList());
+                        });
+                        _confirmAndNavigate();
+                      }
+                      // Handle attachment (file picker or gallery)
+                    },
+                  ),
+
+                  // Camera Button
+                  IconButton(
+                    icon: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () async {
+                      // _showOptionsBottomSheet(context, "camera");
+                      mediaPaths.clear();
+
+                      final image = await showFullScreenAlertBool(
+                          context,
+                          AddPostCameraScreen(
+                            isChatCamera: true,
+                            routeChatCamera: true,
+                            chatModel: widget.chatModel,
+                            token: '',
+                          ));
+
+                      if (image) {
+                        widget.onCameraChat;
+                      }
+                      // Handle camera action (open camera or photo picker)
+                    },
+                  ),
+                ] else
+                  Expanded(
+                    child: AudioWidget(
+                      controller: _audioController,
+                      audioFile: null,
+                      onDelete: _deleteRecording,
+                      showRecordingUI: _audioController.isRecording,
+                    ),
+                  ),
+
+                // Send Button or Voice Button
+                widget.messageController.text.isNotEmpty ||
+                        _selectedFiles.isNotEmpty
+                    ? buildSendButton(_selectedFiles.isEmpty
+                        ? widget.onPressedSend
+                        : widget.voicePressed)
+                    : buildVoiceButton(),
+              ],
             ),
-            onPressed: () {
-              // Handle emoji selection (Use a package like emoji_picker_flutter)
-              showEmojiPicker(context);
-            },
-          ),
-
-          // TextField
-          Expanded(
-            child: TextField(
-              controller: widget.messageController,
-              decoration: InputDecoration(
-                hintText: 'Type a message',
-                hintStyle: TextStyle(color: Colors.grey.shade500),
-                border: InputBorder.none,
-              ),
-              minLines: 1,
-              maxLines: 5, // Allow multiline input
-            ),
-          ),
-
-          // Attachments Button
-          IconButton(
-            icon: const Icon(
-              Icons.attach_file,
-              color: Colors.grey,
-            ),
-            onPressed: () async {
-              // _showOptionsBottomSheet(context, "attachment");
-              mediaPaths.clear();
-              final result = await showFullScreenAlert(
-                  context,
-                  CreatePostScreen(
-                    isChatCamera: true,
-                  ));
-              if (result != null && result.isNotEmpty) {
-                setState(() {
-                  mediaPaths.addAll(result.toList());
-                });
-                _confirmAndNavigate();
-              }
-              // Handle attachment (file picker or gallery)
-            },
-          ),
-
-          // Camera Button
-          IconButton(
-            icon: const Icon(
-              Icons.camera_alt,
-              color: Colors.grey,
-            ),
-            onPressed: () async {
-              // _showOptionsBottomSheet(context, "camera");
-              mediaPaths.clear();
-
-              final image = await showFullScreenAlertBool(
-                  context,
-                  AddPostCameraScreen(
-                    isChatCamera: true,
-                    routeChatCamera: true,
-                    chatModel: widget.chatModel,
-                    token: '',
-                  ));
-
-              if (image) {
-                widget.onCameraChat;
-              }
-              // Handle camera action (open camera or photo picker)
-            },
-          ),
-
-          // Send Button or Voice Button
-          widget.messageController.text.isNotEmpty
-              ? buildSendButton(widget.onPressedSend)
-              : buildVoiceButton(),
-        ],
-      ),
     );
   }
 
@@ -292,6 +325,43 @@ class _ChatInputFieldState extends State<ChatInputField> {
     } catch (e) {
       print("Error recording video: $e");
     }
+  }
+
+  // In your _MessageWidgetState:
+  Future<void> _startRecording() async {
+    try {
+      setState(() {
+        _selectedFiles.removeWhere((f) => f.path.endsWith('.m4a'));
+      });
+      await _audioController.startRecording();
+      setState(() {});
+    } catch (e) {
+      print('Recording error: $e');
+      setState(() {});
+    }
+  }
+
+  Future<void> _stopRecording() async {
+    try {
+      final audioFile = await _audioController.stopRecording();
+      if (audioFile != null) {
+        setState(() {
+          _selectedFiles.add(audioFile);
+        });
+      }
+    } catch (e) {
+      print('Stop recording error: $e');
+    }
+    setState(() {});
+  }
+
+  Future<void> _deleteRecording() async {
+    if (_audioController.isPlaying) {
+      await _audioController.audioPlayer.stop();
+    }
+    setState(() {
+      _selectedFiles.removeWhere((f) => f.path.endsWith('.m4a'));
+    });
   }
 
   // Show Confirmation Dialog and Navigate
