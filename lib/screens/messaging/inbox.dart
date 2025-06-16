@@ -214,25 +214,26 @@ class _InboxScreenState extends State<InboxScreen> {
                                   ),
                       ),
                       ChatInputField(
-                          messageController: messageController,
-                          voicePressed: () async {},
-                          onPressedSend: () async {
-                            try {
-                              await chatController.sendMessage(
-                                messageController.text.trim(),
-                                widget.chatModel.id,
-                                [],
-                              );
-                              setState(() => messageController.clear());
-                              Future.delayed(
-                                  Duration(milliseconds: 300), _scrollToBottom);
-                            } catch (_) {}
-                          },
-                          chatModel: widget.chatModel,
-                          onCameraChat: () {
+                        messageController: messageController,
+                        onPressedSend: () async {
+                          try {
+                            await chatController.sendMessage(
+                              messageController.text.trim(),
+                              widget.chatModel.id,
+                              [],
+                            );
+                            setState(() => messageController.clear());
                             Future.delayed(
                                 Duration(milliseconds: 300), _scrollToBottom);
-                          }),
+                          } catch (_) {}
+                        },
+                        chatModel: widget.chatModel,
+                        onCameraChat: () {
+                          Future.delayed(
+                              Duration(milliseconds: 300), _scrollToBottom);
+                        },
+                        chatController: chatController,
+                      ),
                     ],
                   ),
                   if (moreLoading)

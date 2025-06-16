@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/endpoints.dart';
 import 'package:mobile/screens/messaging/widgets/media_display_message.dart';
+import 'package:mobile/screens/messaging/widgets/message_audio_player.dart';
 import 'package:mobile/screens/messaging/widgets/message_video_player.dart';
 
 class MediaItem extends StatefulWidget {
@@ -27,27 +30,42 @@ class _MediaItemState extends State<MediaItem> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+    log("Media Type: ${widget.mediaType}" + "Url : ${widget.url}");
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Stack(
         alignment: Alignment.bottomRight,
         children: [
           // Media container with conditional background color
-          Container(
-            padding: const EdgeInsets.all(10), // Apply padding of 10
-            decoration: BoxDecoration(
-              color: widget.isUser
-                  ? Color.fromARGB(255, 103, 207, 255)
-                  : Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: widget.mediaType == 'video'
-                  ? MessageVideoPlayer(videoUrl: widget.url)
-                  : _buildImage(widget.url, size),
-            ),
-          ),
+          widget.url.contains('m4a')
+              ? Container(
+                  width: MediaQuery.of(context).size.width * .7,
+                  padding: const EdgeInsets.all(10), // Apply padding of 10
+                  decoration: BoxDecoration(
+                    color: widget.isUser
+                        ? Color.fromARGB(255, 103, 207, 255)
+                        : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: MessageAudioPlayer(
+                    audioUrl: ApiURLs.baseUrl2 + widget.url,
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.all(10), // Apply padding of 10
+                  decoration: BoxDecoration(
+                    color: widget.isUser
+                        ? Color.fromARGB(255, 103, 207, 255)
+                        : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: widget.mediaType == 'video'
+                        ? MessageVideoPlayer(videoUrl: widget.url)
+                        : _buildImage(widget.url, size),
+                  ),
+                ),
           // Timestamp on Bottom-Right
           Positioned(
             bottom: 8,

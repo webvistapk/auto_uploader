@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/controller/function/AudioController.dart';
+import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/model/chat_model.dart';
 import 'package:mobile/screens/messaging/widgets/media_preview/media_screen_preview.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
@@ -14,16 +15,16 @@ import 'package:mobile/screens/profile/widgets/AudioRecordingWidget.dart';
 class ChatInputField extends StatefulWidget {
   final TextEditingController messageController;
   final onPressedSend;
-  final voicePressed;
   final onCameraChat;
   final ChatModel chatModel;
+  final ChatController chatController;
   ChatInputField(
       {super.key,
       required this.messageController,
       this.onPressedSend,
       this.onCameraChat,
       required this.chatModel,
-      this.voicePressed});
+      required this.chatController});
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();
@@ -41,7 +42,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
   }
 
   final AudioController _audioController = AudioController();
-  final List<File> _selectedFiles = [];
+  List<File> _selectedFiles = [];
 
   @override
   void dispose() {
@@ -49,6 +50,16 @@ class _ChatInputFieldState extends State<ChatInputField> {
 
     _audioController.dispose();
     super.dispose();
+  }
+
+  voicePressed() async {
+    log("Pressed : $_selectedFiles");
+    await widget.chatController
+        .sendMessage("", widget.chatModel.id, _selectedFiles);
+    _selectedFiles = [];
+    setState(() {});
+    widget.onCameraChat;
+    // debugger();
   }
 
   @override
@@ -70,12 +81,19 @@ class _ChatInputFieldState extends State<ChatInputField> {
       ),
       child: _selectedFiles.isNotEmpty &&
               _selectedFiles.any((f) => f.path.endsWith('.m4a'))
-          ? AudioWidget(
-              controller: _audioController,
-              audioFile:
-                  _selectedFiles.firstWhere((f) => f.path.endsWith('.m4a')),
-              onDelete: _deleteRecording,
-              showRecordingUI: _audioController.isRecording,
+          ? Row(
+              children: [
+                Expanded(
+                  child: AudioWidget(
+                    controller: _audioController,
+                    audioFile: _selectedFiles
+                        .firstWhere((f) => f.path.endsWith('.m4a')),
+                    onDelete: _deleteRecording,
+                    showRecordingUI: _audioController.isRecording,
+                  ),
+                ),
+                buildSendButton(voicePressed)
+              ],
             )
           : Row(
               children: [
@@ -166,11 +184,8 @@ class _ChatInputFieldState extends State<ChatInputField> {
                   ),
 
                 // Send Button or Voice Button
-                widget.messageController.text.isNotEmpty ||
-                        _selectedFiles.isNotEmpty
-                    ? buildSendButton(_selectedFiles.isEmpty
-                        ? widget.onPressedSend
-                        : widget.voicePressed)
+                widget.messageController.text.isNotEmpty
+                    ? buildSendButton(widget.onPressedSend)
                     : buildVoiceButton(),
               ],
             ),
@@ -193,15 +208,16 @@ class _ChatInputFieldState extends State<ChatInputField> {
   // Voice Input Button
   Widget buildVoiceButton() {
     return Container(
+      height: 30,
+      width: 30,
       decoration: const BoxDecoration(
         color: Colors.green,
         shape: BoxShape.circle,
       ),
-      child: IconButton(
-        icon: const Icon(Icons.keyboard_voice_sharp, color: Colors.white),
-        onPressed: () {
-          // Handle voice input (start recording)
-        },
+      child: GestureDetector(
+        child: const Icon(Icons.keyboard_voice_sharp, color: Colors.white),
+        onLongPressStart: (_) => _startRecording(),
+        onLongPressEnd: (_) => _stopRecording(),
       ),
     );
   }
