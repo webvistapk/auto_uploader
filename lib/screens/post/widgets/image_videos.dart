@@ -25,7 +25,6 @@ class _FileCarouselState extends State<FileCarousel> {
 
   @override
   void dispose() {
-    // Dispose video controllers
     for (var controller in videoControllers.values) {
       controller.dispose();
     }
@@ -37,9 +36,7 @@ class _FileCarouselState extends State<FileCarousel> {
         !videoControllers.containsKey(file.path)) {
       final controller = VideoPlayerController.file(file)
         ..initialize().then((_) {
-          setState(() {
-            // Video is ready to play
-          });
+          setState(() {});
         }).catchError((error) {
           debugPrint('Error initializing video: ${file.path}, Error: $error');
         });
@@ -47,57 +44,92 @@ class _FileCarouselState extends State<FileCarousel> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return widget.files.isEmpty
-        ? Text(
-            "No Files Selected",
-            style: AppTextStyles.poppinsBold(color: Colors.white),
-          )
-        : CarouselSlider.builder(
-            itemCount: widget.files.length,
-            options: CarouselOptions(
-              height: MediaQuery.of(context).size.height * .35,
-              autoPlay: true,
-              enlargeCenterPage: true,
-              aspectRatio: 16 / 9,
-              viewportFraction: 0.9,
-              enableInfiniteScroll: false,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  // Pause the current video if it's playing
-                  if (videoControllers[widget.files[currentIndex].path]
-                          ?.value
-                          .isPlaying ??
-                      false) {
-                    videoControllers[widget.files[currentIndex].path]?.pause();
-                  }
-                  currentIndex = index;
-
-                  // Initialize the new video's controller if needed
-                  initializeVideoController(widget.files[currentIndex]);
-                });
-              },
-            ),
-            itemBuilder: (context, index, realIndex) {
-              final file = widget.files[index];
-              return ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+@override
+Widget build(BuildContext context) {
+  return widget.files.isEmpty
+      ? Text(
+          "No Files Selected",
+          style: TextStyle(color: Colors.white),
+        )
+      : Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Media container
+              Container(
+                height: 400,
+                width: MediaQuery.of(context).size.width * 0.85,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2C2C2E),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: file.path.endsWith('.mp4')
-                    ? buildVideoPlayer(file)
-                    : buildImage(file),
-              );
-            },
-          );
-  }
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: widget.files[currentIndex].path.endsWith('.mp4')
+                      ? buildVideoPlayer(widget.files[currentIndex])
+                      : buildImage(widget.files[currentIndex]),
+                ),
+              ),
 
+              // Left arrow (just outside left of media container)
+              if (widget.files.length > 1)
+                Positioned(
+                  left: 0,
+                  child: Transform.translate(
+                    offset: Offset(-30, 0), // Move slightly outside
+                    child: IconButton(
+                      icon: Icon(Icons.chevron_left, color: Colors.white, size: 32),
+                      onPressed: () {
+                        setState(() {
+                          if (videoControllers[widget.files[currentIndex].path]
+                                  ?.value.isPlaying ??
+                              false) {
+                            videoControllers[widget.files[currentIndex].path]
+                                ?.pause();
+                          }
+                          currentIndex = (currentIndex - 1) >= 0
+                              ? currentIndex - 1
+                              : widget.files.length - 1;
+                          initializeVideoController(widget.files[currentIndex]);
+                        });
+                      },
+                    ),
+                  ),
+                ),
+
+              // Right arrow (just outside right of media container)
+              if (widget.files.length > 1)
+                Positioned(
+                  right: 0,
+                  child: Transform.translate(
+                    offset: Offset(30, 0), // Move slightly outside
+                    child: IconButton(
+                      icon: Icon(Icons.chevron_right, color: Colors.white, size: 32),
+                      onPressed: () {
+                        setState(() {
+                          if (videoControllers[widget.files[currentIndex].path]
+                                  ?.value.isPlaying ??
+                              false) {
+                            videoControllers[widget.files[currentIndex].path]
+                                ?.pause();
+                          }
+                          currentIndex = (currentIndex + 1) % widget.files.length;
+                          initializeVideoController(widget.files[currentIndex]);
+                        });
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+}
+
+  
+  
   Widget buildVideoPlayer(File file) {
     final controller = videoControllers[file.path];
 
-    // Ensure the controller is not null and initialized
     if (controller != null && controller.value.isInitialized) {
       return Stack(
         alignment: Alignment.bottomCenter,
@@ -111,6 +143,7 @@ class _FileCarouselState extends State<FileCarousel> {
             bottom: 20,
             left: 20,
             child: FloatingActionButton(
+              mini: true,
               onPressed: () {
                 setState(() {
                   if (controller.value.isPlaying) {

@@ -26,12 +26,20 @@ import 'package:http/http.dart' as http;
 class AddPostScreen extends StatefulWidget {
   final UserProfile? userProfile;
   final List<File> mediFiles;
+  final String? title;
+  final String? description;
+  bool isfileUploaded;
+  final String titleFontColor;
   // final type;
 
-  const AddPostScreen({
+  AddPostScreen({
     super.key,
     required this.userProfile,
     required this.mediFiles,
+  required  this.title,
+   required this.description,
+    this.isfileUploaded = false,
+    required this.titleFontColor,
     // required this.type,
   });
 
@@ -567,25 +575,30 @@ class _AddPostScreenState extends State<AddPostScreen> {
                               setState(() {
                                 isLoading = false;
                               });
-                              Navigator.push(
-                                  context,
-                                  CupertinoDialogRoute(
-                                      builder: (_) => NewPostNow(
-                                            postField:
-                                                titleController.text.trim(),
-                                            peopleTags: selectedTagUsers,
-                                            keywordsList: keywords,
-                                            privacyPost: privacyPolicy,
-                                            mediaFiles: widget.mediFiles,
-                                            interactions:
-                                                interactionSheetOptions,
-                                            dmReplies: dmRepliesOptions,
-                                            dmComments: dmCommentOptions,
-                                            userProfile: widget.userProfile!,
-                                            isPoll: true,
-                                            location: _location,
-                                          ),
-                                      context: context));
+                              
+                                Navigator.push(
+                                    context,
+                                    CupertinoDialogRoute(
+                                        builder: (_) => AddPollScreen(
+                                              postField:
+                                                  titleController.text.trim(),
+                                              selectedTagUsers:
+                                                  selectedTagUsers,
+                                              keywordList: keywords,
+                                              privacyPolicy: privacyPolicy,
+                                              mediaFiles: widget.mediFiles,
+                                              userProfile: widget.userProfile!,
+                                              interactions:
+                                                  interactionSheetOptions,
+                                              postTitle: widget.title,
+                                              postDescription:
+                                                  widget.description,
+                                              location: _location,
+                                              dmReplies: dmRepliesOptions,
+                                              dmComments: dmCommentOptions,
+                                            ),
+                                        context: context));
+                              
                             }
                           } else if (widget.mediFiles.isEmpty &&
                               interactionSheetOptions.contains('Polls')) {
@@ -664,25 +677,89 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                 setState(() {
                                   isLoading = false;
                                 });
-                                Navigator.push(
+                                if (widget.isfileUploaded) {
+                                  final response = await pro.createNewPost(
+                                      context,
+                                      postField: titleController.text.trim(),
+                                      peopleTags: selectedTagUsers,
+                                      keywordsList: keywords,
+                                      privacyPost: privacyPolicy,
+                                      mediaFiles: widget.mediFiles,
+                                      postTitle: widget.title,
+                                      dmReplies: dmRepliesOptions,
+                                      dmComments: dmCommentOptions,
+                                      postDescription: widget.description,
+                                      interactions: interactionSheetOptions,
+                                      location: _location,
+                                      titleFontColor: widget.titleFontColor
+                                      );
+                                  if (response != null) {
+                                    //ToastNotifier.showSuccessToast(
+                                    // context, "Post Successfully posted!");
+
+                                    final token =
+                                        await Prefrences.getAuthToken();
+                                    Navigator.pushAndRemoveUntil(
+                                        context,
+                                        CupertinoDialogRoute(
+                                            builder: (_) => MainScreen(
+                                                userProfile:
+                                                    widget.userProfile!,
+                                                authToken: token),
+                                            context: context),
+                                        (route) => false);
+                                  } else {
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                    //ToastNotifier.showErrorToast(
+                                    // context, "Network Problem. Try again.");
+                                  }
+                                  // Clear fields after submission
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Post submitted successfully!')),
+                                  );
+                                } else {
+                                 final response = await pro.createNewPost(context,
+                                  postField: titleController.text.trim(),
+                                  peopleTags: selectedTagUsers,
+                                  keywordsList: keywords,
+                                  privacyPost: privacyPolicy,
+                                  mediaFiles: widget.mediFiles,
+                                  interactions: interactionSheetOptions,
+                                  dmReplies: dmRepliesOptions,
+                                  dmComments: dmCommentOptions,
+                                  location: _location,
+                                  titleFontColor: widget.titleFontColor
+                                  );
+
+                              if (response != null) {
+                                //ToastNotifier.showSuccessToast(
+                                // context, "Post Successfully posted!");
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                final token = await Prefrences.getAuthToken();
+                                Navigator.pushAndRemoveUntil(
                                     context,
                                     CupertinoDialogRoute(
-                                        builder: (_) => NewPostNow(
-                                              postField:
-                                                  titleController.text.trim(),
-                                              peopleTags: selectedTagUsers,
-                                              keywordsList: keywords,
-                                              privacyPost: privacyPolicy,
-                                              mediaFiles: widget.mediFiles,
-                                              interactions:
-                                                  interactionSheetOptions,
-                                              userProfile: widget.userProfile!,
-                                              isPoll: false,
-                                              location: _location,
-                                              dmReplies: dmRepliesOptions,
-                                              dmComments: dmCommentOptions,
-                                            ),
-                                        context: context));
+                                        builder: (_) => MainScreen(
+                                            userProfile: widget.userProfile!,
+                                            authToken: token),
+                                        context: context),
+                                    (route) => false);
+                              } else {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                //ToastNotifier.showErrorToast(
+                                // context, "Network Problem. Try again.");
+                              }
+                            
+                                }
                               }
                             }
                           } else if (widget.mediFiles.isEmpty &&
@@ -705,7 +782,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                   interactions: interactionSheetOptions,
                                   dmReplies: dmRepliesOptions,
                                   dmComments: dmCommentOptions,
-                                  location: _location);
+                                  location: _location,
+                                  titleFontColor: widget.titleFontColor
+                                  );
 
                               if (response != null) {
                                 //ToastNotifier.showSuccessToast(

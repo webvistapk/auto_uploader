@@ -130,7 +130,8 @@ class PostProvider extends ChangeNotifier {
       List<String>? pollOptions,
       required List<String>? interactions,
       required List<String> dmReplies, // Interaction options
-      required List<String> dmComments // Interaction options
+      required List<String> dmComments, // Interaction options
+     required String titleFontColor
       }) async {
     try {
       _isLoading = true;
@@ -154,7 +155,9 @@ class PostProvider extends ChangeNotifier {
             interactions: interactions!,
             location: location,
             dmReplies: dmReplies,
-            dmComments: dmComments);
+            dmComments: dmComments,
+            titleFontColor:titleFontColor
+            );
 
         if (response != null) {
           log("Post: $response");

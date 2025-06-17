@@ -27,6 +27,7 @@ class PostManager {
     required List<String> dmReplies, // Interaction options
     required List<String> dmComments,
     required String token, // Bearer token for authorization
+    required String titleFontColor
   }) async {
     String url = baseUrl + ApiURLs.create_new_post;
 
@@ -79,6 +80,7 @@ class PostManager {
     if (postTitle != null && postDescription != null) {
       request.fields['post_title'] = postTitle;
       request.fields['post_description'] = postDescription;
+      request.fields['post_title_font_color']=titleFontColor;
     }
     request.fields['keywords'] = keywordsList.join(',');
     if (peopleTags.isEmpty) {

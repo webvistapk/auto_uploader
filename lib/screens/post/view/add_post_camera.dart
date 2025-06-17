@@ -11,6 +11,7 @@ import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/create_post_screen.dart';
 import 'package:mobile/screens/post/view/camera/funky_code.dart';
 import 'package:mobile/screens/post/view/chat_input_field.dart';
+import 'package:mobile/screens/post/widgets/editPhoto.dart';
 import 'package:mobile/utils/custom_navigations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -594,8 +595,8 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
   _onNextPressed() {
     push(
         context,
-        AddPostScreen(
-            userProfile: widget.userProfile, mediFiles: selectedFiles));
+        EditPhotoScreen(
+            userProfile: widget.userProfile, mediaFiles: selectedFiles));
   }
 
   Future<List<File>?> showFullScreenAlert(

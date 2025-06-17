@@ -257,7 +257,9 @@ class _AddPollScreenState extends State<AddPollScreen> {
                                 postDescription: widget.postDescription,
                                 location: widget.location,
                                 dmReplies: widget.dmReplies,
-                                dmComments: widget.dmComments);
+                                dmComments: widget.dmComments,
+                                titleFontColor: ""
+                                );
 
                             if (response != null) {
                               //ToastNotifier.showSuccessToast(

@@ -14,6 +14,7 @@ import 'package:mobile/screens/mainscreen/main_screen.dart';
 import 'package:mobile/screens/post/reels/reels_video_player.dart';
 import 'package:mobile/screens/post/add_post_screen.dart';
 import 'package:mobile/screens/post/widgets/discard_post.dart';
+import 'package:mobile/screens/post/widgets/editPhoto.dart';
 import 'package:mobile/screens/post/widgets/image_videos.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -111,7 +112,7 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
           appBar: AppBar(
             automaticallyImplyLeading: false,
             title: Text(
-              '(overlap)',
+              '(overap)',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -635,9 +636,11 @@ class _UploadFromGalleryState extends State<UploadFromGallery>
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => AddPostScreen(
-                                    mediFiles: mediaFiles,
-                                    userProfile: widget.userProfile,
+                              builder: (_) => EditPhotoScreen(
+                                    mediaFiles: mediaFiles,
+                                   
+                                    userProfile:widget.userProfile,
+                                    
                                     // type: "post",
                                   )));
                     } else {
