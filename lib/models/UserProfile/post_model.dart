@@ -28,6 +28,7 @@ class PostModel {
   final List<Keyword> keywords;
   final String? interactions;
   final String? pollTitle;
+  final String? postTitleColor;
   final String? pollDescription;
   final List<Poll>? polls; // Optional list of polls
   final List<Media> media;
@@ -66,6 +67,7 @@ class PostModel {
     this.polls, // Optional list of polls
     this.postTitle,
     this.postDescription,
+    this.postTitleColor,
     this.location,
     this.isReposted,
     this.repostedBy,
@@ -99,6 +101,7 @@ class PostModel {
         isLiked: json['is_liked'] ?? false,
         postTitle: json['post_title'],
         postDescription: json['post_description'],
+        postTitleColor: json['post_title_font_color']??'',
         location: json['location'] ?? "",
         isReposted: json['is_reposted'] ?? false,
         repostedBy: json['reposted_by'] == null
@@ -159,6 +162,7 @@ class PostModel {
       'is_liked': post.isLiked ?? false,
       'post_title': post.postTitle,
       'post_description': post.postDescription,
+      'post_title_font_color':post.postTitleColor??'000000',
       'location': post.location,
       'is_reposted': post.isReposted,
       'reposted_by': post.repostedBy != null

@@ -127,6 +127,29 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   String? date;
+
+  Color hexToColor(String? hexColor) {
+  // Handle null or empty input
+  if (hexColor == null || hexColor.trim().isEmpty) {
+    return Color(0xFF000000); // Fallback to black
+  }
+
+  // Remove '#' if present
+  hexColor = hexColor.replaceAll('#', '');
+
+  // Pad with 'FF' (fully opaque) if only 6 characters
+  if (hexColor.length == 6) {
+    hexColor = 'FF$hexColor';
+  }
+
+  // Parse to integer (handle invalid cases)
+  try {
+    return Color(int.parse(hexColor, radix: 16));
+  } catch (e) {
+    return Color(0xFF000000); // Fallback on parsing error
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     final GlobalKey iconKey = GlobalKey();
@@ -721,14 +744,21 @@ class _PostWidgetState extends State<PostWidget> {
                     children: [
                       Text(widget.postTitle ?? '',
                           style: TextStyle(
-                            color: AppColors.black,
+                            color: hexToColor(widget.postModel.postTitleColor),
                             fontFamily: 'fontBold',
                             fontSize: 36.sp,
                           )),
                       Text(
                         widget.postDescription ?? '',
                         style: TextStyle(
-                          color: AppColors.black,
+                          color: hexToColor(
+                            (widget.postModel.postTitleColor
+                                        ?.trim()
+                                        .isNotEmpty ??
+                                    false)
+                                ? widget.postModel.postTitleColor!
+                                : '000000',
+                          ),
                           fontSize: 25.sp,
                         ),
                       ),

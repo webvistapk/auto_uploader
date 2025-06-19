@@ -678,6 +678,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                                   isLoading = false;
                                 });
                                 if (widget.isfileUploaded) {
+                                  
                                   final response = await pro.createNewPost(
                                       context,
                                       postField: titleController.text.trim(),

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -12,13 +13,11 @@ import 'package:sizer/sizer.dart';
 class EditPhotoScreen extends StatefulWidget {
   final List<File> mediaFiles;
   final UserProfile? userProfile;
-  
 
   const EditPhotoScreen({
     super.key,
     required this.mediaFiles,
     required this.userProfile,
-    
   });
 
   @override
@@ -61,35 +60,41 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
 
   int data1index = 0;
   int data2index = 0;
-  List<String> mydata1 = [
-    'Make it so that you can tap the title here or description and select a font.',
-    'Another inspirational message goes here',
-    'Final message to test navigation'
-  ];
-  List<String> mydata2 = [
-    'instead of see more wecouldddo....',
-    'Explore more design options!',
-    'Thanks for using the editor!',
-  ];
+  String mydata1 = 'Add Title Here';
+  String mydata2 = "Add Description Here";
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final linkcontroller = TextEditingController();
 
-  @override
-  void dispose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    linkcontroller.dispose();
-    super.dispose();
+   @override
+void initState() {
+  super.initState();
+  titleController.addListener(_updatePreview);
+  descriptionController.addListener(_updatePreview);
+}
+
+@override
+void dispose() {
+  titleController.removeListener(_updatePreview);
+  descriptionController.removeListener(_updatePreview);
+  super.dispose();
+}
+
+void _updatePreview() {
+  if (mounted) {
+    setState(() {});
   }
+}
 
   Widget _buildFileCarousel() {
-    final titleText = titleController.text.isNotEmpty
-        ? titleController.text
-        : mydata1[data1index];
-    final descriptionText = descriptionController.text.isNotEmpty
-        ? descriptionController.text
-        : mydata2[data2index];
+    final hasTitleText = titleController.text.isNotEmpty;
+  final hasDescriptionText = descriptionController.text.isNotEmpty;
+  
+  final titleText = hasTitleText ? titleController.text : mydata1;
+  final descriptionText = hasDescriptionText ? descriptionController.text : mydata2;
+  
+  final selectedColor = colors1[selectedColorIndex ?? 0];
+  
     return Stack(
       children: [
         Container(
@@ -109,43 +114,44 @@ class _EditPhotoScreenState extends State<EditPhotoScreen> {
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: colors1[selectedColorIndex ?? 0].withOpacity(0.8),
+              color: Colors.white.withOpacity(0.8),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  titleText,
-                  style: TextStyle(
-                      fontFamily: font[selectedFontIndex ?? 0],
-                      fontWeight: FontWeight.bold,
-                      color: colors1[selectedColorIndex ?? 0] == Colors.black
-                          ? Colors.white
-                          : Colors.black,
-                      fontSize: 12),
-                  textAlign: TextAlign.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                titleText,
+                style: TextStyle(
+                  fontFamily: font[selectedFontIndex ?? 0],
+                  fontWeight: FontWeight.bold,
+                  color: hasTitleText ? selectedColor : Colors.black54, // Gray if empty
+                  fontSize: 12,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  descriptionText,
-                  style: TextStyle(
-                      fontFamily: font[selectedFontIndex ?? 0],
-                      color: colors1[selectedColorIndex ?? 0] == Colors.black
-                          ? Colors.white
-                          : Colors.black,
-                      fontSize: 12),
-                  textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                descriptionText,
+                style: TextStyle(
+                  fontFamily: font[selectedFontIndex ?? 0],
+                  color: hasDescriptionText ? selectedColor : Colors.black54, // Gray if empty
+                  fontSize: 12,
                 ),
-              ],
-            ),
+                textAlign: TextAlign.left,
+              ),
+            ],
+          ),
           ),
         ),
       ],
     );
   }
-String colorToHex(Color color) {
-  return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
-}
+
+  String colorToHex(Color color) {
+    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,10 +186,15 @@ String colorToHex(Color color) {
                             builder: (_) => AddPostScreen(
                               userProfile: widget.userProfile,
                               mediFiles: widget.mediaFiles,
-                              title: titleController.text.toString(),
-                              description: descriptionController.text.toString(),
+                              title: titleController.text.isNotEmpty
+                                  ? titleController.text
+                                  : null,
+                              description: descriptionController.text.isNotEmpty
+                                  ? descriptionController.text
+                                  : null,
                               isfileUploaded: true,
-                              titleFontColor: colorToHex(colors1[selectedColorIndex ?? 0]),
+                              titleFontColor:
+                                  colorToHex(colors1[selectedColorIndex ?? 0]),
                             ),
                           ),
                         );
