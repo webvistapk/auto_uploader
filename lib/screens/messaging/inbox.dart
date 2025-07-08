@@ -5,6 +5,7 @@ import 'package:mobile/common/message_toast.dart';
 import 'package:mobile/models/UserProfile/userprofile.dart';
 import 'package:mobile/prefrences/prefrences.dart';
 import 'package:mobile/screens/mainscreen/main_screen.dart';
+import 'package:mobile/screens/messaging/calling/view/call_page.dart';
 import 'package:mobile/screens/messaging/controller/chat_controller.dart';
 import 'package:mobile/screens/messaging/widgets/input_message.dart';
 import 'package:mobile/screens/messaging/widgets/post_message/post_message_widget.dart';
@@ -289,25 +290,72 @@ class _InboxScreenState extends State<InboxScreen> {
           Text(widget.chatName ?? widget.chatModel.participants[0].username,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const Spacer(),
-          Container(
-            decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-            child: const Padding(
-                padding: EdgeInsets.all(5.0),
-                child: Icon(
-                  Icons.phone,
-                  size: 18,
-                )),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
+          InkWell(
+            onTap: () {
+              final targetParticipant =
+                  widget.chatModel.participants.firstWhere(
+                (e) =>
+                    e.username.toString() !=
+                    widget.userProfile.username.toString(),
+              );
+
+              final participantId = targetParticipant.id;
+
+              Navigator.push(
+                  context,
+                  CupertinoDialogRoute(
+                      builder: (_) => CallPage(
+                          userID: widget.userProfile.id.toString(),
+                          userName:
+                              widget.userProfile.username.toString() ?? "dummy",
+                          targetUserID: participantId.toString(),
+                          callType: CallType.audio),
+                      context: context));
+            },
             child: Container(
               decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
               child: const Padding(
                   padding: EdgeInsets.all(5.0),
                   child: Icon(
-                    Icons.video_call,
+                    Icons.phone,
                     size: 18,
                   )),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: InkWell(
+              onTap: () {
+                final targetParticipant =
+                    widget.chatModel.participants.firstWhere(
+                  (e) =>
+                      e.username.toString() !=
+                      widget.userProfile.username.toString(),
+                );
+
+                final participantId = targetParticipant.id;
+
+                Navigator.push(
+                    context,
+                    CupertinoDialogRoute(
+                        builder: (_) => CallPage(
+                            userID: widget.userProfile.id.toString(),
+                            userName: widget.userProfile.username.toString() ??
+                                "dummy",
+                            targetUserID: participantId.toString(),
+                            callType: CallType.video),
+                        context: context));
+              },
+              child: Container(
+                decoration:
+                    BoxDecoration(border: Border.all(color: Colors.grey)),
+                child: const Padding(
+                    padding: EdgeInsets.all(5.0),
+                    child: Icon(
+                      Icons.video_call,
+                      size: 18,
+                    )),
+              ),
             ),
           ),
         ],

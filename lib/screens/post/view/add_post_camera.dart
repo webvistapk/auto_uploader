@@ -238,7 +238,7 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
       //     ));
     } catch (e) {
       log('Error stopping video recording: $e');
-      debugger();
+      // debugger();
       setState(() {
         _isRecording = false;
         _progress = 0.0;
