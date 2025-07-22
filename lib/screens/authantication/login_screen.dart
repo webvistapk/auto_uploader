@@ -98,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               height: 10,
                             ),
                             Text(
+                              key: const Key('loginErrorMessageText'),
                               pro.errorMessage,
                               textAlign: TextAlign.center,
                               style: AppTextStyles.poppinsRegular(

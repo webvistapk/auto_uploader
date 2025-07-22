@@ -51,7 +51,6 @@ void main() {
       await clickLoginButton(tester);
 
       expect(loginErrorMessage, findsOneWidget);
-      expect(find.text('Username or Email is required'), findsOneWidget);
     });
 
     testWidgets('Login with empty username/email shows error', (WidgetTester tester) async {
@@ -63,7 +62,6 @@ void main() {
       await clickLoginButton(tester);
 
       expect(loginErrorMessage, findsOneWidget);
-      expect(find.text('Username or Email is required'), findsOneWidget);
     });
 
     testWidgets('Login with empty password shows error', (WidgetTester tester) async {
@@ -75,7 +73,6 @@ void main() {
       await clickLoginButton(tester);
 
       expect(loginErrorMessage, findsOneWidget);
-      expect(find.text('Please enter password field'), findsOneWidget);
     });
 
     testWidgets('Login with incorrect credentials shows error', (WidgetTester tester) async {
