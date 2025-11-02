@@ -61,6 +61,7 @@ class _FileCarouselState extends State<FileCarousel> {
               autoPlay: true,
               enlargeCenterPage: true,
               aspectRatio: 16 / 9,
+              viewportFraction: 0.9,
               enableInfiniteScroll: false,
               onPageChanged: (index, reason) {
                 setState(() {
@@ -80,9 +81,15 @@ class _FileCarouselState extends State<FileCarousel> {
             ),
             itemBuilder: (context, index, realIndex) {
               final file = widget.files[index];
-              return file.path.endsWith('.mp4')
-                  ? buildVideoPlayer(file)
-                  : buildImage(file);
+              return ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: file.path.endsWith('.mp4')
+                    ? buildVideoPlayer(file)
+                    : buildImage(file),
+              );
             },
           );
   }

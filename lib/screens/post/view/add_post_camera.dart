@@ -66,8 +66,11 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _progressTimer?.cancel();
-    _videoPlayerController?.dispose();
-    _controller.dispose();
+    _recordingTimer?.cancel();
+    _disposeVideoControllers();
+    if (mounted) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -158,7 +161,7 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
 
       // Dispose existing video controllers before creating new one
       await _disposeVideoControllers();
-      debugger();
+      // debugger();ss
       final newVideoController = VideoPlayerController.file(file)
         ..initialize().then((_) {
           // Set looping and start playing
@@ -362,7 +365,7 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
                                     controller.play();
                                   }
                                 },
-                                child: Chewie(controller: _chewieController!),
+                                child: VideoPlayer(_videoPlayerController!),
                               )
                             : const Center(
                                 child: CircularProgressIndicator(
@@ -504,7 +507,16 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
         });
 
         if (index == 0) {
-          // Upload
+          final oldController = _controller;
+          // _controller = null;
+          setState(() {}); // Rebuild UI to remove CameraPreview
+
+          // await oldController.dispose();
+
+          await Future.delayed(Duration(milliseconds: 50)); // Let UI rebuild
+
+          if (!mounted) return;
+
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => CreatePostScreen(
@@ -513,9 +525,8 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
               ),
             ),
           );
-
-          await _controller.dispose();
         }
+
         // Add other navigation cases as needed
       },
       child: Column(
@@ -560,7 +571,8 @@ class _AddPostCameraScreenState extends State<AddPostCameraScreen>
           FutureBuilder<void>(
             future: _initializeControllerFuture,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.connectionState == ConnectionState.done &&
+                  _controller.value.isInitialized) {
                 return SizedBox(
                   height: cameraHeight,
                   width: double.infinity,

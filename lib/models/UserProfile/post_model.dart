@@ -1,5 +1,5 @@
 class PostResponse {
-  final String? totalcount;
+  final int? totalcount;
   final bool? has_next_page;
   final int? next_offset;
   List<PostModel>? postModel;
@@ -9,7 +9,7 @@ class PostResponse {
 
   factory PostResponse.fromJson(Map<String, dynamic> json) {
     return PostResponse(
-      totalcount: json["total_count"] ?? '',
+      totalcount: json["total_count"] ?? 0,
       has_next_page: json['has_next_page'] ?? false,
       next_offset: json['next_offset'] ?? 0,
       postModel: (json['posts'] as List)
@@ -44,30 +44,35 @@ class PostModel {
   final bool? isReposted;
   final User? repostedBy;
   final int? repostCount;
+  final bool? showDm;
+  final bool? showComment;
 
-  PostModel(
-      {required this.id,
-      required this.post,
-      required this.tags,
-      required this.keywords,
-      required this.media,
-      required this.user,
-      required this.privacy,
-      required this.createdAt,
-      required this.updatedAt,
-      required this.likesCount,
-      required this.commentsCount,
-      required this.isLiked,
-      this.interactions,
-      this.pollTitle,
-      this.pollDescription,
-      this.polls, // Optional list of polls
-      this.postTitle,
-      this.postDescription,
-      this.location,
-      this.isReposted,
-      this.repostedBy,
-      this.repostCount});
+  PostModel({
+    required this.id,
+    required this.post,
+    required this.tags,
+    required this.keywords,
+    required this.media,
+    required this.user,
+    required this.privacy,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.likesCount,
+    required this.commentsCount,
+    required this.isLiked,
+    this.interactions,
+    this.pollTitle,
+    this.pollDescription,
+    this.polls, // Optional list of polls
+    this.postTitle,
+    this.postDescription,
+    this.location,
+    this.isReposted,
+    this.repostedBy,
+    this.repostCount,
+    required this.showDm,
+    required this.showComment,
+  });
 
   // Factory method to parse JSON data
   factory PostModel.fromJson(Map<String, dynamic> json) {
@@ -99,7 +104,9 @@ class PostModel {
         repostedBy: json['reposted_by'] == null
             ? null
             : User.fromJson(json['reposted_by']),
-        repostCount: json['repost_count']);
+        repostCount: json['repost_count'],
+        showDm: json['show_dm'] ?? false,
+        showComment: json['show_comment'] ?? false);
   }
   static Map<String, dynamic> postModelToJson(PostModel post) {
     return {
@@ -164,6 +171,8 @@ class PostModel {
             }
           : null,
       'repost_count': post.repostCount,
+      'show_dm': post.showDm,
+      'show_comment': post.showComment
     };
   }
 }
@@ -279,3 +288,7 @@ class User {
     );
   }
 }
+
+
+
+

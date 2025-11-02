@@ -50,4 +50,6 @@ class AppIcons {
   static const String searchIcon2 = "assets/icons/search2.png";
   static const String filter = "assets/icons/search_filter.png";
   static const String back_arrow = "assets/icons/back_icon.png";
+   static const String SearchFilter = "assets/icons/filter.png";
+  static const String searchIcon = "assets/icons/search_icon.png";
 }

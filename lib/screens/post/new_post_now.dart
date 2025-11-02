@@ -17,6 +17,8 @@ class NewPostNow extends StatefulWidget {
   final List<String> privacyPost; // Privacy policy (e.g., Public, Private)
   final List<File> mediaFiles; // List of media files
   final List<String> interactions; // Interaction options
+  final List<String> dmReplies; // Interaction options
+  final List<String> dmComments; // Interaction options
   final UserProfile userProfile;
   final bool isPoll;
   final String location;
@@ -31,6 +33,8 @@ class NewPostNow extends StatefulWidget {
     required this.userProfile,
     this.isPoll = false,
     required this.location,
+    required this.dmReplies,
+    required this.dmComments,
   });
   @override
   _NewPostNowState createState() => _NewPostNowState();
@@ -159,6 +163,8 @@ class _NewPostNowState extends State<NewPostNow> {
                                               postTitle: title,
                                               postDescription: description,
                                               location: widget.location,
+                                              dmReplies: widget.dmReplies,
+                                              dmComments: widget.dmComments,
                                             ),
                                         context: context));
                               } else {
@@ -170,6 +176,8 @@ class _NewPostNowState extends State<NewPostNow> {
                                     privacyPost: widget.privacyPost,
                                     mediaFiles: widget.mediaFiles,
                                     postTitle: title,
+                                    dmReplies: widget.dmReplies,
+                                    dmComments: widget.dmComments,
                                     postDescription: description,
                                     interactions: widget.interactions,
                                     location: widget.location);
